@@ -41,20 +41,21 @@ If the headers and librairies were installed in /usr/local, create symbolic link
 ln -s /usr/local/include/Boots /usr/include
 ln -s /usr/local/lib/libBoots.so /usr/lib/libBoots.so
 
-Building the Crails application
+Building the Crails Framework
 ======
-Currently, since there is no proper building tools for creating Crails applition, everything is bundled in the
-same CMakeFile.
 To the root of the project's directory, create a build directory, go in there, and type:
 
-cmake ..
-make
+cmake .. && make && sudo make install
 
-Launching the Crails application
+Again, make sure the installed files are accessible through the lib, include, binary and shared path.
+
+Creating a Crails Application
 =====
-Launch using:
+The installation of the Crails Framework should have added a ruby script named 'crails' in your bin directory.
+You can use it to create application this way:
 
-./crails-app -p 3000 -h hostname
+crails new application_name --use-mongodb --use-sql --debug-mode
 
-Default hostname is 127.0.0.1 and port is 3001.
+The script will tell you how to compile and launch the server next.
 
+N.B: You cannot compile if you don't use the --use-mongodb and --use-sql flags right now. It's a flaw that I'm working on.
