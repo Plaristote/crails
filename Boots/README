@@ -1,0 +1,55 @@
+#####################
+#####################
+##  Boots Library  ##
+#####################
+#####################
+
+      .-'\
+   .-'  `/\
+.-'      `/\
+\         `/\
+ \         `/\
+  \    _-   `/\       _.--.
+   \    _-   `/`-..--\     )
+    \    _-   `,','  /    ,')
+     `-_   -   ` -- ~   ,','
+      `-              ,','
+       \,--.    ____==-~
+        \   \_-~\
+         `_-~_.-'
+ _ Seal _ \-~
+
++ What the fuck is this ?
+- This is a Unix/Windows library that provide features necessary for Network communication, by
+  providing a C++ interface for RCP-like usage.
+  The specificity of this system is that the callbacks can also point to the same process. In
+  this case, they can be synchronous or not.
+
++ Is that all ?
+- Well there's also a set of object for regular network handling, such as serializing, select
+  and socket abstraction, rolling buffers and such.
+  It also incoroporate abstraction for some OSes specific features, namely filesystem operations
+  (and there is more to come on this part).
+
++ Why was it developed ?
+  It's basically a tool to ease and fasten the work of a C++ developer.
+  Many templates and macro have been developed to help the implementation of popular design
+  patterns (singleton, state machine, flyweight...).
+  It's goal is to cover with simplicity every bit of everyday C++ developping that is rarely
+  made easy in general-purpose developing libraries.
+
++ Where's the freaking doc ?
+  There's no documentation for now. The library is still in development and documentation is
+  prompt to change too often for me to bother to write the doc right now.
+  There will be in the future.
+
++ How do I install this fuck ?
+- cd build
+  cmake ..
+  make
+  make install (you need to be root, or to type sudo make install)
+
++ Wait what ? I use Windows and I don't get it !
+- Use the CMake client for windows and Visual Studio or Mingw.
+
+Hope you enjoy the lib. Cheers.
