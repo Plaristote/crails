@@ -1,0 +1,23 @@
+#!/usr/bin/ruby
+
+source = nil
+
+(ENV['XDG_DATA_DIRS'].split ':').each do | dir |
+  full_path = "#{dir}/crails"
+  if File.directory? full_path
+    source = full_path
+    break
+  end
+end
+
+source = ENV['CRAILS_SHARED_DIR'] unless ENV['CRAILS_SHARED_DIR'].nil?
+
+if source.nil?
+  puts "Missing crails shared directory. Please check your installation."
+  exit 1
+end
+
+command      = ARGV[0]
+command_args = ARGV[1..ARGV.count]
+
+system "ruby #{source}/scripts/#{command}.rb #{command_args.join ' '}"
