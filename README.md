@@ -26,7 +26,7 @@ Here's a list of the dependecies:
 - cpp-netlib
 - segvcatch (optional, add "-DUSE_SEGVCATCH" and uncomment the CMakeList linking line to use)
 - soci (if you want to compile crails-sql)
-- mongodb (if you want to compile crail-mongodb)
+- mongoclient (if you want to compile crail-mongodb)
 - nodejs (you'll need uglifyjs, and coffeescript if you put coffee files in /app/assets/javascripts)
 - ruby 1.9+
 
