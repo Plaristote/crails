@@ -18,20 +18,20 @@ Right now the optios use sql and mongodb are actually not optional. Your project
 # Databases
 The file conf/db.json is used to load and connct the prope databases.
 
-  {
-    "mongodb": {
-      "type": "mongodb",
-      "host": "127.0.0.1",
-      "database": "crails_db"
-    },
-  
-    "mysql": {
-      "type": "sql",
-      "host": "127.0.0.1",
-      "database": "crails_db",
-      "user": "root"
-    }
-  }
+      {
+        "mongodb": {
+          "type": "mongodb",
+          "host": "127.0.0.1",
+          "database": "crails_db"
+        },
+      
+        "mysql": {
+          "type": "sql",
+          "host": "127.0.0.1",
+          "database": "crails_db",
+          "user": "root"
+        }
+      }
 
 The default conf file looks like this.
 The keys to the first objects are the name of your dbs which you will use to get a handle of them at runtime.
@@ -76,16 +76,16 @@ and Boots/Sync/mutex.hpp).
 ## Controller method
 We'll now see how to implement a controller method and how to link it to a route.
 
-  DynStruct CrmAccountsController::show(Params& params)
-  {
-    DynStruct render_data;
-    std::string body;
-
-    body  = "Hello World<br />";
-    body += params["id"].Value();
-    render_data["body"] = body;
-    return (render_data);
-  }
+      DynStruct CrmAccountsController::show(Params& params)
+      {
+        DynStruct render_data;
+        std::string body;
+    
+        body  = "Hello World<br />";
+        body += params["id"].Value();
+        render_data["body"] = body;
+        return (render_data);
+      }
 
 Here's a not-quite-minimal method for a controller.
 
@@ -97,26 +97,26 @@ DynStruct is an object that serializes/unserializes data in text mode. Any node 
 contain a value or a set of other nodes. Unexisting nodes are created on the fly and garbage collected when they go
 out of scope. This means you can do stuff like this:
 
-  if ((render_data["whatever"]["something"]["something_else"].Nil()))
-    std::cout << "This node does not exist" << std::endl;
+      if ((render_data["whatever"]["something"]["something_else"].Nil()))
+        std::cout << "This node does not exist" << std::endl;
 
 If you set a value on an unexisting node, it will be saved along with all the unexisting parent nodes. This means that
 this is a correct use of the DynStruct:
 
-  render_data["nonexisting-node"]["akey"] = "Fuck yeah";
+      render_data["nonexisting-node"]["akey"] = "Fuck yeah";
 
 They also support any type that is suppoted by std streams. So this s correct as well:
 
-  render_data["key"] = 42.f;
+      render_data["key"] = 42.f;
 
 It also automatically cast to the expected type:
 
-  unsigned int numbe = render_data["key"];
+      unsigned int number = render_data["key"];
 
 I have however experienced compilation issues with using this method with string and MSVC, so the correct way to get
 a string value from a DynStruct node is actually this (if you wish to be compliant with something else than GCC):
 
-  std::string mystring = render_data["key"].Value();
+      std::string mystring = render_data["key"].Value();
 
 # Returning DynStruct
 Your controller method must always return a DynStruct.
@@ -136,22 +136,22 @@ exceptions thrown in any routes implemented by your controller.
 
 Here's how to implement a rescue from in you controller:
 
-  class CrmAccountsController : public ControllerBase
-  {
-  public:
-    static DynStruct index     (Params& params);
-    
-  RESCUE_FROM(render_data)
-    catch (const std::exception e)
-    {
-      std::cout << "Rescue From catched exception: " << std::endl;
-    }
-    catch (const char* str)
-    {
-      std::cout << "Catched a string " << str << std::endl;
-    }
-  END_RESCUE_FROM
-  };
+      class CrmAccountsController : public ControllerBase
+      {
+      public:
+        static DynStruct index     (Params& params);
+        
+      RESCUE_FROM(render_data)
+        catch (const std::exception e)
+        {
+          std::cout << "Rescue From catched exception: " << std::endl;
+        }
+        catch (const char* str)
+        {
+          std::cout << "Catched a string " << str << std::endl;
+        }
+      END_RESCUE_FROM
+      };
 
 ### Write MongoDB based model
 
