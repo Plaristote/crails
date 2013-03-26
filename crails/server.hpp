@@ -62,7 +62,7 @@ private:
   void ParseMultipart (Response, Params& params);
   void ParseForm      (Response, Params& params);
 
-  bool ServeFile(const Server::request& request, BuildingResponse& response);
+  bool ServeFile  (const Server::request& request, BuildingResponse& response, Params& params);
   bool ServeAction(const Server::request& request, BuildingResponse& response, Params& params);
 
   bool SendFile(const std::string& path, BuildingResponse& response, unsigned int first_bit = 0);

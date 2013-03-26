@@ -34,8 +34,7 @@ Bulding Boots
 =====
 Go to the Boots folder, create a build directory, go in the build directory and type:
 
-cmake ..
-sudo make install
+cmake .. && make && sudo make install
 
 If the headers and librairies were installed in /usr/local, create symbolic links using these commands:
 ln -s /usr/local/include/Boots /usr/include

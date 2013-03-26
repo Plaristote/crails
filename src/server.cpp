@@ -128,14 +128,14 @@ void CrailsServer::operator()(const Server::request& request, Response response)
 
   try
   {
-    if (request.method == "GET" && ServeFile(request, out))
+    ReadRequestData(request, response, params);
+    if (request.method == "GET" && ServeFile(request, out, params))
       ;
     else
     {
 #ifdef SERVER_DEBUG
       Assets::Precompile();
 #endif
-      ReadRequestData(request, response, params);
       if (!(ServeAction(request, out, params)))
         ResponseException(out, "CrailsServer::Router", "Crails Router isn't initialized", params);
     }
@@ -200,9 +200,9 @@ bool CrailsServer::SendFile(const std::string& fullpath, BuildingResponse& respo
   return (false);
 }
 
-bool CrailsServer::ServeFile(const Server::request& request, BuildingResponse& response)
+bool CrailsServer::ServeFile(const Server::request& request, BuildingResponse& response, Params& params)
 {
-  std::string fullpath       = request.destination;
+  std::string fullpath       = params["uri"].Value();
   size_t      pos_get_params = fullpath.find('?');
 
   if (pos_get_params != std::string::npos)

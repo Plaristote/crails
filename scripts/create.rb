@@ -1,12 +1,5 @@
 #!/usr/bin/ruby
 
-if ARGV[0].nil?
-  puts "usage: crails new [app]"
-  exit 1
-end
-
-base_directory = ARGV[0]
-
 ##
 ## ProjectModel
 ##
@@ -87,51 +80,49 @@ OptionParser.new do |opts|
   opts.on('-d', '--debug-mode',    'use debug mode')            do options[:debug]     = true end
 end.parse!
 
+if ARGV[0].nil?
+  puts "usage: crails new [app]"
+  exit 1
+end
+
+base_directory = ARGV[0]
+
 options[:name] = (base_directory.split '/').last
 project        = ProjectModel.new
 source         = "/home/plaristote/projects/MongoDB_Test"
 
-(ENV['XDG_DATA_DIRS'].split ':').each do | dir |
-  full_path = "#{dir}/crails"
-  if File.directory? full_path
-    source = full_path
-    break
+source = unless ENV['CRAILS_SHARED_DIR'].nil?
+  ENV['CRAILS_SHARED_DIR']
+else
+  path = nil
+  (ENV['XDG_DATA_DIRS'].split ':').each do | dir |
+    full_path = "#{dir}/crails"
+    path = full_path ; break if File.directory? full_path
   end
+  path
 end
 
 project.base_directory source, base_directory do
-  
   project.generate_erb 'CMakeLists.txt', 'CMakeLists.txt.erb', options
-  
   project.directory :build do end
-
   project.directory :app do
-    
     project.file 'routes.cpp'
     project.file 'main.cpp'
-    
     project.directory :assets do
       project.directory :stylesheets do end
       project.directory :javascript  do end
     end
-
-    project.directory :controllers do
-    end
-
-    project.directory :models do
-    end
-
+    project.directory :controllers do end
+    project.directory :models do end
     project.directory :views do
       project.directory :layouts do
         project.file 'demo.html.ecpp'
       end
     end
   end
-
   project.directory :config do
     project.file 'db.json'
   end
-  
   project.directory :public do
     project.file '404.html'
     project.file '500.html'
