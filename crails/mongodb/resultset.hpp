@@ -7,7 +7,7 @@
 # include "collection.hpp"
 # include "model.hpp"
 # include "crails/databases.hpp"
-# include "include/mongodb.hpp"
+# include "../mongodb.hpp"
 
 namespace MongoDB
 {

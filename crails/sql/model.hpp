@@ -87,7 +87,15 @@ namespace SQL
       initialize_id();
     }
 
-    virtual void InitializeFields(void) = 0;
+    virtual void InitializeFields(void)
+    {
+      fields.clear();
+    }
+
+    bool         Exists(void) const
+    {
+      return (initialized);
+    }
 
     unsigned int Id(void) const { return (id()); }
 

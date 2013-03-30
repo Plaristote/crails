@@ -69,7 +69,15 @@ namespace MongoDB
     mongo::BSONObj     Update(void);
 
   protected:
-    virtual void       InitializeFields(void) = 0;
+    virtual void       InitializeFields(void)
+    {
+      fields.clear();
+    }
+
+    bool               Exists(void) const
+    {
+      return (has_id);
+    }
     
     struct IField;
 
