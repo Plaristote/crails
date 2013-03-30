@@ -126,7 +126,9 @@ project.base_directory source, base_directory do
   project.directory :public do
     project.file '404.html'
     project.file '500.html'
-    project.directory :js          do end
+    project.directory :js          do
+      project.file 'crails.js'
+    end
     project.directory :stylesheets do end
   end
 end
