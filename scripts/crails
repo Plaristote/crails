@@ -20,4 +20,18 @@ end
 command      = ARGV[0]
 command_args = ARGV[1..ARGV.count]
 
+unless command == 'create'
+  require 'fileutils'
+
+  until (File.exists? 'CMakeLists.txt' and File.exists? 'app' and File.exists? 'public')
+    FileUtils.cd '..'
+    if Dir.pwd == '/'
+      puts 'You\'re not in a Crails application'
+      exit -2
+    end
+  end
+end
+
+puts "Executing Crails script in #{Dir.pwd}"
+
 system "ruby #{source}/scripts/#{command}.rb #{command_args.join ' '}"
