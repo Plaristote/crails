@@ -65,6 +65,19 @@ private:
   Match("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller::delete);
   
 # define SetRoute(method, route, klass, function) \
-  Match(method, route, [](Params& params) -> DynStruct { return (klass::RescueFrom(klass::function, params)); });
+  Match(method, route, [](Params& params) -> DynStruct \
+  { \
+    klass::BeforeFilter(params); \
+    return (klass::AfterFilter(klass::RescueFrom(klass::function, params), params)); \
+  });
+  
+# define SetResource(name, klass) \
+  SetRoute("GET",    '/' + std::string(#name),               klass, index)   \
+  SetRoute("GET",    '/' + std::string(#name) + "/new",      klass, _new)    \
+  SetRoute("GET",    '/' + std::string(#name) + "/:id",      klass, show)    \
+  SetRoute("GET",    '/' + std::string(#name) + "/:id/edit", klass, edit)    \
+  SetRoute("PUT",    '/' + std::string(#name),               klass, create)  \
+  SetRoute("POST",   '/' + std::string(#name) + "/:id",      klass, update)  \
+  SetRoute("DELETE", '/' + std::string(#name) + "/:id",      klass, _delete) \
 
 #endif

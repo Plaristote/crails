@@ -18,7 +18,7 @@ void Assets::UglifyJS(void)
     Regex              match;
     Directory::Entries files = directory.GetEntries();
 
-    match.SetPattern("^[^\\.]+\\.js$", REG_EXTENDED);
+    match.SetPattern("^(.+)\\.js$", REG_EXTENDED);
     for_each(files.begin(), files.end(), [match, relative_path](Dirent& dirent)
     {
       if (!(match.Match(dirent.d_name)))
@@ -59,11 +59,12 @@ void Assets::Coffeescript(void)
     Regex              match;
     vector<string>     coffeescript_files;
 
-    match.SetPattern("^([^\\.]+)\\.coffee$", REG_EXTENDED);
+    match.SetPattern("^(.+)\\.coffee$", REG_EXTENDED);
 
     for_each(files.begin(), files.end(), [&coffeescript_files, match, relative_path](Dirent& dirent)
     {
-      if (!(match.Match(dirent.d_name)))
+      if (dirent.d_type == DT_DIR);
+      else if (!(match.Match(dirent.d_name)))
         coffeescript_files.push_back(dirent.d_name);
       else
         Filesystem::FileCopy(relative_path + '/' + dirent.d_name, COMPILED_ASSETS_PATH + '/' + dirent.d_name);
@@ -80,18 +81,19 @@ void Assets::Coffeescript(void)
         if ((process.Join() != 0))
         {
           stringstream stream;
-          
+
           process.Stderr(stream);
           throw Assets::Exception(filepath, stream);
         }
         else
         {
+          std::cout << "Compiled coffeescript file " << filename << std::endl;
           regmatch_t matches[2];
           string compiled_name;
 
           match.Match(filename, matches, 2);
-          compiled_name = filename.substr(0, matches[1].rm_eo) + ".js";
-          if (!(Filesystem::FileMove(relative_path + '/' + compiled_name, dest + compiled_name)))
+          compiled_name = filename.substr(0, matches[1].rm_eo);
+          if (!(Filesystem::FileMove(relative_path + '/' + compiled_name + ".js", dest + compiled_name)))
             throw Assets::Exception("Couldn't move '" + relative_path + '/' + compiled_name + "' to the asset directory");
         }
       }

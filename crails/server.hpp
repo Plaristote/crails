@@ -3,6 +3,7 @@
 
 # include <boost/network/protocol/http/server.hpp>
 # include "file_cache.hpp"
+#include "multipart.hpp"
 # include <Boots/Utils/dynstruct.hpp>
 
 namespace http = boost::network::http;
@@ -49,18 +50,13 @@ struct CrailsServer : public CrailsServerTraits
 
   static void Launch(int argc, char** argv);
 private:
-  typedef std::function<void (boost::iterator_range<char const*>,
-                              boost::system::error_code,
-                              size_t,
-                              Server::connection_ptr)> ReadCallback;  
-  
   static void ThrowCrashSegv(void);
   static void ThrowCrashFpe(void);
 
   void ReadRequestData(const Server::request& request, Response response, Params& params);
-  void ParseResponse  (Response, Params& params);
-  void ParseMultipart (Response, Params& params);
-  void ParseForm      (Response, Params& params);
+  void ParseResponse  (const Server::request& request, Response, Params& params);
+  void ParseMultipart (const Server::request& request, Response, Params& params);
+  void ParseForm      (const Server::request& request, Response, Params& params);
 
   bool ServeFile  (const Server::request& request, BuildingResponse& response, Params& params);
   bool ServeAction(const Server::request& request, BuildingResponse& response, Params& params);
@@ -71,8 +67,16 @@ private:
   void ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCode code, Params& params);
 
   FileCache file_cache;
+
+#ifdef ASYNC_SERVER  
+  typedef std::function<void (boost::iterator_range<char const*>,
+                            boost::system::error_code,
+                            size_t,
+                            Server::connection_ptr)> ReadCallback;  
   
-  ReadCallback callback;
+  ReadCallback    callback;
+#endif
+  MultipartParser multipart_parser;
 };
 
 // Helpers

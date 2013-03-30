@@ -80,11 +80,6 @@ void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCo
   }
 }
 
-typedef std::function<void (boost::iterator_range<char const*>,
-                        boost::system::error_code,
-                        size_t,
-                        Server::connection_ptr)> ReadCallback;
-
 void CrailsServer::ReadRequestData(const Server::request& request, Response response, Params& params)
 {
   const char*  get_params = strrchr(request.destination.c_str(), '?');
@@ -114,7 +109,7 @@ void CrailsServer::ReadRequestData(const Server::request& request, Response resp
   
   // Reading body if relevant
   if (request.method != "GET")
-    ParseResponse(response, params);
+    ParseResponse(request, response, params);
   
   // Set URI for the posterity (is that even a word ?)
   params["uri"] = uri;
@@ -191,7 +186,12 @@ bool CrailsServer::SendFile(const std::string& fullpath, BuildingResponse& respo
       response.SetHeaders("Content-Type",   GetMimeType(strrchr(fullpath.c_str(), '.')));
       response.SetStatusCode(CrailsServer::HttpCodes::ok);    
       response.SetBody(str.c_str() + first_bit, str.size() - first_bit);
-      cout << "[GET asset " << fullpath << "][Cached:True]" << endl;
+#ifdef SERVER_DEBUG
+      file_cache.GarbageCollect();
+      cout << "[GET asset " << fullpath << "] [Cached:False]" << endl;
+#else
+      cout << "[GET asset " << fullpath << "] [Cached:True]" << endl;
+#endif
       file_cache.Unlock();
       return (true);
     }
@@ -226,8 +226,9 @@ bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse&
   {
     params.session.Load(params["header"]);
     {
-      DynStruct     data = router->Execute(request.method, params["uri"].Value(), params);
-      string        body = data["body"].Value();
+      std::string   method = (params["_method"].Nil() ? request.method : params["_method"].Value());
+      DynStruct     data   = router->Execute(method, params["uri"].Value(), params);
+      string        body   = data["body"].Value();
 
       cout << "[" << request.method << " route " << request.destination << "]" << endl;
 
@@ -284,7 +285,9 @@ void CrailsServer::Launch(int argc, char **argv)
   {
     std::string    address = options.GetValue("-h", "--hostname", std::string("127.0.0.1"));
     std::string    port    = options.GetValue("-p", "--port",     std::string("3001"));
+#ifdef ASYNC_SERVER
     unsigned short threads = options.GetValue("-t", "--threads",  std::thread::hardware_concurrency());
+#endif
     cout << ">> Initializing server" << endl;
     cout << ">> Listening on " << address << ":" << port << endl;
     CrailsServer   handler;
