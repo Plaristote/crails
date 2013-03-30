@@ -11,7 +11,8 @@ struct MultipartParser
   MultipartParser(void) : sem(1), end(0)
   {
   }
-  
+
+  void         Initialize(Params&);
   void         Parse(Params&);
 
   std::string  read_buffer;
