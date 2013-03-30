@@ -4,6 +4,7 @@
 # include <Boots/Utils/singleton.hpp>
 # include <Boots/Utils/datatree.hpp>
 # include <vector>
+# include <crails/rackables.hpp>
 
 class Databases
 {
@@ -28,6 +29,7 @@ public:
     std::string       type;
   };
 
+  typedef Db* (*DbFactory)(Data);
   typedef std::vector<Db*> Dbs;
   
   struct Exception : public std::exception
@@ -53,7 +55,9 @@ private:
       delete config_file;
   }
   
-public:
+public:  
+  typedef Rackables<DbFactory> Factories;
+  
   template<typename TYPE>
   TYPE& GetDb(const std::string& key)
   {
@@ -77,21 +81,10 @@ public:
   }
 
 private:
-  struct ConfigLoader
-  {
-    ConfigLoader(const std::string& type, std::function<void (Data)> loader) : type(type), loader(loader)
-    {}
-
-    std::string                type;
-    std::function<void (Data)> loader;
-  };
-  
-  typedef std::vector<ConfigLoader> ConfigLoaders;
-  
   void LoadDatabases(void);
-  
-  DataTree* config_file;
-  Dbs       databases;
+
+  DataTree*            config_file;
+  Dbs                  databases;
 };
 
 #endif

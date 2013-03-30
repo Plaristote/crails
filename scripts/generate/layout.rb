@@ -172,6 +172,7 @@ string* @yield;
       }
     </style>
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+    <script src="/js/crails.js"></script>
   </head>
 
   <body>
