@@ -2,7 +2,7 @@ Crails Cookbook
 =====
 This tutorial is intented to show you step by step how to create a Crails application from scratch.
 
-## Create a project
+# Create a project
 The first step to use the Crails Framewrok after having it installed is to use the create script to generate all
 the files your project might need.
 
@@ -14,8 +14,8 @@ It needs to be build and run from the buid directory.
 You can use crails create -h to list the options.
 Right now the optios use sql and mongodb are actually not optional. Your project won't compile without both.
 
-## Configure a project
-# Databases
+# Configure a project
+## Databases
 The file conf/db.json is used to load and connct the prope databases.
 
       {
@@ -40,7 +40,7 @@ Notes:
 - Authentication with mongodb is not yet ready.
 - The SQL module only support MySQL for now. SQLite and PostgreSQL support is planned.
 
-### Write a controller
+# Write a controller
 This is what a Crails controller looks like:
 
     #ifndef  CRM_ACCOUNTS_HPP
@@ -92,7 +92,7 @@ Here's a not-quite-minimal method for a controller.
 Let's first talk about the DynStruct and Params objets. They are quite similar since Params inheits DynStruct,
 however Params implements other tools (for handling file upload for instance).
 
-# DynStruct
+### DynStruct
 DynStruct is an object that serializes/unserializes data in text mode. Any node from the root of the DynStruct can
 contain a value or a set of other nodes. Unexisting nodes are created on the fly and garbage collected when they go
 out of scope. This means you can do stuff like this:
@@ -118,13 +118,13 @@ a string value from a DynStruct node is actually this (if you wish to be complia
 
       std::string mystring = render_data["key"].Value();
 
-# Returning DynStruct
+### Returning DynStruct
 Your controller method must always return a DynStruct.
 The DynStruct will be used to genrate the HTTP response. The body node (render_data["body"]) must contain the body
 of the response.
 Status code and setting headers / mimetypes is not yet supported, but it's in the works.
 
-# Params
+### Params
 The param object is also a DynStruct, but it contains everything you need to know about the client's request:
 All the GET, form, multipart and routing parameters are stored at the root of the params object.
 Say your route is /crmacconts/:id, you would access the id parameter by using params["id"].
@@ -183,7 +183,7 @@ Here's how to implement a rescue from in you controller:
 ## File Upload
 ! Soon, an example of how to handle file uploads from your controller
 
-### Write a view
+# Write a view
 Views templates in Crails use a syntax similar to Ruby's ERB, with some tricks to make it more accessible to C++
 development.
 Views are stored in the /app/views folder, and the file extension is 'ecpp' (for an index html render, you would
@@ -221,9 +221,39 @@ inside a template.
 If the variable wasn't stored in the SharedVar object, the pointer will be NULL, so don't forget to check that value to
 avoid unnecessary segmentation faults.
 
-### Scaffolding
+# Scaffolding
+Scaffolding is a way of getting setting up a code base for new elements you wish to add to your application.
+Scaffolding scripts support generation of controllers, models, views, layouts.
 
-### Notes on asset precompile
+## Layouts
+All applictions need layout in which your views will be rendered. Crails incorporate some scripts to download and
+generate whatever files you need to start a new layout.
+It uses an HTML Engine system which currntly supports Bootstrap and HTML Kickstart.
+
+Say you want to start your brand new website with a kickstart theme, you would type the following:
+
+      crails generate/layout kickstart application install
+
+The command is composed of three parameters:
+- HTML Engine to use (currently supported: 'bootstrap' and 'kickstart' for Twitter's Bootstrap and HTML Kickstart)
+- Layout's name
+- Command (install / uninstall / nothing)
+
+The command 'intall' will ensure that kickstart requirements (js, css and pictures) are already installed. If you do not
+specify this parameter, the script will simply generate a layout without cheking the requirements.
+
+The layout's name will be used to create the file. In our use case, the file will be:
+/app/views/layouts/application.html.ecpp
+
+## Views
+
+## Controller
+
+## Model
+
+## All at once
+
+# Notes on asset precompile
 Note: CSS and SCSS assets aren't supported yet, but it's planned.
 
 Asset precompilation use coffeescript and uglifyJS. You'll need nodejs to install them.
