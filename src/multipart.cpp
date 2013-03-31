@@ -141,20 +141,25 @@ void MultipartParser::Parse(Params& params)
   } while (!blocked);
 }
 
-#ifdef ASYNC_SERVER
-void CrailsServer::ParseMultipart(const Server::request&, Response response, Params& params)
+void MultipartParser::Initialize(Params& params)
 {
-  cout << "Going for multipart/form-data parsing" << endl;
   string             type     = params["header"]["Content-Type"].Value();
   Regex              get_boundary("boundary=(.*)", REG_EXTENDED);
   regmatch_t         matches[2];
 
   get_boundary.Match(type, matches, 2);
-  multipart_parser.to_read      = params["header"]["Content-Length"];
-  multipart_parser.total_read   = 0;
-  multipart_parser.boundary     = type.substr(matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
-  multipart_parser.parsed_state = 0;
+  to_read      = params["header"]["Content-Length"];
+  total_read   = 0;
+  boundary     = type.substr(matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
+  parsed_state = 0;
+}
 
+#ifdef ASYNC_SERVER
+void CrailsServer::ParseMultipart(const Server::request&, Response response, Params& params)
+{
+  cout << "Going for multipart/form-data parsing" << endl;
+
+  multipart_parser.Initialize(params);
   callback = [this, &params](boost::iterator_range<char const*> range,
                       boost::system::error_code error_code,
                       size_t size_read,
@@ -212,7 +217,7 @@ void CrailsServer::ParseForm(const Server::request&, Response response, Params& 
 void CrailsServer::ParseMultipart(const Server::request& request, Response, Params& params)
 {
   cout << "Going for multipart/form-data parsing" << endl;
-  
+  multipart_parser.Initialize(params);
   multipart_parser.read_buffer = request.body;
   multipart_parser.Parse(params);
   params.response_parsed.Post();

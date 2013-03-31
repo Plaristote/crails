@@ -130,6 +130,33 @@ All the GET, form, multipart and routing parameters are stored at the root of th
 Say your route is /crmacconts/:id, you would access the id parameter by using params["id"].
 There's also an header node (params["headers"]) containing the header parameters of the request.
 
+## Filters
+There are two methods in the controller base class that can be overloaded to implement before and after filters
+behaviours.
+
+      static void      BeforeFilter(Params&);
+      static DynStruct AfterFilter(DynStruct, Params&);
+
+Note that the AfterFilter 
+
+If you overload these methods, you MUST call the parent's class filter method, like this:
+
+      static void      BeforeFilter(Params& params)
+      {
+        ControllerBase::BeforeFilter(params);
+        if (params["header"]["Content-Type"] != "image/png")
+          RedirectTo("/unsuported-file-format.html");
+      }
+
+      static DynStruct AfterFilter(DynStruct render_data, Params& params)
+      {
+        render_data["body"] = "content was after filtered !";
+        return (ControllerBase::AfterFilter(render_data, params));
+      }
+
+Note that the order is important. In the before filter, we call the parent's method first, and in the
+after filter, we call it last. You don't have to do it this way but it's highly recommended.
+
 ## Rescue From
 You can also use macro to overload the global 'rescue from' of your contoller. This will allow you to catch
 exceptions thrown in any routes implemented by your controller.
@@ -153,11 +180,48 @@ Here's how to implement a rescue from in you controller:
       END_RESCUE_FROM
       };
 
-### Write MongoDB based model
-
-### Write a MySQL based model
+## File Upload
+! Soon, an example of how to handle file uploads from your controller
 
 ### Write a view
+Views templates in Crails use a syntax similar to Ruby's ERB, with some tricks to make it more accessible to C++
+development.
+Views are stored in the /app/views folder, and the file extension is 'ecpp' (for an index html render, you would
+call your file index.html.ecpp).
+
+The templates are divided in two parts: 
+
+- The first one is called the Linking part. You can use it to include your
+headers, declare variable or write code like you would in any regular C++ code. It ends when the line // END LINKING is met.
+- The second one is the actual view template, much like ERB, but with C++.
+
+This is what a view template looks like:
+
+      string* some_string = @some_string;
+      // END LINKING
+      <h2>Some page</h2>
+      <% if (some_string != NULL) do %>
+        <%= *some_string %>
+      <% end else do %>
+        some_string was null !
+      <% end %>
+
+You proably noticed that we use words instead of braces. For readability purpose, in Crails views templates, you have the
+possibility to replace { and } with do and end respectively.
+
+You must also note that code between <% %> will not output anything. However, code between <%= %> will, and the return value
+of the expression between these symbols must be a type handled by std's streams.
+
+There's also something quite interesting happening in the first line. As you can see, we declare a pointer on a string and
+name it 'some_string'. The interesting part is the rvalue, which start with the character '@'.
+
+When you render views in Crails, you need to pass them a SharedVar object containing all the variables that must be shared
+between the controller, the layout and the partials that will be rendered. This '@' is how you get these variables back
+inside a template.
+If the variable wasn't stored in the SharedVar object, the pointer will be NULL, so don't forget to check that value to
+avoid unnecessary segmentation faults.
+
+### Scaffolding
 
 ### Notes on asset precompile
 Note: CSS and SCSS assets aren't supported yet, but it's planned.

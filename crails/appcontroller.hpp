@@ -28,6 +28,15 @@ class ControllerBase
 {
   friend class Router;
 private:
+  static void      BeforeFilter(Params& params)
+  {
+  }
+
+  static DynStruct AfterFilter(DynStruct render_data, Params&)
+  {
+    return (render_data);
+  }
+
   static DynStruct RescueFrom(std::function<DynStruct (Params&)> callback, Params& params)
   {
     return (callback(params));

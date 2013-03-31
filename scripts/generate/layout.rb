@@ -200,7 +200,6 @@ string* @yield;
     <div class="container">
 
       <%= (yield ? *yield : "") %>
-      <script type='text/javascript' src='/js/crails.js'></script>
 
     </div> <!-- /container -->
 
@@ -215,7 +214,8 @@ string* @yield;
     end
     value
   )
-}  </body>
+}  <script type='text/javascript' src='/js/crails.js'></script>
+  </body>
 </html>
 HTML
 

@@ -28,8 +28,8 @@ bool Filesystem::FileContent(const string& filepath, string& out)
 
 bool Filesystem::FileCopy(const string& from, const string& dest)
 {
-  ifstream stream_src(from.c_str());
-  ofstream stream_dest(dest.c_str());
+  ifstream stream_src(from.c_str(),  std::ios::binary);
+  ofstream stream_dest(dest.c_str(), std::ios::binary);
 
   if (stream_src.is_open() && stream_dest.is_open())
   {
