@@ -51,13 +51,13 @@ This is what a Crails controller looks like:
     class CrmAccountsController : public ControllerBase
     {
     public:
-      static DynStruct index (Params& params)
-      static DynStruct show  (Params& params);
-      static DynStruct new   (Params& params);
-      static DynStruct create(Params& params);
-      static DynStruct edit  (Params& params);
-      static DynStruct update(Params& params);
-      static DynStruct delete(Params& params);
+      static DynStruct index  (Params& params);
+      static DynStruct show   (Params& params);
+      static DynStruct _new   (Params& params);
+      static DynStruct create (Params& params);
+      static DynStruct edit   (Params& params);
+      static DynStruct update (Params& params);
+      static DynStruct _delete(Params& params);
     };
     
     #endif
@@ -181,7 +181,54 @@ Here's how to implement a rescue from in you controller:
       };
 
 ## File Upload
-! Soon, an example of how to handle file uploads from your controller
+Uploaded files are exposed to the developer in the Param object. You can access them using the Upload method:
+
+      const Params::File* Upload(const std::string& key) const;
+
+The returned File struct implements the following attributes:
+
+      struct File
+      {
+        std::string key;            // attribute 'name' in the file input html field
+        std::string temporary_path; // absolute path where the file was uploaded
+        std::string name;           // original name of the file
+        std::string mimetype;       // mimetype
+      };
+
+Here's an example of contoller method using uploaded files:
+
+      #include <Boots/Utils/directory.hpp> // For filesystem operations
+
+      DynStruct MyController::file_upload(Params& params)
+      {
+        DynStruct           render_data;
+        const Params::File* file = params.upload("file_upload[upfile]");
+        std::stringstream   html;
+
+        // If a file was uploaded, display it
+        if (file)
+        {
+          std::string display_file;
+          
+          Filesystem::FileContent(file->temporary_path, display_file);
+          html << "<pre>" << display_file << "</pre>";
+        }
+        // Display the form to upload files
+        html << "<form mehod='post' action='/file_upload' enctype='multipart/form-data'>";
+        html << "<input type='file' name='file_upload[upfile]' /><br />";
+        html << "<input type='submit' value='Upload' />";
+        html << "</form>";
+        return (render_data);
+      }
+
+This controller method will generate an upload form. If the query contains an uploaded file, it will be
+displayed at the top of the page.
+Create the routes with:
+
+      SetRoute("GET",  "/file_upload", MyController, file_upload)
+      SetRoute("POST", "/file_upload", MyController, file_upload)
+
+And test it by uploading text files.
 
 # Write a view
 Views templates in Crails use a syntax similar to Ruby's ERB, with some tricks to make it more accessible to C++
