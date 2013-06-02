@@ -12,7 +12,6 @@ This command creates a Crails appliatin in the directory myapplication.
 It needs to be build and run from the buid directory.
 
 You can use crails create -h to list the options.
-Right now the optios use sql and mongodb are actually not optional. Your project won't compile without both.
 
 # Configure a project
 ## Databases
