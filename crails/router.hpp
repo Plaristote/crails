@@ -55,21 +55,22 @@ private:
 
 # define SYM2STRING(sym) std::string(#sym)
 
-# define ROUTER_RESSOURCE(resource_name, controller) \
-  Match("GET",    '/' + SYM2STRING(resource_name),               controller::index); \
-  Match("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller::new); \
-  Match("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller::edit); \
-  Match("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller::show); \
-  Match("POST",   '/' + SYM2STRING(resource_name),               controller::create); \
-  Match("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller::update); \
-  Match("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller::delete);
-  
 # define SetRoute(method, route, klass, function) \
   Match(method, route, [](Params& params) -> DynStruct \
   { \
-    klass::BeforeFilter(params); \
-    return (klass::AfterFilter(klass::RescueFrom(klass::function, params), params)); \
+    klass controller(params); \
+\
+    return (klass::RescueFrom([&controller]() -> DynStruct { return (controller.function()); })); \
   });
+
+# define ROUTER_RESSOURCE(resource_name, controller) \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,new);    \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,edit);   \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,show);   \
+  SetRoute("POST",   '/' + SYM2STRING(resource_name),               controller,create); \
+  SetRoute("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,update); \
+  SetRoute("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,delete);
   
 # define SetResource(name, klass) \
   SetRoute("GET",    '/' + std::string(#name),               klass, index)   \

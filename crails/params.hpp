@@ -4,9 +4,12 @@
 # include "server.hpp"
 # include "session_store.hpp"
 
+class MultipartParser;
+
 class Params : public DynStruct
 {
   friend class CrailsServer;
+  friend class MultipartParser; 
 public:
   Params(void) : handle(1), response_parsed(0)
   {

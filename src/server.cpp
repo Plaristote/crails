@@ -290,13 +290,16 @@ void CrailsServer::Launch(int argc, char **argv)
 #endif
     cout << ">> Initializing server" << endl;
     cout << ">> Listening on " << address << ":" << port << endl;
-    CrailsServer   handler;
+
+    CrailsServer    handler;
+    Server::options server_options(handler); 
+
 #ifdef ASYNC_SERVER
     cout << ">> Pool Thread Size: " << threads << endl;
-    thread_pool    thread_pool(threads);
-    Server         server(address.c_str(), port.c_str(), handler, thread_pool);
+    thread_pool     thread_pool(threads);
+    Server          server(server_options.address(address.c_str()).port(port.c_str()));
 #else
-    Server         server(address.c_str(), port.c_str(), handler);
+    Server          server(server_options.address(address.c_str()).port(port.c_str()));
 #endif
 
     server.run();

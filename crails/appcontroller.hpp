@@ -9,13 +9,13 @@
 # include <crails/params.hpp>
 
 # define RESCUE_FROM(render_data) \
-  static DynStruct RescueFrom(std::function<DynStruct (Params&)> callback, Params& params) \
+  static DynStruct RescueFrom(std::function<DynStruct (void)> callback) \
   { \
     DynStruct render_data; \
     \
     try \
     { \
-      return (callback(params)); \
+      return (callback()); \
     }
     
 # define END_RESCUE_FROM \
@@ -27,23 +27,20 @@ class Router;
 class ControllerBase
 {
   friend class Router;
+protected:
+  ControllerBase(Params& params) : params(params)
+  {
+  }
+
 private:
-  static void      BeforeFilter(Params& params)
+  static DynStruct RescueFrom(std::function<DynStruct (void)> callback)
   {
-  }
-
-  static DynStruct AfterFilter(DynStruct render_data, Params&)
-  {
-    return (render_data);
-  }
-
-  static DynStruct RescueFrom(std::function<DynStruct (Params&)> callback, Params& params)
-  {
-    return (callback(params));
+    return (callback());
   }
 
 protected:
   static void RedirectTo(const std::string& uri);
+  Params&     params;
 };
 
 #endif
