@@ -50,13 +50,17 @@ This is what a Crails controller looks like:
     class CrmAccountsController : public ControllerBase
     {
     public:
-      static DynStruct index  (Params& params);
-      static DynStruct show   (Params& params);
-      static DynStruct _new   (Params& params);
-      static DynStruct create (Params& params);
-      static DynStruct edit   (Params& params);
-      static DynStruct update (Params& params);
-      static DynStruct _delete(Params& params);
+      CrmAccountsController(Params& params) : ControllerBase(params)
+      {
+      }
+    
+      DynStruct index  ();
+      DynStruct show   ();
+      DynStruct _new   ();
+      DynStruct create ();
+      DynStruct edit   ();
+      DynStruct update ();
+      DynStruct _delete();
     };
     
     #endif
@@ -67,22 +71,22 @@ with Crail: (DynStruct, Params, ControllerBase, SharedVars and more).
 
 The controller class must inherits ControllerBase, which will implement some default behaviors (by default,
 no exception catcher or filters are set, but you can override these behaviors).
-All the mehods need to be static. Since the server might run in asynchronous mode, you must also be careful not to
-use any global variables or static attibutes unless you know what you're doing (the Boots lib implements some
-asynchronous development tools that you might wanna use if you need global stuff. Check out Boots/Sync/semaphore.hpp
-and Boots/Sync/mutex.hpp).
+Since the server might run in asynchronous mode, you must also be careful not to use any global variables or static
+attibutes unless you know what you're doing (the Boots lib implements some asynchronous development tools that you
+might wanna use if you need global stuff. Check out Boots/Sync/semaphore.hpp and Boots/Sync/mutex.hpp).
 
 ## Controller method
 We'll now see how to implement a controller method and how to link it to a route.
 
-      DynStruct CrmAccountsController::show(Params& params)
+      DynStruct CrmAccountsController::show()
       {
         DynStruct render_data;
         std::string body;
     
         body  = "Hello World<br />";
-        body += params["id"].Value();
-        render_data["body"] = body;
+        body += params["id"].Value(); // params is a protected reference to the request's params
+        render_data["response"]["Content-Type"] = "text/html"; // use this to set the response's headers, default is text/html
+        render_data["body"]                     = body;        // use this to set the response's body
         return (render_data);
       }
 
