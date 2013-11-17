@@ -164,33 +164,6 @@ The flash variables aren't accessed the same way they're set. If you want to dis
           std::cout << flash["info"].Value() << std::endl; // displays the message
         }
 
-## Filters
-There are two methods in the controller base class that can be overloaded to implement before and after filters
-behaviours.
-
-      static void      BeforeFilter(Params&);
-      static DynStruct AfterFilter(DynStruct, Params&);
-
-Note that the AfterFilter 
-
-If you overload these methods, you MUST call the parent's class filter method, like this:
-
-      static void      BeforeFilter(Params& params)
-      {
-        ControllerBase::BeforeFilter(params);
-        if (params["header"]["Content-Type"] != "image/png")
-          RedirectTo("/unsuported-file-format.html");
-      }
-
-      static DynStruct AfterFilter(DynStruct render_data, Params& params)
-      {
-        render_data["body"] = "content was after filtered !";
-        return (ControllerBase::AfterFilter(render_data, params));
-      }
-
-Note that the order is important. In the before filter, we call the parent's method first, and in the
-after filter, we call it last. You don't have to do it this way but it's highly recommended.
-
 ## Rescue From
 You can also use macro to overload the global 'rescue from' of your contoller. This will allow you to catch
 exceptions thrown in any routes implemented by your controller.
