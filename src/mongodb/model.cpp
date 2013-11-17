@@ -14,9 +14,18 @@ bool Model::GetOidFromObject(mongo::BSONObj object, mongo::OID& oid)
   return (has_oid);
 }
 
-Model::Model(Collection& collection, mongo::BSONObj bson_object) : bson_object(bson_object), collection(collection)
+Model::Model(Collection& collection, mongo::BSONObj bson_object) : bson_object(bson_object), collection(collection), result_set(nullptr)
 {
   has_id = GetOidFromObject(bson_object, id);
+}
+
+Model::Model(const Model& copy) : bson_object(copy.bson_object), id(copy.id), has_id(copy.has_id), collection(copy.collection), result_set(copy.result_set)
+{
+}
+
+void Model::InitializeFields(void)
+{
+  fields.clear();
 }
 
 bool Model::Refresh(void)
@@ -42,6 +51,7 @@ mongo::BSONObj Model::Update(void)
   std::list<IField*>::iterator end = fields.end();
 
   if (!(has_id)) { builder.genOID(); }
+  cout << "Updating " << fields.size() << " fields." << endl;
   for (; it != end ; ++it)
     (*it)->BuildUpdate(builder);
   object = builder.obj();
@@ -57,12 +67,15 @@ void Model::Save(void)
 {
   if (has_id)
   {
+    cout << "Model::Save -> Update" << endl;
     mongo::Query query = QUERY("_id" << id);
   
     collection.Update(Update(), query);
   }
   else
   {
+    cout << "Model::Save -> Insert" << endl;
+    ForceUpdate();
     collection.Insert(Update());
   }
 }

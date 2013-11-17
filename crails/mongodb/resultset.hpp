@@ -51,6 +51,7 @@ namespace MongoDB
         mongo::BSONObj object = results->next();
         MODEL          model(collection, object);
 
+        model.result_set = results;
         model.InitializeFields();
         fetched.push_back(model);
         if (!(functor(*fetched.rbegin())))
@@ -60,7 +61,7 @@ namespace MongoDB
 
     std::list<MODEL>& Entries(void)
     {
-      Each([](MODEL&) { return (true); });
+      Each([](MODEL&) -> bool { return (true); });
       return (fetched);
     }
     

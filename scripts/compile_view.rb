@@ -80,12 +80,20 @@ def compile_view filename
   linking_lines = Array.new
   tmp_lines.each do | line |
     if line.match /@[a-zA-Z_]+/
-      type = line.scan /^([a-zA-Z_]+(<[a-zA-Z_]+[*&]*>){0,1}[*&]*)/
+      type = line.scan /^([a-zA-Z0-9_]+(<[a-zA-Z_0-9]+[*&]*>){0,1}[*&]*)/
       name = line.scan /@[a-zA-Z_]+/
       if not type.nil? and not type[0].nil? and not name.nil? and not name[0].nil?
         type = type.first.first
         name = name.first[1..name.first.size]
-        line = "#{type} #{name} = (#{type})*(vars[\"#{name}\"]);"
+        line = if not (type =~ /^SmartPointer</).nil?
+          # If the type is a SmartPointer, dereference
+          "#{type} #{name}(*((#{type}*)*(vars[\"#{name}\"]))); // Smart Pointer"
+        elsif not (type =~ /&$/).nil?
+          # If the type is a reference, dereference
+          "#{type} #{name} = *((#{type[0...-1]}*)*(vars[\"#{name}\"])); // Reference"
+        else
+          "#{type} #{name} = (#{type})*(vars[\"#{name}\"]);"
+        end
       end
     end
     linking_lines << line

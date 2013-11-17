@@ -195,11 +195,15 @@ void CrailsServer::ParseForm(const Server::request&, Response response, Params& 
                         size_t size_read,
                         Server::connection_ptr connection_ptr)
   {
+    std::cout << "Reading buffer..." << std::endl;
     for (unsigned int i = 0 ; i < size_read ; ++i)
       read_buffer += range[i];
     total_read += size_read;
     if (total_read == to_read)
+    {
+      std::cout << "Finished reading..." << std::endl;
       sem.Post();
+    }
     else
       response->read(callback);
   };
@@ -216,7 +220,7 @@ void CrailsServer::ParseForm(const Server::request&, Response response, Params& 
 #else
 void CrailsServer::ParseMultipart(const Server::request& request, Response, Params& params)
 {
-  cout << "Going for multipart/form-data parsing" << endl;
+  cout << "[" << request.method << " " << request.destination << "] Going for multipart/form-data parsing" << endl;
   multipart_parser.Initialize(params);
   multipart_parser.read_buffer = request.body;
   multipart_parser.Parse(params);
@@ -225,7 +229,7 @@ void CrailsServer::ParseMultipart(const Server::request& request, Response, Para
 
 void CrailsServer::ParseForm(const Server::request& request, Response, Params& params)
 {
-  cout << "Going for form-data parsing" << endl;  
+  cout << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << endl;  
   if (request.body.size() > 0)
   {
     cgi2params(params, request.body);

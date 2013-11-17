@@ -38,10 +38,12 @@ public:
 
   void Lock(void)   { handle.Wait(); }
   void Unlock(void) { handle.Post(); }
-  
-  SessionStore    session;
+
+  DynStruct&       Session(void)       { return (session.Session()); }
+  const DynStruct& Session(void) const { return (session.Session()); }
 
 private:
+  SessionStore    session;
   Sync::Semaphore handle;
   Sync::Semaphore response_parsed;
   Files           files;

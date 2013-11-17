@@ -22,5 +22,7 @@ void Databases::LoadDatabases(void)
       db->name = db_config.Key();
       databases.push_back(db);
     }
+    else
+      cout << "Failed to load database " << db_config.Key() << endl;
   });
 }

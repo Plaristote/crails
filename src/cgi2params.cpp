@@ -35,20 +35,21 @@ void cgi2params(DynStruct& params, const std::string& encoded_str)
     regex.SetPattern("[^=&]*", REG_EXTENDED);
     if (!(regex.Match(str, &match, 1)))
     {
+      auto sub_key = str.find('[');
+
+      if (sub_key != std::string::npos && sub_key < match.rm_eo)
+        match.rm_eo = sub_key;
       key_stacks.push_back(str.substr(match.rm_so, match.rm_eo));
       str.erase(match.rm_so, match.rm_eo);
 
       while (str[0] == '[')
       {
         str.erase(0, 1);
-        if (!(regex.Match(str, &match, 1)))
+        auto end_key = str.find(']');
+        if (end_key != std::string::npos)
         {
-          key_stacks.push_back(str.substr(match.rm_so, match.rm_eo));
-          str.erase(match.rm_so, match.rm_eo);
-          if (str[0] == ']')
-            str.erase(0, 1);
-          else
-            return ;
+          key_stacks.push_back(str.substr(0, end_key));
+          str.erase(0, end_key + 1);
         }
         else
           return ;

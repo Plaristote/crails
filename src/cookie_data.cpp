@@ -103,35 +103,38 @@ std::string Http::Url::Decode(const std::string& src)
   return (result);
 }
 
-// TODO Find out why the key/values are swapped
-// TODO Find out why it works with key/values swapped
-string CookieData::Serialize(void )
+string CookieData::Serialize(void)
 {
-  std::string cookie_string;
+  string cookie_string;
+  string value;
 
-  for_each(begin(), end(), [&cookie_string](const Data data)
-  {
-    if (cookie_string.size())
-      cookie_string += "; ";
-    cookie_string += Http::Url::Encode(data.Value()) + '=' + Http::Url::Encode(data.Key());
-  });
-  //cout << "SERIALIZED COOKIE STRING = " << cookie_string << endl;
+  DataTree::Writers::StringJSON(*this, value);
+  cookie_string += Http::Url::Encode("crails") + '=' + Http::Url::Encode(value);
+  cookie_string += ";path=/";
   return (cookie_string);
 }
 
-void CookieData::Unserialize(const string& data)
+void CookieData::Unserialize(const string& str)
 {
-  string     cookie_string = Http::Url::Decode(data);
+  string     cookie_string = str;
   Regex      regex;
   regmatch_t matches[3];
 
-  regex.SetPattern("\\s*([^=]+)=([^;]+);{0,1}", REG_EXTENDED);
+  regex.SetPattern("\\s*([^=]+)=([^;]*);{0,1}", REG_EXTENDED);
   while (!(regex.Match(cookie_string, matches, 3)))
   {
-    string key     = cookie_string.substr(matches[2].rm_so, matches[2].rm_eo - matches[2].rm_so);
-    string val     = cookie_string.substr(matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
+    string val     = cookie_string.substr(matches[2].rm_so, matches[2].rm_eo - matches[2].rm_so);
+    string key     = cookie_string.substr(matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
 
     cookie_string  = cookie_string.substr(matches[0].rm_eo);
-    (*this)[val] = key;
+    val            = Http::Url::Decode(val);
+    key            = Http::Url::Decode(key);
+    if (key == "crails")
+    {
+      DataTree* datatree = DataTree::Factory::StringJSON(val);
+
+      Duplicate(datatree);
+      break ;
+    }
   }
 }

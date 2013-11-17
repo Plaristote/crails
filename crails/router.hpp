@@ -63,22 +63,13 @@ private:
     return (klass::RescueFrom([&controller]() -> DynStruct { return (controller.function()); })); \
   });
 
-# define ROUTER_RESSOURCE(resource_name, controller) \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,new);    \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,edit);   \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,show);   \
-  SetRoute("POST",   '/' + SYM2STRING(resource_name),               controller,create); \
-  SetRoute("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,update); \
-  SetRoute("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,delete);
-  
-# define SetResource(name, klass) \
-  SetRoute("GET",    '/' + std::string(#name),               klass, index)   \
-  SetRoute("GET",    '/' + std::string(#name) + "/new",      klass, _new)    \
-  SetRoute("GET",    '/' + std::string(#name) + "/:id",      klass, show)    \
-  SetRoute("GET",    '/' + std::string(#name) + "/:id/edit", klass, edit)    \
-  SetRoute("PUT",    '/' + std::string(#name),               klass, create)  \
-  SetRoute("POST",   '/' + std::string(#name) + "/:id",      klass, update)  \
-  SetRoute("DELETE", '/' + std::string(#name) + "/:id",      klass, _delete) \
+# define SetResource(resource_name, controller) \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,Index);  \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,New);    \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,Edit);   \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,Show);   \
+  SetRoute("POST",   '/' + SYM2STRING(resource_name),               controller,Create); \
+  SetRoute("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,Update); \
+  SetRoute("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,Delete);
 
 #endif

@@ -2,6 +2,54 @@
 # define MONGODB_MODEL_HPP
 
 # include <mongo/client/dbclient.h>
+# include <Boots/Utils/smart_pointer.hpp>
+# include "exception.hpp"
+
+# define MONGODB_MODEL(classname) \
+    friend class MongoDB::ResultSet<classname>; \
+  public: \
+    classname(MongoDB::Collection& collection, mongo::BSONObj& bson_object) : Model(collection, bson_object) \
+    { \
+      InitializeFields(); \
+    } \
+    \
+    classname(const classname& copy) : Model(copy) \
+    { \
+      InitializeFields(); \
+    } \
+    \
+    static SmartPointer<classname> Find(const std::string& id_str) \
+    { \
+      mongo::OID                                     id; \
+      \
+      if (id_str.size() != 24) \
+        throw MongoDB::Exception(std::string("Invalid call to ") + std::string(#classname) + std::string("::Find with OID '") + id_str + '\''); \
+      id.init(id_str); \
+      { \
+        SmartPointer<MongoDB::ResultSet<classname> > results = MongoDB::ResultSet<classname>::Query(QUERY("_id" << id)); \
+        SmartPointer<classname>                      result(nullptr); \
+  \
+        if (results->Entries().size() > 0) \
+          result = new classname(results->Entries().front()); \
+        return (result); \
+      } \
+    } \
+    \
+    static classname Create(Data params = Data()) \
+    { \
+      const std::string    database        = classname::DatabaseName(); \
+      const std::string    collection_name = classname::CollectionName(); \
+      MongoDB::Collection& collection      = Databases::singleton::Get()->GetDb<MongodbDb>(database)[collection_name]; \
+      mongo::BSONObj       obj; \
+      { \
+        mongo::BSONObjBuilder builder; \
+        \
+        if (!(params.Nil())) \
+        { std::for_each(params.begin(), params.end(), [&builder](Data param) { builder << param.Key() << param.Value(); }); } \
+        obj = builder.obj(); \
+      } \
+      return (classname(collection, obj)); \
+    }
 
 # define MONGODB_FIELD(type,field,def) \
 private:  Field<type> _##field ; \
@@ -55,6 +103,7 @@ namespace MongoDB
   {
   public:
     Model(Collection& collection, mongo::BSONObj bson_object);
+    Model(const Model& copy);
 
     std::string        Id(void)  const { return (id.toString()); }
     mongo::OID         OID(void) const { return (id);            }
@@ -69,9 +118,11 @@ namespace MongoDB
     mongo::BSONObj     Update(void);
 
   protected:
-    virtual void       InitializeFields(void)
+    virtual void       InitializeFields(void);
+
+    void               ForceUpdate(void)
     {
-      fields.clear();
+      std::for_each(fields.begin(), fields.end(), [](IField* field) { field->ForceUpdate(); });
     }
 
     bool               Exists(void) const
@@ -81,11 +132,12 @@ namespace MongoDB
     
     struct IField;
 
-    mongo::BSONObj     bson_object;
-    mongo::OID         id;
-    std::list<IField*> fields;
-    bool               has_id;
-    Collection&        collection;
+    mongo::BSONObj                       bson_object;
+    mongo::OID                           id;
+    std::list<IField*>                   fields;
+    bool                                 has_id;
+    Collection&                          collection;
+    SmartPointer<mongo::DBClientCursor>  result_set; // Must hold reference to result set if was part of a result set
 
     /*
      * Field Management
@@ -95,6 +147,7 @@ namespace MongoDB
       friend class Model;
     public:
       std::string  Name(void) { return (name); }
+      virtual void ForceUpdate(void)                   = 0;
     protected:
       virtual void BuildUpdate(mongo::BSONObjBuilder&) = 0;
 
@@ -124,6 +177,8 @@ namespace MongoDB
           element.Val(value);
         has_changed = false;
       }
+      
+      void        ForceUpdate(void) { has_changed = true; }
 
       TYPE        Get(void) const        { return (value);      }
       void        Set(const TYPE& value)

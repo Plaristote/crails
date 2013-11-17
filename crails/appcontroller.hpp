@@ -30,6 +30,7 @@ class ControllerBase
 protected:
   ControllerBase(Params& params) : params(params)
   {
+    *vars["params"] = &params;
   }
 
 private:
@@ -41,6 +42,7 @@ private:
 protected:
   static void RedirectTo(const std::string& uri);
   Params&     params;
+  SharedVars  vars;
 };
 
 #endif

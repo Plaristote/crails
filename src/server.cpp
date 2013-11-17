@@ -27,6 +27,8 @@ void CrailsServer::ResponseException(BuildingResponse& out, std::string e_name, 
   {
     std::string content = view.Generate(vars);
 
+    cerr << "Catched exception `" << e_name << "`: " << e_what << endl;
+    cout << content << endl;
 #ifdef SERVER_DEBUG
     out.SetHeaders("Content-Type", "text/html");
     out.SetResponse(CrailsServer::HttpCodes::internal_server_error, content);
@@ -138,6 +140,7 @@ void CrailsServer::operator()(const Server::request& request, Response response)
   catch (const Router::Exception302 e)
   {
     out.SetHeaders("Location", e.redirect_to);
+    params.session.Finalize(out);
     ResponseHttpError(out, HttpCodes::moved_temporarily, params);
   }
   catch (const Router::Exception404 e)
