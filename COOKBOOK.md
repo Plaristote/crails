@@ -133,6 +133,37 @@ All the GET, form, multipart and routing parameters are stored at the root of th
 Say your route is /crmacconts/:id, you would access the id parameter by using params["id"].
 There's also an header node (params["headers"]) containing the header parameters of the request.
 
+### Session
+The session is managed directly by Crails. It might not be a good idea to send "Set-Cookie" headers, since Crails is going
+to handle those on its own.
+The session variable can be accessed through the Params object. For instance, if you wish to record the ID of a connected user:
+
+        params.Session()["current_user"] = "user_id";
+        
+And if you wish to remove it:
+
+        params.Session()["current_user"].Remove();
+
+### Flash
+Flash is a particular part of the session which gets erased at the beginning of each request. It's a way of communicating
+between one request and the next one.
+For instance, to record a notification that needs to be displayed to an user:
+
+        DynStruct SessionsController::destroy()
+        {
+          params.Session()["current_user"].Remove();
+          params.Session()["flash"]["info"] = "You've been disconnected"; // Sets a message into flash
+          RedirectTo(params["header"]["Referer"]); // Redirects to previous page
+          return (DynStruct());
+        }
+
+The flash variables aren't accessed the same way they're set. If you want to display the message:
+
+        DynStruct SessionsController::show()
+        {
+          std::cout << flash["info"].Value() << std::endl; // displays the message
+        }
+
 ## Filters
 There are two methods in the controller base class that can be overloaded to implement before and after filters
 behaviours.
