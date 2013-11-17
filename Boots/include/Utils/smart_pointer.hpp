@@ -33,9 +33,34 @@ public:
     *counter -= 1;
     if (*counter == 0)
     {
+      if (pointer)
+        delete pointer;
+      delete counter;
+    }
+  }
+
+  SmartPointer& operator=(const SmartPointer& smart_ptr)
+  {
+    *counter -= 1;
+    if (*counter == 0)
+    {
       delete pointer;
       delete counter;
     }
+    counter   = smart_ptr.counter;
+    pointer   = smart_ptr.pointer;
+    *counter += 1;
+    return (*this);
+  }
+
+  bool Null(void) const
+  {
+    return (pointer == 0);
+  }
+
+  bool NotNull(void) const
+  {
+    return (pointer != 0);
   }
   
   T* operator->()

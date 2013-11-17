@@ -223,10 +223,10 @@ static bool isNumeric(const std::string& str)
     return (true);
 }
 
-static std::string appendArray(Data data, unsigned short indent = 0);
-static std::string appendObject(Data data, unsigned short indent = 0);
+static std::string appendArray(Data data);
+static std::string appendObject(Data data);
 
-static std::string appendValue(Data data, unsigned short indent = 0)
+static std::string appendValue(Data data)
 {
     std::string toWrite;
 
@@ -235,8 +235,8 @@ static std::string appendValue(Data data, unsigned short indent = 0)
         // Object or Array
         bool isArray = true;
 
-        Data::my_iterator arrChkIt  = data.begin();
-        Data::my_iterator arrChkEnd = data.end();
+        Data::iterator arrChkIt  = data.begin();
+        Data::iterator arrChkEnd = data.end();
 
         for (; arrChkIt != arrChkEnd ; ++arrChkIt)
         {
@@ -247,9 +247,9 @@ static std::string appendValue(Data data, unsigned short indent = 0)
             }
         }
         if (isArray)
-          toWrite += appendArray(data, indent);
+          toWrite += appendArray(data);
         else
-          toWrite += appendObject(data, indent);
+          toWrite += appendObject(data);
     }
     else
     {
@@ -265,13 +265,13 @@ static std::string appendValue(Data data, unsigned short indent = 0)
     return (toWrite);
 }
 
-static std::string appendArray(Data data, unsigned short indent)
+static std::string appendArray(Data data)
 {
-    std::string toWrite;
-    Data::my_iterator it  = data.begin();
-    Data::my_iterator end = data.end();
+    std::string    toWrite;
+    Data::iterator it  = data.begin();
+    Data::iterator end = data.end();
 
-    toWrite = "[\n";
+    toWrite = '[';
     while (it != end)
     {
         if ((*it).Nil())
@@ -279,24 +279,22 @@ static std::string appendArray(Data data, unsigned short indent)
           ++it;
           continue ;
         }
-        toWrite += appendValue(*it, indent + 2);
+        toWrite += appendValue(*it);
         ++it;
         if (it  != end)
-          toWrite += ", ";
+          toWrite += ',';
     }
-    for (unsigned short iIndent = indent ; iIndent ; --iIndent)
-        toWrite += ' ';
-    toWrite += "\n]\n";
+    toWrite += ']';
     return (toWrite);
 }
 
-static std::string appendObject(Data data, unsigned short indent)
+static std::string appendObject(Data data)
 {
     std::string toWrite;
-    Data::my_iterator it  = data.begin();
-    Data::my_iterator end = data.end();
+    Data::iterator it  = data.begin();
+    Data::iterator end = data.end();
 
-    toWrite = "{\n";
+    toWrite = "{";
     while (it != end)
     {
         if ((*it).Nil())
@@ -304,18 +302,13 @@ static std::string appendObject(Data data, unsigned short indent)
           ++it;
           continue ;
         }
-        for (unsigned short iIndent = indent + 2 ; iIndent ; --iIndent)
-            toWrite += ' ';
-        toWrite += "\"" + (*it).Key() + "\": ";
-        toWrite += appendValue(*it, indent + 2);
+        toWrite += '"' + (*it).Key() + "\":";
+        toWrite += appendValue(*it);
         ++it;
         if (it  != end)
-            toWrite += ",";
-        toWrite += "\n";
+            toWrite += ',';
     }
-    for (unsigned short iIndent = indent ; iIndent ; --iIndent)
-        toWrite += ' ';
-    toWrite += "}\n";
+    toWrite += '}';
     return (toWrite);
 }
 
@@ -325,8 +318,8 @@ bool DataTree::Writers::StringJSON(Data data, string& str)
 
   toWrite = "{\n";
 
-  Data::my_iterator it  = data.begin();
-  Data::my_iterator end = data.end();
+  Data::iterator it  = data.begin();
+  Data::iterator end = data.end();
 
   while (it != end)
   {
@@ -339,11 +332,10 @@ bool DataTree::Writers::StringJSON(Data data, string& str)
       toWrite += appendValue(*it);
       ++it;
       if (it  != end)
-	  toWrite += ",";
-      toWrite += "\n";
+	  toWrite += ',';
   }
 
-  toWrite += "\n}\n";
+  toWrite += '}';
   str = toWrite;
   return (true);
 }

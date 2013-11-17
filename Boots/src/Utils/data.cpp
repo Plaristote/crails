@@ -6,8 +6,8 @@ using namespace std;
 
 void      Data::Output(std::ostream& stream, unsigned char indent)
 {
-  Data::my_iterator it  = this->begin();
-  Data::my_iterator end = this->end();
+  Data::iterator it  = this->begin();
+  Data::iterator end = this->end();
 
   for (unsigned char toIndent = indent ; toIndent ; --toIndent)
     stream << ' ';
@@ -18,8 +18,8 @@ void      Data::Output(std::ostream& stream, unsigned char indent)
 
 static void WriteFile(ofstream& stream, const Data data, unsigned char indent)
 {
-  Data::const_my_iterator it  = data.const_begin();
-  Data::const_my_iterator end = data.const_end();
+  Data::const_iterator it  = data.const_begin();
+  Data::const_iterator end = data.const_end();
 
   for (unsigned char toIndent = indent ; toIndent ; --toIndent)
     stream << ' ';
@@ -132,8 +132,8 @@ const Data Data::operator[](const std::string& key) const
 
 void        Data::Duplicate(Data var)
 {
-  Data::my_iterator it  = var.begin();
-  Data::my_iterator end = var.end();
+  Data::iterator it  = var.begin();
+  Data::iterator end = var.end();
 
   if (_data == 0)
   {

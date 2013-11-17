@@ -113,13 +113,13 @@ public:
   /*! \brief Returns the amount of children the branch has */
   unsigned int Count(void) const { return (_data ? _data->children.size() : 0); }
   
-  class my_iterator : public std::iterator_traits<Children::iterator>
+  class iterator : public std::iterator_traits<Children::iterator>
   {
   public:
-    my_iterator(Children::iterator it)           { _it = it;               }
+    iterator(Children::iterator it)           { _it = it;               }
     void operator=(Children::iterator it)     { _it = it;               }
-    bool operator==(const my_iterator& it) const { return (_it == it._it); }
-    bool operator!=(const my_iterator& it) const { return (_it != it._it); }
+    bool operator==(const iterator& it) const { return (_it == it._it); }
+    bool operator!=(const iterator& it) const { return (_it != it._it); }
     Data operator*() const                    { return (Data(*_it));    }
     void operator++()                         { ++_it;                  }
     void operator--()                         { --_it;                  }
@@ -127,13 +127,13 @@ public:
     Children::iterator _it;
   };
 
-  class const_my_iterator : public std::iterator_traits<Children::const_iterator>
+  class const_iterator : public std::iterator_traits<Children::const_iterator>
   {
   public:
-    const_my_iterator(Children::const_iterator it)     { _it = it;               }
+    const_iterator(Children::const_iterator it)     { _it = it;               }
     void operator=(Children::const_iterator it)     { _it = it;               }
-    bool operator==(const const_my_iterator& it) const { return (_it == it._it); }
-    bool operator!=(const const_my_iterator& it) const { return (_it != it._it); }
+    bool operator==(const const_iterator& it) const { return (_it == it._it); }
+    bool operator!=(const const_iterator& it) const { return (_it != it._it); }
     Data operator*() const                          { return (Data(*_it));    }
     void operator++()                               { ++_it;                  }
     void operator--()                               { --_it;                  }
@@ -141,10 +141,10 @@ public:
     Children::const_iterator _it;
   };
 
-  my_iterator       begin()             { return (my_iterator(_data->children.begin()));       }
-  const_my_iterator const_begin() const { return (const_my_iterator(_data->children.begin())); }
-  my_iterator       end()               { return (my_iterator(_data->children.end()));         }
-  const_my_iterator const_end() const   { return (const_my_iterator(_data->children.end()));   }
+  iterator       begin()             { return (iterator(_data->children.begin()));       }
+  const_iterator const_begin() const { return (const_iterator(_data->children.begin())); }
+  iterator       end()               { return (iterator(_data->children.end()));         }
+  const_iterator const_end() const   { return (const_iterator(_data->children.end()));   }
 
   void Serialize(Utils::Packet& packet) const;
   void Unserialize(Utils::Packet& packet);
