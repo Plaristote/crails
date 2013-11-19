@@ -1,9 +1,10 @@
-#include "crails/cookie_data.hpp"
+#include <crails/cookie_data.hpp>
+#include <crails/http.hpp>
+#include <crails/cipher.h>
 #include <Boots/Utils/regex.hpp>
 
 using namespace std;
 
-#include "crails/http.hpp"
 
 static std::string charToHex(char c)
 {
@@ -105,36 +106,55 @@ std::string Http::Url::Decode(const std::string& src)
 
 string CookieData::Serialize(void)
 {
-  string cookie_string;
-  string value;
+  try
+  {
+    Cipher cipher;
+    string cookie_string;
+    string value;
 
-  DataTree::Writers::StringJSON(*this, value);
-  cookie_string += Http::Url::Encode("crails") + '=' + Http::Url::Encode(value);
-  cookie_string += ";path=/";
-  return (cookie_string);
+    DataTree::Writers::StringJSON(*this, value);
+    value          = cipher.encrypt(value, password, salt);
+    cookie_string += Http::Url::Encode("crails") + '=' + Http::Url::Encode(value);
+    cookie_string += ";path=/";
+    return (cookie_string);
+  }
+  catch (const std::exception&)
+  {
+  }
+  return ("");
 }
 
 void CookieData::Unserialize(const string& str)
 {
-  string     cookie_string = str;
-  Regex      regex;
-  regmatch_t matches[3];
-
-  regex.SetPattern("\\s*([^=]+)=([^;]*);{0,1}", REG_EXTENDED);
-  while (!(regex.Match(cookie_string, matches, 3)))
+  try
   {
-    string val     = cookie_string.substr(matches[2].rm_so, matches[2].rm_eo - matches[2].rm_so);
-    string key     = cookie_string.substr(matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
+    Cipher     cipher;
+    string     cookie_string = str;
+    Regex      regex;
+    regmatch_t matches[3];
 
-    cookie_string  = cookie_string.substr(matches[0].rm_eo);
-    val            = Http::Url::Decode(val);
-    key            = Http::Url::Decode(key);
-    if (key == "crails")
+    regex.SetPattern("\\s*([^=]+)=([^;]*);{0,1}", REG_EXTENDED);
+    while (!(regex.Match(cookie_string, matches, 3)))
     {
-      DataTree* datatree = DataTree::Factory::StringJSON(val);
+      string val     = cookie_string.substr(matches[2].rm_so, matches[2].rm_eo - matches[2].rm_so);
+      string key     = cookie_string.substr(matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
 
-      Duplicate(datatree);
-      break ;
+      cookie_string  = cookie_string.substr(matches[0].rm_eo);
+      val            = Http::Url::Decode(val);
+      key            = Http::Url::Decode(key);
+      if (key == "crails")
+      {
+        val = cipher.decrypt(val, password, salt);
+        {
+          DataTree* datatree = DataTree::Factory::StringJSON(val);
+
+          Duplicate(datatree);
+          break ;
+        }
+      }
     }
+  }
+  catch (const std::exception&)
+  {
   }
 }

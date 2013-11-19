@@ -129,6 +129,7 @@ project.base_directory source, base_directory do
   end
   project.directory :config do
     project.file 'db.json'
+    project.generate_erb 'salt.cpp', 'salt.cpp.erb', options
   end
   project.directory :public do
     project.file '404.html'
