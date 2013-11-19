@@ -4,11 +4,12 @@
 # include <mongo/client/dbclient.h>
 # include <Boots/Utils/smart_pointer.hpp>
 # include "exception.hpp"
+# include "array.hpp"
 
 # define MONGODB_MODEL(classname) \
     friend class MongoDB::ResultSet<classname>; \
   public: \
-    classname(MongoDB::Collection& collection, mongo::BSONObj& bson_object) : Model(collection, bson_object) \
+    classname(MongoDB::Collection& collection, mongo::BSONObj bson_object) : Model(collection, bson_object) \
     { \
       InitializeFields(); \
     } \
@@ -58,28 +59,35 @@ public: \
   type field (void) const { return (_##field.Get()); }\
   void set_##field (type val) { _##field.Set(val); }
 
-# define MONGODB_HAS_MANY_AS(collection_name,type,relation_name) \
+# define MONGODB_HAS_MANY_AS(type,remote_field,relation_name) \
   MongoDB::ResultSet<type>* relation_name##s (void) \
   { \
-    std::string      association      = std::string(#collection_name) + 's'; \
-    std::string      association_name = std::string(#relation_name)   + "_id"; \
+    std::string      association      = type::CollectionName(); \
+    std::string      association_name = std::string(#remote_field) + "_id"; \
     mongo::Query     query            = QUERY(association_name << OID()); \
     MongoDB::ResultSet<type>* ptr     = MongoDB::ResultSet<type>::Query(collection.Db()[association], query);\
     \
-    ptr->SetOwner(*this, #relation_name);\
+    ptr->SetOwner(*this, #remote_field);\
     return (ptr);\
   }
 
-# define MONGODB_HAS_MANY(collection_name,type) \
-  MONGODB_HAS_MANY_AS(collection_name,type,collection_name)
+# define MONGODB_HAS_MANY(type,remote_field) \
+  MONGODB_HAS_MANY_AS(type,remote_field,type)
 
-# define MONGODB_BELONGS_TO_AS(collection_name,type,relation_name) \
+# define MONGODB_BELONGS_TO_AS(type,relation_name) \
   MONGODB_FIELD(mongo::OID, relation_name##_id , mongo::OID()) \
+  void set_##relation_name##_id(const std::string& str) \
+  { \
+    if (str.size() != 24) \
+      throw MongoDB::Exception(std::string("Invalid call to set_") + std::string(#relation_name) + std::string("_id with OID '") + str + '\''); \
+    mongo::OID id; id.init(str); set_##relation_name##_id(id); \
+  } \
+  \
   type relation_name(void) \
   {\
     mongo::OID            foreign_oid = relation_name##_id (); \
     mongo::Query          query = QUERY("_id" << foreign_oid); \
-    MongoDB::Collection&  col   = GetCollection().Db()[std::string(#collection_name) + 's']; \
+    MongoDB::Collection&  col   = GetCollection().Db()[type::CollectionName() + 's']; \
     auto                  ptr   = col.Query(query); \
     \
     if (ptr->more()) \
@@ -92,8 +100,16 @@ public: \
     return (type(col, mongo::BSONObj())); \
   }
   
-# define MONGODB_BELONGS_TO(collection_name,type) \
-  MONGODB_BELONGS_TO_AS(collection_name,type,collection_name)
+# define MONGODB_BELONGS_TO(type) \
+  MONGODB_BELONGS_TO_AS(type,type)
+  
+# define MONGODB_HAS_AND_BELONGS_TO_MANY(type,relation_name) \
+  MONGODB_FIELD(MongoDB::Array<mongo::OID>, relation_name##_ids, MongoDB::Array<mongo::OID>()) \
+  MongoDB::ResultSet<type>* relation_name (void) \
+  { \
+    MongoDB::ResultSet<type>* ptr = MongoDB::ResultSet<type>::Query(collection.Db()[type::CollectionName()], BSON("_id" << BSON("$in" << relation_name##_ids()))); \
+    return (ptr); \
+  }
   
 namespace MongoDB
 {

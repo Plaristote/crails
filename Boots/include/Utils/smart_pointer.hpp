@@ -7,6 +7,12 @@ template<typename T>
 class SmartPointer
 {
 public:
+  SmartPointer(void) : pointer(nullptr)
+  {
+    counter  = new unsigned int;
+    *counter = 1;
+  }
+
   SmartPointer(T* pointer) : pointer(pointer)
   {
     counter  = new unsigned int;
@@ -39,6 +45,20 @@ public:
     }
   }
 
+  SmartPointer& operator=(T* n_pointer)
+  {
+    *counter -= 1;
+    if (*counter == 0)
+    {
+      delete pointer;
+      delete counter;
+    }
+    pointer  = n_pointer;
+    counter  = new unsigned int;
+    *counter = 1;
+    return (*this);
+  }
+  
   SmartPointer& operator=(const SmartPointer& smart_ptr)
   {
     *counter -= 1;
