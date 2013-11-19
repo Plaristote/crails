@@ -50,13 +50,17 @@ This is what a Crails controller looks like:
     class CrmAccountsController : public ControllerBase
     {
     public:
-      static DynStruct index  (Params& params);
-      static DynStruct show   (Params& params);
-      static DynStruct _new   (Params& params);
-      static DynStruct create (Params& params);
-      static DynStruct edit   (Params& params);
-      static DynStruct update (Params& params);
-      static DynStruct _delete(Params& params);
+      CrmAccountsController(Params& params) : ControllerBase(params)
+      {
+      }
+    
+      DynStruct index  ();
+      DynStruct show   ();
+      DynStruct _new   ();
+      DynStruct create ();
+      DynStruct edit   ();
+      DynStruct update ();
+      DynStruct _delete();
     };
     
     #endif
@@ -67,22 +71,22 @@ with Crail: (DynStruct, Params, ControllerBase, SharedVars and more).
 
 The controller class must inherits ControllerBase, which will implement some default behaviors (by default,
 no exception catcher or filters are set, but you can override these behaviors).
-All the mehods need to be static. Since the server might run in asynchronous mode, you must also be careful not to
-use any global variables or static attibutes unless you know what you're doing (the Boots lib implements some
-asynchronous development tools that you might wanna use if you need global stuff. Check out Boots/Sync/semaphore.hpp
-and Boots/Sync/mutex.hpp).
+Since the server might run in asynchronous mode, you must also be careful not to use any global variables or static
+attibutes unless you know what you're doing (the Boots lib implements some asynchronous development tools that you
+might wanna use if you need global stuff. Check out Boots/Sync/semaphore.hpp and Boots/Sync/mutex.hpp).
 
 ## Controller method
 We'll now see how to implement a controller method and how to link it to a route.
 
-      DynStruct CrmAccountsController::show(Params& params)
+      DynStruct CrmAccountsController::show()
       {
         DynStruct render_data;
         std::string body;
     
         body  = "Hello World<br />";
-        body += params["id"].Value();
-        render_data["body"] = body;
+        body += params["id"].Value(); // params is a protected reference to the request's params
+        render_data["response"]["Content-Type"] = "text/html"; // use this to set the response's headers, default is text/html
+        render_data["body"]                     = body;        // use this to set the response's body
         return (render_data);
       }
 
@@ -129,32 +133,36 @@ All the GET, form, multipart and routing parameters are stored at the root of th
 Say your route is /crmacconts/:id, you would access the id parameter by using params["id"].
 There's also an header node (params["headers"]) containing the header parameters of the request.
 
-## Filters
-There are two methods in the controller base class that can be overloaded to implement before and after filters
-behaviours.
+### Session
+The session is managed directly by Crails. It might not be a good idea to send "Set-Cookie" headers, since Crails is going
+to handle those on its own.
+The session variable can be accessed through the Params object. For instance, if you wish to record the ID of a connected user:
 
-      static void      BeforeFilter(Params&);
-      static DynStruct AfterFilter(DynStruct, Params&);
+        params.Session()["current_user"] = "user_id";
+        
+And if you wish to remove it:
 
-Note that the AfterFilter 
+        params.Session()["current_user"].Remove();
 
-If you overload these methods, you MUST call the parent's class filter method, like this:
+### Flash
+Flash is a particular part of the session which gets erased at the beginning of each request. It's a way of communicating
+between one request and the next one.
+For instance, to record a notification that needs to be displayed to an user:
 
-      static void      BeforeFilter(Params& params)
-      {
-        ControllerBase::BeforeFilter(params);
-        if (params["header"]["Content-Type"] != "image/png")
-          RedirectTo("/unsuported-file-format.html");
-      }
+        DynStruct SessionsController::destroy()
+        {
+          params.Session()["current_user"].Remove();
+          params.Session()["flash"]["info"] = "You've been disconnected"; // Sets a message into flash
+          RedirectTo(params["header"]["Referer"]); // Redirects to previous page
+          return (DynStruct());
+        }
 
-      static DynStruct AfterFilter(DynStruct render_data, Params& params)
-      {
-        render_data["body"] = "content was after filtered !";
-        return (ControllerBase::AfterFilter(render_data, params));
-      }
+The flash variables aren't accessed the same way they're set. If you want to display the message:
 
-Note that the order is important. In the before filter, we call the parent's method first, and in the
-after filter, we call it last. You don't have to do it this way but it's highly recommended.
+        DynStruct SessionsController::show()
+        {
+          std::cout << flash["info"].Value() << std::endl; // displays the message
+        }
 
 ## Rescue From
 You can also use macro to overload the global 'rescue from' of your contoller. This will allow you to catch
