@@ -26,6 +26,7 @@ class Router;
 
 struct ExceptionCSRF : public std::exception
 {
+  const char* what(void) const throw() { return ("The CSRF token was missing or invalid and your identity couldn't be verified."); }
 };
 
 class ControllerBase
