@@ -13,6 +13,7 @@
     function Form(element) {
       var method,
         _this = this;
+      var csrf_token = $('meta[name="csrf-token"]');
       this.form = element;
       (this.form.find('.form-actions button[type="reset"]')).click(function() {
         return _this.Cancel();
@@ -22,6 +23,8 @@
         this.form.append("<input type='hidden' name='_method' value='" + method + "' />");
         this.form.attr('method', 'POST');
       }
+      if (csrf_token.length > 0)
+        this.form.append("<input type='hidden' name='csrf-token' value='" + csrf_token.attr('content') + "' />");
       this.DomValidate();
     }
 
@@ -71,7 +74,8 @@
     Link.prototype.GoTo = function(method, url) {
       var fake_form, metadata;
       fake_form = $("<form method='post' action='" + url + "'></form>");
-      metadata = "<input type='hidden' name='_method' value='" + method + "' />";
+      metadata  = "<input type='hidden' name='_method' value='" + method + "' />";
+      metadata += "<input type='hidden' name='csrf-token' value='" + $('meta[name="csrf-token"]').attr('content') + "' />";
       fake_form.hide();
       fake_form.append(metadata);
       return fake_form.submit();
@@ -89,7 +93,7 @@
       var can_run, confirm_text, method, path;
       event.preventDefault();
       path = this.base.attr('href');
-      method = this.base.attr('data-method');
+      method = this.base.attr('data-method').toUpperCase();
       confirm_text = this.base.attr('data-confirm');
       can_run = true;
       if (confirm_text !== '' && !(confirm(confirm_text))) {

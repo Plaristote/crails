@@ -7,13 +7,13 @@ std::string rand_str(std::string::size_type size); // Defined in rand_str.cpp
 
 ControllerBase::ControllerBase(Params& params, bool must_protect_from_forgery) : params(params)
 {
-  // Generate a CSRF token and store it in the session if protecting from forgery
   if (must_protect_from_forgery)
   {
-    params.Session()["csrf_token"] = rand_str(16);
     // If request contains a body (ie: not get), check for the CSRF token
     if (params["method"].Value() != "GET" && !(protect_from_forgery()))
       throw ExceptionCSRF();
+    // Generate a new CSRF token for this request
+    params.Session()["csrf_token"] = rand_str(16);
   }
 
   // Set the class attributes accessible to the views
@@ -36,7 +36,7 @@ void ControllerBase::RedirectTo(const string& uri)
 
 bool ControllerBase::protect_from_forgery()
 {
-  Data csrf_token = params["csrf_token"];
+  Data csrf_token = params["csrf-token"];
   
   if (csrf_token.Nil())
     return (false); // CSRF Token wasn't specified in the request

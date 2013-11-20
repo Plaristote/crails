@@ -129,31 +129,22 @@ html = ""
 
 if bundle == 'bootstrap'
 
-javascripts = [ 'jquery',
-                'bootstrap-transition',
-                'bootstrap-alert',
-                'bootstrap-modal',
-                'bootstrap-dropdown',
-                'bootstrap-scrollspy',
-                'bootstrap-tab',
-                'bootstrap-tooltip',
-                'bootstrap-popover',
-                'bootstrap-button',
-                'bootstrap-collapse',
-                'bootstrap-carousel',
-                'bootstrap-typeahead' ]
+javascripts = [ 'bootstrap.min.js' ]
 
 javascripts.each do |js|
   path = "public/js/#{js}.js"
   unless File.exists? path
-    dl   = "http://twitter.github.com/bootstrap/assets/js/#{js}.js"
+    dl   = "http://getbootstrap.com/dist/js/#{js}.js"
     download_file dl, path
     puts "\033[32m[CREATE]\033[0m " + "File #{path}"
   end
 end
 
 html = <<HTML
+#include <crails/params.hpp>
 string* @yield;
+Params& @params;
+Data    csrf_token = params.Session()["csrf_token"];
 // END LINKING
 <!DOCTYPE html>
 <html lang="en">
@@ -163,12 +154,25 @@ string* @yield;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="../../docs-assets/ico/favicon.png">
+    <% if (csrf_token.NotNil()) do %><meta name="csrf-token" content="<%= csrf_token.Value() %><% end %>
 
     <title>#{PROJECT_NAME} - Powered by Crails Framework</title>
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+#{
+  (
+    value = String.new
+    javascripts.each do |js|
+      value += "    <script src='/js/" + js + ".js'></script>\n"
+    end
+    value
+  )
+}
+    <script src="/js/crails.js"></script>
+
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -195,16 +199,6 @@ string* @yield;
     <div class="container">
       <%= (yield ? *yield : "") %>
     </div><!-- /.container -->
-
-#{
-  (
-    value = String.new
-    javascripts.each do |js|
-      value += "<script src='/js/" + js + ".js'></script>\n"
-    end
-    value
-  )
-}    <script src="/js/crails.js"></script>
   </body>
 </html>
 HTML
@@ -249,7 +243,10 @@ end
 
 engine.html do |css, js|
 html = <<HTML
-string* yield = @yield;
+#include <crails/params.hpp>
+string* @yield;
+Params& @params;
+Data    csrf_token = params.Session()["csrf_token"];
 // END LINKING
 <!DOCTYPE html>
 <html><head>
@@ -258,6 +255,7 @@ string* yield = @yield;
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="description" content="" />
 <meta name="copyright" content="" />
+<% if (csrf_token.NotNil()) do %><meta name="csrf-token" content="<%= csrf_token.Value() %><% end %>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="/js/crails.js"></script>
 #{js}
