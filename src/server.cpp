@@ -113,8 +113,9 @@ void CrailsServer::ReadRequestData(const Server::request& request, Response resp
   if (request.method != "GET")
     ParseResponse(request, response, params);
   
-  // Set URI for the posterity (is that even a word ?)
-  params["uri"] = uri;
+  // Set URI and method for the posterity (is that even a word ?)
+  params["uri"]    = uri;
+  params["method"] = request.method;
 }
 
 void CrailsServer::operator()(const Server::request& request, Response response)
