@@ -261,6 +261,8 @@ bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse&
 
 using namespace boost::network::utils;
 
+typedef boost::shared_ptr<thread_pool> thread_pool_ptr;
+
 #ifdef USE_SEGVCATCH
 # include <segvcatch.h>
 void CrailsServer::ThrowCrashSegv()
@@ -298,10 +300,12 @@ void CrailsServer::Launch(int argc, char **argv)
     CrailsServer    handler;
     Server::options server_options(handler); 
 
+    server_options.thread_pool();
 #ifdef ASYNC_SERVER
     cout << ">> Pool Thread Size: " << threads << endl;
-    thread_pool     thread_pool(threads);
-    Server          server(server_options.address(address.c_str()).port(port.c_str()));
+    thread_pool     _thread_pool(threads);
+    thread_pool_ptr thread_pool_ptr(&_thread_pool);
+    Server          server(server_options.address(address.c_str()).port(port.c_str()).thread_pool(thread_pool_ptr));
 #else
     Server          server(server_options.address(address.c_str()).port(port.c_str()));
 #endif

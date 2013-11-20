@@ -37,7 +37,7 @@ void cgi2params(DynStruct& params, const std::string& encoded_str)
     {
       auto sub_key = str.find('[');
 
-      if (sub_key != std::string::npos && sub_key < match.rm_eo)
+      if (sub_key != std::string::npos && (int)sub_key < match.rm_eo)
         match.rm_eo = sub_key;
       key_stacks.push_back(str.substr(match.rm_so, match.rm_eo));
       str.erase(match.rm_so, match.rm_eo);

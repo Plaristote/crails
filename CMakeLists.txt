@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(crails_project)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic -DSYNC_SERVER -DSERVER_DEBUG")
+set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic -DASYNC_SERVER -DSERVER_DEBUG")
 
 include_directories(include /usr/local/include .)
 
