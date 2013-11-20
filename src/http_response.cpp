@@ -32,6 +32,13 @@ void BuildingResponse::SetResponse(CrailsServer::HttpCode code, const string& bo
 
 void BuildingResponse::SetBody(const char* str, size_t size)
 {
+  // Set the Content-Length parameter
+  {
+    std::stringstream stream;
+
+    stream << size;
+    SetHeaders("Content-Length", stream.str());
+  }
 #ifdef ASYNC_SERVER
   std::string  out;
 #else
