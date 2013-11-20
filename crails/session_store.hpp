@@ -4,41 +4,12 @@
 # include "crails/cookie_data.hpp"
 # include "crails/http_response.hpp"
 
-/*
- * Cookie based SessionStore
- */
-class CookieStore
-{
-public:
-  void             Load(Data request_headers);
-  void             Finalize(BuildingResponse& response);
-  DynStruct&       Session(void);
-  const DynStruct& Session(void) const;
-
-private:
-  CookieData       cookies;
-};
-
-/*
- * MongoDB based SesionStore
- */
-/*# include <mongo/client/dbclient.h>
-
-class MongoStore
-{
-public:
-  MongoStore(Data request_headers);
-  
-  DynStruct&       Session(void);
-  const DynStruct& Session(void) const;
-  
-  void             Finalize(BuildingResponse& response);
-private:
-  CookieData cookie;
-  DynStruct  variables;
-  mongo::DBClientConnection connection;
-};*/
-
+# ifdef USE_MONGODB_SESSION_STORE
+#  include "crails/session_store/mongo_store.hpp"
+typedef MongoStore  SessionStore;
+# else
+#  include "crails/session_store/cookie_store.hpp"
 typedef CookieStore SessionStore;
+#endif
 
 #endif

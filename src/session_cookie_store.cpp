@@ -1,4 +1,4 @@
-#include "crails/session_store.hpp"
+#include "crails/session_store/cookie_store.hpp"
 
 using namespace std;
 

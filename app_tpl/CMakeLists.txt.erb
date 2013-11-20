@@ -5,6 +5,7 @@ project(<%= options[:name] %>)
 <% cmd_line += " -DASYNC_SERVER"  unless options[:server]    != :async %>
 <% cmd_line += " -DSERVER_DEBUG"  unless options[:debug]     == false  %>
 <% cmd_line += " -DUSE_SEGVCATCH" unless options[:segvcatch] != true   %>
+<% cmd_line += " -DUSE_MONGODB_SESSION_STORE" unless options[:session_store] != 'mongodb' %>
 set(CMAKE_CXX_FLAGS "<%= cmd_line %>")
 
 include_directories(include /usr/local/include .)
@@ -13,7 +14,9 @@ file(GLOB crails_app
      app/controllers/*.cpp
      app/models/*.cpp
      app/routes.cpp
-     app/main.cpp)
+     app/main.cpp
+     config/salt.cpp
+     <%= "config/session_store_mongodb.cpp" if options[:session_store] == 'mongodb' %>)
 
 add_executable(crails-app ${crails_app})
 <% if options[:sql] == true %>

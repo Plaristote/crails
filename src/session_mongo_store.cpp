@@ -1,0 +1,76 @@
+#ifdef USE_MONGODB_SESSION_STORE
+# include <Boots/include/Utils/datetime.hpp>
+# include "crails/session_store/mongo_store.hpp"
+
+using namespace MongoDB;
+using namespace std;
+
+MongoStore::MongoStore()
+{
+}
+
+void MongoStore::Load(Data request_headers)
+{
+  string cookie_string = request_headers["Cookie"].Value();
+
+  cookies.Unserialize(cookie_string);
+  if (cookies["session_id"].NotNil())
+  {
+    session = SessionStore::Find(cookies["session_id"].Value());
+    if (session.NotNull())
+      session->GetFields(session_content);
+  }
+}
+
+void MongoStore::Finalize(BuildingResponse& response)
+{
+  if (session.Null())
+    session = new SessionStore(SessionStore::Create(session_content));
+  else
+    session->SetFields(session_content);
+  session->Save();
+  cookies["session_id"] = session->Id();
+  response.SetHeaders("Set-Cookie", cookies.Serialize());
+  MongoStore::SessionStore::Cleanup();
+}
+
+void MongoStore::SessionStore::GetFields(Data data)
+{
+  set<string> field_names;
+
+  bson_object.getFieldNames(field_names);
+  {
+    auto it  = field_names.begin();
+    auto end = field_names.end();
+    
+    for (; it != end ; ++it)
+    {
+      std::string key   = *it;
+      std::string value = bson_object.getField(key).str();
+      
+      data[key] = value;
+    }
+  }
+}
+
+void MongoStore::SessionStore::SetFields(Data data)
+{
+  mongo::BSONObjBuilder builder;
+  auto                  it  = data.begin();
+  auto                  end = data.end();
+  
+  builder << "_id" << id;
+  for (; it != end ; ++it)
+    builder << (*it).Key() << (*it).Value();
+  bson_object = builder.obj();
+}
+
+void MongoStore::SessionStore::Cleanup(void)
+{
+  Collection&                                   collection  = Databases::singleton::Get()->GetDb<MongodbDb>(database_name)[collection_name];
+  unsigned int                                  timestamp   = DateTime::Now();
+  unsigned int                                  expiring_at = timestamp - session_expiration;
+
+  collection.Remove(BSON("_updated_at" << mongo::LT << expiring_at));
+}
+#endif
