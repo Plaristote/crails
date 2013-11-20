@@ -44,6 +44,11 @@
     Form.prototype.DomValidate = function() {
       var rules,
         _this = this;
+      if (typeof $.validate == "undefined")
+      {
+        console.log("crails.js", "jquery.validate hasn't been required, form validation is disabled for crails.js");
+        return null;
+      }
       rules = {};
       (this.form.find('[name][data-validate]')).each(function() {
         var name, validate_cmd;
