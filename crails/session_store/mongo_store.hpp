@@ -20,6 +20,7 @@ public:
 
     void SetFields(Data data);
     void GetFields(Data data);
+    void Save(void);
 
     static void Cleanup(void);
 
@@ -36,8 +37,8 @@ public:
   const DynStruct& Session(void) const { return (session_content); }
   
 private:
-  CookieData                 cookies;
   SmartPointer<SessionStore> session;
+  CookieData                 cookie;
   DynStruct                  session_content;
 };
 

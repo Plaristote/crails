@@ -13,12 +13,14 @@ void MongoStore::Load(Data request_headers)
 {
   string cookie_string = request_headers["Cookie"].Value();
 
-  cookies.Unserialize(cookie_string);
-  if (cookies["session_id"].NotNil())
+  cookie.Unserialize(cookie_string);
+  if (cookie["session_id"].NotNil())
   {
-    session = SessionStore::Find(cookies["session_id"].Value());
+    session = SessionStore::Find(cookie["session_id"].Value());
     if (session.NotNull())
       session->GetFields(session_content);
+    else
+      cout << "[MongoStore] Could not find the session object in the database" << endl;
   }
 }
 
@@ -29,8 +31,10 @@ void MongoStore::Finalize(BuildingResponse& response)
   else
     session->SetFields(session_content);
   session->Save();
-  cookies["session_id"] = session->Id();
-  response.SetHeaders("Set-Cookie", cookies.Serialize());
+  while (cookie.Count())
+    cookie[0].Remove();
+  cookie["session_id"] = session->Id();
+  response.SetHeaders("Set-Cookie", cookie.Serialize());
   MongoStore::SessionStore::Cleanup();
 }
 
@@ -47,19 +51,32 @@ void MongoStore::SessionStore::GetFields(Data data)
     {
       std::string key   = *it;
       std::string value = bson_object.getField(key).str();
-      
-      data[key] = value;
+
+      if (key != "_id" && key != "_updated_at")
+        data[key] = value;
     }
   }
+}
+
+void MongoStore::SessionStore::Save(void)
+{
+  Collection& collection  = Databases::singleton::Get()->GetDb<MongodbDb>(database_name)[collection_name];
+
+  if (has_id)
+    collection.Update(bson_object, QUERY("_id" << id));
+  else
+    collection.Insert(bson_object);
 }
 
 void MongoStore::SessionStore::SetFields(Data data)
 {
   mongo::BSONObjBuilder builder;
-  auto                  it  = data.begin();
-  auto                  end = data.end();
-  
-  builder << "_id" << id;
+  auto                  it         = data.begin();
+  auto                  end        = data.end();
+  unsigned int          updated_at = DateTime::Now();
+
+  builder << "_id"         << id;
+  builder << "_updated_at" << updated_at;
   for (; it != end ; ++it)
     builder << (*it).Key() << (*it).Value();
   bson_object = builder.obj();
