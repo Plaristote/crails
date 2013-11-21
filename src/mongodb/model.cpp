@@ -67,14 +67,12 @@ void Model::Save(void)
 {
   if (has_id)
   {
-    cout << "Model::Save -> Update" << endl;
     mongo::Query query = QUERY("_id" << id);
   
     collection.Update(Update(), query);
   }
   else
   {
-    cout << "Model::Save -> Insert" << endl;
     ForceUpdate();
     collection.Insert(Update());
   }

@@ -16,6 +16,7 @@ void MongoStore::Load(Data request_headers)
   cookie.Unserialize(cookie_string);
   if (cookie["session_id"].NotNil())
   {
+    cout << "[MongoStore] Session Id = " << cookie["session_id"].Value() << endl;
     session = SessionStore::Find(cookie["session_id"].Value());
     if (session.NotNull())
       session->GetFields(session_content);
@@ -27,9 +28,8 @@ void MongoStore::Load(Data request_headers)
 void MongoStore::Finalize(BuildingResponse& response)
 {
   if (session.Null())
-    session = new SessionStore(SessionStore::Create(session_content));
-  else
-    session->SetFields(session_content);
+    session = new SessionStore(SessionStore::Create());
+  session->SetFields(session_content);
   session->Save();
   while (cookie.Count())
     cookie[0].Remove();
@@ -65,7 +65,13 @@ void MongoStore::SessionStore::Save(void)
   if (has_id)
     collection.Update(bson_object, QUERY("_id" << id));
   else
+  {
+    mongo::BSONElement id_element;
+
     collection.Insert(bson_object);
+    if ((has_id = bson_object.getObjectID(id_element)))
+      id = id_element.OID();
+  }
 }
 
 void MongoStore::SessionStore::SetFields(Data data)
@@ -75,11 +81,16 @@ void MongoStore::SessionStore::SetFields(Data data)
   auto                  end        = data.end();
   unsigned int          updated_at = DateTime::Now();
 
-  builder << "_id"         << id;
-  builder << "_updated_at" << updated_at;
+  if (has_id)
+    builder << "_id"         << id;
+  else
+    builder.genOID();
+  builder   << "_updated_at" << updated_at;
   for (; it != end ; ++it)
     builder << (*it).Key() << (*it).Value();
   bson_object = builder.obj();
+//  cout << "Set session: ";
+//  data.Output();
 }
 
 void MongoStore::SessionStore::Cleanup(void)
