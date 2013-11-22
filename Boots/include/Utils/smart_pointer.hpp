@@ -3,6 +3,15 @@
 
 # include <memory>
 
+struct NullPointerException : public std::exception
+{
+public:
+  const char* what() const throw()
+  {
+    return ("A null pointer has been dereferenced.");
+  }
+};
+
 template<typename T>
 class SmartPointer
 {
@@ -18,7 +27,7 @@ public:
     counter  = new unsigned int;
     *counter = 1;
   }
-  
+
   SmartPointer(const std::unique_ptr<T>& ptr)
   {
     pointer  = ptr.get();
@@ -33,7 +42,7 @@ public:
     counter   = smart_ptr.counter;
     *counter += 1;
   }
-  
+
   ~SmartPointer(void)
   {
     *counter -= 1;
@@ -58,7 +67,7 @@ public:
     *counter = 1;
     return (*this);
   }
-  
+
   SmartPointer& operator=(const SmartPointer& smart_ptr)
   {
     *counter -= 1;
@@ -82,22 +91,25 @@ public:
   {
     return (pointer != 0);
   }
-  
+
   T* operator->()
   {
+    if (pointer == 0) { throw NullPointerException(); }
     return (pointer);
   }
-  
+
   T& operator*(void)
   {
+    if (pointer == 0) { throw NullPointerException(); }
     return (*pointer);
   }
-  
+
   const T& operator*(void) const
   {
+    if (pointer == 0) { throw NullPointerException(); }
     return (*pointer);
   }
-  
+
 private:
   T*            pointer;
   unsigned int* counter;
