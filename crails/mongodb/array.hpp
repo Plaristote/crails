@@ -22,6 +22,13 @@ namespace MongoDB
       mongo::BSONArray::operator=(builder.arr());
     }
     
+    bool Contains(const T& value) const
+    {
+      std::vector<T> array = *this;
+
+      return (std::find(array.begin(), array.end(), value) != array.end());
+    }
+
     operator std::vector<T>() const
     {
       std::vector<mongo::BSONElement> elements;
