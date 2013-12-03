@@ -5,7 +5,7 @@
 
 static char rand_char()
 {
-  const std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.;:!?%$#()[]{}+-";
+  const std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.;:!?&%$#()[]{}+-";
 
   return (charset[std::rand() % charset.size()]);
 }

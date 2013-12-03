@@ -176,6 +176,7 @@ bool Socket::Connect(const string& hostname, short unsigned int port)
   if (::connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
     return (false);
   _socket = sock;
+  _ip     = hostname;
   return (true);
 }
 
@@ -265,6 +266,34 @@ void Socket::NetworkWrite(void)
     TransmittedData.Emit(this);
 }
 
+#ifndef _WIN32
+# include <sys/select.h>
+#else
+# include <io.h>
+#endif
+
+void Socket::WaitForData(unsigned int timeout_microseconds) const
+{
+  int            fd_max = 1;
+  fd_set         read_set;
+  int            ret;
+  struct timeval timeout;
+
+#ifndef _WIN32
+  fd_max = _socket;
+#endif
+  FD_ZERO(&read_set);
+  FD_SET(_socket, &read_set);
+  if (timeout_microseconds != 0)
+  {
+    timeout.tv_sec  = 0;
+    timeout.tv_usec = timeout_microseconds;
+  }
+  ret = select(fd_max + 1, &read_set, NULL, NULL, (timeout_microseconds != 0 ? &timeout : NULL));
+  if (ret == -1)
+    std::cerr << "[Network::Socket::WaitForData][" << this << "] " << Network::GetLastErrorMessage() << std::endl;
+}
+
 Socket::~Socket()
 {
   Disconnect();
@@ -278,7 +307,6 @@ void Socket::Disconnect(void)
   {
     Close(_socket);
     _socket = NULL_SOCKET;
-    std::cout << this << " Socket Disconnected" << std::endl;
     Disconnected.Emit(this);
   }
 }

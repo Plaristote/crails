@@ -5,7 +5,6 @@
 
 using namespace std;
 
-
 static std::string charToHex(char c)
 {
   std::string result;

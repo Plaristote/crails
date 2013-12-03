@@ -20,10 +20,10 @@ static void RecursivelySetValue(Data param, std::vector<std::string> key_stack, 
 
 void cgi2params(DynStruct& params, const std::string& encoded_str)
 {
-  const std::string opening_bracket = "%5B";
-  const std::string closing_bracket = "%5D";
-  std::string    str        = encoded_str;//        = Http::Url::Decode(encoded_str);  
-  std::string    looping    = "";
+  const std::string        opening_bracket = "%5B";
+  const std::string        closing_bracket = "%5D";
+  std::string              str             = encoded_str;
+  std::string              looping         = "";
   std::vector<std::string> key_stacks;
 
   while (str.size())

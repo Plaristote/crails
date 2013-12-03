@@ -47,7 +47,26 @@ namespace Network
     Buffer&            ReadBuffer()         { return (_buffer_read);  }
     const Buffer&      WriteBuffer() const  { return (_buffer_write); }
     const Buffer&      ReadBuffer()  const  { return (_buffer_read);  }
-   
+
+    void               WaitForData(unsigned int timeout_microseconds = 0) const;
+    
+    Socket&            operator<<(const std::string& str)
+    {
+      _buffer_write.Lock();
+      _buffer_write.Push(str.c_str(), str.size());
+      _buffer_write.Unlock();
+      return (*this);
+    }
+
+    Socket&           operator>>(std::string& str)
+    {
+      _buffer_read.Lock();
+      str = _buffer_read.Data();
+      _buffer_read.Flush(_buffer_read.Length());
+      _buffer_read.Unlock();
+      return (*this);
+    }
+
     Sync::PolymorphicSignal<void (Socket*)> Disconnected;
     Sync::PolymorphicSignal<void (Socket*)> NetworkError;
     Sync::PolymorphicSignal<void (Socket*)> ReceivedData;

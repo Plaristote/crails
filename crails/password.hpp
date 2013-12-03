@@ -40,7 +40,6 @@ struct Password : public std::string
   
 private:
   static std::string md5(const std::string& str);
-  static std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
 };
 
 #endif

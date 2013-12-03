@@ -5,6 +5,9 @@
 # include <string>
 # include <sstream>
 # include <thread>
+# ifdef __GNUG__
+#  include <cxxabi.h>
+# endif
 
 struct AllException : public std::exception
 {
@@ -40,7 +43,7 @@ struct Exception : public AllException
     if (details & Thread)
     { stream << "[Thread::" << (std::this_thread::get_id()) << ']'; }
     if (details & Type)
-    { stream << '[' << typeid(T).name() << ']'; }
+    { stream << '[' << cpp_demangle_symbol(typeid(T).name()) << ']'; }
     if (details & Pointer)
     { stream << '[' << (pointer) << ']'; }
     if (details & Code)
@@ -60,6 +63,24 @@ struct Exception : public AllException
   {
     throw Exception(instance, message, code, Thread | Type | Pointer | (code != 0 ? Code : 0));
   }
+  
+private:
+# ifdef __GNUG__
+  std::string cpp_demangle_symbol(const char* name)
+  {
+    int         status;
+    char*       demangled = abi::__cxa_demangle(name, 0, 0, &status);
+    std::string result(demangled);
+
+    free(demangled);
+    return (result);
+  }
+# else
+  std::string cpp_demangle_symbol(const char* name)
+  {
+    return (name);
+  }
+# endif
 };
 
 
