@@ -1,7 +1,6 @@
 #include <Sync/thread.hpp>
 
 using namespace Sync;
-using namespace std;
 
 #ifdef _WIN32
 void Thread::Launch(void)

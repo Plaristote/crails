@@ -1,28 +1,25 @@
 #ifndef  SEMAPHORE_HPP
 # define SEMAPHORE_HPP
 
-# ifdef __linux__
-#  include <semaphore.h>
-#  include <thread>
-# endif
-
 # ifdef _WIN32
 #  include <Winsock2.h>
 #  include <windows.h>
 #  include <stdio.h>
+# else
+#  include <semaphore.h>
+#  include <thread>
 # endif
 
 namespace Sync
 {
   class Semaphore
   {
-  # ifdef __linux__
-    typedef sem_t           Handle;
-    typedef std::thread::id ThreadId;
-  # endif
   # ifdef _WIN32
     typedef HANDLE Handle;
     typedef DWORD  ThreadId; 
+  # else
+    typedef sem_t           Handle;
+    typedef std::thread::id ThreadId;
   # endif
   public:
     class Lock

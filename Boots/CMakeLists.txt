@@ -5,6 +5,8 @@ project(Boots)
 if(UNIX)
   if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic")
+  elseif(APPLE)
+    set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
   endif()
 endif()
 

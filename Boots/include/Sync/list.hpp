@@ -3,6 +3,7 @@
 
 # include <list>
 # include <algorithm>
+# include <functional>
 # include "mutex.hpp"
 
 namespace Sync

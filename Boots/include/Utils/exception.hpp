@@ -20,6 +20,7 @@ struct AllException : public std::exception
     Pointer   = 8
   };
 
+  virtual ~AllException() throw() {}
   const char*   what(void)    const throw() { return (message.c_str()); }
   unsigned char GetCode(void) const         { return (code);            }
 

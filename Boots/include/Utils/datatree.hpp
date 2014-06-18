@@ -52,6 +52,11 @@ public:
   Data         operator[](const std::string& key);
   const Data   operator[](const std::string& key) const;
   Data         operator[](unsigned int it);
+#ifdef __llvm__
+  Data         operator[](const char* str)       { return (this->operator[](std::string(str))); }
+  Data         operator[](const char* str) const { return (this->operator[](std::string(str))); }
+  Data         operator[](int it)                { return (this->operator[]((unsigned int)it)); }
+#endif
 
   std::string  Key(void)   const { return (_data ? _data->key             : ""); }
   std::string  Value(void) const { return (_data ? _data->value           : ""); }

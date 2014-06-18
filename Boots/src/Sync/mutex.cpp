@@ -1,7 +1,6 @@
 #include <Sync/mutex.hpp>
 
 using namespace Sync;
-using namespace std;
 
 Mutex::Mutex(void)
 {

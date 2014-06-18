@@ -3,7 +3,7 @@
 
 using namespace Sync;
 
-#ifdef __linux__
+#if defined(__linux__) or defined(__llvm__)
 Semaphore::Semaphore(unsigned int initial_count, unsigned int max_count)
 {
   sem_init(&_handle, 0, initial_count);
