@@ -1,5 +1,6 @@
 #include <Utils/test.hpp>
 #include <Utils/serializer.hpp>
+#include <Utils/exception.hpp>
 
 using namespace std;
 
@@ -102,13 +103,27 @@ void TestsSerializer(UnitTest& tester)
     int* ii = &i;
     Utils::Packet in;
 
-    in << ii;
+    try
+    {
+      in << ii;
+    }
+    catch (...)
+    {
+      return ("Serializing a pointer threw an exception.");
+    }
 
     Utils::Packet out(in.raw(), in.size());
 
     int iii;
 
-    out >> iii;
+    try
+    {
+      out >> iii;
+    }
+    catch (...)
+    {
+      return ("Couldn't unserialize the value.");
+    }
     return (i == iii ? "" : "Did not work");
   });
 
@@ -121,9 +136,13 @@ void TestsSerializer(UnitTest& tester)
     {
       in << obj;
     }
-    catch (Exception<Utils::Packet> e)
+    catch (const Utils::Packet::SerializeUnknownType& e)
     {
       return ("");
+    }
+    catch (...)
+    {
+      return ("Didn't throw the proper type of exception");
     }
     return ("Didn't throw an exception");
   });

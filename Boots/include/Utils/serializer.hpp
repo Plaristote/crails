@@ -12,9 +12,6 @@
 #  include <cstdint>
 # endif
 
-# include "helpers.hpp"
-# include "exception.hpp"
-
 /*! \namespace Utils
  * \brief Various essentials utilities for all-purpose programming
  */
@@ -31,9 +28,44 @@ namespace Utils
 /*! \class Packet
  * \brief Serialization utility.
  */
-class		Packet
+class		Packet : public Serializable
 {
 public:
+  struct Exception : public std::exception
+  {
+  public:
+    Exception(Packet* packet);
+    ~Exception() throw() {}
+
+    const char* what(void) const throw()
+    {
+      return (message.c_str());
+    }
+
+    Packet*            GetPacket(void)      const { return (packet); }
+    unsigned int       ThrownAtOffset(void) const { return (offset); }
+    unsigned int       PacketSize(void)     const { return (size);   }
+    const std::string& ExpectedType(void)   const;
+    const std::string& ProvidedType(void)   const;
+
+  protected:
+    Exception(void) {}
+    
+    Packet*            packet;
+    unsigned int       offset, size;
+    char               assumed_type, provided_type;
+    std::string        message;
+    static std::string type_names[];
+  };
+
+  struct SerializeUnknownType   : public Exception { SerializeUnknownType(Packet* packet); };
+  struct UnserializeUnknownType : public Exception { UnserializeUnknownType(Packet* packet, char assumed_type, char provided_type); };
+  struct CorruptPacket          : public Exception { CorruptPacket(Packet* packet); };
+
+  friend struct SerializeUnknownType;
+  friend struct UnserializeUnknownType;
+  friend struct CorruptPacket;
+  
   enum Types
   {
     String = 1,
@@ -44,15 +76,7 @@ public:
     Array  = 6,
     UInt   = 7,
     UShort = 8,
-    UChar  = 9,
-    Long   = 10
-  };
-
-  enum Errors
-  {
-    TypeMismatch,
-    InvalidSize,
-    UnsupportedType
+    UChar  = 9
   };
 
   /*! \brief Use to create an empty Packet. */
@@ -76,50 +100,41 @@ public:
   size_t	size(void) const;
   /*! \brief Prints the content of the packet in an human-readable form */
   void		PrintContent(void);
-  void          PrintRawContent(void);
   
   Packet&	operator=(const Packet& cpy);
 
+  // Self serialization (embedding packets in packet)
+  void Serialize(Utils::Packet& packet) const;
+  void Unserialize(Utils::Packet& packet);
+  void Clear(void);
+  
   // Serialization
-  template<typename T> Packet& operator<<(T& v)
+  template<typename T> Packet&  operator<<(const Utils::Serializable& serializable)
   {
-    SelectSerializer<TypeToCode<T>::TypeCode != 0, std::is_base_of<Utils::Serializable, T>::value>::Func(*this, v);
+    serializable.Serialize(*this);
     return (*this);
   }
 
-  template<typename T> Packet& operator<<(T* i)
+  template<typename T> Packet&	operator<<(T& i)
   {
-    return (this->operator<<(*i));
-  }
-
-  template<bool is_serializable_natively, bool is_serializable>
-  struct SelectSerializer   { template<typename T> static void Func(Utils::Packet& packet, T& v) { packet.Serialize(v); } };
-
-  template<typename T> Packet&	Serialize(T& i)
-  {
-    int	    newSize = sizeBuffer;
-    char*   typeCode;
-    T*	    copy;
-
-    newSize   += sizeof(T) + sizeof(char);
-    realloc(newSize);
-    typeCode   = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    copy       = reinterpret_cast<T*>((long)typeCode + sizeof(char));
-    *typeCode  = TypeToCode<T>::TypeCode;
-    *copy      = i;
-    sizeBuffer = newSize;
-    updateHeader();
-    return (*this);
+    return (this->operator<< <T>((const T&)i));
   }
 
   template<typename T> Packet&	operator<<(const T& i)
   {
-    int	    newSize = sizeBuffer;
+    size_t  newSize = sizeBuffer;
     char*   typeCode;
     T*	    copy;
 
+    if (TypeToCode<T>::TypeCode == 0)
+    {
+      if (std::is_base_of<Utils::Serializable, T>::value)
+        return (this->operator<< <T>((const Utils::Serializable&)i));
+      else
+        throw SerializeUnknownType(this);
+    }
     newSize += sizeof(T) + sizeof(char);
-    realloc(newSize);
+    realloc((int)newSize);
     typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
     copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
     *typeCode = TypeToCode<T>::TypeCode;
@@ -129,24 +144,44 @@ public:
     return (*this);
   }
 
-  template<typename T> Packet&	operator<<(std::list<T>& tehList)
+  template<typename T> Packet&	operator<<(const std::list<T>& tehList)
   {
     SerializeArray(tehList);
     return (*this);
   }
 
-  template<typename T> Packet&	operator<<(std::vector<T>& tehList)
+  template<typename T> Packet&	operator<<(const std::vector<T>& tehList)
+  {
+    SerializeArray(tehList);
+    return (*this);
+  }
+  
+  template<typename T> Packet&  operator<<(std::list<T>& tehList)
+  {
+    SerializeArray(tehList);
+    return (*this);
+  }
+
+  template<typename T> Packet&  operator<<(std::vector<T>& tehList)
   {
     SerializeArray(tehList);
     return (*this);
   }
 
   // Unserialization
+  template<typename T> Packet&  operator>>(Utils::Serializable& serializable)
+  {
+    serializable.Unserialize(*this);
+    return (*this);
+  }
+
   template<typename T> Packet& operator>>(T& v)
   {
     SelectUnserializer<TypeToCode<T>::TypeCode != 0, std::is_base_of<Utils::Serializable, T>::value>::Func(*this, v);
     return (*this);
   }
+
+  template<typename T> Packet&  operator<<(T* v) { return (*this); }
 
   template<bool is_serializable_nativelly, bool is_serializable>
   struct SelectUnserializer { template<typename T> static void Func(Utils::Packet& packet, T& v) { packet.Unserialize(v); } };
@@ -197,8 +232,32 @@ public:
   }
 
 private:
-  template<typename T> void	SerializeArray(T& tehList);
+  template<typename T> void	SerializeArray(T& tehList)
+  {
+    typename T::const_iterator current = tehList.begin();
+    typename T::const_iterator end     = tehList.end();
+    int                  newSize = sizeBuffer;
+    char*                typeCode;
+    std::int32_t*        sizeArray;
 
+    newSize   += sizeof(char) + sizeof(std::int32_t);
+    realloc(newSize);
+    typeCode   = reinterpret_cast<char*>((long)buffer + sizeBuffer);
+    sizeArray  = reinterpret_cast<std::int32_t*>((long)typeCode + sizeof(char));
+    *typeCode  = Packet::Array;
+    *sizeArray = tehList.size();
+    sizeBuffer = newSize;
+    while (current != end)
+    {
+      *this << *current;
+      current++;
+    }
+    updateHeader();
+  }
+
+  void          initializeFromBuffer(const char* raw, size_t size);
+  void          initializeAsEmpty(void);
+  void          finalize(void);
   bool		canIHaz(size_t sizeType, int howMany); // Checks if the buffer is big enough for Packet to read size_t
   void		checkType(int assumedType);            // Check if the next type in buffer match the assumed type
   void		realloc(int newsize);                  // Realloc the buffer (used in serializing)
@@ -222,16 +281,10 @@ private:
 };
 
   template<>
-  struct Packet::SelectSerializer<false, true>  { template<typename T> static void Func(Utils::Packet& packet, T& v) { v.Serialize(packet); } };
-
-  template<>
-  struct Packet::SelectSerializer<false, false> { template<typename T> static void Func(Utils::Packet& packet, T& v) { Exception<Packet>::Raise(&packet, std::string("Unsupported type ") + typeid(T).name(), UnsupportedType); } };
-
-  template<>
   struct Packet::SelectUnserializer<false, true> { template<typename T> static void Func(Utils::Packet& packet, T& v) { v.Unserialize(packet); } };
 
   template<>
-  struct Packet::SelectUnserializer<false, false> { template<typename T> static void Func(Utils::Packet& packet, T& v) { Exception<Packet>::Raise(&packet, std::string("Unsupported type ") + typeid(T).name(), UnsupportedType); } };
+  struct Packet::SelectUnserializer<false, false> { template<typename T> static void Func(Utils::Packet& packet, T& v) { throw UnserializeUnknownType(&packet, TypeToCode<T>::TypeCode, 0); } };
 
   template<> Packet& Packet::operator<< <std::string>(const std::string& str);
   template<> Packet& Packet::operator<< <std::string>(std::string& str);
@@ -245,7 +298,6 @@ private:
   template<> struct Packet::TypeToCode<unsigned int>   { enum { TypeCode = Packet::UInt   }; };
   template<> struct Packet::TypeToCode<unsigned short> { enum { TypeCode = Packet::UShort }; };
   template<> struct Packet::TypeToCode<unsigned char>  { enum { TypeCode = Packet::UChar  }; };
-  template<> struct Packet::TypeToCode<long>           { enum { TypeCode = Packet::Long   }; };
 }
 
 #endif

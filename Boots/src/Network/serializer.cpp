@@ -9,7 +9,6 @@ void Network::WritePacket(Utils::Packet& packet, Network::Socket* socket)
   unsigned short size;
 
   size = packet.size();
-  packet.PrintRawContent();
   socket->WriteBuffer().Push((const char*)&size, sizeof(size));
   socket->WriteBuffer().Push(packet.raw(), size);
   socket->AskingToWrite.Emit();

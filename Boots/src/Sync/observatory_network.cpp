@@ -23,7 +23,6 @@ void SignalRemoteSource::RetrieveCalls(void)
       int            num_calls;
       Sync::ISignal* sig;
       
-      packet.PrintRawContent();
       packet >> identifier >> num_calls;
       sig = FindSignal(identifier);
       std::cout << "[Sync::SignalRemoteSource][" << this << "] Received " << num_calls << " calls for '" << identifier << '\'' << std::endl;
