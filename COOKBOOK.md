@@ -54,13 +54,13 @@ This is what a Crails controller looks like:
       {
       }
     
-      DynStruct index  ();
-      DynStruct show   ();
-      DynStruct _new   ();
-      DynStruct create ();
-      DynStruct edit   ();
-      DynStruct update ();
-      DynStruct _delete();
+      void index  ();
+      void show   ();
+      void _new   ();
+      void create ();
+      void edit   ();
+      void update ();
+      void _delete();
     };
     
     #endif
