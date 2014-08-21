@@ -60,7 +60,10 @@ private:
   { \
     klass controller(params); \
 \
-    return (klass::RescueFrom([&controller]() -> DynStruct { return (controller.function()); })); \
+    return (klass::RescueFrom([&controller]() -> DynStruct { \
+      controller.function();\
+      return (controller.response); \
+    })); \
   });
 
 # define SetResource(resource_name, controller) \

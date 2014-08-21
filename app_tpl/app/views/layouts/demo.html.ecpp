@@ -1,4 +1,6 @@
-// BEGIN LINKING
+#include <crails/params.hpp>
+
+Params* @params;
 string* @yield;
 // END LINKING
 
@@ -6,6 +8,7 @@ string* @yield;
 <html>
   <head>
     <title>Crails template demo layout</title>
+    <meta name="csrf-token" content="<%= params->Session()["csrf_token"].Value() %>"/>
   </head>
   <body>
     <%= (yield ? *yield : "Nothing to yield") %>

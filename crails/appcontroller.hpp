@@ -33,7 +33,7 @@ class ControllerBase
 {
   friend class Router;
 protected:
-  ControllerBase(Params& params, bool must_protect_from_forgery = true);
+  ControllerBase(Params& params);
   
   static DynStruct RescueFrom(std::function<DynStruct ()> callback)
   {
@@ -42,11 +42,29 @@ protected:
 
   static void     RedirectTo(const std::string& uri);
   
-  bool            protect_from_forgery(void);
+  enum RenderType
+  {
+    JSON,
+    JSONP,
+    HTML,
+    XML
+  };
 
-  Params&    params;
-  SharedVars vars;
-  Data       flash;
+  void            render(RenderType type, DynStruct value);
+  void            render(RenderType type, const std::string& value);
+  void            render(const std::string& view, const std::string& layout = "layouts/application");
+
+  virtual bool    must_protect_from_forgery(void) const { return (true); };
+
+  Params&        params;
+  DynStruct      response;
+  SharedVars     vars;
+  Data           flash;
+private:
+  void            protect_from_forgery(void) const;
+  bool            check_csrf_token(void) const;
+  void            set_content_type(RenderType);
+  void            set_content_type_from_extension(const std::string&);
 };
 
 #endif

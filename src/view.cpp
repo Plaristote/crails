@@ -1,6 +1,7 @@
 #include <Boots/System/process.hpp>
 #include <unistd.h>
 #include "crails/view.hpp"
+#include <iostream>
 
 using namespace std;
 using namespace System;
@@ -17,6 +18,9 @@ View::View(const std::string& path)
 
     exc.error     = "Failed to compile view '" + path + '\'';
     exc.backtrace = backtrace;
+    
+    cerr << exc.error << endl;
+    cerr << backtrace << endl << endl;
     throw exc;
   }
 #endif
