@@ -131,9 +131,6 @@ void CrailsServer::operator()(const Server::request& request, Response response)
       ;
     else
     {
-#ifdef SERVER_DEBUG
-      Assets::Precompile();
-#endif
       if (!(ServeAction(request, out, params)))
         ResponseException(out, "CrailsServer::Router", "Crails Router isn't initialized", params);
     }
@@ -157,7 +154,6 @@ void CrailsServer::operator()(const Server::request& request, Response response)
   EXCEPTION_RESPONSE(CrailsServer::Crash,)
 #ifdef SERVER_DEBUG
   EXCEPTION_RESPONSE(View::CompileException,params["backtrace"] = e.backtrace)
-  EXCEPTION_RESPONSE(Assets::Exception,     params["backtrace"] = e.backtrace)
 #endif
   EXCEPTION_RESPONSE(std::exception&,)
   catch (...)

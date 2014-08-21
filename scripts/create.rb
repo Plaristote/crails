@@ -110,6 +110,8 @@ end
 
 project.base_directory source, base_directory do
   project.generate_erb 'CMakeLists.txt', 'CMakeLists.txt.erb', options
+  project.file 'Gulpfile.js'
+  project.file 'package.json'
   project.directory :build do end
   project.directory :app do
     project.file 'routes.cpp'
@@ -128,8 +130,8 @@ project.base_directory source, base_directory do
   end
   project.directory :lib    do
     project.directory :db   do
-      project.file 'mongodb.cpp' if options[:sql]     != false
-      project.file 'sql.cpp'     if options[:mongodb] != false
+      project.file 'mongodb.cpp' if options[:mongodb] != false
+      project.file 'sql.cpp'     if options[:sql]     != false
     end
     project.file 'exception.html.ecpp'
   end
@@ -146,6 +148,13 @@ project.base_directory source, base_directory do
     end
     project.directory :stylesheets do end
   end
+end
+
+FileUtils.cd base_directory do
+  puts "\033[32m[NODEJS]\033[0m " + "Installing dependencies"
+  `npm install`
+  puts "\033[32m[GULP]\033[0m " + "Running asset pipeline"
+  `gulp ecpp`
 end
 
 puts ""
