@@ -78,16 +78,14 @@ might wanna use if you need global stuff. Check out Boots/Sync/semaphore.hpp and
 ## Controller method
 We'll now see how to implement a controller method and how to link it to a route.
 
-      DynStruct CrmAccountsController::show()
+      void CrmAccountsController::show()
       {
-        DynStruct render_data;
         std::string body;
     
         body  = "Hello World<br />";
         body += params["id"].Value(); // params is a protected reference to the request's params
-        render_data["response"]["Content-Type"] = "text/html"; // use this to set the response's headers, default is text/html
-        render_data["body"]                     = body;        // use this to set the response's body
-        return (render_data);
+        response["headers"]["Content-Type"] = "text/html"; // use this to set the response's headers, default is text/html
+        response["body"]                    = body;        // use this to set the response's body
       }
 
 Here's a not-quite-minimal method for a controller.
