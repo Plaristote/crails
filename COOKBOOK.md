@@ -268,7 +268,7 @@ Here are a few demonstrations of how a view can be rendered from a controller:
     {
       string some_string = "some string was *not* null";
 
-      vars["some_string"] = &some_string; // Will make 'some_string' visible from the ECPP template
+      *vars["some_string"] = &some_string; // Will make 'some_string' visible from the ECPP template
       render("mycontroller/index.html.ecpp", "layouts/mylayout");
     }
 
