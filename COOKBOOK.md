@@ -164,29 +164,6 @@ The flash variables aren't accessed the same way they're set. If you want to dis
           std::cout << flash["info"].Value() << std::endl; // displays the message
         }
 
-## Rescue From
-You can also use macro to overload the global 'rescue from' of your contoller. This will allow you to catch
-exceptions thrown in any routes implemented by your controller.
-
-Here's how to implement a rescue from in you controller:
-
-      class CrmAccountsController : public ControllerBase
-      {
-      public:
-        static DynStruct index     (Params& params);
-        
-      RESCUE_FROM(render_data)
-        catch (const std::exception e)
-        {
-          std::cout << "Rescue From catched exception: " << std::endl;
-        }
-        catch (const char* str)
-        {
-          std::cout << "Catched a string " << str << std::endl;
-        }
-      END_RESCUE_FROM
-      };
-
 ## File Upload
 Uploaded files are exposed to the developer in the Param object. You can access them using the Upload method:
 
@@ -206,9 +183,8 @@ Here's an example of contoller method using uploaded files:
 
       #include <Boots/Utils/directory.hpp> // For filesystem operations
 
-      DynStruct MyController::file_upload(Params& params)
+      void MyController::file_upload()
       {
-        DynStruct           render_data;
         const Params::File* file = params.upload("file_upload[upfile]");
         std::stringstream   html;
 
@@ -225,7 +201,7 @@ Here's an example of contoller method using uploaded files:
         html << "<input type='file' name='file_upload[upfile]' /><br />";
         html << "<input type='submit' value='Upload' />";
         html << "</form>";
-        return (render_data);
+        render(HTML, html.str());
       }
 
 This controller method will generate an upload form. If the query contains an uploaded file, it will be
@@ -274,6 +250,29 @@ between the controller, the layout and the partials that will be rendered. This 
 inside a template.
 If the variable wasn't stored in the SharedVar object, the pointer will be NULL, so don't forget to check that value to
 avoid unnecessary segmentation faults.
+
+## Render a view from a controller
+Here are a few demonstrations of how a view can be rendered from a controller:
+
+    void MyController::index()
+    {
+      // Will render the ecpp view within the default layout (layouts/application.html.ecpp)
+      render("mycontroller/index.html.ecpp");
+    }
+    
+    void MyController::index()
+    {
+      // Will render the ecpp view within the specified layout (layouts/mylayout.html.ecpp)
+      render("mycontroller/index.html.ecpp", "layouts/mylayout");
+    }
+
+    void MyController::index()
+    {
+      string some_string = "some string was *not* null";
+
+      vars["some_string"] = &some_string; // Will make 'some_string' visible from the ECPP template
+      render("mycontroller/index.html.ecpp", "layouts/mylayout");
+    }
 
 # Scaffolding
 Scaffolding is a way of getting setting up a code base for new elements you wish to add to your application.
