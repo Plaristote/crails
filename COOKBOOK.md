@@ -147,17 +147,16 @@ Flash is a particular part of the session which gets erased at the beginning of 
 between one request and the next one.
 For instance, to record a notification that needs to be displayed to an user:
 
-        DynStruct SessionsController::destroy()
+        void SessionsController::destroy()
         {
           params.Session()["current_user"].Remove();
           params.Session()["flash"]["info"] = "You've been disconnected"; // Sets a message into flash
-          RedirectTo(params["header"]["Referer"]); // Redirects to previous page
-          return (DynStruct());
+          RedirectTo(params["headers"]["Referer"]); // Redirects to previous page
         }
 
 The flash variables aren't accessed the same way they're set. If you want to display the message:
 
-        DynStruct SessionsController::show()
+        void SessionsController::show()
         {
           std::cout << flash["info"].Value() << std::endl; // displays the message
         }
