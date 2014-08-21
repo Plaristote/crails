@@ -48,6 +48,6 @@ The installation of the Crails Framework should have added a ruby script named '
 You can use it to create application this way:
 
     crails create -h # Check out the options first (support for databases and all that)
-    crails create application_name --debug-mode
+    crails create application_name --use-mongodb --use-mongo-session-store --debug-mode
 
 Now that your crails application is ready, check out the COOKBOOK to see all the neat things you can do with it !
