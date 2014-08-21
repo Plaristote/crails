@@ -34,27 +34,19 @@ Bulding Boots
 =====
 Go to the Boots folder, create a build directory, go in the build directory and type:
 
-cmake .. && make && sudo make install
-
-If the headers and librairies were installed in /usr/local, create symbolic links using these commands:
-ln -s /usr/local/include/Boots /usr/include
-ln -s /usr/local/lib/libBoots.so /usr/lib/libBoots.so
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
 
 Building the Crails Framework
 ======
-To the root of the project's directory, create a build directory, go in there, and type:
+To the root of the project's directory, create a build directory, go in there, and once again, type:
 
-cmake .. && make && sudo make install
-
-Again, make sure the installed files are accessible through the lib, include, binary and shared path.
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
 
 Creating a Crails Application
 =====
 The installation of the Crails Framework should have added a ruby script named 'crails' in your bin directory.
 You can use it to create application this way:
 
-crails new application_name --use-mongodb --use-sql --debug-mode
+    crails create application_name --use-mongodb --use-sql --debug-mode
 
-The script will tell you how to compile and launch the server next.
-
-N.B: You cannot compile if you don't use the --use-mongodb and --use-sql flags right now. It's a flaw that I'm working on.
+Now that your crails application is ready, check out the COOKBOOK to see all the neat things you can do with it !
