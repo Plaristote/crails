@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(crails_project)
 
+option(USE_MONGODB "MongoDB" ON)
+option(USE_SOCI    "Soci"    ON)
+
 # Define:
 # - ASYNC_SERVER / SYNC_SERVER	to use the async or the sync server
 # - SERVER_DEBUG		to enable non-production features (view compiler, displaying exceptions, ...)
@@ -30,8 +33,12 @@ file(GLOB crails_mongodb
      src/mongodb/*.cpp)
 
 add_library(crails-core    SHARED ${crails_core})
-add_library(crails-sql     SHARED ${crails_sql})
-add_library(crails-mongodb SHARED ${crails_mongodb})
+if (USE_SOCI)
+  add_library(crails-sql     SHARED ${crails_sql})
+endif()
+if (USE_MONGODB)
+  add_library(crails-mongodb SHARED ${crails_mongodb})
+endif()
 
 file(GLOB         headers_crails     crails/*.h crails/*.hpp)
 file(GLOB         headers_crails_sql crails/sql/*.hpp)
@@ -50,6 +57,10 @@ install(FILES    ${headers_crails_sql} DESTINATION include/crails/sql)
 install(FILES    ${headers_crails_mdb} DESTINATION include/crails/mongodb)
 install(FILES    ${headers_crails_cki} DESTINATION include/crails/session_store)
 install(TARGETS  crails-core    LIBRARY DESTINATION lib)
-install(TARGETS  crails-mongodb LIBRARY DESTINATION lib)
-install(TARGETS  crails-sql     LIBRARY DESTINATION lib)
+if (USE_SOCI)
+  install(TARGETS  crails-sql     LIBRARY DESTINATION lib)
+endif()
+if (USE_MONGODB)
+  install(TARGETS  crails-mongodb LIBRARY DESTINATION lib)
+endif()
 

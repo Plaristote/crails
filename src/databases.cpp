@@ -1,8 +1,5 @@
 #include "crails/databases.hpp"
 
-#include "crails/mongodb.hpp"
-#include "crails/sql.hpp"
-
 using namespace std;
 
 void Databases::LoadDatabases(void)
