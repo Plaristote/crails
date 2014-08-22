@@ -4,12 +4,12 @@
 # include "server.hpp"
 # include "session_store.hpp"
 
-class MultipartParser;
+struct MultipartParser;
 
 class Params : public DynStruct
 {
-  friend class CrailsServer;
-  friend class MultipartParser; 
+  friend struct CrailsServer;
+  friend struct MultipartParser; 
 public:
   Params(void) : handle(1), response_parsed(0)
   {
@@ -33,7 +33,10 @@ public:
   
   Data            operator[](const std::string& key)       { return (DynStruct::operator[](key)); }
   const File*     operator[](const std::string& key) const { return (Upload(key)); }
-  
+#ifdef __llvm__
+  Data            operator[](const char* key)       { return (DynStruct::operator[](std::string(key))); }
+  const File*     operator[](const char* key) const { return (Upload(key)); }
+#endif
   const File*     Upload(const std::string& key) const;
 
   void Lock(void)   { handle.Wait(); }
