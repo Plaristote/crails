@@ -1,6 +1,5 @@
 #include <iostream>
 #include <crails/server.hpp>
-#include <crails/assets.hpp>
 #include <crails/databases.hpp>
 
 using namespace std;
