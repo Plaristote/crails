@@ -4,7 +4,6 @@
 #include <crails/http_response.hpp>
 #include <crails/session_store.hpp>
 #include <crails/view.hpp>
-#include <crails/assets.hpp>
 #include <crails/params.hpp>
 #include <crails/databases.hpp>
 
