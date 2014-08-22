@@ -8,7 +8,10 @@ project(<%= options[:name] %>)
 <% cmd_line += " -DUSE_MONGODB_SESSION_STORE" unless options[:session_store] != 'mongodb' %>
 set(CMAKE_CXX_FLAGS "<%= cmd_line %>")
 
-include_directories(include /usr/local/include .)
+find_package(cppnetlib REQUIRED)
+find_package(Boost COMPONENTS thread filesystem program_options system REQUIRED)
+
+include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} .)
 
 file(GLOB crails_app
      app/controllers/*.cpp
@@ -27,10 +30,10 @@ add_executable(crails-app ${crails_app})
 <% end %>
 target_link_libraries(crails-app
                       crails-core
-                      boost_thread boost_filesystem boost_program_options boost_system
+                      ${Boost_LIBRARIES}
                       pthread dl
                       Boots
-                      cppnetlib-client-connections cppnetlib-server-parsers cppnetlib-uri
+                      ${CPPNETLIB_LIBRARIES}
                       <% if options[:segvcatch] == true %> segvcatch <% end %>
                       <% if options[:sql]       == true %> ${crails_sql_dep} <% end %>
                       <% if options[:mongodb]   == true %> ${crails_mongodb_dep} <% end %>)
