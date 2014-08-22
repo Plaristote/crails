@@ -7,9 +7,18 @@ project(crails_project)
 # - SERVER_DEBUG		to enable non-production features (view compiler, displaying exceptions, ...)
 # - USE_SEGVCATCH		if you're going to use the segvcatch library
 # - USE_MONGODB_SESSION_STORE	to use MongoDB as a session store instead of the cookies
-set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic -DASYNC_SERVER -DSERVER_DEBUG -DUSE_MONGODB_SESSION_STORE")
+set(CMAKE_CXX_FLAGS "-Wall -Wno-deprecated-declarations -pedantic -DASYNC_SERVER -DSERVER_DEBUG -DUSE_MONGODB_SESSION_STORE")
 
-include_directories(include /usr/local/include .)
+if(CMAKE_COMPILER_IS_GNUCC)
+  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ ${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual -Wno-return-type-c-linkage")
+  set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -undefined dynamic_lookup")
+endif()
+
+find_package(cppnetlib   REQUIRED)
+
+include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} .)
 
 file(GLOB crails_core
      src/*.cpp)
