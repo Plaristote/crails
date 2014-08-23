@@ -19,7 +19,7 @@ std::string GetMimeType(const std::string& filename)
 {
   static const ExtensionMatch extensions[] = {
     ExtensionMatch("(htm|html)", "text/html"),
-    ExtensionMatch("js",         "script/javascript"),
+    ExtensionMatch("js",         "text/javascript"),
     ExtensionMatch("css",        "text/css"),
     ExtensionMatch("png",        "image/png"),
     ExtensionMatch("(jpg|jpeg)", "image/jpg"),
