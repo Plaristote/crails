@@ -1,5 +1,4 @@
-#include <Utils/json.hpp>
-#include <Utils/exception.hpp>
+#include "Utils/json.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -16,7 +15,14 @@ void Parser::ParseString(DataBranch* value)
       break ;
   }
   if (_it < _str.length())
+  {
     value->value = _str.substr(start, _it - start);
+    for (unsigned int i = 0 ; i < value->value.length() ; ++i)
+    {
+      if (value->value[i] == '\\' && value->value[i + 1] == '"')
+        value->value.erase(i, 1);
+    }
+  }
 }
 
 void Parser::ParseOther(DataBranch* value)
@@ -65,11 +71,11 @@ void Parser::ParseObject(DataBranch* value)
       {
         for (begKey = ++_it ; _it < _str.length() && (_str[_it] != '"' || _str[_it] == '\\') ; ++_it);
         if (_it >= _str.length())
-          Exception<Parser>::Raise(this, "Syntax Error while parsing a string");
+          throw "String: Syntax Error";
         key = _str.substr(begKey, _it - begKey);
         for (_it = _it + 1 ; _it < _str.length() && _str[_it] == ' ' ; ++_it);
         if (_it >= _str.length() || _str[_it] != ':')
-          Exception<Parser>::Raise(this, "Syntax Error while parsing an object");
+          throw "Object: Syntax Error";
         ++_it;
       }
       else if (_str[_it] == '}') // End of object
@@ -81,7 +87,7 @@ void Parser::ParseObject(DataBranch* value)
       {
         for (begKey = _it ; _it < _str.length() && _str[_it] != ':' ; ++_it);
         if (_it >= _str.length())
-          Exception<Parser>::Raise(this, "Syntax Error while parsing an object");
+          throw "Object: Syntax Error";
         key = _str.substr(begKey, _it - begKey);
       }
 
@@ -110,7 +116,7 @@ void Parser::ParseArray(DataBranch* value)
   {
     for (; _it < _str.length() && (_str[_it] == ' ' || _str[_it] == '\n' || _str[_it] == '\r') ; ++_it);
     if (_it >= _str.length())
-      Exception<Parser>::Raise(this, "Syntax Error: unclosed array");
+      throw "Unclosed array";
     if (_str[_it] == ']')
       break ;
     DataBranch* child = new DataBranch;
@@ -223,10 +229,10 @@ static bool isNumeric(const std::string& str)
     return (true);
 }
 
-static std::string appendArray(Data data);
-static std::string appendObject(Data data);
+static std::string appendArray(Data data, unsigned short indent = 0);
+static std::string appendObject(Data data, unsigned short indent = 0);
 
-static std::string appendValue(Data data)
+static std::string appendValue(Data data, unsigned short indent = 0)
 {
     std::string toWrite;
 
@@ -247,9 +253,9 @@ static std::string appendValue(Data data)
             }
         }
         if (isArray)
-          toWrite += appendArray(data);
+          toWrite += appendArray(data, indent);
         else
-          toWrite += appendObject(data);
+          toWrite += appendObject(data, indent);
     }
     else
     {
@@ -259,15 +265,25 @@ static std::string appendValue(Data data)
         if (value.size() == 0)
           value = "\"\"";
         else if (!(isNumeric(value)))
-          value = "\"" + value + "\"";
+        {
+          std::string escaped_value = "";
+
+          for (unsigned int i = 0 ; i < value.length() ; ++i)
+          {
+            if (value[i] == '"')
+              escaped_value += '\\';
+            escaped_value += value[i];
+          }
+          value = "\"" + escaped_value + "\"";
+        }
         toWrite += value;
     }
     return (toWrite);
 }
 
-static std::string appendArray(Data data)
+static std::string appendArray(Data data, unsigned short indent)
 {
-    std::string    toWrite;
+    std::string toWrite;
     Data::iterator it  = data.begin();
     Data::iterator end = data.end();
 
@@ -279,22 +295,22 @@ static std::string appendArray(Data data)
           ++it;
           continue ;
         }
-        toWrite += appendValue(*it);
+        toWrite += appendValue(*it, indent + 2);
         ++it;
         if (it  != end)
-          toWrite += ',';
+          toWrite += ", ";
     }
     toWrite += ']';
     return (toWrite);
 }
 
-static std::string appendObject(Data data)
+static std::string appendObject(Data data, unsigned short indent)
 {
     std::string toWrite;
     Data::iterator it  = data.begin();
     Data::iterator end = data.end();
 
-    toWrite = "{";
+    toWrite = '{';
     while (it != end)
     {
         if ((*it).Nil())
@@ -302,41 +318,25 @@ static std::string appendObject(Data data)
           ++it;
           continue ;
         }
-        toWrite += '"' + (*it).Key() + "\":";
-        toWrite += appendValue(*it);
+        toWrite += '\n';
+        for (unsigned short iIndent = indent + 2 ; iIndent ; --iIndent)
+            toWrite += ' ';
+        toWrite += "\"" + (*it).Key() + "\": ";
+        toWrite += appendValue(*it, indent + 2);
         ++it;
         if (it  != end)
-            toWrite += ',';
+          toWrite += ',';
     }
+    toWrite += '\n';
+    for (unsigned short iIndent = indent ; iIndent ; --iIndent)
+        toWrite += ' ';
     toWrite += '}';
     return (toWrite);
 }
 
 bool DataTree::Writers::StringJSON(Data data, string& str)
 {
-  std::string toWrite;
-
-  toWrite = "{\n";
-
-  Data::iterator it  = data.begin();
-  Data::iterator end = data.end();
-
-  while (it != end)
-  {
-      if ((*it).Nil())
-      {
-	++it;
-	continue ;
-      }
-      toWrite += "\"" + (*it).Key() + "\": ";
-      toWrite += appendValue(*it);
-      ++it;
-      if (it  != end)
-	  toWrite += ',';
-  }
-
-  toWrite += '}';
-  str = toWrite;
+  str = appendValue(data);
   return (true);
 }
 
