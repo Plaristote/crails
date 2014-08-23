@@ -18,7 +18,11 @@
       (this.form.find('.form-actions button[type="reset"]')).click(function() {
         return _this.Cancel();
       });
-      method = (this.form.attr('method')).toUpperCase();
+      method = (this.form.attr('method'));
+      if (tyepof method == 'undefined')
+        method = 'GET';
+      else
+        method = method.toUpperCase();
       if (method !== 'POST' && method !== 'GET') {
         this.form.append("<input type='hidden' name='_method' value='" + method + "' />");
         this.form.attr('method', 'POST');
