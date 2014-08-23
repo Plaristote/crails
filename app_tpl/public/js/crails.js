@@ -19,7 +19,7 @@
         return _this.Cancel();
       });
       method = (this.form.attr('method'));
-      if (tyepof method == 'undefined')
+      if (typeof method == 'undefined')
         method = 'GET';
       else
         method = method.toUpperCase();
