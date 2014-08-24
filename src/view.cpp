@@ -8,22 +8,6 @@ using namespace System;
 
 View::View(const std::string& path)
 {
-#ifdef SERVER_DEBUG
-  // Views are automatically compiled in debug, if deemed necessary
-  std::string backtrace;
-  
-  if (!(Compile(path, backtrace)))
-  {
-    CompileException exc;
-
-    exc.error     = "Failed to compile view '" + path + '\'';
-    exc.backtrace = backtrace;
-    
-    cerr << exc.error << endl;
-    cerr << backtrace << endl << endl;
-    throw exc;
-  }
-#endif
   std::string full_path;
 
   full_path  = "../";
@@ -51,48 +35,6 @@ std::string       View::Render(const std::string& layout_path, const std::string
   return (layout.Generate(vars));
 }
 
-bool              View::Compile(const std::string& path, std::string& backtrace)
-{
-  char tmp[256];
-  std::string relative_path = "../app/views/" + path;
-  std::string output_path   = relative_path + ".so";
-  std::string current_path  = getcwd(tmp, 256);
-  Process     compile_view("/usr/bin/ruby", { current_path + "/../scripts/compile_view.rb", relative_path });
-  
-  if (compile_view.Execute())
-  {
-
-    if (compile_view.Join() != 0)
-    {
-      vector<string> compile_args = { "-Wall", "-g", "-fPIC", "-shared", "-I..", "-std=c++11" };
-      
-      compile_args.push_back(relative_path + ".cpp");
-      compile_args.push_back("-o");
-      compile_args.push_back(output_path);
-      {
-        Process compile_lib("/usr/bin/g++", compile_args);
-        
-        if (compile_lib.Execute())
-        {
-          if (compile_lib.Join() != 0)
-          {
-            Process      rm_tmp("/usr/bin/rm", { relative_path + ".cpp" });
-            stringstream output;
-
-            rm_tmp.Execute();
-            compile_lib.Stderr(output);
-            backtrace = output.str();            
-            return (false);
-          }
-          return (true);
-        }
-      }
-    }
-    return (true);
-  }
-  return (false);
-}
-
 /*
  * Render Partial Function
  */
@@ -103,4 +45,16 @@ std::string render_view(const std::string& name, SharedVars& vars)
   if (view.IsValid())
     return (view.Generate(vars));
   return ("[Crails][Error] couldn't render view '" + name + "'<br />\n");
+}
+
+std::string render_layout(const std::string& name, SharedVars& vars, std::function<std::string ()> yield)
+{
+    std::string* old_yield = (std::string*)(*vars["yield"]);
+    std::string html, yield_html;
+
+    yield_html       = yield();
+    *vars["yield"]   = &yield_html;
+    html             = render_view(name, vars);
+    *vars["yield"]   = old_yield;
+    return (html);
 }

@@ -10,7 +10,7 @@ var debug  = true;
 
 var paths = {
   scripts: [ 'app/assets/javascript/**/*.js', 'app/assets/javascript/**/*.coffee' ],
-  css:     [ 'app/assets/stylesheets/**/*.scss' ],
+  css:     [ 'app/assets/stylesheets/**/*.scss', 'app/assets/stylesheets/**/*.css' ],
   ecpp:    [ 'app/views/**/*.ecpp', 'lib/*.ecpp' ]
 }
 
@@ -22,11 +22,14 @@ gulp.task('scripts', ['clean'], function() {
 });
 
 gulp.task('css', ['clean'], function() {
-  return (gulp.src(paths.css).pipe(sass({ includePaths: paths.css })).pipe(concat('application.css')).pipe(gulp.dest('./public/assets')));
+  return (gulp.src(paths.css).pipe(gulpif(/[.].scss$/, sass({ includePaths: paths.css }))).pipe(concat('application.css')).pipe(gulp.dest('./public/assets')));
 });
 
 gulp.task('ecpp', ['clean'], function() {
-  return (gulp.src(paths.ecpp).pipe(exec('crails compile_view <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true })));
+  var compiler    = 'c++';
+  var compile_erb = gulp.src(paths.ecpp).pipe(exec('crails compile_view <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
+  var compile_cpp = compile_erb.pipe(exec(compiler + ' -Wall -g -fPIC --std=c++11 -shared -I./app <%= file.path %>.cpp -o <%= file.path %>.so'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
+  return (compile_cpp);
 });
 
 gulp.task('clean', function() {

@@ -50,32 +50,26 @@ void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCo
     return ;
   view_name << "errors/" << file_name.str() << ".ecpp";
   {
-    try
-    {
-      View view(view_name.str());
+    View view(view_name.str());
       
-      if (view.IsValid())
-      {
-        SharedVars  vars;
-        View        layout("layouts/application.html.ecpp");
-        std::string content;
-
-        if (layout.IsValid())
-        {
-          std::string content_view = view.Generate(vars);
-          
-          *vars["yield"] = &content_view;
-          content = layout.Generate(vars);
-        }
-        else
-          content = view.Generate(vars);
-        out.SetHeaders("Content-Type", "text/html");
-        out.SetResponse(code, content);
-        return ;
-      }
-    }
-    catch (View::CompileException e)
+    if (view.IsValid())
     {
+      SharedVars  vars;
+      View        layout("layouts/application.html.ecpp");
+      std::string content;
+
+      if (layout.IsValid())
+      {
+        std::string content_view = view.Generate(vars);
+         
+        *vars["yield"] = &content_view;
+        content = layout.Generate(vars);
+      }
+      else
+        content = view.Generate(vars);
+      out.SetHeaders("Content-Type", "text/html");
+      out.SetResponse(code, content);
+      return ;
     }
     out.SetResponse(code, "");
   }
@@ -151,9 +145,6 @@ void CrailsServer::operator()(const Server::request& request, Response response)
     ResponseException(out, #type, e.what(), params); \
   }
   EXCEPTION_RESPONSE(CrailsServer::Crash,)
-#ifdef SERVER_DEBUG
-  EXCEPTION_RESPONSE(View::CompileException,params["backtrace"] = e.backtrace)
-#endif
   EXCEPTION_RESPONSE(std::exception&,)
   catch (...)
   {

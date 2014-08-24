@@ -3,6 +3,7 @@
 
 # include <Boots/System/dynamic_library.hpp>
 # include "shared_vars.hpp"
+# include <functional>
 
 class View
 {
@@ -18,15 +19,6 @@ public:
 
   const std::string  Generate(SharedVars& vars);
   static std::string Render(const std::string& layout_path, const std::string& view_path, SharedVars& vars);
-  static bool        Compile(const std::string& view_path, std::string& backtrace);
-
-  struct CompileException : public std::exception
-  {
-    virtual const char* what(void) const throw() { return (error.c_str()); }
-    
-    std::string error;
-    std::string backtrace;
-  };
 
 private:
   DynamicLibrary view_object;
@@ -36,6 +28,7 @@ private:
 extern "C"
 {
   std::string render_view(const std::string& name, SharedVars& vars);
+  std::string render_layout(const std::string& name, SharedVars& vars, std::function<std::string ()> yield);
 }
 
 #endif

@@ -56,8 +56,16 @@ void ControllerBase::render(const std::string& view, const std::string& layout)
 
   if (!(match_ecpp.Match(view, &match, 1)))
   {
-    format = view.substr(match.rm_so + 1, match.rm_eo - match.rm_so - 6);
-    body   = View::Render(layout + '.' + format + ".ecpp", view, vars);
+    if (layout != "")
+    {
+      format = view.substr(match.rm_so + 1, match.rm_eo - match.rm_so - 6);
+      body   = View::Render(layout + '.' + format + ".ecpp", view, vars);
+    }
+    else
+    {
+      cout << "calling render view for " << view << endl;
+      body   = render_view(view, vars);
+    }
   }
   else if (!(match_extension.Match(view, &match, 1)))
   {

@@ -6,6 +6,9 @@ CXT_STRING  = 3
 
 def compile_view filename
   file_content = (File.open filename).read
+  view_name    = (filename.scan /(.*)[.][a-z0-9]+[.]ecpp$/).flatten.first
+  class_name   = (view_name.split /_|-|\b|\//).map {|w| w.strip.capitalize }.join
+  class_name   = class_name.gsub /[.\/]/, ''
 
   lines = file_content.split "\n"
 
@@ -76,6 +79,8 @@ def compile_view filename
   end
   code += ';'
 
+  instance_variables = []
+  
   tmp_lines = linking_lines
   linking_lines = Array.new
   tmp_lines.each do | line |
@@ -85,22 +90,26 @@ def compile_view filename
       if not type.nil? and not type[0].nil? and not name.nil? and not name[0].nil?
         type = type.first.first
         name = name.first[1..name.first.size]
+        instance_variables << "#{type} #{name};"
         line = if not (type =~ /^SmartPointer</).nil?
           # If the type is a SmartPointer, dereference
-          "#{type} #{name}(*((#{type}*)*(vars[\"#{name}\"]))); // Smart Pointer"
+          "#{name} = #{type}(*((#{type}*)*(vars[\"#{name}\"]))); // Smart Pointer"
         elsif not (type =~ /&$/).nil?
           # If the type is a reference, dereference
-          "#{type} #{name} = *((#{type[0...-1]}*)*(vars[\"#{name}\"])); // Reference"
+          "#{name} = *((#{type[0...-1]}*)*(vars[\"#{name}\"])); // Reference"
         else
-          "#{type} #{name} = (#{type})*(vars[\"#{name}\"]);"
+          "#{name} = (#{type})*(vars[\"#{name}\"]);"
         end
       end
     end
     linking_lines << line
   end
+  
   #                   Type      Sep Name
   code = code.gsub /@([a-zA-Z_]+)\(([^)]+)\)/, '((\2)*(vars["\1"]))'
 
+  code = code.gsub /\)\s*yields([^a-zA-Z_(\[\]])/, ', [this]() -> string { std::stringstream html_stream; \1'
+  code = code.gsub /\byend([^a-zA-Z_(\[\]])/, 'return (html_stream.str()); })\1'
   code = code.gsub /\bdo([^a-zA-Z_(\[\]])/, '{\1'
   code = code.gsub /\bend([^a-zA-Z_(\[\]])/, '; }\1'
 
@@ -118,15 +127,32 @@ def compile_view filename
     std::string generate_view(SharedVars&);
     std::string render_view(const std::string& name, SharedVars&);
   }
+  
+  class #{class_name}
+  {
+  public:
+    #{class_name}(SharedVars& vars) : vars(vars)
+    {
+      #{linking_lines.join "\n"}
+    }
+    
+    std::string render(void)
+    {
+      #{code}
+      return (#{out_var}.str());
+    }
+
+  private:
+    SharedVars&       vars;
+    std::stringstream #{out_var};
+    #{instance_variables.join "\n"}
+  };
 
   std::string generate_view(SharedVars& vars)
   {
-    stringstream #{out_var};
+    #{class_name} view(vars);
     
-    #{linking_lines.join "\n"}
-
-    #{code}
-    return (#{out_var}.str());
+    return (view.render());
   }
 CPP
 
