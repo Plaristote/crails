@@ -262,6 +262,12 @@ Here are a few demonstrations of how a view can be rendered from a controller:
       // Will render the ecpp view within the specified layout (layouts/mylayout.html.ecpp)
       render("mycontroller/index.html.ecpp", "layouts/mylayout");
     }
+    
+    void MyController::index()
+    {
+      // Will render the ecpp view without using any layouts
+      render("mycontroller/index.html.ecpp", "");
+    }
 
     void MyController::index()
     {
