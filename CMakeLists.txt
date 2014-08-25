@@ -19,7 +19,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -undefined dynamic_lookup")
 endif()
 
-find_package(cppnetlib   REQUIRED)
+find_package(cppnetlib QUIET)
 
 include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} .)
 

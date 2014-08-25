@@ -151,6 +151,10 @@ project.base_directory source, base_directory do
 end
 
 FileUtils.cd base_directory do
+  FileUtils.cd 'build' do
+    puts "\033[32m[CMAKE]\033[0m " + "Configuring building tools"
+    `cmake ..`
+  end
   puts "\033[32m[NODEJS]\033[0m " + "Installing dependencies"
   `npm install`
   puts "\033[32m[GULP]\033[0m " + "Running asset pipeline"

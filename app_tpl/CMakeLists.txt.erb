@@ -1,17 +1,27 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(<%= options[:name] %>)
-<% cmd_line  = "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic" %>
-<% cmd_line += " -DASYNC_SERVER"  unless options[:server]    != :async %>
-<% cmd_line += " -DSERVER_DEBUG"  unless options[:debug]     == false  %>
-<% cmd_line += " -DUSE_SEGVCATCH" unless options[:segvcatch] != true   %>
-<% cmd_line += " -DUSE_MONGODB_SESSION_STORE" unless options[:session_store] != 'mongodb' %>
-set(CMAKE_CXX_FLAGS "<%= cmd_line %>")
+option(SERVER_DEBUG  "enable debugging tools"       <%= options[:debug]            ? 'ON' : 'OFF' %>)
+option(ASYNC_SERVER  "enable multi-threaded server" <%= options[:esrver] == :async ? 'ON' : 'OFF' %>)
 
-find_package(cppnetlib REQUIRED)
+<% cxx_options  = ''
+   cxx_options += " -DASYNC_SERVER"  unless options[:server]    != :async
+   cxx_options += " -DSERVER_DEBUG"  unless options[:debug]     == false
+   cxx_options += " -DUSE_SEGVCATCH" unless options[:segvcatch] != true
+   cxx_options += " -DUSE_MONGODB_SESSION_STORE" unless options[:session_store] != 'mongodb' %>
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-deprecated-declarations -pedantic <%= cxx_options %>")
+
+find_package(cppnetlib QUIET)
 find_package(Boost COMPONENTS thread filesystem program_options system REQUIRED)
 
 include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} .)
+
+if (SERVER_DEBUG)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSERVER_DEBUG")
+endif()
+if (ASYNC_SERVER)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASYNC_SERVER")
+endif()
 
 file(GLOB crails_app
      app/controllers/*.cpp
@@ -22,16 +32,12 @@ file(GLOB crails_app
      <%= "config/session_store_mongodb.cpp" if options[:session_store] == 'mongodb' %>)
 
 add_executable(crails-app ${crails_app})
-<% if options[:sql] == true %>
-  set(crails_sql_dep     soci_core soci_mysql crails-sql)
-<% end %>
-<% if options[:mongodb] == true %>
-  set(crails_mongodb_dep mongoclient crails-mongodb)
-<% end %>
+<% if options[:sql] == true %>set(crails_sql_dep     soci_core soci_mysql crails-sql)<% end %>
+<% if options[:mongodb] == true %>set(crails_mongodb_dep mongoclient crails-mongodb)<% end %>
 target_link_libraries(crails-app
                       crails-core
                       ${Boost_LIBRARIES}
-                      pthread dl
+                      pthread dl crypto
                       Boots
                       ${CPPNETLIB_LIBRARIES}
                       <% if options[:segvcatch] == true %> segvcatch <% end %>
