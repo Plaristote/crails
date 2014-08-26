@@ -211,7 +211,7 @@ Create the routes with:
 And test it by uploading text files.
 
 # Views
-[a relative link](doc-view.md)
+[Documentation for views](doc-view.md)
 
 # Scaffolding
 Scaffolding is a way of getting setting up a code base for new elements you wish to add to your application.
