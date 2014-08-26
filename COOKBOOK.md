@@ -2,53 +2,22 @@ Crails Cookbook
 =====
 This tutorial is intented to show you step by step how to create a Crails application from scratch.
 
-# Create a project
-The first step to use the Crails Framewrok after having it installed is to use the create script to generate all
-the files your project might need.
-
-    crails create myapplication --use-sql --use-mongodb --debug-mode
-
-This command creates a Crails appliatin in the directory myapplication.
-It needs to be build and run from the buid directory.
-
-You can use crails create -h to list the options.
-
-# Configure a project
-## Databases
-The file conf/db.json is used to load and connct the prope databases.
-
-      {
-        "mongodb": {
-          "type": "mongodb",
-          "host": "127.0.0.1",
-          "database": "crails_db"
-        },
-      
-        "mysql": {
-          "type": "sql",
-          "host": "127.0.0.1",
-          "database": "crails_db",
-          "user": "root"
-        }
-      }
-
-The default conf file looks like this.
-The keys to the first objects are the name of your dbs which you will use to get a handle of them at runtime.
-
-Notes:
-- Authentication with mongodb is not yet ready.
-- The SQL module only support MySQL for now. SQLite and PostgreSQL support is planned.
+# Getting started
+* [Create a project](doc-getting-started.md#create-a-project)
+* [Configure a project](doc-getting-started.md#configure-a-project)
+  * [CMake](doc-getting-started.md#cmake)
+  * [Databases](doc-getting-started.md#databases)
 
 # Controllers
-* [Controllers](doc-controllers.md#controllers)
-* [Write a controller](doc-controllers.md#controllers)
-* [Router](doc-controllers.md#controllers)
-* [Controller methods](doc-controllers.md#controllers)
-  * [DynStruct (type used for storing parameters)](doc-controllers.md#dynstruct)
-  * [Parameters](doc-controllers.md#params)
-  * [Session](doc-controllers.md#session)
-* [CSRF security](doc-controllers.md#controllers)
-* [File upload](doc-controllers.md#controllers)
+* [Controllers](doc-controller.md#controllers)
+* [Write a controller](doc-controller.md#controllers)
+* [Router](doc-controller.md#controllers)
+* [Controller methods](doc-controller.md#controllers)
+  * [DynStruct (type used for storing parameters)](doc-controller.md#dynstruct)
+  * [Parameters](doc-controller.md#params)
+  * [Session](doc-controller.md#session)
+* [CSRF security](doc-controller.md#controllers)
+* [File upload](doc-controller.md#controllers)
 
 # Views
 * [Views](doc-view.md#views)
