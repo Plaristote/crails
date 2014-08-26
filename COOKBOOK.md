@@ -60,10 +60,15 @@ Notes:
 * [MongoDB-based models](doc-models-mongo.md)
   * [Configure your project for MongoDB](doc-models-mongo.md#configure-your-project-for-mongodb)
   * [Writing a model](doc-models-mongo.md#writing-a-model)
+  * [Create, update, delete](doc-models-mongo.md#create-update-delete)
   * [Relations](doc-models-mongo.md#relations)
     * [has many](doc-models-mongo.md#has-many)
     * [belongs to](doc-models-mongo.md#belongs-to)
     * [has and belongs to many](doc-models-mongo.md#has-and-belongs-to-many)
+  * [Querying](doc-models-mongo.md#querying)
+    * [find by id](doc-models-mongo.md#find-by-id)
+    * [find many](doc-models-mongo.md#find-many)
+
 * [SQL-based models](#)
 
 # Scaffolding
