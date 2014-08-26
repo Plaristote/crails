@@ -56,6 +56,16 @@ Notes:
 * [Render a view from a controller](doc-view.md#render-a-view-from-a-controller)
 * [Using helpers within a view](doc-view.md#using-helpers-within-a-view)
 
+# Models
+* [MongoDB-based models](doc-models-mongo.md)
+  * [Configure your project for MongoDB](doc-models-mongo.md#configure-your-project-for-mongodb)
+  * [Writing a model](doc-models-mongo.md#writing-a-model)
+  * [Relations](doc-models-mongo.md#relations)
+    * [has many](doc-models-mongo.md#has-many)
+    * [belongs to](doc-models-mongo.md#belongs-to)
+    * [has and belongs to many](doc-models-mongo.md#has-and-belongs-to-many)
+* [SQL-based models](#)
+
 # Scaffolding
 Scaffolding is a way of getting setting up a code base for new elements you wish to add to your application.
 Scaffolding scripts support generation of controllers, models, views, layouts.
@@ -87,11 +97,3 @@ The layout's name will be used to create the file. In our use case, the file wil
 ## Model
 
 ## All at once
-
-# Notes on asset precompile
-Note: CSS and SCSS assets aren't supported yet, but it's planned.
-
-Asset precompilation use coffeescript and uglifyJS. You'll need nodejs to install them.
-Coffeescript is not mandatory unless you have coffee files in your app/assets/javascripts folder.
-UglifyJS is not used in debug mode.
-So if you're in debug mode and don't use coffeescript, you needn't worry about nodejs.
