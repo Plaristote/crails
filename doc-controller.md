@@ -1,6 +1,9 @@
 # Controllers
-Crails controllers are located in `app/controllers`. They inherits the ControllerBase class, which brings a few
-features such as CSRF security, view rendering tools, 
+Crails controllers are located in `app/controllers`. They inherits the ControllerBase class, which allows the Router
+to interact with them, and brings a few features along (csrf security, view rendering features, redirecting methods,
+and exception filtering).
+
+They are compiled along with the application, which means you must recompile and restart the server at every new revision.
 
 # Write a controller
 This is what a Crails controller looks like:
