@@ -1,6 +1,6 @@
 # Controllers
 Crails controllers are located in `app/controllers`. They inherits the ControllerBase class, which brings a few
-features such as CSRF security,
+features such as CSRF security, view rendering tools, 
 
 # Write a controller
 This is what a Crails controller looks like:
@@ -37,6 +37,28 @@ no exception catcher or filters are set, but you can override these behaviors).
 Since the server might run in asynchronous mode, you must also be careful not to use any global variables or static
 attibutes unless you know what you're doing (the Boots lib implements some asynchronous development tools that you
 might wanna use if you need global stuff. Check out Boots/Sync/semaphore.hpp and Boots/Sync/mutex.hpp).
+
+## Router
+The `Router::Initialize()` method located in the `app/router.cpp` file: this is where you explain Crails in which
+controllers and which methods each HTTP requests should head to.
+Let's see what it looks like:
+
+      #include <crails/router.hpp>
+      #include "controllers/crm_accounts.hpp" // don't forget to include your controllers
+
+      void Router::Initialize(void)
+      {
+        SetRoute("GET",    "/crm_accounts",      CrmAccountsController, index);
+        SetRoute("GET",    "/crm_accounts/new",  CrmAccountsController, new);
+        SetRoute("GET",    "/crm_accounts/edit", CrmAccountsController, edit);
+        SetRoute("GET",    "/crm_accounts/:id",  CrmAccountsController, show);
+        SetRoute("DELETE", "/crm_accounts/:id",  CrmAccountsController, _delete);
+        SetRoute("PUT",    "/crm_accounts/:id",  CrmAccountsController, update);
+        SetRoute("POST",   "/crm_accounts",      CrmAccountsController, create);
+      }
+      
+SetRoute takes four parameters: the request's type, the URL matcher, the controller's name and the method's name.
+The routes are checked in the same order you wrote them in. This means that when you're using variables (`:id` is the parameter in this exemple), you must make sure any route that might match the variable (in this exemple, `/crm_accounts/new` and `/crm_accounts/update`) is specified before the one using a variable.
 
 ## Controller method
 We'll now see how to implement a controller method and how to link it to a route.
