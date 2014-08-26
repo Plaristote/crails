@@ -211,7 +211,10 @@ Create the routes with:
 And test it by uploading text files.
 
 # Views
-[Documentation for views](doc-view.md)
+- [Views](doc-view.md#views)
+- [Writing a view](doc-view.md#writing-a-view)
+- [Render a view from a controller](doc-view.md#render-a-view-from-a-controller)
+- [Using helpers within a view](doc-view.md#using-helpers-within-a-view)
 
 # Scaffolding
 Scaffolding is a way of getting setting up a code base for new elements you wish to add to your application.
