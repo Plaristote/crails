@@ -5,13 +5,10 @@
 string*    @exception_name;
 string*    @exception_what;
 DynStruct* @params;
-
-DynStruct& lparams = *params;
-
-string     backtrace = lparams["backtrace"].Value();
-lparams["backtrace"].Remove();
 // END LINKING
-
+<% DynStruct& lparams = *params %>
+<% string     backtrace = lparams["backtrace"].Value() %>
+<% lparams["backtrace"].Remove() %>
 <!DOCTYPE html>
 <html lang="en">
 <head>

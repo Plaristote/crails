@@ -8,6 +8,7 @@ var exec   = require('gulp-exec');
 var child  = require('child_process');
 
 var debug  = true;
+var macosx = false;
 
 var paths = {
   cmake:   [ 'build/CMakeCache.txt' ],
@@ -41,8 +42,8 @@ gulp.task('css', ['clean'], function() {
 
 gulp.task('ecpp', ['clean'], function() {
   var compiler    = 'c++';
-  var opts        = [ '-Wall', '-fPIC', '--std=c++11', '-shared' ]
-  if (debug) { opts.push('-g'); }
+  var opts        = [ '-Wall', '-Wreturn-type-c-linkage', '-Wunused-private-field', '-fPIC', '--std=c++11', '-undefined dynamic_lookup', '-shared' ]
+  if (debug)  { opts.push('-g'); }
   var compile_erb = gulp.src(paths.ecpp).pipe(exec('crails compile_view <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
   var compile_cpp = compile_erb.pipe(exec(compiler + ' ' + opts.join(' ') + ' -I./app <%= file.path %>.cpp -o <%= file.path %>.so'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
   return (compile_cpp);
