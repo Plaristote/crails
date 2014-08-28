@@ -118,7 +118,7 @@ project.base_directory source, base_directory do
     project.file 'main.cpp'
     project.directory :assets do
       project.directory :stylesheets do end
-      project.directory :javascript  do end
+      project.directory :javascripts do end
     end
     project.directory :controllers do end
     project.directory :models do end

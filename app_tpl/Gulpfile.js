@@ -11,7 +11,7 @@ var debug  = true;
 
 var paths = {
   cmake:   [ 'build/CMakeCache.txt' ],
-  scripts: [ 'app/assets/javascript/**/*.js', 'app/assets/javascript/**/*.coffee' ],
+  scripts: [ 'app/assets/javascripts/**/*.js', 'app/assets/javascripts/**/*.coffee' ],
   css:     [ 'app/assets/stylesheets/**/*.scss', 'app/assets/stylesheets/**/*.css' ],
   ecpp:    [ 'app/views/**/*.ecpp', 'lib/*.ecpp' ]
 }
