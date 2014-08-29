@@ -16,11 +16,13 @@ bool Model::GetOidFromObject(mongo::BSONObj object, mongo::OID& oid)
 
 Model::Model(Collection& collection, mongo::BSONObj bson_object) : bson_object(bson_object), collection(collection), result_set(nullptr)
 {
-  has_id = GetOidFromObject(bson_object, id);
+  has_id             = GetOidFromObject(bson_object, id);
+  fields_initialized = false;
 }
 
 Model::Model(const Model& copy) : bson_object(copy.bson_object), id(copy.id), has_id(copy.has_id), collection(copy.collection), result_set(copy.result_set)
 {
+  fields_initialized = false;
 }
 
 void Model::InitializeFields(void)
@@ -104,4 +106,15 @@ Model::Field<mongo::OID>::Field(const Model::Field<mongo::OID>& field)
 {
   value       = field.value;
   has_changed = field.has_changed;
+}
+
+void Model::set_owner_id(const string& relation_name, const string& id_string)
+{
+  if (id_string.size() == 24)
+  {
+    mongo::OID id; id.init(id_string);
+    GetField<mongo::OID>(relation_name + "_id").Set(id);
+  }
+  else
+    throw MongoDB::Exception(std::string("Invalid call to set_") + relation_name + std::string("_id with OID '") + id_string + '\'');
 }

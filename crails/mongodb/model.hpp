@@ -8,97 +8,26 @@
 
 # define MONGODB_MODEL(classname) \
     friend class MongoDB::ResultSet<classname>; \
-  public: \
-    classname(MongoDB::Collection& collection, mongo::BSONObj bson_object) : Model(collection, bson_object) \
-    { \
-      InitializeFields(); \
-    } \
-    \
-    classname(const classname& copy) : Model(copy) \
-    { \
-      InitializeFields(); \
-    } \
-    \
-    static SmartPointer<classname> Find(const std::string& id_str) \
-    { \
-      mongo::OID                                     id; \
-      \
-      if (id_str.size() != 24) \
-        throw MongoDB::Exception(std::string("Invalid call to ") + std::string(#classname) + std::string("::Find with OID '") + id_str + '\''); \
-      id.init(id_str); \
-      { \
-        SmartPointer<MongoDB::ResultSet<classname> > results = MongoDB::ResultSet<classname>::Query(QUERY("_id" << id)); \
-        SmartPointer<classname>                      result(nullptr); \
-  \
-        if (results->Entries().size() > 0) \
-          result = new classname(results->Entries().front()); \
-        return (result); \
-      } \
-    } \
-    \
-    static classname Create(Data params = Data()) \
-    { \
-      const std::string    database        = classname::DatabaseName(); \
-      const std::string    collection_name = classname::CollectionName(); \
-      MongoDB::Collection& collection      = Databases::singleton::Get()->GetDb<MongodbDb>(database)[collection_name]; \
-      mongo::BSONObj       obj; \
-      { \
-        mongo::BSONObjBuilder builder; \
-        \
-        if (!(params.Nil())) \
-        { std::for_each(params.begin(), params.end(), [&builder](Data param) { builder << param.Key() << param.Value(); }); } \
-        obj = builder.obj(); \
-      } \
-      return (classname(collection, obj)); \
-    }
+    classname(MongoDB::Collection& collection, mongo::BSONObj bson_object); \
+    classname(const classname& copy); \
+    static SmartPointer<classname> Find(const std::string& id_str); \
+    static classname Create(Data params = Data()); \
+    void initialize_fields(void);
 
 # define MONGODB_FIELD(type,field,def) \
-private:  Field<type> _##field ; \
-  inline void initialize_##field (void) { _##field.initialize(#field, bson_object, def); fields.push_back(&_##field); }\
-public: \
-  type field (void) const { return (_##field.Get()); }\
-  void set_##field (type val) { _##field.Set(val); }
+  type get_field (void) const;\
+  void set_##field (type val); }
 
 # define MONGODB_HAS_MANY_AS(type,remote_field,relation_name) \
-  MongoDB::ResultSet<type>* relation_name##s (void) \
-  { \
-    std::string      association      = type::CollectionName(); \
-    std::string      association_name = std::string(#remote_field) + "_id"; \
-    mongo::Query     query            = QUERY(association_name << OID()); \
-    MongoDB::ResultSet<type>* ptr     = MongoDB::ResultSet<type>::Query(collection.Db()[association], query);\
-    \
-    ptr->SetOwner(*this, #remote_field);\
-    return (ptr);\
-  }
+  MongoDB::ResultSet<type>* relation_name##s (void);
 
 # define MONGODB_HAS_MANY(type,remote_field) \
   MONGODB_HAS_MANY_AS(type,remote_field,type)
 
 # define MONGODB_BELONGS_TO_AS(type,relation_name) \
   MONGODB_FIELD(mongo::OID, relation_name##_id , mongo::OID()) \
-  void set_##relation_name##_id(const std::string& str) \
-  { \
-    if (str.size() != 24) \
-      throw MongoDB::Exception(std::string("Invalid call to set_") + std::string(#relation_name) + std::string("_id with OID '") + str + '\''); \
-    mongo::OID id; id.init(str); set_##relation_name##_id(id); \
-  } \
-  \
-  type relation_name(void) \
-  {\
-    mongo::OID            foreign_oid = relation_name##_id (); \
-    mongo::Query          query = QUERY("_id" << foreign_oid); \
-    MongoDB::Collection&  col   = GetCollection().Db()[type::CollectionName() + 's']; \
-    auto                  ptr   = col.Query(query); \
-    \
-    if (ptr->more()) \
-    { \
-      type                  obj(col, ptr->next());\
-      \
-      obj.InitializeFields(); \
-      return (obj); \
-    } \
-    return (type(col, mongo::BSONObj())); \
-  }
+  void set_##relation_name##_id(const std::string& str); \
+  type relation_name(void);
   
 # define MONGODB_BELONGS_TO(type) \
   MONGODB_BELONGS_TO_AS(type,type)
@@ -110,7 +39,7 @@ public: \
     MongoDB::ResultSet<type>* ptr = MongoDB::ResultSet<type>::Query(collection.Db()[type::CollectionName()], BSON("_id" << BSON("$in" << relation_name##_ids()))); \
     return (ptr); \
   }
-  
+
 namespace MongoDB
 {
   class Collection;
@@ -128,7 +57,7 @@ namespace MongoDB
     bool               Refresh(void);
     Collection&        GetCollection(void)       { return (collection); }
     const Collection&  GetCollection(void) const { return (collection); }
-
+    
   private:
     static bool        GetOidFromObject(mongo::BSONObj object, mongo::OID& oid);
     mongo::BSONObj     Update(void);
@@ -136,6 +65,7 @@ namespace MongoDB
   protected:
     virtual void       InitializeFields(void);
 
+    void               set_owner_id(const std::string& relation_name, const std::string& id_string);
     void               ForceUpdate(void)
     {
       std::for_each(fields.begin(), fields.end(), [](IField* field) { field->ForceUpdate(); });
@@ -151,7 +81,7 @@ namespace MongoDB
     mongo::BSONObj                       bson_object;
     mongo::OID                           id;
     std::list<IField*>                   fields;
-    bool                                 has_id;
+    bool                                 has_id, fields_initialized;
     Collection&                          collection;
     SmartPointer<mongo::DBClientCursor>  result_set; // Must hold reference to result set if was part of a result set
 
@@ -164,6 +94,7 @@ namespace MongoDB
     public:
       std::string  Name(void) { return (name); }
       virtual void ForceUpdate(void)                   = 0;
+      bool operator==(const std::string& comp) const { return (name == comp); }
     protected:
       virtual void BuildUpdate(mongo::BSONObjBuilder&) = 0;
 
@@ -217,6 +148,17 @@ namespace MongoDB
       TYPE         value;
       bool         has_changed;
     };    
+
+    template<typename Type>
+    Field<Type>&       GetField(const std::string& fieldname) const
+    {
+      auto it = std::find_if(fields.begin(), fields.end(), [fieldname](IField* field)
+      { return (*field == fieldname); });
+      
+      if (it == fields.end())
+        throw MongoDB::Exception("No such field " + fieldname);
+      return (*(reinterpret_cast<Field<Type>*>(*it)));
+    }
   };
   
   template<>

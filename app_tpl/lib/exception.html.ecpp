@@ -6,7 +6,7 @@ string*    @exception_name;
 string*    @exception_what;
 DynStruct* @params;
 // END LINKING
-<% DynStruct& lparams = *params %>
+<% DynStruct& lparams   = *params %>
 <% string     backtrace = lparams["backtrace"].Value() %>
 <% lparams["backtrace"].Remove() %>
 <!DOCTYPE html>

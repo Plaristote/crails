@@ -23,12 +23,13 @@ if (ASYNC_SERVER)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASYNC_SERVER")
 endif()
 
-file(GLOB crails_app
+file(GLOB_RECURSE crails_app
      app/controllers/*.cpp
      app/models/*.cpp
      app/routes.cpp
      app/main.cpp
      config/salt.cpp
+     lib/models/*.cpp
      <%= "config/session_store_mongodb.cpp" if options[:session_store] == 'mongodb' %>)
 
 add_executable(crails-app ${crails_app})

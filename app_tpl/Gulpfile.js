@@ -14,7 +14,8 @@ var paths = {
   cmake:   [ 'build/CMakeCache.txt' ],
   scripts: [ 'app/assets/javascripts/**/*.js', 'app/assets/javascripts/**/*.coffee' ],
   css:     [ 'app/assets/stylesheets/**/*.scss', 'app/assets/stylesheets/**/*.css' ],
-  ecpp:    [ 'app/views/**/*.ecpp', 'lib/*.ecpp' ]
+  views:   [ 'app/views/**/*.ecpp', 'lib/*.ecpp' ],
+  models:  [ 'app/models/**/*.cpp' ]
 }
 
 gulp.task('cmake', function() {
@@ -40,13 +41,18 @@ gulp.task('css', ['clean'], function() {
   return (gulp.src(paths.css).pipe(gulpif(/[.].scss$/, sass({ includePaths: paths.css }))).pipe(concat('application.css')).pipe(gulp.dest('./public/assets')));
 });
 
-gulp.task('ecpp', ['clean'], function() {
+gulp.task('views', ['clean'], function() {
   var compiler    = 'c++';
   var opts        = [ '-Wall', '-Wreturn-type-c-linkage', '-Wunused-private-field', '-fPIC', '--std=c++11', '-undefined dynamic_lookup', '-shared' ]
-  if (debug)  { opts.push('-g'); }
-  var compile_erb = gulp.src(paths.ecpp).pipe(exec('crails compile_view <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
+  if (debug) { opts.push('-g'); }
+  var compile_erb = gulp.src(paths.views).pipe(exec('crails compile_view <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
   var compile_cpp = compile_erb.pipe(exec(compiler + ' ' + opts.join(' ') + ' -I./app <%= file.path %>.cpp -o <%= file.path %>.so'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
   return (compile_cpp);
+});
+
+gulp.task("models', ['clean'], function() {
+  var compile_model = gulp.src(paths.models).pipe(exec('crails compile_model <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({err:true,stderr:true,stdout:true})));
+  return (compile_model);
 });
 
 gulp.task('clean', function() {
@@ -56,7 +62,8 @@ gulp.task('watch', function() {
   gulp.watch(paths.cmake,   ['cmake']);
   gulp.watch(paths.scripts, ['scripts']);
   gulp.watch(paths.css,     ['css']);
-  gulp.watch(paths.ecpp,    ['ecpp']);
+  gulp.watch(paths.views,   ['views']);
+  gulp.watch(paths.models,  ['models']);
 });
 
-gulp.task('default', ['watch', 'cmake', 'scripts', 'css', 'ecpp']);
+gulp.task('default', ['watch', 'cmake', 'scripts', 'css', 'views', 'models']);
