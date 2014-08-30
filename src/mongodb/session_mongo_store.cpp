@@ -1,4 +1,3 @@
-#ifdef USE_MONGODB_SESSION_STORE
 # include <Boots/include/Utils/datetime.hpp>
 # include "crails/session_store/mongo_store.hpp"
 
@@ -101,4 +100,3 @@ void MongoStore::SessionStore::Cleanup(void)
 
   collection.Remove(BSON("_updated_at" << mongo::LT << expiring_at));
 }
-#endif

@@ -65,12 +65,13 @@ end
 require 'optparse'
 
 options = {
-            sql:           false,
-            mongodb:       false,
-            segvcatch:     false,
-            server:        :async,
-            debug:         false,
-            session_store: "cookie_store"
+            sql:                 false,
+            mongodb:             false,
+            segvcatch:           false,
+            server:              :async,
+            debug:               false,
+            session_store:       "cookie_store",
+            session_store_class: "CookieStore"
           }
 OptionParser.new do |opts|
   opts.banner = "usage: crails new [name] [options]"
@@ -80,9 +81,15 @@ OptionParser.new do |opts|
   opts.on('',   '--use-segvcatch', 'use the segvcatch library') do options[:segvcatch] = true end
   opts.on('-d', '--debug-mode',    'use debug mode')            do options[:debug]     = true end
 
+  opts.on('',   '--session-store [include] [type]', 'set a session store (ex: -session-store mongodb MongoStore)' do |param1,param2|
+    options[:session_store]       = param1
+    options[:session_store_class] = param2
+  end
+
   opts.on('',   '--use-mongo-session-store', 'use the mongodb based session store') do
-    options[:session_store] = 'mongodb'
-    options[:mongodb]       = true
+    options[:session_store]       = 'mongodb'
+    options[:mongodb]             = true
+    options[:session_store_class] = 'MongoStore'
   end
 end.parse!
 
@@ -137,8 +144,8 @@ project.base_directory source, base_directory do
   end
   project.directory :config do
     project.file 'db.json'
-    project.generate_erb 'salt.cpp', 'salt.cpp.erb', options
-    project.file 'session_store_mongodb.cpp' if options[:session_store] == 'mongodb'
+    project.generate_erb 'salt.cpp',          'salt.cpp.erb',          options
+    project.generate_erb 'session_store.cpp', 'session_store.cpp.erb', options
   end
   project.directory :public do
     project.file '404.html'

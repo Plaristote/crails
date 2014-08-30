@@ -5,6 +5,11 @@
 
 using namespace std;
 
+Params::Params(void) : handle(1), response_parsed(0)
+{
+  session = SessionStore::Factory();
+}
+
 Params::~Params(void)
 {
   std::for_each(files.begin(), files.end(), [](const File& file)

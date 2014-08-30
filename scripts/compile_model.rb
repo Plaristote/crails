@@ -88,7 +88,7 @@ def compile_model filename
   path     = Pathname.new "lib/models/#{relative_path}"
 
   FileUtils.mkdir_p path.dirname
-  File.open path.to_s do |file|
+  File.open path.to_s, 'w' do |file|
     file.write template.result binding
   end
 end

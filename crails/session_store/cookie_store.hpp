@@ -3,8 +3,9 @@
 
 # include "crails/cookie_data.hpp"
 # include "crails/http_response.hpp"
+# include "crails/session_store.hpp"
 
-class CookieStore
+class CookieStore : public SessionStore
 {
 public:
   void             Load(Data request_headers);

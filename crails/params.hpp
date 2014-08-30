@@ -11,10 +11,7 @@ class Params : public DynStruct
   friend struct CrailsServer;
   friend struct MultipartParser; 
 public:
-  Params(void) : handle(1), response_parsed(0)
-  {
-  }
-  
+  Params(void);
   ~Params(void);
 
   //
@@ -42,14 +39,14 @@ public:
   void Lock(void)   { handle.Wait(); }
   void Unlock(void) { handle.Post(); }
 
-  DynStruct&       Session(void)       { return (session.Session()); }
-  const DynStruct& Session(void) const { return (session.Session()); }
+  DynStruct&       Session(void)       { return ((*session).Session()); }
+  const DynStruct& Session(void) const { return ((*session).Session()); }
 
 private:
-  SessionStore    session;
-  Sync::Semaphore handle;
-  Sync::Semaphore response_parsed;
-  Files           files;
+  SmartPointer<SessionStore> session;
+  Sync::Semaphore            handle;
+  Sync::Semaphore            response_parsed;
+  Files                      files;
 };
 
 #endif

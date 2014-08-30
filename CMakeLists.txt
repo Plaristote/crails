@@ -10,7 +10,7 @@ option(USE_SOCI    "Soci"    ON)
 # - SERVER_DEBUG		to enable non-production features (view compiler, displaying exceptions, ...)
 # - USE_SEGVCATCH		if you're going to use the segvcatch library
 # - USE_MONGODB_SESSION_STORE	to use MongoDB as a session store instead of the cookies
-set(CMAKE_CXX_FLAGS "-Wall -Wno-deprecated-declarations -pedantic -DASYNC_SERVER -DSERVER_DEBUG -DUSE_MONGODB_SESSION_STORE")
+set(CMAKE_CXX_FLAGS "-Wall -Wno-deprecated-declarations -pedantic -DASYNC_SERVER -DSERVER_DEBUG")
 
 if(CMAKE_COMPILER_IS_GNUCC)
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")

@@ -131,7 +131,7 @@ void CrailsServer::operator()(const Server::request& request, Response response)
   catch (const Router::Exception302 e)
   {
     out.SetHeaders("Location", e.redirect_to);
-    params.session.Finalize(out);
+    params.session->Finalize(out);
     ResponseHttpError(out, HttpCodes::moved_temporarily, params);
   }
   catch (const Router::Exception404 e)
@@ -214,7 +214,7 @@ bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse&
   
   if (router)
   {
-    params.session.Load(params["header"]);
+    params.session->Load(params["header"]);
     {
       std::string   method = (params["_method"].Nil() ? request.method : params["_method"].Value());
       DynStruct     data   = router->Execute(method, params["uri"].Value(), params);
@@ -231,7 +231,7 @@ bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse&
         for (; it != end ; ++it)
           out.SetHeaders((*it).Key(), (*it).Value());
       }
-      params.session.Finalize(out);
+      params.session->Finalize(out);
       out.SetResponse(HttpCodes::ok, body);
     }
     return (true);

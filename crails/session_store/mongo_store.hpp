@@ -3,11 +3,12 @@
 
 # include "crails/cookie_data.hpp"
 # include "crails/http_response.hpp"
+# include "crails/session_store.hpp"
 
 # include <crails/mongodb/model.hpp>
 # include <crails/mongodb/resultset.hpp>
 
-class MongoStore
+class MongoStore : public SessionStore
 {
 public:
   class SessionStore : public MongoDB::Model
