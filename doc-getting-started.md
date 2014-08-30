@@ -69,3 +69,10 @@ The order of the matchers matters during the compilation, which allows you to us
 ```
 
 This would ensure that `/app/assets/javascripts/jquery.js` would be at the top of the `/public/assets/application.js`.
+
+# Start developing
+## Gulp
+Before you start developing, you must launch `gulp` from your application directory: this service takes care of some code generation needed for the views and models, and compiles your assets and views.
+
+## Launch the server
+You may launch the server using the `crails server` command from your application directory. This will compile the server is needed, and launch it.
