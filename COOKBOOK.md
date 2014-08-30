@@ -7,6 +7,7 @@ This tutorial is intented to show you step by step how to create a Crails applic
 * [Configure a project](doc-getting-started.md#configure-a-project)
   * [CMake](doc-getting-started.md#cmake)
   * [Databases](doc-getting-started.md#databases)
+  * [Asset pipeline](doc-getting-started.md#asset-pipeline)
 
 # Controllers
 * [Controllers](doc-controller.md#controllers)
