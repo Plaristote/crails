@@ -21,14 +21,16 @@ headers, declare variable or write code like you would in any regular C++ code. 
 
 This is what a view template looks like:
 
-      string* @some_string;
-      // END LINKING
-      <h2>Some page</h2>
-      <% if (some_string != NULL) do %>
-        <%= *some_string %>
-      <% end else do %>
-        some_string was null !
-      <% end %>
+```ERB
+string* @some_string;
+// END LINKING
+<h2>Some page</h2>
+<% if (some_string != NULL) do %>
+  <%= *some_string %>
+<% end else do %>
+  some_string was null !
+<% end %>
+```
 
 You proably noticed that we use words instead of braces. For readability purpose, in Crails views templates, you have the
 possibility to replace { and } with do and end respectively.
@@ -48,77 +50,82 @@ avoid unnecessary segmentation faults.
 ## Render a view from a controller
 Here are a few demonstrations of how a view can be rendered from a controller:
 
-    void MyController::index()
-    {
-      // Will render the ecpp view within the default layout (layouts/application.html.ecpp)
-      render("mycontroller/index.html.ecpp");
-    }
+```C++
+void MyController::index()
+{
+  // Will render the ecpp view within the default layout (layouts/application.html.ecpp)
+  render("mycontroller/index.html.ecpp");
+}
     
-    void MyController::index()
-    {
-      // Will render the ecpp view within the specified layout (layouts/mylayout.html.ecpp)
-      render("mycontroller/index.html.ecpp", "layouts/mylayout");
-    }
+void MyController::index()
+{
+  // Will render the ecpp view within the specified layout (layouts/mylayout.html.ecpp)
+  render("mycontroller/index.html.ecpp", "layouts/mylayout");
+}
     
-    void MyController::index()
-    {
-      // Will render the ecpp view without using any layouts
-      render("mycontroller/index.html.ecpp", "");
-    }
+void MyController::index()
+{
+  // Will render the ecpp view without using any layouts
+  render("mycontroller/index.html.ecpp", "");
+}
 
-    void MyController::index()
-    {
-      string some_string = "some string was *not* null";
+void MyController::index()
+{
+  string some_string = "some string was *not* null";
 
-      *vars["some_string"] = &some_string; // Will make 'some_string' visible from the ECPP template
-      render("mycontroller/index.html.ecpp", "layouts/mylayout");
-    }
+  *vars["some_string"] = &some_string; // Will make 'some_string' visible from the ECPP template
+  render("mycontroller/index.html.ecpp", "layouts/mylayout");
+}
+```
 
 ## Using helpers within a view
 The folder `app/helpers` is supposed to host functions that you would want to use in your views in order to factorize your HTML. Here is an exemple using two helpers ('breadcrumb' and 'box'):
 
-      #include "helpers/bootstrap.hpp"
-      string* @some_string;
-      // END LINKING
-      <%= breadcrumb({ { "Home", "/home" } { "MyController", "/my_controller" } }) %>
+```ERB
+#include "helpers/bootstrap.hpp"
+string* @some_string;
+// END LINKING
+<%= breadcrumb({ { "Home", "/home" } { "MyController", "/my_controller" } }) %>
       
-      <%= box("Box Title", "info-sign") yields %>
-        <h2>Some page</h2>
-        <% if (some_string != NULL) do %>
-          <%= *some_string %>
-        <% end else do %>
-          some_string was null !
-        <% end %>
-      <% yend %>
+<%= box("Box Title", "info-sign") yields %>
+  <h2>Some page</h2>
+  <% if (some_string != NULL) do %>
+    <%= *some_string %>
+  <% end else do %>
+    some_string was null !
+  <% end %>
+<% yend %>
+```
 
 The first helper is pretty easy to understand: it's a simple function taking a map<string,string> object as a parameter.
 
 The second helper use the "yields" syntax, which allows you to render ECPP inside of a helper. A "yielding" helper is a function that takes a lambda as a last parameter. If you want the lambda to render ECPP code, you should not declare the lambda parameter, and instead append the function call with the "yields" clause. Note that the created block won't end with the "end" word, as usual, but with the "yend" word (yield ends).
 
 Now, this is how such helpers could look like in "helpers/bootstrap.hpp"
+```C++
+// Breadcrumb Helper
+std::string breadcrumb(std::map<std::string, std::string> elements)
+{
+  std::stringstream html;
 
-        // Breadcrumb Helper
-        std::string breadcrumb(std::map<std::string, std::string> elements)
-        {
-          std::stringstream html;
+  html << "<div class='breadcrumb'>";          
+  for (auto it = elements.begin() ; it != elements.end() ; ++it)
+    html << "<a href='" << it->second << "'>" << it->first << "</a>";
+  html << "</div>";
+  return (html.str());
+}
         
-          html << "<div class='breadcrumb'>";          
-          for (auto it = elements.begin() ; it != elements.end() ; ++it)
-            html << "<a href='" << it->second << "'>" << it->first << "</a>";
-          html << "</div>";
-          return (html.str());
-        }
-        
-        // Box Helper
-        std::string box(std::string title, std::string icon, std::function<std::string ()> yield)
-        {
-          std::stringstream html;
+// Box Helper
+std::string box(std::string title, std::string icon, std::function<std::string ()> yield)
+{
+    std::stringstream html;
           
-          html << "<div class='box'>;
-          html <<   "<h2><i class='glyphicon glyphicon-" << icon << "'></i> " << title << "</h2>";
-          html <<   "<div class='content'>";
-          html <<     yield(); // Append the rendered ECPP to the stream
-          html <<   "</div>";
-          html << "</div>";
-          return (html.str());
-        }
+  html << "<div class='box'>;
+  html <<   "<h2><i class='glyphicon glyphicon-" << icon << "'></i> " << title << "</h2>";
+  html <<   "<div class='content'>";
+  html <<     yield(); // Append the rendered ECPP to the stream
+  html <<   "</div>";
+  html << "</div>";
+  return (html.str());
+}
+```
