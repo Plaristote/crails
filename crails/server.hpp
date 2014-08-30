@@ -3,7 +3,8 @@
 
 # include <boost/network/protocol/http/server.hpp>
 # include "file_cache.hpp"
-#include "multipart.hpp"
+# include "multipart.hpp"
+# include "backtrace.hpp"
 # include <Boots/Utils/dynstruct.hpp>
 
 namespace http = boost::network::http;
@@ -35,7 +36,7 @@ class Params;
 
 struct CrailsServer : public CrailsServerTraits
 {
-  struct Crash : public std::exception
+  struct Crash : public boost_ext::exception
   {
     Crash(const std::string& details) : details(details) {}
     

@@ -6,6 +6,7 @@
 #include <crails/view.hpp>
 #include <crails/params.hpp>
 #include <crails/databases.hpp>
+#include <crails/backtrace.hpp>
 
 #ifdef ASYNC_SERVER
 # pragma message("Building Asynchronous Server")
@@ -142,6 +143,7 @@ void CrailsServer::operator()(const Server::request& request, Response response)
   catch (const type e) \
   { \
     set_params; \
+    params["backtrace"] = boost_ext::trace(e); \
     ResponseException(out, #type, e.what(), params); \
   }
   EXCEPTION_RESPONSE(CrailsServer::Crash,)

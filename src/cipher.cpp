@@ -35,6 +35,7 @@
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
+#include <crails/backtrace.hpp>
 using namespace std;
 
 // ================================================================
@@ -268,10 +269,10 @@ string Cipher::encode_base64(uchar* ciphertext,
   BIO* bm  = BIO_new(BIO_s_mem());
   b64 = BIO_push(b64,bm);
   if (BIO_write(b64,ciphertext,ciphertext_len)<2) {
-    throw runtime_error("BIO_write() failed");
+    throw boost_ext::runtime_error("BIO_write() failed");
   }
   if (BIO_flush(b64)<1) {
-    throw runtime_error("BIO_flush() failed");
+    throw boost_ext::runtime_error("BIO_flush() failed");
   }
   BUF_MEM *bptr=0;
   BIO_get_mem_ptr(b64,&bptr);
@@ -336,19 +337,19 @@ Cipher::kv1_t Cipher::encode_cipher(const string& plaintext) const
   EVP_CIPHER_CTX_init(&ctx);
 
   if (!EVP_EncryptInit_ex(&ctx, EVP_aes_256_cbc(), NULL, m_key, m_iv)) {
-    throw runtime_error("EVP_EncryptInit_ex() failed");
+    throw boost_ext::runtime_error("EVP_EncryptInit_ex() failed");
   }
   EVP_CIPHER_CTX_set_key_length(&ctx, EVP_MAX_KEY_LENGTH);
 
   uchar* p    = (uchar*)plaintext.c_str();
   uint   plen = plaintext.size();
   if (!EVP_EncryptUpdate(&ctx,ciphertext,&ciphertext_len,p,plen)) {
-    throw runtime_error("EVP_EncryptUpdate() failed");
+    throw boost_ext::runtime_error("EVP_EncryptUpdate() failed");
   }
 
   uchar* pbuf = ciphertext+ciphertext_len; // pad at the end
   if (!EVP_EncryptFinal_ex(&ctx,pbuf,&ciphertext_padlen)) {
-    throw runtime_error("EVP_EncryptFinal_ex() failed");
+    throw boost_ext::runtime_error("EVP_EncryptFinal_ex() failed");
   }
 
   ciphertext_len += ciphertext_padlen + off; // <off> for the Salted prefix
@@ -370,17 +371,17 @@ string Cipher::decode_cipher(uchar* ciphertext,
   EVP_CIPHER_CTX_init(&ctx);
 
   if (!EVP_DecryptInit_ex(&ctx, EVP_aes_256_cbc(), NULL, m_key, m_iv)) {
-    throw runtime_error("EVP_DecryptInit_ex() failed");
+    throw boost_ext::runtime_error("EVP_DecryptInit_ex() failed");
   }
   EVP_CIPHER_CTX_set_key_length(&ctx, EVP_MAX_KEY_LENGTH);
 
   if (!EVP_DecryptUpdate(&ctx,plaintext,&plaintext_len,ciphertext,ciphertext_len)) {
-    throw runtime_error("EVP_DecryptUpdate() failed");
+    throw boost_ext::runtime_error("EVP_DecryptUpdate() failed");
   }
 
   int plaintext_padlen=0;
   if (!EVP_DecryptFinal_ex(&ctx,plaintext+plaintext_len,&plaintext_padlen)) {
-    throw runtime_error("EVP_DecryptFinal_ex() failed");
+    throw boost_ext::runtime_error("EVP_DecryptFinal_ex() failed");
   }
   plaintext_len += plaintext_padlen;
   plaintext[plaintext_len] = 0;
@@ -406,10 +407,10 @@ void Cipher::set_salt(const string& salt)
     memcpy(m_salt,salt.c_str(),8);
   }
   else if (salt.length()<8) {
-    throw underflow_error("init(): salt is too short, must be 8 characters");
+    throw boost_ext::underflow_error("init(): salt is too short, must be 8 characters");
   }
   else if (salt.length()>8) {
-    throw overflow_error("init(): salt is too long, must be 8 characters");
+    throw boost_ext::overflow_error("init(): salt is too long, must be 8 characters");
   }
 }
 
@@ -437,11 +438,11 @@ void Cipher::init(const string& pass)
   const EVP_MD*     digest = EVP_get_digestbyname(m_digest.c_str());
   if (!cipher) {
     string msg = "init(): cipher does not exist "+m_cipher;
-    throw runtime_error(msg);
+    throw boost_ext::runtime_error(msg);
   }
   if (!digest) {
     string msg = "init(): digest does not exist "+m_digest;
-    throw runtime_error(msg);
+    throw boost_ext::runtime_error(msg);
   }
 
   int ks = EVP_BytesToKey(cipher,    // cipher type
@@ -453,7 +454,7 @@ void Cipher::init(const string& pass)
                           m_key,
                           m_iv);
   if (ks!=32) {
-    throw runtime_error("init() failed: "
+    throw boost_ext::runtime_error("init() failed: "
                         "EVP_BytesToKey did not return a 32 byte key");
   }
 
@@ -475,7 +476,7 @@ string Cipher::file_read(const string& fn) const
   ifstream ifs(fn.c_str());
   if (!ifs) {
     string msg="Cannot read file '"+fn+"'";
-    throw runtime_error(msg);
+    throw boost_ext::runtime_error(msg);
   }
   string str((istreambuf_iterator<char>(ifs)),
              istreambuf_iterator<char>());
@@ -491,7 +492,7 @@ void Cipher::file_write(const string& fn,const string& data,bool nl) const
   ofstream ofs(fn.c_str());
   if (!ofs) {
     string msg="Cannot write file '"+fn+"'";
-    throw runtime_error(msg);
+    throw boost_ext::runtime_error(msg);
   }
   ofs << data;
   if (nl) {

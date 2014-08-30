@@ -217,16 +217,23 @@ DataTree* DataTree::Factory::StringJSON(const std::string& filename)
 // File Writer
 //
 
-static bool isNumeric(const std::string& str)
+static bool isNumeric(std::string& str)
 {
-    unsigned int i = 0;
+  unsigned int i = 0;
 
-    for (i = 0 ; i < str.size() ; ++i)
-    {
-        if ((str[i] < '0' || str[i] > '9') && str[i] != '.')
-            return (false);
-    }
-    return (true);
+  for (i = 0 ; i < str.size() ; ++i)
+  {
+    if ((str[i] < '0' || str[i] > '9') && str[i] != '.')
+      return (false);
+  }
+  {
+    std::stringstream stream;
+    
+    stream << atoi(str.c_str());
+    str = stream.str();
+  }
+  atoi(str.c_str());
+  return (true);
 }
 
 static std::string appendArray(Data data, unsigned short indent = 0);

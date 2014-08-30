@@ -79,9 +79,7 @@ void <%= classname %>::set_<%= field[:name] %>(<%= field[:type] %> value)
 <% belongs_to.each do |data| %>
 void <%= classname %>::set_<%= data[:relation_name] %>_id(const std::string& id_string)
 {
-  if (fields_initialized == false)
-    initialize_fields();
-  set_owner_id("<%= data[:relation_name] %>_id", id_string);
+  MongoDB::Model::set_owner_id("<%= data[:relation_name] %>_id", id_string);
 }
 
 <%= data[:type] %> <%= classname %>::<%= data[:relation_name] %>(void)
@@ -93,11 +91,11 @@ void <%= classname %>::set_<%= data[:relation_name] %>_id(const std::string& id_
 
   if (ptr->more())
   {
-    type                  obj(col, ptr->next());
+    <%= data[:type] %>  obj(col, ptr->next());
 
     return (obj);
   }
-  return (type(col, mongo::BSONObj()));
+  return (<%= data[:type] %>(col, mongo::BSONObj()));
 }
 <% end %>
 

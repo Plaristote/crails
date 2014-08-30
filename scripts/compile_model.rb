@@ -14,13 +14,13 @@ def compile_model filepath
   has_and_belongs_to_many = []
 
   # SCAN CLASS
-  file_content.scan /MONGODB_MODEL\([a-zA-Z0-9_]+\)/ do |param|
+  file_content.scan /MONGODB_MODEL\s*\([a-zA-Z0-9_]+\)/ do |param|
     throw "#{filename} hosts several MONGODB_MODEL. Don't do that." if not classname.nil?
     classname  = param[14...param.length-1]
   end
 
   # SCAN FIELDS
-  file_content.scan /MONGODB_FIELD\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+),(.*)\)/ do |param1, param2,param3|
+  file_content.scan /MONGODB_FIELD\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+),(.*)\)/ do |param1, param2,param3|
     field_data = {
         type:    param1,
         name:    param2,
@@ -31,7 +31,7 @@ def compile_model filepath
   
   # SCAN RELATIONS
   # Scan has_many
-  file_content.scan /MONGODB_HAS_MANY\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
+  file_content.scan /MONGODB_HAS_MANY\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
     has_many_data = {
         type:          param1,
         remote_field:  param2,
@@ -40,7 +40,7 @@ def compile_model filepath
    has_many << has_many_data
   end
 
-  file_content.scan /MONGODB_HAS_MANY_AS\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2,param3|
+  file_content.scan /MONGODB_HAS_MANY_AS\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2,param3|
     has_many_data = {
         type:          param1,
         remote_field:  param2,
@@ -50,7 +50,7 @@ def compile_model filepath
   end
   
   # Scan belongs_to
-  file_content.scan /MONGODB_BELONGS_TO\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1|
+  file_content.scan /MONGODB_BELONGS_TO\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1|
     throw "bite"
     belongs_to_data = {
         type:          param1,
@@ -59,7 +59,7 @@ def compile_model filepath
     belongs_to << belongs_to_data
   end
 
-  file_content.scan /MONGODB_BELONGS_TO_AS\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
+  file_content.scan /MONGODB_BELONGS_TO_AS\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
     belongs_to_data = {
         type:          param1,
         relation_name: param2
@@ -67,7 +67,7 @@ def compile_model filepath
     belongs_to << belongs_to_data
   end
   
-  file_content.scan /MONGODB_HAS_AND_BELONGS_TO_MANY\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
+  file_content.scan /MONGODB_HAS_AND_BELONGS_TO_MANY\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
     has_many_data = {
         type:          param1,
         relation_name: param2

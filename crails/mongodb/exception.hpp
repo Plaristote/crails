@@ -1,12 +1,12 @@
 #ifndef  CRAILS_MONGODB_EXCEPTION_HPP
 # define CRAILS_MONGODB_EXCEPTION_HPP
 
-# include <exception>
+# include <crails/backtrace.hpp>
 # include <string>
 
 namespace MongoDB
 {
-  class Exception : public std::exception
+  class Exception : public boost_ext::exception
   {
   public:
     Exception(const std::string& message) : message(message)

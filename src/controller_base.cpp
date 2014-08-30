@@ -1,5 +1,6 @@
 #include "crails/appcontroller.hpp"
 #include "crails/router.hpp"
+#include "crails/backtrace.hpp"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ ControllerBase::ControllerBase(Params& params) : params(params)
   // Initialize flash variable and reset corresponding cookie
   flash.Duplicate(params.Session()["flash"]);
   params.Session()["flash"].CutBranch();
-  params.Session()["flash"] = "";  
+  params.Session()["flash"] = "";
 }
 
 void ControllerBase::RedirectTo(const string& uri)
@@ -73,7 +74,7 @@ void ControllerBase::render(const std::string& view, const std::string& layout)
     Filesystem::FileContent("../app/views/" + view, body);
   }
   else
-    throw "Could not detect format for view";
+    throw boost_ext::invalid_argument("Could not detect format for view `" + view + '`');
   response["body"]                    = body;
   set_content_type_from_extension(format);
 }
@@ -94,10 +95,15 @@ void ControllerBase::render(RenderType type, DynStruct value)
   switch (type)
   {
     case JSON:
-      value.Output(body);
+    {
+      std::string json;
+
+      DataTree::Writers::StringJSON(value, json);
+      body << json;
       break ;
+    }
     default:
-      throw "ControllerBase::render(RenderType,DynStruct) only supports JSON type";
+      throw boost_ext::invalid_argument("ControllerBase::render(RenderType,DynStruct) only supports JSON type");
   }
   response["body"] = body.str();
   set_content_type(type);
