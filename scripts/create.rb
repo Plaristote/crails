@@ -81,7 +81,7 @@ OptionParser.new do |opts|
   opts.on('',   '--use-segvcatch', 'use the segvcatch library') do options[:segvcatch] = true end
   opts.on('-d', '--debug-mode',    'use debug mode')            do options[:debug]     = true end
 
-  opts.on('',   '--session-store [include] [type]', 'set a session store (ex: -session-store mongodb MongoStore)' do |param1,param2|
+  opts.on('',   '--session-store [include] [type]', 'set a session store (ex: -session-store mongodb MongoStore)') do |param1,param2|
     options[:session_store]       = param1
     options[:session_store_class] = param2
   end
@@ -125,7 +125,9 @@ project.base_directory source, base_directory do
     project.file 'main.cpp'
     project.directory :assets do
       project.directory :stylesheets do end
-      project.directory :javascripts do end
+      project.directory :javascripts do
+        project.file 'crails.js'
+      end
     end
     project.directory :controllers do end
     project.directory :models do end
@@ -144,16 +146,14 @@ project.base_directory source, base_directory do
   end
   project.directory :config do
     project.file 'db.json'
+    project.file 'assets.json'
     project.generate_erb 'salt.cpp',          'salt.cpp.erb',          options
     project.generate_erb 'session_store.cpp', 'session_store.cpp.erb', options
   end
   project.directory :public do
+    project.directory :assets do end
     project.file '404.html'
     project.file '500.html'
-    project.directory :js          do
-      project.file 'crails.js'
-    end
-    project.directory :stylesheets do end
   end
 end
 

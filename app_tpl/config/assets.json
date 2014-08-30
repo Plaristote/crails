@@ -1,0 +1,14 @@
+{
+  "javascripts": {
+    "application": [
+      "**/*.js",
+      "**/*.coffee"
+    ]
+  },
+  "stylesheets": {
+    "application": [
+      "**/*.css",
+      "**/*.scss"
+    ]
+  }
+}

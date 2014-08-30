@@ -1,14 +1,15 @@
-var gulp   = require('gulp');
-var coffee = require('gulp-coffee');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var sass   = require('gulp-sass');
-var gulpif = require('gulp-if');
-var exec   = require('gulp-exec');
-var child  = require('child_process');
+var gulp            = require('gulp');
+var coffee          = require('gulp-coffee');
+var concat          = require('gulp-concat');
+var uglify          = require('gulp-uglify');
+var sass            = require('gulp-sass');
+var gulpif          = require('gulp-if');
+var exec            = require('gulp-exec');
+var child           = require('child_process');
+var require_nocache = require('require-without-cache');
+var assets          = require_nocache('./config/assets.json', require);
 
 var debug  = true;
-var macosx = false;
 
 var paths = {
   cmake:   [ 'build/CMakeCache.txt' ],
@@ -31,19 +32,40 @@ gulp.task('cmake', function() {
 });
 
 gulp.task('scripts', ['clean'], function() {
-  var scripts = gulp.src(paths.scripts).pipe(gulpif(/[.]coffee$/, coffee()));
-  if (debug != true)
-    scripts = scripts.pipe(uglify());
-  return (scripts.pipe(concat('application.js')).pipe(gulp.dest('./public/assets')));
+  for (output_file in assets.javascripts)
+  {
+    var scripts_paths = [];
+    var scripts;
+
+    for (var i = 0 ; i < assets.javascripts[output_file].length ; ++i)
+      scripts_paths.push('app/assets/javascripts/' + assets.javascripts[output_file][i]);
+    scripts   = gulp.src(scripts_paths).pipe(gulpif(/[.]coffee$/, coffee()));
+    if (debug == false)
+      scripts = scripts.pipe(uglify);
+    scripts.pipe(concat(output_file + '.js')).pipe(gulp.dest('./public/assets'));
+  }
 });
 
 gulp.task('css', ['clean'], function() {
-  return (gulp.src(paths.css).pipe(gulpif(/[.].scss$/, sass({ includePaths: paths.css }))).pipe(concat('application.css')).pipe(gulp.dest('./public/assets')));
+  for (output_file in assets.stylesheets)
+  {
+    var scripts_paths = [];
+    var scripts;
+
+    for (var i = 0 ; i < assets.stylesheets[output_file].length ; ++i)
+      scripts_paths.push('app/assets/stylesheets/' + assets.stylesheets[output_file][i]);
+    scripts   = gulp.src(scripts_paths).pipe(gulpif(/[.]scss$/, sass({ includePaths: paths.css })));
+    scripts.pipe(concat(output_file + '.css')).pipe(gulp.dest('./public/assets'));
+  }
+});
+
+gulp.task('assets.json', ['clean'], function() {
+  assets          = require_nocache('./config/assets.json', require);
 });
 
 gulp.task('views', ['clean'], function() {
   var compiler    = 'c++';
-  var opts        = [ '-Wall', '-Wreturn-type-c-linkage', '-Wunused-private-field', '-fPIC', '--std=c++11', '-undefined dynamic_lookup', '-shared' ]
+  var opts        = [ '-Wall', '-fPIC', '--std=c++11', '-shared' ]
   if (debug) { opts.push('-g'); }
   var compile_erb = gulp.src(paths.views).pipe(exec('crails compile_view <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
   var compile_cpp = compile_erb.pipe(exec(compiler + ' ' + opts.join(' ') + ' -I./app <%= file.path %>.cpp -o <%= file.path %>.so'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
@@ -51,7 +73,7 @@ gulp.task('views', ['clean'], function() {
 });
 
 gulp.task('models', ['clean'], function() {
-  var compile_model = gulp.src(paths.models).pipe(exec('crails compile_model <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({err:true,stderr:true,stdout:true})));
+  var compile_model = gulp.src(paths.models).pipe(exec('crails compile_model <%= file.path %> ; echo <%= file.path %> >> bite'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
   return (compile_model);
 });
 
@@ -59,6 +81,7 @@ gulp.task('clean', function() {
 });
 
 gulp.task('watch', function() {
+  gulp.watch(['config/assets.json'], ['assets.json', 'scripts', 'css']);
   gulp.watch(paths.cmake,   ['cmake']);
   gulp.watch(paths.scripts, ['scripts']);
   gulp.watch(paths.css,     ['css']);
