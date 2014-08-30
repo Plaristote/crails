@@ -1,22 +1,25 @@
-#include "<%= filepath[4..filepath.length] %>"
+#include "app/models/<%= filename %>.hpp"
 
 using namespace std;
+using namespace MongoDB;
 
 <%= classname %>::<%= classname %>(MongoDB::Collection& collection, mongo::BSONObj bson_object) : Model(collection, bson_object)
 {
+  initialize_fields();
 }
 
 <%= classname %>::<%= classname %>(const <%= classname %>& copy) : Model(copy)
 {
+  initialize_fields();
 }
 
 SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
 {
   mongo::OID id;
 
-  if (id_str.size() != 24)
-    throw MongoDB::Exception(string("Invalid call to <%= classname %>::Find with OID '") + id_str + '\'');
-  id.init(id_str);
+  if (id_string.size() != 24)
+    throw MongoDB::Exception(string("Invalid call to <%= classname %>::Find with OID '") + id_string + '\'');
+  id.init(id_string);
   {
     SmartPointer<MongoDB::ResultSet<<%= classname %>> > results = MongoDB::ResultSet<<%= classname %>>::Query(QUERY("_id" << id));
     SmartPointer<<%= classname %>>                      result(nullptr);
@@ -51,24 +54,22 @@ SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
 // FIELDS
 void <%= classname %>::initialize_fields()
 {
+  fields.clear();
 <% fields.each do |field| %>
   <%= field[:name] %>.initialize("<%= field[:name] %>", bson_object, <%= field[:default] %>);
+  fields.push_back(&<%= field[:name] %>);
 <% end %>
   fields_initialized = true;
 }
 
 <% fields.each do |field| %>
-<%= field[:type] %> <%= classname %>::get_<%= field[:name] %>(void)
+<%= field[:type] %> <%= classname %>::get_<%= field[:name] %>(void) const
 {
-  if (fields_initialized == false)
-    initialize_fields();
   return <%= field[:name] %>.Get();
 }
 
 void <%= classname %>::set_<%= field[:name] %>(<%= field[:type] %> value)
 {
-  if (fields_initialized == false)
-    initialize_fields();
   <%= field[:name] %>.Set(value);
 }
 <% end %>
@@ -92,9 +93,8 @@ void <%= classname %>::set_<%= data[:relation_name] %>_id(const std::string& id_
 
   if (ptr->more())
   {
-    type                  obj(col, ptr->next())
+    type                  obj(col, ptr->next());
 
-    obj.initialize_fields();
     return (obj);
   }
   return (type(col, mongo::BSONObj()));

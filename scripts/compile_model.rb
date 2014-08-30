@@ -3,10 +3,10 @@ require 'erb'
 require 'pathname'
 require 'fileutils'
 
-def compile_model filename
-  file_content            = (File.open filename).read
-  filepath                = filename
-  relative_path           = filepath[11..filepath.length]
+def compile_model filepath
+  file_content            = (File.open filepath).read
+  filename                = filepath.match(/\/app\/models\/(.*).h(pp)?$/)[1]
+  relative_path           = filename + '.cpp'
   classname               = nil
   fields                  = []
   has_many                = []
@@ -80,6 +80,15 @@ def compile_model filename
         type:    "mongo::OID",
         name:    "#{relation[:relation_name]}_id",
         default: "mongo::OID()"
+      }
+    fields << relation_field
+  end
+  
+  has_and_belongs_to_many.each do |relation|
+    relation_field = {
+      type:    "MongoDB::Array<mongo::OID>",
+      name:    "#{relation[:relation_name]}_ids",
+      default: "MongoDB::Array<mongo::OID>()"
       }
     fields << relation_field
   end

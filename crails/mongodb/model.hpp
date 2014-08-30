@@ -6,17 +6,22 @@
 # include "exception.hpp"
 # include "array.hpp"
 
+# define MONGODB_COLLECTION(database,collection) \
+  static std::string DatabaseName()   { return (#database);   } \
+  static std::string CollectionName() { return (#collection); }
+
 # define MONGODB_MODEL(classname) \
-    friend class MongoDB::ResultSet<classname>; \
-    classname(MongoDB::Collection& collection, mongo::BSONObj bson_object); \
-    classname(const classname& copy); \
-    static SmartPointer<classname> Find(const std::string& id_str); \
-    static classname Create(Data params = Data()); \
-    void initialize_fields(void);
+  friend class MongoDB::ResultSet<classname>; \
+  classname(MongoDB::Collection& collection, mongo::BSONObj bson_object); \
+  classname(const classname& copy); \
+  static SmartPointer<classname> Find(const std::string& id_str); \
+  static classname Create(Data params = Data()); \
+  void initialize_fields(void);
 
 # define MONGODB_FIELD(type,field,def) \
-  type get_field (void) const;\
-  void set_##field (type val); }
+  Field<type> field;\
+  type get_##field (void) const;\
+  void set_##field (type val);
 
 # define MONGODB_HAS_MANY_AS(type,remote_field,relation_name) \
   MongoDB::ResultSet<type>* relation_name##s (void);
@@ -34,11 +39,7 @@
   
 # define MONGODB_HAS_AND_BELONGS_TO_MANY(type,relation_name) \
   MONGODB_FIELD(MongoDB::Array<mongo::OID>, relation_name##_ids, MongoDB::Array<mongo::OID>()) \
-  MongoDB::ResultSet<type>* relation_name (void) \
-  { \
-    MongoDB::ResultSet<type>* ptr = MongoDB::ResultSet<type>::Query(collection.Db()[type::CollectionName()], BSON("_id" << BSON("$in" << relation_name##_ids()))); \
-    return (ptr); \
-  }
+  MongoDB::ResultSet<type>* relation_name (void);
 
 namespace MongoDB
 {
