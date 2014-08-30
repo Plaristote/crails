@@ -36,3 +36,36 @@ The keys to the first objects are the name of your dbs which you will use to get
 Notes:
 - Authentication with mongodb is not yet ready.
 - The SQL module only support MySQL for now. SQLite and PostgreSQL support is planned.
+
+## Asset pipeline
+The `Gulpfile.js` provided by crails has two tasks for compiling javascripts and css assets. The lookup pathes for your assets are `app/assets/javascripts` and `app/assets/stylesheets`.
+
+You may configure the asset pipeline's behavior by editing the `conf/assets.json` file. By default, it looks like this:
+
+```JSON
+{
+  "javascripts": {
+    "application": [ '**/*.js', '**/*.coffee' ]
+  },
+  "stylesheets": {
+    "application": [ '**/*.css', '**/*.scss' ]
+  }
+}
+```
+
+The file is composed of three levels: the first level describes the type of assets (javascript/stylesheets), the second level creates a target file (in this case, `public/assets/application.js` and `public/assets/application.css`), and the third level contains an array of file matchers, specifying which files should be compiled into the target.
+
+The order of the matchers matters during the compilation, which allows you to use this configuration to specify which files should be compiled before the others. For instance, if you have a dependency for jquery, you may make this change to the configuration:
+
+```JSON
+{
+  "javascripts": {
+    "application": [ 'jquery.js', '**/*.js', '**/*.coffee' ]
+  },
+  "stylesheets": {
+    "application": [ '**/*.css', '**/*.scss' ]
+  }
+}
+```
+
+This would ensure that `/app/assets/javascripts/jquery.js` would be at the top of the `/public/assets/application.js`.
