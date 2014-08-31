@@ -23,6 +23,7 @@
   }
   
 class Router;
+class Mailer;
 
 struct ExceptionCSRF : public std::exception
 {
@@ -32,6 +33,7 @@ struct ExceptionCSRF : public std::exception
 class ControllerBase
 {
   friend class Router;
+  friend class Mailer;
 protected:
   ControllerBase(Params& params);
   

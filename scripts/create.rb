@@ -147,6 +147,7 @@ project.base_directory source, base_directory do
   project.directory :config do
     project.file 'db.json'
     project.file 'assets.json'
+    project.file 'mailers.json'
     project.generate_erb 'salt.cpp',          'salt.cpp.erb',          options
     project.generate_erb 'session_store.cpp', 'session_store.cpp.erb', options
   end
