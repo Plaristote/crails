@@ -42,6 +42,10 @@ To the root of the project's directory, create a build directory, go in there, a
 
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
 
+In debug mode, the Crails Framework provides a number of tools (disabled caching of views and assets, displaying exceptions as HTTP response...) that you simply need while working on a Crails application. On your development machine, you would want to compile the framework with this command line:
+
+    cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
+
 Creating a Crails Application
 =====
 The installation of the Crails Framework should have added a ruby script named 'crails' in your bin directory.
