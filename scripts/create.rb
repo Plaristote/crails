@@ -69,7 +69,6 @@ options = {
             mongodb:             false,
             segvcatch:           false,
             server:              :async,
-            debug:               false,
             session_store:       "cookie_store",
             session_store_class: "CookieStore"
           }
@@ -79,7 +78,6 @@ OptionParser.new do |opts|
   opts.on('',   '--use-sql',       'include sql module')        do options[:sql]       = true end
   opts.on('',   '--use-mongodb',   'include mongodb module')    do options[:mongodb]   = true end
   opts.on('',   '--use-segvcatch', 'use the segvcatch library') do options[:segvcatch] = true end
-  opts.on('-d', '--debug-mode',    'use debug mode')            do options[:debug]     = true end
 
   opts.on('',   '--session-store [include] [type]', 'set a session store (ex: -session-store mongodb MongoStore)') do |param1,param2|
     options[:session_store]       = param1
