@@ -17,6 +17,8 @@ If the option was previously set to `OFF`, you MUST remove the `build/CMakeCache
 # define USER_HPP
         
 # include <crails/mongodb/model.hpp>
+# include <crails/mongodb/resultset.hpp>
+# include <crails/password.hpp>
         
 class User : public MongoDB::Model
 {
