@@ -176,7 +176,7 @@ bool CrailsServer::SendFile(const std::string& fullpath, BuildingResponse& respo
       str_length << (str.size() - first_bit);
       response.SetHeaders("Content-Length", str_length.str());
       response.SetHeaders("Content-Type",   GetMimeType(strrchr(fullpath.c_str(), '.')));
-      response.SetStatusCode(CrailsServer::HttpCodes::ok);    
+      response.SetStatusCode(CrailsServer::HttpCodes::ok);
       response.SetBody(str.c_str() + first_bit, str.size() - first_bit);
 #ifdef SERVER_DEBUG
       file_cache.GarbageCollect();
