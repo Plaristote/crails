@@ -34,7 +34,7 @@ endif()
 ##
 ## Dependencies
 ##
-find_package(cppnetlib QUIET)
+find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system REQUIRED)
 
 include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} .)
