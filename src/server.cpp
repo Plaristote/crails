@@ -221,20 +221,23 @@ bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse&
       std::string   method = (params["_method"].Nil() ? request.method : params["_method"].Value());
       DynStruct     data   = router->Execute(method, params["uri"].Value(), params);
       string        body   = data["body"].Value();
+      HttpCode      code   = HttpCodes::ok;
 
       cout << "[" << request.method << " route " << request.destination << "]" << endl;
 
       out.SetHeaders("Content-Type", "text/html");
-      if (data["response"]["headers"].NotNil())
+      if (data["headers"].NotNil())
       { // If parameters headers were set, copy them to the response
-        auto it  = data["response"]["headers"].begin();
-        auto end = data["response"]["headers"].end();
+        auto it  = data["headers"].begin();
+        auto end = data["headers"].end();
 
         for (; it != end ; ++it)
           out.SetHeaders((*it).Key(), (*it).Value());
       }
       params.session->Finalize(out);
-      out.SetResponse(HttpCodes::ok, body);
+      if (data["status"].NotNil())
+        code = (HttpCode)((int)data["status"]);
+      out.SetResponse(code, body);
     }
     return (true);
   }
