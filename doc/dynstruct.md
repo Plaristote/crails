@@ -4,6 +4,8 @@ contain a value or a set of other nodes. Unexisting nodes are created on the fly
 out of scope. This means you can do stuff like this:
 
 ```C++
+  DynStruct render_data;
+
   if ((render_data["whatever"]["something"]["something_else"].Nil()))
     std::cout << "This node does not exist" << std::endl;
 ```
