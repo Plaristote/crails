@@ -15,7 +15,7 @@ This tutorial is intented to show you step by step how to create a Crails applic
 * [Write a controller](doc/controller.md#controllers)
 * [Router](doc/controller.md#controllers)
 * [Controller methods](doc/controller.md#controllers)
-  * [DynStruct (type used for storing parameters)](doc/controller.md#dynstruct)
+  * [Render](doc/controller.md#render)
   * [Parameters](doc/controller.md#params)
   * [Session](doc/controller.md#session)
 * [CSRF security](doc/controller.md#controllers)
