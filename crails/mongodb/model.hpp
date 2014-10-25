@@ -138,12 +138,8 @@ namespace MongoDB
     protected:
       void        BuildUpdate(mongo::BSONObjBuilder& builder)
       {
-        std::cout << "Updating field " << name << std::endl;
         if (has_changed)
-        {
-          std::cout << "Needs update" << std::endl;
           builder << name << value;
-        }
       }
     private:
       TYPE         value;
