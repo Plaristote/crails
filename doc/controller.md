@@ -35,7 +35,7 @@ public:
 
 Some explanations about what you're seeing right now:
 First of all, the crails/appcontroller.hpp is a header that includes pretty much everything needed to write contollers
-with Crail: (DynStruct, Params, ControllerBase, SharedVars and more).
+with Crail: ([DynStruct](doc/dynstruct.md), Params, ControllerBase, SharedVars and more).
 
 The controller class must inherits ControllerBase, which will implement some default behaviors (by default,
 no exception catcher or filters are set, but you can override these behaviors).
@@ -85,44 +85,10 @@ void CrmAccountsController::show()
 
 Here's a not-quite-minimal method for a controller.
 
-Let's first talk about the `response` and `params` objets. They are quite similar since they are both classes of the `DynStruct` type, however `Params` implements other tools (for handling file upload for instance).
-
-### DynStruct
-DynStruct is an object that serializes/unserializes data in text mode. Any node from the root of the DynStruct can
-contain a value or a set of other nodes. Unexisting nodes are created on the fly and garbage collected when they go
-out of scope. This means you can do stuff like this:
-
-```C++
-  if ((render_data["whatever"]["something"]["something_else"].Nil()))
-    std::cout << "This node does not exist" << std::endl;
-```
-
-If you set a value on an unexisting node, it will be saved along with all the unexisting parent nodes. This means that
-this is a correct use of the DynStruct:
-
-```C++
-  render_data["nonexisting-node"]["a key"] = "A value";
-```
-
-They also support any type that is suppoted by std streams. So this s correct as well:
-
-```C++
-  render_data["key"] = 42.f;
-```
-It also automatically cast to the expected type:
-
-```C++
-  unsigned int number = render_data["key"];
-```
-
-Use the "value" method to explicitely get the value as a `std::string`:
-
-```C++
-  std::string mystring = render_data["key"].Value();
-```
+Let's first talk about the `response` and `params` objets. They are quite similar since they are both classes of the [DynStruct](doc/dynstruct.md) type, however `Params` implements other tools (for handling file upload for instance).
 
 ### Params
-The param object is also a DynStruct, but it contains everything you need to know about the client's request:
+The param object is also a [DynStruct](doc/dynstruct.md), but it contains everything you need to know about the client's request:
 All the GET, form, multipart and routing parameters are stored at the root of the params object.
 Say your route is /crmacconts/:id, you would access the id parameter by using params["id"].
 There's also an header node (params["headers"]) containing the header parameters of the request.
