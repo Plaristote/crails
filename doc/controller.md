@@ -78,14 +78,14 @@ void CrmAccountsController::show()
   body  = "Hello World<br />";
   body += params["id"].Value(); // params is a protected reference to the request's params
   response["headers"]["Content-Type"] = "text/html"; // use this to set the response's headers, default is text/html
+  response["status"]                  = 200;         // use this to set the response's status code. Default is 200.
   response["body"]                    = body;        // use this to set the response's body
 }
 ```
 
 Here's a not-quite-minimal method for a controller.
 
-Let's first talk about the DynStruct and Params objets. They are quite similar since Params inheits DynStruct,
-however Params implements other tools (for handling file upload for instance).
+Let's first talk about the `response` and `params` objets. They are quite similar since they are both classes of the `DynStruct` type, however `Params` implements other tools (for handling file upload for instance).
 
 ### DynStruct
 DynStruct is an object that serializes/unserializes data in text mode. Any node from the root of the DynStruct can
@@ -101,7 +101,7 @@ If you set a value on an unexisting node, it will be saved along with all the un
 this is a correct use of the DynStruct:
 
 ```C++
-  render_data["nonexisting-node"]["akey"] = "Fuck yeah";
+  render_data["nonexisting-node"]["a key"] = "A value";
 ```
 
 They also support any type that is suppoted by std streams. So this s correct as well:
@@ -115,17 +115,11 @@ It also automatically cast to the expected type:
   unsigned int number = render_data["key"];
 ```
 
-I have however experienced compilation issues with using this method with string and MSVC, so the correct way to get
-a string value from a DynStruct node is actually this (if you wish to be compliant with something else than GCC):
+Use the "value" method to explicitely get the value as a `std::string`:
 
 ```C++
   std::string mystring = render_data["key"].Value();
 ```
-### Returning DynStruct
-Your controller method must always return a DynStruct.
-The DynStruct will be used to genrate the HTTP response. The body node (render_data["body"]) must contain the body
-of the response.
-Status code and setting headers / mimetypes is not yet supported, but it's in the works.
 
 ### Params
 The param object is also a DynStruct, but it contains everything you need to know about the client's request:
