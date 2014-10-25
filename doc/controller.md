@@ -35,7 +35,7 @@ public:
 
 Some explanations about what you're seeing right now:
 First of all, the crails/appcontroller.hpp is a header that includes pretty much everything needed to write contollers
-with Crail: ([DynStruct](doc/dynstruct.md), Params, ControllerBase, SharedVars and more).
+with Crail: ([DynStruct](dynstruct.md), Params, ControllerBase, SharedVars and more).
 
 The controller class must inherits ControllerBase, which will implement some default behaviors (by default,
 no exception catcher or filters are set, but you can override these behaviors).
@@ -85,10 +85,10 @@ void CrmAccountsController::show()
 
 Here's a not-quite-minimal method for a controller.
 
-Let's first talk about the `response` and `params` objets. They are quite similar since they are both classes of the [DynStruct](doc/dynstruct.md) type, however `Params` implements other tools (for handling file upload for instance).
+Let's first talk about the `response` and `params` objets. They are quite similar since they are both classes of the [DynStruct](dynstruct.md) type, however `Params` implements other tools (for handling file upload for instance).
 
 ### Params
-The param object is also a [DynStruct](doc/dynstruct.md), but it contains everything you need to know about the client's request:
+The param object is also a [DynStruct](dynstruct.md), but it contains everything you need to know about the client's request:
 All the GET, form, multipart and routing parameters are stored at the root of the params object.
 Say your route is /crmacconts/:id, you would access the id parameter by using params["id"].
 There's also an header node (params["headers"]) containing the header parameters of the request.
