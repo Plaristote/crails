@@ -16,8 +16,17 @@ precompilation and database abstraction.
 Tutorials and samples of code will be made available at some point in the futur to intoduce you to the capabilities
 of Crails Framework.
 
+Install Crails Framework
+========
+MacOS
+--------
+You may use a brew formula to install crails on Mac:
+
+    brew tap Plaristote/libs
+    brew install crails
+
 Compiling
-======
+--------
 This project was only compiled on an Archlinux. It should work fine with any unix-like OS, but there might be some
 unknown compiling issue. Please let me know if you meet any issues with building.
 
@@ -31,13 +40,13 @@ Here's a list of the dependecies:
 - ruby 1.9+
 
 Bulding Boots
-=====
+--------
 Go to the Boots folder, create a build directory, go in the build directory and type:
 
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
 
 Building the Crails Framework
-======
+--------
 To the root of the project's directory, create a build directory, go in there, and once again, type:
 
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
@@ -47,11 +56,11 @@ In debug mode, the Crails Framework provides a number of tools (disabled caching
     cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
 
 Creating a Crails Application
-=====
+========
 The installation of the Crails Framework should have added a ruby script named 'crails' in your bin directory.
 You can use it to create application this way:
 
     crails create -h # Check out the options first (support for databases and all that)
     crails create application_name --use-mongodb --use-mongo-session-store --debug-mode
 
-Now that your crails application is ready, check out the COOKBOOK to see all the neat things you can do with it !
+Now that your crails application is ready, check out the [COOKBOOK](COOKBOOK.md) to see all the neat things you can do with it !
