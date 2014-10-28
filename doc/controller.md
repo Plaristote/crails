@@ -12,7 +12,7 @@ This is what a Crails controller looks like:
 #ifndef  CRM_ACCOUNTS_HPP
 # define CRM_ACCOUNTS_HPP
 
-# include <crais/appcontroller.hpp>
+# include <crais/controller_base.hpp>
 
 class CrmAccountsController : public ControllerBase
 {
