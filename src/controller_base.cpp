@@ -139,6 +139,9 @@ void ControllerBase::set_content_type(RenderType type)
     case HTML:
       content_type = "text/html";
       break ;
+    case TEXT:
+      content_type = "text/plain";
+      break ;
   }
   response["headers"]["Content-Type"] = content_type;
 }

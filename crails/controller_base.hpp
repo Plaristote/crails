@@ -49,7 +49,8 @@ protected:
     JSON,
     JSONP,
     HTML,
-    XML
+    XML,
+    TEXT
   };
 
   void            render(RenderType type, DynStruct value);
