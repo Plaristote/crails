@@ -25,7 +25,7 @@ You may use a brew formula to install crails on Mac:
     brew tap Plaristote/libs
     brew install crails --HEAD
 
-There are some options available for that formula. This will include the MongoDB backend:
+There are some options available for that formula:
 
     brew install crails --HEAD --with-mongo-cxx-driver # with mongodb backend
     brew install crails --HEAD --with-soci             # with mysql backend
