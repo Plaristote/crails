@@ -1,5 +1,5 @@
 # include <Boots/include/Utils/datetime.hpp>
-# include "crails/session_store/mongo_store.hpp"
+# include "crails/session_store/mongodb.hpp"
 
 using namespace MongoDB;
 using namespace std;

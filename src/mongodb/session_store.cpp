@@ -1,4 +1,4 @@
-#include "crails/session_store/mongo_store.hpp"
+#include "crails/session_store/mongodb.hpp"
 
 using namespace std;
 
