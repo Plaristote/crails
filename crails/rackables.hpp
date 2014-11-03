@@ -6,16 +6,17 @@
 # include <Boots/Utils/directory.hpp>
 # include <functional>
 # include <iostream>
+# include "platform.hpp"
 
 template<typename TYPE>
 class Rackables
 {
   SINGLETON(Rackables)
-  
+
   struct Rackable
   {
     bool operator==(const std::string& comp) const { return (name == comp); }
-    
+
     std::string     name;
     TYPE            callback;
     DynamicLibrary* library;
@@ -26,7 +27,7 @@ class Rackables
   Rackables()
   {
   }
-  
+
   ~Rackables()
   {
     std::for_each(constructors.begin(), constructors.end(), [](Rackable& rackable)
@@ -35,13 +36,25 @@ class Rackables
     });
   }
 
+  static bool IsDynamicallyLoadableLibrary(const Dirent dirent)
+  {
+    if (dirent.d_type == DT_REG)
+    {
+      std::string filename(dirent.d_name);
+      std::string extension(DYNLIB_EXT);
+
+      return (filename.substr(filename.length() - extension.length()) == extension);
+    }
+    return (false);
+  }
+
 public:
 
   TYPE GetByName(const std::string& name) const
   {
     TYPE result = 0;
     auto it     = std::find(constructors.begin(), constructors.end(), name);
-    
+
     if (it  != constructors.end())
       result = it->callback;
     return (result);
@@ -50,7 +63,7 @@ public:
   void Load(const std::string& directory_path)
   {
     Directory directory;
-    
+
     if ((directory.OpenDir(directory_path)))
     {
       Directory::Entries& entries = directory.GetEntries();
@@ -60,11 +73,11 @@ public:
       for (; it != end ; ++it)
       {
         Dirent dirent = *it;
-        
-        if (dirent.d_type == DT_REG)
+
+        if (IsDynamicallyLoadableLibrary(dirent))
         {
           DynamicLibrary* loader = new DynamicLibrary;
-          
+
           if (loader->Load(directory_path + '/' + dirent.d_name))
           {
             HookName hook_name     = loader->Resolve<HookName>("hook_name");
@@ -93,7 +106,7 @@ public:
       }
     }
   }
-  
+
 private:
   std::list<Rackable> constructors;
 };

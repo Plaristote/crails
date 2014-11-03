@@ -1,6 +1,7 @@
 #include <Boots/System/process.hpp>
 #include <unistd.h>
 #include "crails/view.hpp"
+#include "crails/platform.hpp"
 #include <iostream>
 
 using namespace std;
@@ -11,7 +12,7 @@ View::View(const std::string& path)
   std::string full_path;
 
   full_path  = "../";
-  full_path += "app/views/" + path + ".so";
+  full_path += "app/views/" + path + '.' + DYNLIB_EXT;
   if (view_object.Load(full_path))
     generate_view = view_object.Resolve<GenerateView>("generate_view");
   else
