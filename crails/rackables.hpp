@@ -64,6 +64,7 @@ public:
   {
     Directory directory;
 
+    std::cout << "[Rackable] Loading rackables from directory " << directory_path << std::endl;
     if ((directory.OpenDir(directory_path)))
     {
       Directory::Entries& entries = directory.GetEntries();
