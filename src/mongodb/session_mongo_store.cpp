@@ -62,7 +62,7 @@ void MongoStore::SessionStore::Save(void)
   Collection& collection  = Databases::singleton::Get()->GetDb<MongodbDb>(database_name)[collection_name];
 
   if (has_id)
-    collection.Update(bson_object, QUERY("_id" << id));
+    collection.Update(bson_object, MONGO_QUERY("_id" << id));
   else
   {
     mongo::BSONElement id_element;

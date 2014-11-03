@@ -21,7 +21,7 @@ SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
     throw MongoDB::Exception(string("Invalid call to <%= classname %>::Find with OID '") + id_string + '\'');
   id.init(id_string);
   {
-    SmartPointer<MongoDB::ResultSet<<%= classname %>> > results = MongoDB::ResultSet<<%= classname %>>::Query(QUERY("_id" << id));
+    SmartPointer<MongoDB::ResultSet<<%= classname %>> > results = MongoDB::ResultSet<<%= classname %>>::Query(MONGO_QUERY("_id" << id));
     SmartPointer<<%= classname %>>                      result(nullptr);
 
     if (results->Entries().size() > 0)
@@ -85,7 +85,7 @@ void <%= classname %>::set_<%= data[:relation_name] %>_id(const std::string& id_
 <%= data[:type] %> <%= classname %>::<%= data[:relation_name] %>(void)
 {
   mongo::OID            foreign_oid = get_<%= data[:relation_name] %>_id();
-  mongo::Query          query = QUERY("_id" << foreign_oid);
+  mongo::Query          query = MONGO_QUERY("_id" << foreign_oid);
   MongoDB::Collection&  col   = GetCollection().Db()[<%= data[:type] %>::CollectionName() + 's'];
   auto                  ptr   = col.Query(query);
 
@@ -105,7 +105,7 @@ MongoDB::ResultSet<<%= data[:type] %>>* <%= classname %>::<%= data[:relation_nam
 {
   std::string      association      = <%= data[:type] %>::CollectionName();
   std::string      association_name = string("<%= data[:remote_field] %>") + "_id";
-  mongo::Query     query            = QUERY(association_name << OID());
+  mongo::Query     query            = MONGO_QUERY(association_name << OID());
   MongoDB::ResultSet<<%= data[:type] %>>* ptr = MongoDB::ResultSet<<%= data[:type] %>>::Query(collection.Db()[association], query);
 
   ptr->SetOwner(*this, "<%= data[:relation_name] %>");

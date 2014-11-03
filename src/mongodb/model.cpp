@@ -32,7 +32,7 @@ void Model::InitializeFields(void)
 
 bool Model::Refresh(void)
 {
-  auto_ptr<mongo::DBClientCursor> list = collection.Query(QUERY("_id" << id));
+  auto_ptr<mongo::DBClientCursor> list = collection.Query(MONGO_QUERY("_id" << id));
   
   if (list->more())
   {
@@ -69,7 +69,7 @@ void Model::Save(void)
 {
   if (has_id)
   {
-    mongo::Query query = QUERY("_id" << id);
+    mongo::Query query = MONGO_QUERY("_id" << id);
   
     collection.Update(Update(), query);
   }
@@ -84,7 +84,7 @@ void Model::Remove(void)
 {
   if (has_id)
   {
-    mongo::Query query = QUERY("_id" << id);
+    mongo::Query query = MONGO_QUERY("_id" << id);
     
     collection.Remove(query, true);
   }

@@ -71,7 +71,7 @@ namespace MongoDB
       mongo::BSONObj object = BSON("$set" << BSON(foreign_key << foreign_oid));
 
       std::cout << "[" << model.Id() << "] Set " << foreign_key << " to " << foreign_oid.toString() << std::endl;
-      table.Update(object, QUERY("_id" << model.OID()));
+      table.Update(object, MONGO_QUERY("_id" << model.OID()));
       model.Refresh();
       return (*this);
     }
