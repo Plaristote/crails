@@ -23,7 +23,7 @@ MacOS
 You may use a brew formula to install crails on Mac:
 
     brew tap Plaristote/libs
-    brew install crails --HEAD
+    brew install crails --HEAD # the formula is head only
 
 There are some options available for that formula:
 
@@ -31,19 +31,20 @@ There are some options available for that formula:
     brew install crails --HEAD --with-soci             # with mysql backend
     brew install crails --HEAD --with-soci --async     # build server for multithreaded use 
 
+N.B: mongo-cxx-driver and soci support in Crails are currently broken on MacOS.
+
 Compiling
 --------
 This project was only compiled on an Archlinux. It should work fine with any unix-like OS, but there might be some
 unknown compiling issue. Please let me know if you meet any issues with building.
 
 Here's a list of the dependecies:
-- Boots (included in the repository)
+- ruby >= 1.9
+- nodejs
 - cpp-netlib
-- segvcatch (optional, add "-DUSE_SEGVCATCH" and uncomment the CMakeList linking line to use)
-- soci (if you want to compile crails-sql)
-- mongoclient (if you want to compile crail-mongodb)
-- nodejs (you'll need uglifyjs, and coffeescript if you put coffee files in /app/assets/javascripts)
-- ruby 1.9+
+- segvcatch (optional)
+- soci (optional, used by crails-sql)
+- mongoclient (optional, used by crail-mongodb)
 
 Bulding Boots
 --------
