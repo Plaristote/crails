@@ -4,6 +4,9 @@
 # include <crails/databases.hpp>
 # include "collection.hpp"
 
+# define MONGODB_GET_COLLECTION(database,collection) \
+  CRAILS_DATABASE(MongoDB,database)[collection]
+
 namespace MongoDB
 {
   class Database : public Databases::Db

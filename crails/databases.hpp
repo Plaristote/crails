@@ -6,6 +6,9 @@
 # include <vector>
 # include <crails/rackables.hpp>
 
+# define CRAILS_DATABASE(type,database) \
+  Databases::singleton::Get()->GetDb<type::Database>(database)
+
 class Databases
 {
 private:
