@@ -142,7 +142,7 @@ collection will have an `author_id` field instead of the `user_id` field.
 
 When your requirements are a bit more specific, you'll need to make your own requests. You may use helpers from the `ResulSet` template to achieve this:
 
-# Querying
+#### Querying
 ```C++
   #include <Boots/Utils/smart_pointer.hpp> // defines the SP macro
 
@@ -167,7 +167,7 @@ This means:
 
 A simple documentation for the mongo::Query object is available [here](https://github.com/mongodb/mongo-cxx-driver/wiki/Tutorial#query).
 
-# Iterating
+#### Iterating
 You may also iterate on the results using `ResultSet<T>::Each(std::function<bool(T&)>)`.
 
 ```C++
