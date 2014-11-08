@@ -12,6 +12,8 @@ public:
   }
 };
 
+# define SP(T) SmartPointer<T>
+
 template<typename T>
 class SmartPointer
 {
@@ -109,6 +111,9 @@ public:
     if (pointer == 0) { throw NullPointerException(); }
     return (*pointer);
   }
+
+  T*       Pointer(void) const { return (pointer); }
+  const T* Pointer(void) const { return (pointer); }
 
 private:
   T*            pointer;
