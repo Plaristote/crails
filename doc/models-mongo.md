@@ -165,7 +165,7 @@ This means:
 * passing no parameters to this function will ask for all the entries in the collection.
 * it is possible to limit the number of results (useful for pagination for instance) using the `n_to_return` and `n_to_skip` parameters. The default values of '0' means that there is no limit to the number of results.
 
-A simple documentation for the mongo::Query object is available [here](https://github.com/mongodb/mongo-cxx-driver/wiki/Tutorial#query).
+A simple documentation for the `mongo::Query` object is available [here](https://github.com/mongodb/mongo-cxx-driver/wiki/Tutorial#query).
 
 #### Iterating
 You may also iterate on the results using `ResultSet<T>::Each(std::function<bool(T&)>)`.
@@ -187,4 +187,4 @@ You may also iterate on the results using `ResultSet<T>::Each(std::function<bool
   }
 ```
 
-Alternatively, you can also get all the result in an std::list object by using `ResultSet<T>::Entries(void)`.
+Alternatively, you can also get all the result in an `std::list` object by using `ResultSet<T>::Entries(void)`.
