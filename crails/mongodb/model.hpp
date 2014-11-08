@@ -5,10 +5,12 @@
 # include <Boots/Utils/smart_pointer.hpp>
 # include "exception.hpp"
 # include "array.hpp"
+# include "collection.hpp"
 
 # define MONGODB_COLLECTION(database,collection) \
-  static std::string DatabaseName()   { return (#database);   } \
-  static std::string CollectionName() { return (#collection); }
+  static std::string DatabaseName()        { return (#database);   } \
+  static std::string CollectionName()      { return (#collection); } \
+  static MongoDB::Collection& Collection() { return (MONGODB_GET_COLLECTION(#database,#collection)); }
 
 # define MONGODB_MODEL(classname) \
   friend class MongoDB::ResultSet<classname>; \
