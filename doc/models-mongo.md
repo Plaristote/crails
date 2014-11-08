@@ -22,6 +22,8 @@ If the option was previously set to `OFF`, you MUST remove the `build/CMakeCache
         
 class User : public MongoDB::Model
 {
+  // MONGODB_COLLECTION defines the names of the database (as specified in `conf/db.json`) and collection to use.
+  MONGODB_COLLECTION(mongodb, users);
   // MONGODB_MODEL generates constructors, destructor, and the Find and Create methods.
   MONGODB_MODEL(User);
   // MONGODB_FIELD generates a getter and a setter (respectively `type name() const` and `void set_name(type)`)
@@ -83,6 +85,7 @@ A one-to-many relationship is represented using the MONGODB_HAS_MANY macro:
 ```C++
   class User : public MongoDB::Model
   {
+    MONGODB_COLLECTION(mongodb, users);
     MONGODB_MODEL(User);
     MONGODB_FIELD(std::string, name,     "")
     MONGODB_FIELD(Password,    password, "")
@@ -99,6 +102,7 @@ Belongs to is the reverse of a "has_many" relationship. It helps you manage the 
 ```C++
   class Comment : public MongoDB::Model
   {
+    MONGODB_COLLECTION(mongodb, comments);
     MONGODB_MODEL(Comment);
     MONGODB_FIELD(std::string, message,  "")
     MONGODB_BELONGS_TO(User)
@@ -111,6 +115,7 @@ You may also customize the name of the relationship, like this:
 ```C++
   class User : public MongoDB::Model
   {
+    MONGODB_COLLECTION(mongodb, users);
     MONGODB_MODEL(User);
     MONGODB_FIELD(std::string, name,     "")
     MONGODB_FIELD(Password,    password, "")
@@ -119,6 +124,7 @@ You may also customize the name of the relationship, like this:
 
   class Comment : public MongoDB::Model
   {
+    MONGODB_COLLECTION(mongodb, comments);
     MONGODB_MODEL(Comment);
     MONGODB_FIELD(std::string, message,  "")
     MONGODB_BELONGS_TO_AS(User, author)
