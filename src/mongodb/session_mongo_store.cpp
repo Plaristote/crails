@@ -59,7 +59,7 @@ void MongoStore::SessionStore::GetFields(Data data)
 
 void MongoStore::SessionStore::Save(void)
 {
-  Collection& collection  = Databases::singleton::Get()->GetDb<MongodbDb>(database_name)[collection_name];
+  Collection& collection  = Databases::singleton::Get()->GetDb<MongoDB::Database>(database_name)[collection_name];
 
   if (has_id)
     collection.Update(bson_object, MONGO_QUERY("_id" << id));
@@ -81,7 +81,7 @@ void MongoStore::SessionStore::SetFields(Data data)
   unsigned int          updated_at = DateTime::Now();
 
   if (has_id)
-    builder << "_id"         << id;
+    builder << "_id" << id;
   else
     builder.genOID();
   builder   << "_updated_at" << updated_at;
@@ -94,7 +94,7 @@ void MongoStore::SessionStore::SetFields(Data data)
 
 void MongoStore::SessionStore::Cleanup(void)
 {
-  Collection&                                   collection  = Databases::singleton::Get()->GetDb<MongodbDb>(database_name)[collection_name];
+  Collection&                                   collection  = Databases::singleton::Get()->GetDb<MongoDB::Database>(database_name)[collection_name];
   unsigned int                                  timestamp   = DateTime::Now();
   unsigned int                                  expiring_at = timestamp - session_expiration;
 
