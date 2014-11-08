@@ -31,7 +31,28 @@ class User : public MongoDB::Model
   MONGODB_FIELD(Password,    password, "")
 };
 ```
-## Create, update, delete
+
+## Using models
+We will now see how to use the model we just created by writing the code for a UserController.
+
+### Find
+```C++
+void UserController::show()
+{
+  std::string id   = params["id"].Value();
+  SP(User)    user = User::Find(id);
+  
+  if (user.Null())
+  {
+    response["status"] = 404;
+    return ;
+  }
+  *shared_vars["user"] = user.Pointer();
+  render("layouts/application", "users/show");
+}
+```
+
+### Create
 ```C++
 void UserController::create()
 {
@@ -42,14 +63,18 @@ void UserController::create()
     auto user = User::Create(params["user"]);
 
     user.Save();
+    *shared_vars["user"] = &user;
+    render("layouts/application", "users/show");
   }
 }
-        
+```
+
+### Update
+```C++
 void UserController::update()
 {
-  // Note that the SmartPointer throws an exception when trying to use null pointers.
-  SmartPointer<User> user     = User::Find(params["id"]);
-  bool               success = true;
+  SP(User) user    = User::Find(params["id"]);
+  bool     success = true;
 
   if (params["user"]["name"].Value() != "")
     user->set_name(params["user"]["name"]);
@@ -61,22 +86,31 @@ void UserController::update()
       success = false;
   }
   if (success)
+  {
     user->save();
+    *shared_vars["user"] = user.Pointer();
+    render("layouts/application", "users/show");
+  }
+  else
+    response["status"] = 422;
 }
-        
-void UserController::delete()
-{
-  SmartPointer<User> user = User::Find(params["id"]);
 
-  user->Remove();
-}
-        
 bool UserController::password_matches_confirmation()
 {
   return (params["password"].Value() && params["password-confirm"].Value());
 }
 ```
 
+### Delete
+```C++
+void UserController::delete()
+{
+  SP(User) user = User::Find(params["id"]);
+
+  user->Remove();
+}
+```
+        
 ## Relations
 Relations connect your models together, greatly simplifying the task of querying objects that are related to each other.
 
@@ -138,7 +172,7 @@ collection will have an `author_id` field instead of the `user_id` field.
 
 [TODO]
 
-### Making custom requests
+### Custom requests
 
 When your requirements are a bit more specific, you'll need to make your own requests. You may use helpers from the `ResulSet` template to achieve this:
 
