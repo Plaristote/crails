@@ -96,7 +96,7 @@ gulp.task('views', ['clean'], function() {
 });
 
 gulp.task('plugins', ['clean'], function() {
-  return (gulp.src(paths.plugins).pipe(exec(command_compile('<%= file.path %>.cpp -o <%= file.path %>.' + dynlib_extension)), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true })));
+  return (gulp.src(paths.plugins).pipe(exec(command_compile('<%= file.path %> -o <%= file.path %>.' + dynlib_extension)), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true })));
 });
 
 gulp.task('models', ['clean'], function() {
