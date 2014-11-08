@@ -34,7 +34,7 @@ SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
 {
   const string         database        = <%= classname %>::DatabaseName();
   const string         collection_name = <%= classname %>::CollectionName();
-  MongoDB::Collection& collection      = Databases::singleton::Get()->GetDb<MongodbDb>(database)[collection_name];
+  MongoDB::Collection& collection      = Databases::singleton::Get()->GetDb<MongoDB::Database>(database)[collection_name];
   mongo::BSONObj       obj;
   {
     mongo::BSONObjBuilder builder;

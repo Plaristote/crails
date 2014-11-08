@@ -4,8 +4,34 @@
 using namespace MongoDB;
 using namespace std;
 
-Database::Database(mongo::DBClientConnection& connection, const string& name) : connection(connection), name(name)
+Database::Database(const std::string& name, const std::string& hostname, unsigned short port) : Db(ClassType()), name(name), hostname(hostname), port(port)
 {
+  connected = false;
+}
+
+void Database::AuthenticateWith(const std::string& username, const std::string& password)
+{
+  this->username = username;
+  this->password = password;
+}
+
+void Database::Connect(void)
+{
+  if (!connected)
+  {
+    std::stringstream stream;
+    std::string       err;
+      
+    stream << hostname << ':' << port;
+    if (connection.connect(stream.str(), err))
+    {
+      std::cout << "[MongoDB] New connection to " << stream.str() << std::endl;
+      RefreshCollections();
+      connected = true;
+    }
+    else
+      throw Databases::Exception(err);
+  }
 }
 
 void Database::RefreshCollections(void)

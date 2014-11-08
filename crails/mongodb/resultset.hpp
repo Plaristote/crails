@@ -6,8 +6,8 @@
 # include <Boots/Utils/smart_pointer.hpp>
 # include "collection.hpp"
 # include "model.hpp"
+# include "database.hpp"
 # include "crails/databases.hpp"
-# include "../mongodb.hpp"
 
 namespace MongoDB
 {
@@ -31,7 +31,7 @@ namespace MongoDB
     {
       const std::string database        = MODEL::DatabaseName();
       const std::string collection_name = MODEL::CollectionName();
-      Collection&       collection      = Databases::singleton::Get()->GetDb<MongodbDb>(database)[collection_name];
+      Collection&       collection      = Databases::singleton::Get()->GetDb<MongoDB::Database>(database)[collection_name];
       
       return (new ResultSet(collection, collection.Query(query, n_to_return, n_to_skip, fields_to_return, query_options, batch_size)));
     }    
