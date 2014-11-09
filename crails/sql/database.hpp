@@ -2,8 +2,8 @@
 # define SQL_DATABASE_HPP
 
 # include <soci/soci.h>
-# include <soci/soci-mysql.h>
 # include <string>
+# include <crails/databases.hpp>
 
 namespace SQL
 {
@@ -37,10 +37,12 @@ namespace SQL
   
   class Table;
 
-  class Database
+  class Database : public Databases::Db
   {
   public:
-    Database(soci::mysql_backend_factory mbf, const std::string& cmd) : mbf(mbf), connect_cmd(cmd)
+    static const std::string ClassType(void) { return ("sql"); }
+
+    Database(const std::string& factory, const std::string& cmd) : Db(ClassType()), factory(factory), connect_cmd(cmd), connected(false)
     {
     }
     
@@ -49,9 +51,13 @@ namespace SQL
       this->name = name;
     }
     
-    void             OpenConnection(void)
+    void             Connect(void)
     {
-      sql.open(mbf, connect_cmd);
+      if (!connected)
+      {
+        sql.open(factory, connect_cmd);
+        connected = true;
+      }
     }
     
     Table            operator[](const std::string& name);
@@ -61,8 +67,9 @@ namespace SQL
     soci::session sql;
   protected:
     std::string   name;
-    soci::mysql_backend_factory mbf;
-    std::string                 connect_cmd;
+    std::string   factory, connect_cmd;
+  private:
+    bool          connected;
   };
 }
 
