@@ -113,7 +113,6 @@ public:
   }
 
   T*       Pointer(void) const { return (pointer); }
-  const T* Pointer(void) const { return (pointer); }
 
 private:
   T*            pointer;
