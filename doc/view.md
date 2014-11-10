@@ -120,7 +120,7 @@ std::string box(std::string title, std::string icon, std::function<std::string (
 {
     std::stringstream html;
           
-  html << "<div class='box'>;
+  html << "<div class='box'>";
   html <<   "<h2><i class='glyphicon glyphicon-" << icon << "'></i> " << title << "</h2>";
   html <<   "<div class='content'>";
   html <<     yield(); // Append the rendered ECPP to the stream
