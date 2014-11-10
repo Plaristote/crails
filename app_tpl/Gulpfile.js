@@ -46,15 +46,20 @@ var paths = {
 }
 
 gulp.task('cmake', function() {
-  var spawn = child.spawn;
-  var cmake = spawn('cat', ['build/CMakeCache.txt']);
+  if (os.platform() != 'darwin')
+  {
+    var spawn = child.spawn;
+    var cmake = spawn('cat', ['build/CMakeCache.txt']);
 
-  cmake.stdout.on('data', function(data) {
-    var debug_option = ('' + data).match(/SERVER_DEBUG:BOOL=(ON|OFF)/)[1];
+    cmake.stdout.on('data', function(data) {
+      var debug_option = ('' + data).match(/SERVER_DEBUG:BOOL=(ON|OFF)/)[1];
 
-    debug = debug_option == 'ON';
-    console.log("- Using debug mode", debug);
-  });
+      debug = debug_option == 'ON';
+      console.log("- Using debug mode", debug);
+    });
+  }
+  else
+    console.log("- Cannot read CMake variables on OSX. Gulp will assume debug mode is enabled");
 });
 
 gulp.task('scripts', ['clean'], function() {
