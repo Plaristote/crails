@@ -7,6 +7,53 @@ using namespace SQL;
 /*
  * Database
  */
+Database::Database(Data settings) : Db(ClassType(), connected(false)
+{
+  string backend = settings["type"].Value();
+
+  if (backend == "mysql")
+    InitializeForMySQL();
+  else if (backend == "postgresql")
+    InitializeForPostgreSQL();
+  else
+    InitializeForSqlite();
+  SetDbName(settings["database"].Value());
+}
+
+void Database::InitializeForMySQL(Data data)
+{
+  string cmd = "dbname=" + data["database"].Value();
+
+  if (data["user"].NotNil())
+    cmd += " user=" + data["user"].Value();
+  if (data["password"].NotNil())
+    cmd += " password=" + data["password"].Value();
+  if (data["host"].NotNil())
+    cmd += " host=" + data["host"].Value();
+  if (data["port"].NotNil())
+    cmd += " port=" + data["port"].Value();
+  if (data["unix_socket"].NotNil())
+    cmd += " unix_socket=" + data["unix_socket"].Value();
+  connect_cmd = cmd;
+  factory     = "mysql";
+}
+
+void Database::InitializeForPostgreSQL(Data data)
+{
+  factory     = "postgresql";
+  connect_cmd = "dbname=" + data["database"].Value();
+}
+
+void Database::InitializeForSqlite(Data data)
+{
+  string cmd = "sqlite.db";
+
+  if (data["file"].NotNil())
+    cmd = data["file"].Value();
+  connect_cmd = cmd;
+  factory     = "sqlite3";
+}
+
 Table Database::operator[](const std::string& name)
 {
   if (!(TableExists(name)))

@@ -244,3 +244,11 @@ void Data::Unserialize(Utils::Packet& packet)
     _data->pointers = 1;
   }
 }
+
+std::string Data::ToJson(void) const
+{
+  std::string result;
+
+  DataTree::Writers::StringJSON(*this, result);
+  return (result);
+}

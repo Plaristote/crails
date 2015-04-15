@@ -1,6 +1,5 @@
 {
   "mongodb": {
-    "type": "mongodb",
     "host": "127.0.0.1",
     "database": "crails_db"
   },

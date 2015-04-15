@@ -85,7 +85,7 @@ public:
   {
     if (!_data) return (false);
     std::stringstream stream;
-    
+
     stream << var;
     return (_data->value == stream.str());
   }
@@ -114,10 +114,10 @@ public:
   /*! \brief For debug purposes, writes the content of the DataTree from the current branch to the standard output */
   //void Output(unsigned char indent = 0);
   void Output(std::ostream& stream = std::cout, unsigned char indent = 0);
-  
+
   /*! \brief Returns the amount of children the branch has */
   unsigned int Count(void) const { return (_data ? _data->children.size() : 0); }
-  
+
   class iterator : public std::iterator_traits<Children::iterator>
   {
   public:
@@ -153,6 +153,7 @@ public:
 
   void Serialize(Utils::Packet& packet) const;
   void Unserialize(Utils::Packet& packet);
+  std::string ToJson(void) const;
 
 protected:
   DataBranch* _data;

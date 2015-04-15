@@ -16,7 +16,7 @@ namespace MongoDB
 
     static const std::string ClassType(void) { return ("mongodb"); }
 
-    Database(const std::string& name, const std::string& host, unsigned short port);
+    Database(Data settings);
 
     bool                       operator==(const std::string& name) const { return (this->name == name); }
     Collection&                operator[](const std::string& name);

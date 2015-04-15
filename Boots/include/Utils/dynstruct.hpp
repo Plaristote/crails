@@ -8,7 +8,6 @@ class DynStruct : public Data
 public:
   DynStruct(void) : Data(&root) {}
   DynStruct(const DynStruct& other) : Data(&root) { Duplicate(other); }
-
 private:
   DataTree root;
 };

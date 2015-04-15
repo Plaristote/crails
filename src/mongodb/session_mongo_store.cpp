@@ -45,7 +45,7 @@ void MongoStore::SessionStore::GetFields(Data data)
   {
     auto it  = field_names.begin();
     auto end = field_names.end();
-    
+
     for (; it != end ; ++it)
     {
       std::string key   = *it;

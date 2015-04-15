@@ -4,8 +4,14 @@
 using namespace MongoDB;
 using namespace std;
 
-Database::Database(const std::string& name, const std::string& hostname, unsigned short port) : Db(ClassType()), name(name), hostname(hostname), port(port)
+Database::Database(Data settings) :
+  Db(ClassType()),
+  name    (settings["database"].Value()),
+  hostname(settings["hostname"].Value()),
+  port    (settings["port"].Nil() ? 27017 : settings["port"])
 {
+  if (settings["username"].NotNil())
+    AuthenticateWith(settings["username"].Value(), settings["password"].Value());
   connected = false;
 }
 
@@ -21,7 +27,7 @@ void Database::Connect(void)
   {
     std::stringstream stream;
     std::string       err;
-      
+
     stream << hostname << ':' << port;
     if (connection.connect(stream.str(), err))
     {

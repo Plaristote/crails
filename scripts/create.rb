@@ -136,10 +136,6 @@ project.base_directory source, base_directory do
     end
   end
   project.directory :lib    do
-    project.directory :db   do
-      project.file 'mongodb.cpp' if options[:mongodb] != false
-      project.file 'sql.cpp'     if options[:sql]     != false
-    end
     project.file 'exception.html.ecpp'
   end
   project.directory :config do

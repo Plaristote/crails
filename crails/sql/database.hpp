@@ -42,15 +42,15 @@ namespace SQL
   public:
     static const std::string ClassType(void) { return ("sql"); }
 
-    Database(const std::string& factory, const std::string& cmd) : Db(ClassType()), factory(factory), connect_cmd(cmd), connected(false)
+    Database(Data settings) : Db(ClassType())
     {
     }
-    
+
     void             SetDbName(const std::string& name)
     {
       this->name = name;
     }
-    
+
     void             Connect(void)
     {
       if (!connected)
@@ -59,7 +59,7 @@ namespace SQL
         connected = true;
       }
     }
-    
+
     Table            operator[](const std::string& name);
     TableDescription Describe(const std::string& table_name);
     bool             TableExists(const std::string& table_name);
@@ -69,6 +69,10 @@ namespace SQL
     std::string   name;
     std::string   factory, connect_cmd;
   private:
+   void InitializeForMySQL(Data);
+   void InitializeForPostgreSQL(Data);
+   void InitializeForSqlite(Data);
+
     bool          connected;
   };
 }

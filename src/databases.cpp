@@ -2,24 +2,19 @@
 
 using namespace std;
 
-void Databases::LoadDatabases(void)
+void Databases::CleanupDatabases()
 {
-  Data             config(config_file);
-  const Factories* rackables = Factories::singleton::Get();
+  for (auto it = databases.begin() ; it != databases.end() ; ++it)
+    delete *it;
+  databases.clear();
+}
 
-  for_each(config.begin(), config.end(), [this, &rackables](Data db_config)
+Databases::Db* Databases::GetDatabaseFromName(const std::string& key)
+{
+  for (auto it = databases.begin() ; it != databases.end() ; ++it)
   {
-    string               type   = db_config["type"].Value();
-    Databases::DbFactory loader = rackables->GetByName(type);
-    
-    if (loader)
-    {
-      Databases::Db* db = loader(db_config);
-
-      db->name = db_config.Key();
-      databases.push_back(db);
-    }
-    else
-      cout << "Failed to load database " << db_config.Key() << endl;
-  });
+    if (**it == key)
+      return (*it);
+  }
+  return (0);
 }
