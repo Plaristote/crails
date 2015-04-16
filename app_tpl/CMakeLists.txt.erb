@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(<%= options[:name] %>)
-option(ASYNC_SERVER  "enable multi-threaded server" <%= options[:esrver] == :async ? 'ON' : 'OFF' %>)
+option(ASYNC_SERVER  "enable multi-threaded server" <%= options[:server] == :async ? 'ON' : 'OFF' %>)
 option(SERVER_DEBUG  "enable debugging tools"       ON)
 
 cmake_policy(SET CMP0042 OLD)
