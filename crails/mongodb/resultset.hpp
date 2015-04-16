@@ -64,7 +64,12 @@ namespace MongoDB
       Each([](MODEL&) -> bool { return (true); });
       return (fetched);
     }
-    
+
+    unsigned int Count(void)
+    {
+      return (Entries().size());
+    }
+
     ResultSet& operator<<(Model& model)
     {
       Collection&    table  = model.GetCollection();

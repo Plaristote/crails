@@ -35,10 +35,10 @@
   MONGODB_FIELD(mongo::OID, relation_name##_id , mongo::OID()) \
   void set_##relation_name##_id(const std::string& str); \
   type relation_name(void);
-  
+
 # define MONGODB_BELONGS_TO(type) \
   MONGODB_BELONGS_TO_AS(type,type)
-  
+
 # define MONGODB_HAS_AND_BELONGS_TO_MANY(type,relation_name) \
   MONGODB_FIELD(MongoDB::Array<mongo::OID>, relation_name##_ids, MongoDB::Array<mongo::OID>()) \
   MongoDB::ResultSet<type>* relation_name (void);
@@ -46,7 +46,7 @@
 namespace MongoDB
 {
   class Collection;
-  
+
   class Model
   {
   public:
@@ -60,7 +60,7 @@ namespace MongoDB
     bool               Refresh(void);
     Collection&        GetCollection(void)       { return (collection); }
     const Collection&  GetCollection(void) const { return (collection); }
-    
+
   private:
     static bool        GetOidFromObject(mongo::BSONObj object, mongo::OID& oid);
     mongo::BSONObj     Update(void);
@@ -78,7 +78,7 @@ namespace MongoDB
     {
       return (has_id);
     }
-    
+
     struct IField;
 
     mongo::BSONObj                       bson_object;
@@ -109,13 +109,13 @@ namespace MongoDB
     {
     public:
       Field(void) {}
-      
+
       Field(const Field& field)
       {
         value       = field.value;
         has_changed = field.has_changed;
       }
-      
+
       void initialize(const std::string& key, mongo::BSONObj bson_object, TYPE def)
       {
         auto element = bson_object.getField(key);
@@ -127,7 +127,7 @@ namespace MongoDB
           element.Val(value);
         has_changed = false;
       }
-      
+
       void        ForceUpdate(void) { has_changed = true; }
 
       TYPE        Get(void) const        { return (value);      }
@@ -146,24 +146,26 @@ namespace MongoDB
     private:
       TYPE         value;
       bool         has_changed;
-    };    
+    };
 
     template<typename Type>
     Field<Type>&       GetField(const std::string& fieldname) const
     {
       auto it = std::find_if(fields.begin(), fields.end(), [fieldname](IField* field)
       { return (*field == fieldname); });
-      
+
       if (it == fields.end())
         throw MongoDB::Exception("No such field " + fieldname);
       return (*(reinterpret_cast<Field<Type>*>(*it)));
     }
   };
-  
+
   template<>
   Model::Field<mongo::OID>::Field(const Model::Field<mongo::OID>& field);
   template<>
   void Model::Field<mongo::OID>::initialize(const std::string& key, mongo::BSONObj bson_object, mongo::OID def);
 }
+
+# include "resultset.hpp"
 
 #endif
