@@ -4,9 +4,14 @@ There are two ways to get MongoDB support into your crails project:
 
 If you haven't created the application yet, then use the `--use-mongodb` option provided by the `crails create` command.
 
-If the application already exists, then you need to add an option to `CmakeLists.txt`:
+If the application already exists, then you need to make the following changes to the `CMakeLists.txt` file:
 
-      option(USE_MONGODB "enables mongodb support" ON)
+      # Add this line at the beginning of the file
+      set(crails_mongodb_dep mongoclient crails-mongodb)
+      # Add ${crails_mongodb_dep} to the call to `target_link_library`
+      target_link_libraries(crails-app
+                        crails-core ${Boost_LIBRARIES} pthread dl crypto Boots ${CPPNETLIB_LIBRARIES}
+                        ${crails_mongodb_dep})
 
 If the option was previously set to `OFF`, you MUST remove the `build/CMakeCache.txt` file after you've done it.
 
