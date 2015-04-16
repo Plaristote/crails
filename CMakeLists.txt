@@ -70,7 +70,7 @@ file(GLOB         headers_crails_mdb crails/mongodb/*.hpp)
 file(GLOB         headers_crails_cki crails/session_store/*.hpp)
 file(GLOB         scripts            scripts/*.rb)
 file(GLOB         scripts_generate   scripts/generate/*.rb)
-file(GLOB         scripts_templates  scripts/tempaltes/*.erb)
+file(GLOB         scripts_templates  scripts/templates/*.erb)
 file(GLOB_RECURSE app_template       app_tpl/*)
 
 install(PROGRAMS scripts/crails         DESTINATION bin)
