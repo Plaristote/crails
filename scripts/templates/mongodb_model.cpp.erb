@@ -1,4 +1,6 @@
 #include "app/models/<%= filename %>.hpp"
+<% requires.each do |required_file| %>#include "app/models/<%= required_file %>.hpp"
+<% end %>
 
 using namespace std;
 using namespace MongoDB;
@@ -82,29 +84,42 @@ void <%= classname %>::set_<%= data[:relation_name] %>_id(const std::string& id_
   MongoDB::Model::set_owner_id("<%= data[:relation_name] %>_id", id_string);
 }
 
-<%= data[:type] %> <%= classname %>::<%= data[:relation_name] %>(void)
+SP(<%= data[:type] %>) <%= classname %>::get_<%= data[:relation_name] %>(void) const
 {
-  mongo::OID            foreign_oid = get_<%= data[:relation_name] %>_id();
-  mongo::Query          query = MONGO_QUERY("_id" << foreign_oid);
-  MongoDB::Collection&  col   = GetCollection().Db()[<%= data[:type] %>::CollectionName() + 's'];
-  auto                  ptr   = col.Query(query);
+  const string         database        = <%= data[:type] %>::DatabaseName();
+  const string         collection_name = <%= data[:type] %>::CollectionName();
+  MongoDB::Collection& collection      = Databases::singleton::Get()->GetDatabase<MongoDB::Database>(database)[collection_name];
+  mongo::OID           foreign_oid     = get_<%= data[:relation_name] %>_id();
+  mongo::Query         query           = MONGO_QUERY("_id" << foreign_oid);
+  auto                 ptr             = collection.Query(query);
 
   if (ptr->more())
-  {
-    <%= data[:type] %>  obj(col, ptr->next());
+    return (SP(<%= data[:type] %>)(new <%= data[:type] %>(collection, ptr->next())));
+  return (SP(<%= data[:type] %>)());
+}
+<% end %>
 
-    return (obj);
-  }
-  return (<%= data[:type] %>(col, mongo::BSONObj()));
+// has_one
+<% has_one.each do |data| %>
+SP(<%= data[:type] %>) <%= classname %>::get_<%= data[:relation_name] %>(void) const
+{
+  std::string  association      = <%= data[:type] %>::CollectionName();
+  std::string  association_name = "<%= data[:remote_field] + "_id" %>";
+  mongo::Query query            = MONGO_QUERY(association_name << OID());
+  SP(MongoDB::ResultSet<<%= data[:type] %>>) results = MongoDB::ResultSet<<%= data[:type] %>>::Query(collection.Db()[association], query);
+
+  if (results->Count() == 0)
+    return (SP(<%= data[:type] %>)());
+  return (new <%= data[:type] %>(results->Entries().front()));
 }
 <% end %>
 
 // has_many
 <% has_many.each do |data| %>
-MongoDB::ResultSet<<%= data[:type] %>>* <%= classname %>::<%= data[:relation_name] %>s (void)
+MongoDB::ResultSet<<%= data[:type] %>>* <%= classname %>::get_<%= data[:relation_name] %>s (void) const
 {
   std::string      association      = <%= data[:type] %>::CollectionName();
-  std::string      association_name = string("<%= data[:remote_field] %>") + "_id";
+  std::string      association_name = "<%= data[:remote_field] + "_id" %>";
   mongo::Query     query            = MONGO_QUERY(association_name << OID());
   MongoDB::ResultSet<<%= data[:type] %>>* ptr = MongoDB::ResultSet<<%= data[:type] %>>::Query(collection.Db()[association], query);
 

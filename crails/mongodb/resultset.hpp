@@ -40,7 +40,7 @@ namespace MongoDB
     {
       typename std::list<MODEL>::iterator it  = fetched.begin();
       typename std::list<MODEL>::iterator end = fetched.end();
-      
+
       for (; it != end ; ++it)
       {
         if (!(functor(*it)))
@@ -81,12 +81,12 @@ namespace MongoDB
       return (*this);
     }
 
-    void                                 SetOwner(Model& model, std::string relation_name)
+    void                                 SetOwner(const Model& model, const std::string& relation_name)
     {
       foreign_key = relation_name + "_id";
       foreign_oid = model.OID();
     }
-    
+
   private:
     Collection&                          collection;
     SmartPointer<mongo::DBClientCursor>  results;

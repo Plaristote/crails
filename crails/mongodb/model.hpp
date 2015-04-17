@@ -20,13 +20,21 @@
   static classname Create(Data params = Data()); \
   void initialize_fields(void);
 
+# define MONGODB_REQUIRE(filename)
+
 # define MONGODB_FIELD(type,field,def) \
   Field<type> field;\
   type get_##field (void) const;\
   void set_##field (type val);
 
+# define MONGODB_HAS_ONE_AS(type,remote_field,relation_name) \
+  SP(type) get_##relation_name(void) const;
+
+# define MONGODB_HAS_ONE(type,remote_field) \
+  MONGODB_HAS_ONE_AS(type,remote_field,type)
+
 # define MONGODB_HAS_MANY_AS(type,remote_field,relation_name) \
-  MongoDB::ResultSet<type>* relation_name##s (void);
+  MongoDB::ResultSet<type>* get_##relation_name##s (void) const;
 
 # define MONGODB_HAS_MANY(type,remote_field) \
   MONGODB_HAS_MANY_AS(type,remote_field,type)
@@ -34,7 +42,7 @@
 # define MONGODB_BELONGS_TO_AS(type,relation_name) \
   MONGODB_FIELD(mongo::OID, relation_name##_id , mongo::OID()) \
   void set_##relation_name##_id(const std::string& str); \
-  type relation_name(void);
+  SP(type) get_##relation_name(void) const;
 
 # define MONGODB_BELONGS_TO(type) \
   MONGODB_BELONGS_TO_AS(type,type)

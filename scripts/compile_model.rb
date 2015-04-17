@@ -10,13 +10,20 @@ def compile_model filepath
   classname               = nil
   fields                  = []
   has_many                = []
+  has_one                 = []
   belongs_to              = []
   has_and_belongs_to_many = []
+  requires                = []
 
   # SCAN CLASS
   file_content.scan /MONGODB_MODEL\s*\([a-zA-Z0-9_]+\)/ do |param|
     throw "#{filename} hosts several MONGODB_MODEL. Don't do that." if not classname.nil?
     classname  = param[14...param.length-1]
+  end
+
+  # SCAN REQUIRES
+  file_content.scan /MONGODB_REQUIRE\s*\(([a-zA-Z0-9_\/]+)\)/ do |param|
+    requires << param.first
   end
 
   # SCAN FIELDS
@@ -28,8 +35,27 @@ def compile_model filepath
       }
     fields << field_data
   end
-  
+
   # SCAN RELATIONS
+  # Scan has_one
+  file_content.scan /MONGODB_HAS_ONE\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
+    has_one_data = {
+      type:          param1,
+      remote_field:  param2,
+      relation_name: param1
+    }
+    has_one << has_one_data
+  end
+
+  file_content.scan /MONGODB_HAS_ONE_AS\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2,param3|
+    has_many_data = {
+        type:          param1,
+        remote_field:  param2,
+        relation_name: param3
+      }
+    has_one << has_many_data
+  end
+
   # Scan has_many
   file_content.scan /MONGODB_HAS_MANY\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
     has_many_data = {
@@ -48,7 +74,7 @@ def compile_model filepath
       }
     has_many << has_many_data
   end
-  
+
   # Scan belongs_to
   file_content.scan /MONGODB_BELONGS_TO\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1|
     throw "bite"
