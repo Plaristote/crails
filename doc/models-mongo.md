@@ -148,7 +148,7 @@ Belongs to is the reverse of a "has_many" relationship. It helps you manage the 
   };
 ```
 
-This helper will create the methods `void set_user(const User&)` and `User user()`.
+This helper will create the methods `void set_user(const User&)` and `SP(User) get_user() const`.
 You may also customize the name of the relationship, like this:
 
 ```C++
@@ -170,8 +170,7 @@ You may also customize the name of the relationship, like this:
   };
 ```
 
-Now, the generated methods will be `void set_author(const User&)` and `User author()`, and the field in the `comments`
-collection will have an `author_id` field instead of the `user_id` field.
+Now, the generated methods will be `void set_author(const User&)` and `SP(User) get_author() const`, and the field in the `comments` collection will have an `author_id` field instead of the `user_id` field.
 
 ### Has and belongs to many
 
