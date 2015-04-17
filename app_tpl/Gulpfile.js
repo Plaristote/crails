@@ -41,8 +41,7 @@ var paths = {
   scripts: [ 'app/assets/javascripts/**/*.js', 'app/assets/javascripts/**/*.coffee' ],
   css:     [ 'app/assets/stylesheets/**/*.scss', 'app/assets/stylesheets/**/*.css' ],
   views:   [ 'app/views/**/*.ecpp', 'lib/*.ecpp' ],
-  models:  [ 'app/models/**/*.hpp' ],
-  plugins: [ 'lib/db/*.cpp' ]
+  models:  [ 'app/models/**/*.hpp' ]
 }
 
 gulp.task('cmake', function() {
@@ -100,10 +99,6 @@ gulp.task('views', ['clean'], function() {
   return (compile_cpp);
 });
 
-gulp.task('plugins', ['clean'], function() {
-  return (gulp.src(paths.plugins).pipe(exec(command_compile('<%= file.path %> -o <%= file.path %>.' + dynlib_extension)), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true })));
-});
-
 gulp.task('models', ['clean'], function() {
   var compile_model = gulp.src(paths.models).pipe(exec('crails compile_model <%= file.path %> ; echo <%= file.path %> >> bite'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
   return (compile_model);
@@ -119,7 +114,8 @@ gulp.task('watch', function() {
   gulp.watch(paths.css,     ['css']);
   gulp.watch(paths.views,   ['views']);
   gulp.watch(paths.models,  ['models']);
-  gulp.watch(paths.plugins, ['plugins']);
 });
 
-gulp.task('default', ['watch', 'cmake', 'scripts', 'css', 'views', 'models', 'plugins']);
+gulp.task('build',   ['cmake', 'scripts', 'css', 'views', 'models']);
+gulp.task('default', ['watch', 'build']);
+
