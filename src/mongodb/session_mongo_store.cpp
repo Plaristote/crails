@@ -26,15 +26,20 @@ void MongoStore::Load(Data request_headers)
 
 void MongoStore::Finalize(BuildingResponse& response)
 {
-  if (session.Null())
-    session = new SessionStore(SessionStore::Create());
-  session->SetFields(session_content);
-  session->Save();
-  while (cookie.Count())
-    cookie[0].Remove();
-  cookie["session_id"] = session->Id();
-  response.SetHeaders("Set-Cookie", cookie.Serialize());
-  MongoStore::SessionStore::Cleanup();
+  bool is_session_empty = session_content.Count() <= 1 && session_content["flash"].Count() == 0;
+
+  if (!session.Null() || !is_session_empty)
+  {
+    if (session.Null())
+      session = new SessionStore(SessionStore::Create());
+    session->SetFields(session_content);
+    session->Save();
+    while (cookie.Count())
+      cookie[0].Remove();
+    cookie["session_id"] = session->Id();
+    response.SetHeaders("Set-Cookie", cookie.Serialize());
+    MongoStore::SessionStore::Cleanup();
+  }
 }
 
 void MongoStore::SessionStore::GetFields(Data data)
