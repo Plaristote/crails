@@ -34,7 +34,7 @@ add_executable(crails-app ${crails_app})
 target_link_libraries(crails-app
                       crails-core
                       ${Boost_LIBRARIES}
-                      pthread dl crypto
+                      pthread dl crypto ssl
                       Boots
                       ${CPPNETLIB_LIBRARIES}
                       <% if options[:segvcatch] == true %> segvcatch <% end %>
