@@ -2,6 +2,10 @@
 
 using namespace std;
 
+Databases::Db::~Db()
+{
+}
+
 void Databases::CleanupDatabases()
 {
   for (auto it = databases.begin() ; it != databases.end() ; ++it)
