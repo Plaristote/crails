@@ -100,7 +100,7 @@ gulp.task('views', ['clean'], function() {
 });
 
 gulp.task('models', ['clean'], function() {
-  var compile_model = gulp.src(paths.models).pipe(exec('crails compile_model <%= file.path %> ; echo <%= file.path %> >> bite'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
+  var compile_model = gulp.src(paths.models).pipe(exec('crails compile_model <%= file.path %>'), { continueOnError: false, pipeStdout: false }).pipe(exec.reporter({ err: true, stderr: true, stdout: true }));
   return (compile_model);
 });
 
