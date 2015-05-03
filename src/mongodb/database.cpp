@@ -7,7 +7,7 @@ using namespace std;
 Database::Database(Data settings) :
   Db(ClassType()),
   name    (settings["database"].Value()),
-  hostname(settings["hostname"].Value()),
+  hostname(settings["host"].Value()),
   port    (settings["port"].Nil() ? 27017 : settings["port"])
 {
   if (settings["username"].NotNil())
