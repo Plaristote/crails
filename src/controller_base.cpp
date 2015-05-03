@@ -9,9 +9,6 @@ std::string rand_str(std::string::size_type size); // Defined in rand_str.cpp
 
 ControllerBase::ControllerBase(Params& params) : params(params)
 {
-  if (must_protect_from_forgery())
-    protect_from_forgery();
-
   // Set the class attributes accessible to the views
   *vars["controller"]       = this;
   *vars["params"]           = &params;
@@ -21,6 +18,12 @@ ControllerBase::ControllerBase(Params& params) : params(params)
   flash.Duplicate(params.Session()["flash"]);
   params.Session()["flash"].CutBranch();
   params.Session()["flash"] = "";
+}
+
+void ControllerBase::initialize()
+{
+  if (must_protect_from_forgery())
+    protect_from_forgery();
 }
 
 void ControllerBase::RedirectTo(const string& uri)

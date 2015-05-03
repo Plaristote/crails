@@ -36,6 +36,8 @@ class ControllerBase
   friend class Mailer;
 protected:
   ControllerBase(Params& params);
+
+  void initialize(void);
   
   static DynStruct RescueFrom(std::function<DynStruct ()> callback)
   {

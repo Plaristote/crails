@@ -61,7 +61,8 @@ private:
     klass controller(params); \
 \
     return (klass::RescueFrom([&controller]() -> DynStruct { \
-      controller.function();\
+      controller.initialize(); \
+      controller.function(); \
       return (controller.response); \
     })); \
   });
