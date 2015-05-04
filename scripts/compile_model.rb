@@ -77,7 +77,6 @@ def compile_model filepath
 
   # Scan belongs_to
   file_content.scan /MONGODB_BELONGS_TO\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1|
-    throw "bite"
     belongs_to_data = {
         type:          param1,
         relation_name: param1
@@ -93,10 +92,21 @@ def compile_model filepath
     belongs_to << belongs_to_data
   end
   
-  file_content.scan /MONGODB_HAS_AND_BELONGS_TO_MANY\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
+  file_content.scan /MONGODB_HAS_AND_BELONGS_TO_MANY_HOST\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2|
     has_many_data = {
+        host:          true,
         type:          param1,
         relation_name: param2
+      }
+    has_and_belongs_to_many << has_many_data
+  end
+
+  file_content.scan /MONGODB_HAS_AND_BELONGS_TO_MANY\s*\(([a-zA-Z0-9_:<>]+),\s*([a-zA-Z0-9_]+),\s*([a-zA-Z0-9_]+)\)/ do |param1,param2,param3|
+    has_many_data = {
+        host:          false,
+        type:          param1,
+        relation_name: param2,
+        foreign_name:  param3
       }
     has_and_belongs_to_many << has_many_data
   end
@@ -111,6 +121,7 @@ def compile_model filepath
   end
   
   has_and_belongs_to_many.each do |relation|
+    next if relation[:host] == false
     relation_field = {
       type:    "MongoDB::Array<mongo::OID>",
       name:    "#{relation[:relation_name]}_ids",

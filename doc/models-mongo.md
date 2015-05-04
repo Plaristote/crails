@@ -154,8 +154,8 @@ You may also customize the name of the relationship, like this:
 ```C++
   class User : public MongoDB::Model
   {
-    MONGODB_COLLECTION(mongodb, users);
-    MONGODB_MODEL(User);
+    MONGODB_COLLECTION(mongodb, users)
+    MONGODB_MODEL(User)
     MONGODB_FIELD(std::string, name,     "")
     MONGODB_FIELD(Password,    password, "")
     MONGODB_HAS_MANY(Comment, author)
@@ -163,8 +163,8 @@ You may also customize the name of the relationship, like this:
 
   class Comment : public MongoDB::Model
   {
-    MONGODB_COLLECTION(mongodb, comments);
-    MONGODB_MODEL(Comment);
+    MONGODB_COLLECTION(mongodb, comments)
+    MONGODB_MODEL(Comment)
     MONGODB_FIELD(std::string, message,  "")
     MONGODB_BELONGS_TO_AS(User, author)
   };
@@ -174,7 +174,38 @@ Now, the generated methods will be `void set_author(const User&)` and `SP(User) 
 
 ### Has and belongs to many
 
-[TODO]
+Has and belongs to many relationships are similar, but one of the model has to host the relationship.
+
+```C++
+  class Player : public MongoDB::Model
+  {
+    MONGODB_COLLECTION(mongodb, players)
+    MONGODB_MODEL(Player)
+    MONGODB_HAS_AND_BELONGS_TO_MANY(Game,game,player) // typename, relation name, foreign relation name
+  }
+
+  class Game : public MongoDB::Model
+  {
+    MONGODB_COLLECTION(mongodb, games)
+    MONGODB_MODEL(Game)
+    MONGODB_HAS_AND_BELONGS_TO_MANY_HOST(Player,player) // typename, relation name
+  }
+```
+
+The generated methods will be:
+```
+  SmartPointer<ResultSet<Game> >   Player::get_games();
+  void                             Player::add_to_games(Game&) const;
+  void                             Player::remove_from_games(Game&) const;
+
+  SmartPointer<ResultSet<Player> > Game::get_players();
+  void                             Game::add_to_players(const Player&);
+  void                             Game::remove_from_players(const Player&);
+  MongoDB::Array<mongo::OID>       Game::get_players_ids() const;
+  void                             Game::set_players_ids(MongoDB::Array<mongo::OID>);
+```
+
+Don't forget that no matter on which object you call the `add_to_...` and `remove_from_...` methods, the modifications are always made on the host (`Game` in this case). When you want to save your modifications, do not forget to call `Save` on the host object.
 
 ### Custom requests
 

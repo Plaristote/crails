@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "app/models/<%= filename %>.hpp"
 <% requires.each do |required_file| %>#include "app/models/<%= required_file %>.hpp"
 <% end %>
@@ -130,9 +131,47 @@ MongoDB::ResultSet<<%= data[:type] %>>* <%= classname %>::get_<%= data[:relation
 
 // has_and_belongs_to_many
 <% has_and_belongs_to_many.each do |data| %>
-MongoDB::ResultSet<<%= data[:type] %>>* <%= classname %>::<%= data[:relation_name] %> (void)
+
+MongoDB::ResultSet<<%= data[:type] %>>* <%= classname %>::get_<%= data[:relation_name] %>s (void) const
 {
-  MongoDB::ResultSet<<%= data[:type] %>>* ptr = MongoDB::ResultSet<<%= data[:type] %>>::Query(collection.Db()[<%= data[:type] %>::CollectionName()], BSON("_id" << BSON("$in" << get_<%= data[:relation_name] %>_ids())));
+  MongoDB::ResultSet<<%= data[:type] %>>* ptr;
+
+<% if data[:host] == true %>
+  ptr = MongoDB::ResultSet<<%= data[:type] %>>::Query(collection.Db()[<%= data[:type] %>::CollectionName()], BSON("_id" << BSON("$in" << get_<%= data[:relation_name] %>_ids())));
+  <% else %>
+  ptr = MongoDB::ResultSet<<%= data[:type] %>>::Query(collection.Db()[<%= data[:type] %>::CollectionName()], BSON("<%= data[:foreign_key] %>_ids" << OID()));
+  <% end %>
   return (ptr);
 }
+
+void <%= classname %>::add_to_<%= data[:relation_name] %>s (<%= 'const ' if data[:host] == true %><%= data[:type] %>& model) <%= 'const' if data[:host] != true %>
+{
+  <% if data[:host] == true %>
+  std::vector<mongo::OID> oids = get_<%= data[:relation_name] %>_ids();
+
+  oids.push_back(model.OID());
+  set_<%= data[:relation_name] %>_ids(oids);
+  <% else %>
+  std::vector<mongo::OID> oids = model.get_<%= data[:foreign_name] %>_ids();
+
+  oids.push_back(OID());
+  model.set_<%= data[:foreign_name] %>_ids(oids);
+  <% end %>
+}
+
+void <%= classname %>::remove_from_<%= data[:relation_name] %>s (<%= 'const ' if data[:host] == true %><%= data[:type] %>& model) <%= 'const' if data[:host] != true %>
+{
+  <% if data[:host] == true %>
+  std::vector<mongo::OID> oids = get_<%= data[:relation_name] %>_ids();
+
+  std::remove(oids.begin(), oids.end(), model.OID());
+  set_<%= data[:relation_name] %>_ids(oids);
+  <% else %>
+  std::vector<mongo::OID> oids = model.get_<%= data[:foreign_name] %>_ids();
+
+  std::remove(oids.begin(), oids.end(), OID());
+  model.set_<%= data[:foreign_name] %>_ids(oids);
+  <% end %>
+}
+
 <% end %>
