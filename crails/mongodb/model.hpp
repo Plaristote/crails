@@ -49,7 +49,7 @@
 
 # define MONGODB_HAS_AND_BELONGS_TO_MANY(type,relation_name) \
   MONGODB_FIELD(MongoDB::Array<mongo::OID>, relation_name##_ids, MongoDB::Array<mongo::OID>()) \
-  MongoDB::ResultSet<type>* relation_name (void);
+  MongoDB::ResultSet<type>* get_##relation_name##s (void);
 
 namespace MongoDB
 {

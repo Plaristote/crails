@@ -58,22 +58,29 @@ private:
 # define SetRoute(method, route, klass, function) \
   Match(method, route, [](Params& params) -> DynStruct \
   { \
+    params["controller-action"] = #function; \
     klass controller(params); \
 \
+    if (controller.response["status"].NotNil()) \
+      return (controller.response); \
     return (klass::RescueFrom([&controller]() -> DynStruct { \
       controller.initialize(); \
-      controller.function(); \
+      if (controller.response["status"].Nil()) \
+        controller.function(); \
       return (controller.response); \
     })); \
   });
 
+# define Crudify(resource_name, controller) \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,show);   \
+  SetRoute("POST",   '/' + SYM2STRING(resource_name),               controller,create); \
+  SetRoute("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,update); \
+  SetRoute("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,destroy);
+
 # define SetResource(resource_name, controller) \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,Index);  \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,New);    \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,Edit);   \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,Show);   \
-  SetRoute("POST",   '/' + SYM2STRING(resource_name),               controller,Create); \
-  SetRoute("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,Update); \
-  SetRoute("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,Delete);
+  SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,new);    \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,edit);   \
+  Crudify(resource_name, controller)
 
 #endif

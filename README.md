@@ -58,9 +58,11 @@ To the root of the project's directory, create a build directory, go in there, a
 
     cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
 
-In debug mode, the Crails Framework provides a number of tools (disabled caching of views and assets, displaying exceptions as HTTP response...) that you simply need while working on a Crails application. On your development machine, you would want to compile the framework with this command line:
+When the developer mode is on, the Crails Framework provides a number of tools (disabled caching of views and assets, displaying exceptions as HTML response...) that you simply need while working on a Crails application. On your development machine, you would want to compile the framework with this command line:
 
-    cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
+    cmake -DDEVELOPER_MODE=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
+
+Developer and Production server do not conflict: you may want to compile the project twice, with and without the developer mode option, which would give you the ability to swap between developer and production mode simply by changing the CMAKE_BUILD_TYPE variable to Release or Debug in your project's CMakeCache.txt.
 
 Creating a Crails Application
 ========
@@ -68,6 +70,8 @@ The installation of the Crails Framework should have added a ruby script named '
 You can use it to create application this way:
 
     crails create -h # Check out the options first (support for databases and all that)
-    crails create application_name --use-mongodb --use-mongo-session-store --debug-mode
+    crails create application_name --use-mongodb --use-mongo-session-store
+
+By default, the project will build in release mode, which means it'll link to the production server. Don't forget to change CMAKE_BUILD_TYPE in your CMakeCache.txt file if you want to link to the developer server instead.
 
 Now that your crails application is ready, check out the [COOKBOOK](COOKBOOK.md) to see all the neat things you can do with it !

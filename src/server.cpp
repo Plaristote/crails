@@ -14,6 +14,12 @@
 # pragma message("Building Synchronous Server")
 #endif
 
+#ifdef SERVER_DEBUG
+# pragma message("Building Testing Server")
+#else
+# pragma message("Building Release Server")
+#endif
+
 using namespace std;
 
 void CrailsServer::ResponseException(BuildingResponse& out, std::string e_name, std::string e_what, Params& params)

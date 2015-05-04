@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 
 project(crails_project)
 
-option(USE_MULTITHREAD "Asynchronous Server" OFF)
-option(USE_MONGODB     "MongoDB"             OFF)
+option(USE_MULTITHREAD "Asynchronous Server" ON)
+option(USE_MONGODB     "MongoDB"             ON)
 option(USE_SOCI        "Soci"                OFF)
+option(DEVELOPER_MODE  "Developer mode"      OFF)
 
 cmake_policy(SET CMP0042 OLD)
 
@@ -20,8 +21,12 @@ if (USE_MULTITHREAD)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASYNC_SERVER")
 endif()
 
-if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+if (DEVELOPER_MODE)
+  message("-- Building development server")
+  set(CMAKE_BUILD_TYPE "Debug")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSERVER_DEBUG")
+else()
+  message("-- Building production server")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC)
@@ -54,14 +59,24 @@ file(GLOB crails_mongodb
 ##
 ## Targets
 ##
-add_library(crails-core      SHARED ${crails_core})
+if (DEVELOPER_MODE)
+  set(crails_core_name    crails-core-debug)
+  set(crails_sql_name     crails-sql-debug)
+  set(crails_mongodb_name crails-mongodb-debug)
+else()
+  set(crails_core_name    crails-core)
+  set(crails_sql_name     crails-sql)
+  set(crails_mongodb_name crails-mongodb)
+endif()
+
+add_library(${crails_core_name}      SHARED ${crails_core})
 
 if (USE_SOCI)
-  add_library(crails-sql     SHARED ${crails_sql})
+  add_library(${crails_sql_name}     SHARED ${crails_sql})
 endif()
 
 if (USE_MONGODB)
-  add_library(crails-mongodb SHARED ${crails_mongodb})
+  add_library(${crails_mongodb_name} SHARED ${crails_mongodb})
 endif()
 
 file(GLOB         headers_crails     crails/*.h crails/*.hpp)
@@ -80,13 +95,13 @@ install(FILES    ${scripts_generate}    DESTINATION share/crails/scripts/generat
 install(FILES    ${scripts_templates}   DESTINATION share/crails/scripts/templates)
 install(FILES    ${headers_crails}      DESTINATION include/crails)
 install(FILES    ${headers_crails_cki}  DESTINATION include/crails/session_store)
-install(TARGETS  crails-core    LIBRARY DESTINATION lib)
+install(TARGETS  ${crails_core_name}    LIBRARY DESTINATION lib)
 if (USE_SOCI)
   install(FILES    ${headers_crails_sql}  DESTINATION include/crails/sql)
-  install(TARGETS  crails-sql     LIBRARY DESTINATION lib)
+  install(TARGETS  ${crails_sql_name}     LIBRARY DESTINATION lib)
 endif()
 if (USE_MONGODB)
   install(FILES    ${headers_crails_mdb}  DESTINATION include/crails/mongodb)
-  install(TARGETS  crails-mongodb LIBRARY DESTINATION lib)
+  install(TARGETS  ${crails_mongodb_name} LIBRARY DESTINATION lib)
 endif()
 
