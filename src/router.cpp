@@ -67,7 +67,7 @@ void Router::ItemInitializeRegex(Item& item, std::string route)
     while (!(find_params.Match(route, &match, 1)))
     {
       regexified_route += route.substr(0, match.rm_so);
-      regexified_route += "([a-zA-Z0-9_]*)";
+      regexified_route += "([a-zA-Z0-9_-]*)";
       item.param_names.push_back(route.substr(match.rm_so + 1, match.rm_eo - match.rm_so - 1));
       route             = route.substr(match.rm_eo);
     }
