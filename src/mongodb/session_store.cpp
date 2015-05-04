@@ -18,11 +18,11 @@ SmartPointer<MongoStore::SessionStore> MongoStore::SessionStore::Find(const stri
     throw MongoDB::Exception(string("Invalid call to SessionStore::Find with OID '") + id_string + '\'');
   id.init(id_string);
   {
-    SmartPointer<MongoDB::ResultSet<SessionStore> > results = MongoDB::ResultSet<SessionStore>::Query(MONGO_QUERY("_id" << id));
+    SmartPointer<MongoDB::ResultSet<SessionStore> > results = MongoDB::ResultSet<SessionStore>::prepare(MONGO_QUERY("_id" << id));
     SmartPointer<SessionStore>                      result(nullptr);
 
-    if (results->Entries().size() > 0)
-      result = new SessionStore(results->Entries().front());
+    if (results->entries().size() > 0)
+      result = new SessionStore(results->entries().front());
     return (result);
   }
 }

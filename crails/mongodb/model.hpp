@@ -34,7 +34,7 @@
   MONGODB_HAS_ONE_AS(type,remote_field,type)
 
 # define MONGODB_HAS_MANY_AS(type,remote_field,relation_name) \
-  MongoDB::ResultSet<type>* get_##relation_name##s (void) const;
+  SP(MongoDB::ResultSet<type>) get_##relation_name##s (void) const;
 
 # define MONGODB_HAS_MANY(type,remote_field) \
   MONGODB_HAS_MANY_AS(type,remote_field,type)
@@ -49,12 +49,12 @@
 
 # define MONGODB_HAS_AND_BELONGS_TO_MANY_HOST(type,relation_name) \
   MONGODB_FIELD(MongoDB::Array<mongo::OID>, relation_name##_ids, MongoDB::Array<mongo::OID>()) \
-  MongoDB::ResultSet<type>* get_##relation_name##s (void) const; \
+  SP(MongoDB::ResultSet<type>) get_##relation_name##s (void) const; \
   void add_to_##relation_name##s (const type&); \
   void remove_from_##relation_name##s (const type&);
 
 # define MONGODB_HAS_AND_BELONGS_TO_MANY(type,relation_name,foreign_name) \
-  MongoDB::ResultSet<type>* get_##relation_name##s (void) const; \
+  SP(MongoDB::ResultSet<type>) get_##relation_name##s (void) const; \
   void add_to_##relation_name##s (type&) const; \
   void remove_from_##relation_name##s (type&) const;
 

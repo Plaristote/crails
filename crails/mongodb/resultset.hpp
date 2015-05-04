@@ -17,81 +17,97 @@ namespace MongoDB
   class ResultSet
   {
   public:
-    ResultSet(Collection& collection, typename std::auto_ptr<mongo::DBClientCursor> results) : collection(collection), results(results.get())
+    ResultSet(Collection& collection, mongo::Query query) : collection(collection), query(query)
     {
-      results.release();
     }
 
-    static ResultSet* Query(Collection& collection, mongo::Query query = mongo::Query(), int n_to_return = 0, int n_to_skip = 0, mongo::BSONObj* fields_to_return = 0, int query_options = 0, int batch_size = 0)
+    void set_skip(int n_to_skip)                      { this->n_to_skip        = n_to_skip;     }
+    void set_limit(int n_to_return)                   { this->n_to_return      = n_to_return;   }
+    void set_fields_to_return(mongo::BSONObj* fields) { this->fields_to_return = fields;        }
+    void set_query_options(int query_options)         { this->query_options    = query_options; }
+    void set_batch_size(int batch_size)               { this->batch_size       = batch_size;    }
+
+    void ensure_result_fetched()
     {
-      return (new ResultSet(collection, collection.Query(query, n_to_return, n_to_skip, fields_to_return, query_options, batch_size)));
+      if (results.Null())
+        fetch();
+    }
+
+    void fetch()
+    {
+      typename std::auto_ptr<mongo::DBClientCursor> results_auto_ptr;
+
+      results_auto_ptr = collection.Query(query,
+                                          n_to_return,
+                                          n_to_skip,
+                                          fields_to_return,
+                                          query_options,
+                                          batch_size);
+      this->results    = results_auto_ptr.get();
+      results_auto_ptr.release();
+    }
+
+    static SmartPointer<ResultSet> prepare(Collection& collection, mongo::Query query = mongo::Query())
+    {
+      return (new ResultSet(collection, query));
     }
     
-    static ResultSet* Query(mongo::Query query = mongo::Query(), int n_to_return = 0, int n_to_skip = 0, mongo::BSONObj* fields_to_return = 0, int query_options = 0, int batch_size = 0)
+    static SmartPointer<ResultSet> prepare(mongo::Query query = mongo::Query())
     {
       const std::string database        = MODEL::DatabaseName();
       const std::string collection_name = MODEL::CollectionName();
       Collection&       collection      = Databases::singleton::Get()->GetDatabase<MongoDB::Database>(database)[collection_name];
-      
-      return (new ResultSet(collection, collection.Query(query, n_to_return, n_to_skip, fields_to_return, query_options, batch_size)));
+
+      return (prepare(collection, query));
     }    
 
-    void Each(std::function<bool (MODEL&)> functor)
+    void each(std::function<bool (MODEL&)> functor)
     {
-      typename std::list<MODEL>::iterator it  = fetched.begin();
-      typename std::list<MODEL>::iterator end = fetched.end();
-
-      for (; it != end ; ++it)
+      ensure_result_fetched();
       {
-        if (!(functor(*it)))
-          return ;
-      }
-      while (results->more())
-      {
-        mongo::BSONObj object = results->next();
-        MODEL          model(collection, object);
+        typename std::list<MODEL>::iterator it  = fetched.begin();
+        typename std::list<MODEL>::iterator end = fetched.end();
 
-        model.result_set = results;
-        model.InitializeFields();
-        fetched.push_back(model);
-        if (!(functor(*fetched.rbegin())))
-          break ;
+        for (; it != end ; ++it)
+        {
+          if (!(functor(*it)))
+            return ;
+        }
+        while (results->more())
+        {
+          mongo::BSONObj object = results->next();
+          MODEL          model(collection, object);
+
+          model.result_set = results;
+          model.InitializeFields();
+          fetched.push_back(model);
+          if (!(functor(*fetched.rbegin())))
+            break ;
+        }
       }
     }
 
-    std::list<MODEL>& Entries(void)
+    std::list<MODEL>& entries(void)
     {
-      Each([](MODEL&) -> bool { return (true); });
+      each([](MODEL&) -> bool { return (true); });
       return (fetched);
     }
 
-    unsigned int Count(void)
+    unsigned int count(void)
     {
-      return (Entries().size());
-    }
-
-    ResultSet& operator<<(Model& model)
-    {
-      Collection&    table  = model.GetCollection();
-      mongo::BSONObj object = BSON("$set" << BSON(foreign_key << foreign_oid));
-
-      std::cout << "[" << model.Id() << "] Set " << foreign_key << " to " << foreign_oid.toString() << std::endl;
-      table.Update(object, MONGO_QUERY("_id" << model.OID()));
-      model.Refresh();
-      return (*this);
-    }
-
-    void                                 SetOwner(const Model& model, const std::string& relation_name)
-    {
-      foreign_key = relation_name + "_id";
-      foreign_oid = model.OID();
+      // TODO investigate itcount and eventual peeking for this
+      return (entries().size());
     }
 
   private:
     Collection&                          collection;
+    int                                  n_to_skip, n_to_return, query_options, batch_size;
+    mongo::BSONObj*                      fields_to_return;
+    mongo::Query                         query;
+
     SmartPointer<mongo::DBClientCursor>  results;
     std::list<MODEL>                     fetched;
-    
+
     std::string                          foreign_key;
     mongo::OID                           foreign_oid;
   };  

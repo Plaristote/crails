@@ -218,21 +218,13 @@ When your requirements are a bit more specific, you'll need to make your own req
   void MyController::get_by_name()
   {
     std::string         name    = params["name"];
-    SP(ResultSet<User>) results = ResultSet<User>::Query(MONGO_QUERY("name" << name));
+    SP(ResultSet<User>) results = ResultSet<User>::prepare(MONGO_QUERY("name" << name));
     std::stringstream   text;
 
-    text << "Found " << results->Count() << " users with name `" << name '`' << std::endl;
+    text << "Found " << results->count() << " users with name `" << name '`' << std::endl;
     render(TEXT, text);
   }
 ```
-
-The prototype of `ResultSet<T>::Query` is the following:
-```C++
-  ResultSet* ResultSet::Query(mongo::Query query = mongo::Query(), int n_to_return = 0, int n_to_skip = 0);
-```
-This means:
-* passing no parameters to this function will ask for all the entries in the collection.
-* it is possible to limit the number of results (useful for pagination for instance) using the `n_to_return` and `n_to_skip` parameters. The default values of '0' means that there is no limit to the number of results.
 
 A simple documentation for the `mongo::Query` object is available [here](https://github.com/mongodb/mongo-cxx-driver/wiki/Tutorial#query).
 
@@ -240,15 +232,13 @@ A simple documentation for the `mongo::Query` object is available [here](https:/
 You may also iterate on the results using `ResultSet<T>::Each(std::function<bool(T&)>)`.
 
 ```C++
-  #include <Boots/Utils/smart_pointer.hpp> // defines the SP macro
-
   void MyController::get_by_name()
   {
     std::string         name    = params["name"];
-    SP(ResultSet<User>) results = ResultSet<User>::Query(MONGO_QUERY("name" << name));
+    SP(ResultSet<User>) results = ResultSet<User>::prepare(MONGO_QUERY("name" << name));
     std::stringstream   text;
 
-    results->Each([&text](User& user) -> bool {
+    results->each([&text](User& user) -> bool {
       text << "User(" << user.Id() << ") matching name" << std::endl;
       return (true); // you may return 'false' if you wish to interrupt the loop
     });
@@ -256,4 +246,16 @@ You may also iterate on the results using `ResultSet<T>::Each(std::function<bool
   }
 ```
 
-Alternatively, you can also get all the result in an `std::list` object by using `ResultSet<T>::Entries(void)`.
+#### Pagination
+You may also only fetch a subset of the results, using pagination:
+
+```C++
+  std::list<User> MyController::get_user_page(int page, int items_per_pages)
+  {
+    SP(ResultSet<User>) results = ResultSet<User>::prepare();
+
+    results->set_skip(page * items_per_pages);
+    results->set_limit(items_per_pages);
+    return results->entries();
+  }
+```
