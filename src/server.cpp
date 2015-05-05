@@ -33,24 +33,25 @@ void CrailsServer::SetResponse(Params& params, BuildingResponse& out, CrailsServ
 
 void CrailsServer::ResponseException(BuildingResponse& out, std::string e_name, std::string e_what, Params& params)
 {
+  cerr << "# Catched exception " << e_name << ": " << e_what << endl;
+  if (params["backtrace"].NotNil())
+    cerr << params["backtrace"].Value() << endl;
+#ifdef SERVER_DEBUG
   View       view("../../lib/exception.html.ecpp");
   SharedVars vars;
-  
+
   *vars["exception_name"] = &e_name;
   *vars["exception_what"] = &e_what;
   *vars["params"]         = &params;
   {
     std::string content = view.Generate(vars);
 
-    cerr << "# Catched exception " << e_name << ": " << e_what << endl;
-    cerr << params["backtrace"].Value() << endl;
-#ifdef SERVER_DEBUG
     out.SetHeaders("Content-Type", "text/html");
     SetResponse(params, out, CrailsServer::HttpCodes::internal_server_error, content);
-#else
-    ResponseHttpError(out, CrailsServer::HttpCodes::internal_server_error, params);
-#endif
   }
+#else
+  ResponseHttpError(out, CrailsServer::HttpCodes::internal_server_error, params);
+#endif
 }
 
 void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCode code, Params& params)
