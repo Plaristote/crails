@@ -10,12 +10,30 @@ Database::Database(Data settings) :
   hostname(settings["host"].Value()),
   port    (settings["port"].Nil() ? 27017 : settings["port"])
 {
+  initialize_mongo_client();
   if (settings["username"].NotNil())
-    AuthenticateWith(settings["username"].Value(), settings["password"].Value());
+    authenticate_with(settings["username"].Value(), settings["password"].Value());
   connected = false;
 }
 
-void Database::AuthenticateWith(const std::string& username, const std::string& password)
+void Database::initialize_mongo_client()
+{
+  static bool initialized = false;
+
+  if (initialized == false)
+  {
+    mongo::client::Options options;
+    mongo::client::Status  status;
+
+    status = mongo::client::initialize(options);
+    if (status.isOK())
+      initialized = true;
+    else
+      throw MongoDB::Exception("failed to initialize mongo client");
+  }
+}
+
+void Database::authenticate_with(const std::string& username, const std::string& password)
 {
   this->username = username;
   this->password = password;
@@ -32,7 +50,7 @@ void Database::Connect(void)
     if (connection.connect(stream.str(), err))
     {
       std::cout << "[MongoDB] New connection to " << stream.str() << std::endl;
-      RefreshCollections();
+      refresh_collections();
       connected = true;
     }
     else
@@ -40,7 +58,13 @@ void Database::Connect(void)
   }
 }
 
-void Database::RefreshCollections(void)
+void Database::drop_collection(const std::string& name)
+{
+  connection.dropCollection(name);
+  refresh_collections();
+}
+
+void Database::refresh_collections(void)
 {
   list<string> collection_fetch = connection.getCollectionNames(name);
   

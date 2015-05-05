@@ -20,15 +20,18 @@ namespace MongoDB
 
     bool                       operator==(const std::string& name) const { return (this->name == name); }
     Collection&                operator[](const std::string& name);
-    void                       AuthenticateWith(const std::string& username, const std::string& password);
-    const std::string&         GetName(void)        const       { return (name);        }
-    Collections&               GetCollections(void)             { return (collections); }
-    const Collections&         GetCollections(void) const       { return (collections); }
-    void                       RefreshCollections(void);
+    void                       authenticate_with(const std::string& username, const std::string& password);
+    const std::string&         GetName(void)         const       { return (name);        }
+    Collections&               get_collections(void)             { return (collections); }
+    const Collections&         get_collections(void) const       { return (collections); }
+    void                       refresh_collections(void);
+    void                       drop_collection(const std::string& name);
 
     void                       Connect(void);
 
   private:
+    void                      initialize_mongo_client();
+
     mongo::DBClientConnection connection;
     const std::string         name;
     Collections               collections;

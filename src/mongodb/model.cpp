@@ -70,7 +70,7 @@ void Model::Save(void)
   if (has_id)
   {
     mongo::Query query = MONGO_QUERY("_id" << id);
-  
+
     collection.Update(Update(), query);
   }
   else

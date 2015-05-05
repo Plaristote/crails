@@ -37,7 +37,7 @@ SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
 {
   const string         database        = <%= classname %>::DatabaseName();
   const string         collection_name = <%= classname %>::CollectionName();
-  MongoDB::Collection& collection      = Databases::singleton::Get()->GetDatabase<MongoDB::Database>(database)[collection_name];
+  MongoDB::Collection& collection      = CRAILS_DATABASE(MongoDB::Database,database)[collection_name];
   mongo::BSONObj       obj;
   {
     mongo::BSONObjBuilder builder;
@@ -89,7 +89,7 @@ SP(<%= data[:type] %>) <%= classname %>::get_<%= data[:relation_name] %>(void) c
 {
   const string         database        = <%= data[:type] %>::DatabaseName();
   const string         collection_name = <%= data[:type] %>::CollectionName();
-  MongoDB::Collection& collection      = Databases::singleton::Get()->GetDatabase<MongoDB::Database>(database)[collection_name];
+  MongoDB::Collection& collection      = CRAILS_DATABASE(MongoDB::Database, database)[collection_name];
   mongo::OID           foreign_oid     = get_<%= data[:relation_name] %>_id();
   mongo::Query         query           = MONGO_QUERY("_id" << foreign_oid);
   auto                 ptr             = collection.Query(query);
