@@ -2,6 +2,7 @@
 # define APPCONTROLLER_HPP
 
 # include <Boots/Utils/dynstruct.hpp>
+# include <Boots/Utils/timer.hpp>
 
 # include <crails/databases.hpp>
 # include <crails/shared_vars.hpp>
@@ -36,6 +37,7 @@ class ControllerBase
   friend class Mailer;
 protected:
   ControllerBase(Params& params);
+  virtual ~ControllerBase();
 
   void initialize(void);
   
@@ -61,15 +63,17 @@ protected:
 
   virtual bool    must_protect_from_forgery(void) const { return (true); };
 
-  Params&        params;
-  DynStruct      response;
-  SharedVars     vars;
-  Data           flash;
+  Params&         params;
+  DynStruct       response;
+  SharedVars      vars;
+  Data            flash;
 private:
   void            protect_from_forgery(void) const;
   bool            check_csrf_token(void) const;
   void            set_content_type(RenderType);
   void            set_content_type_from_extension(const std::string&);
+
+  Utils::Timer    timer;
 };
 
 #endif

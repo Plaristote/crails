@@ -30,14 +30,14 @@ namespace MongoDB
     void                       Connect(void);
 
   private:
-    void                      initialize_mongo_client();
+    void                       initialize_mongo_client();
 
-    mongo::DBClientConnection connection;
-    const std::string         name;
-    Collections               collections;
-    std::string               hostname, username, password;
-    unsigned short            port;
-    bool                      connected;
+    mongo::DBClientConnection  connection;
+    const std::string          name;
+    Collections                collections;
+    std::string                hostname, username, password;
+    unsigned short             port;
+    bool                       connected;
   };
 }
 

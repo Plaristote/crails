@@ -48,6 +48,7 @@ struct CrailsServer : public CrailsServerTraits
   
   void operator()(const Server::request& request, Response response);
   void log(const char* to_log);
+  void post_request_log(Params& params) const;
 
   static void Launch(int argc, char** argv);
 private:
@@ -62,10 +63,11 @@ private:
   bool ServeFile  (const Server::request& request, BuildingResponse& response, Params& params);
   bool ServeAction(const Server::request& request, BuildingResponse& response, Params& params);
 
-  bool SendFile(const std::string& path, BuildingResponse& response, unsigned int first_bit = 0);
+  bool SendFile(const std::string& path, BuildingResponse& response, CrailsServer::HttpCode code, unsigned int first_bit = 0);
 
   void ResponseException(BuildingResponse& out, std::string exception_name, std::string exception_what, Params& params);
   void ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCode code, Params& params);
+  void SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const std::string& content);
 
   FileCache file_cache;
 

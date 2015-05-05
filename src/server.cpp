@@ -1,4 +1,5 @@
 #include <Boots/Utils/directory.hpp>
+#include <Boots/Utils/timer.hpp>
 #include <crails/server.hpp>
 #include <crails/router.hpp>
 #include <crails/http_response.hpp>
@@ -7,6 +8,7 @@
 #include <crails/params.hpp>
 #include <crails/databases.hpp>
 #include <crails/backtrace.hpp>
+#include <iostream>
 
 #ifdef ASYNC_SERVER
 # pragma message("Building Asynchronous Server")
@@ -22,6 +24,13 @@
 
 using namespace std;
 
+void CrailsServer::SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const string& content)
+{
+  out.SetResponse(code, content);
+  params["response-data"]["code"]   = (int)code;
+  params["response-data"]["length"] = content.size();
+}
+
 void CrailsServer::ResponseException(BuildingResponse& out, std::string e_name, std::string e_what, Params& params)
 {
   View       view("../../lib/exception.html.ecpp");
@@ -33,14 +42,12 @@ void CrailsServer::ResponseException(BuildingResponse& out, std::string e_name, 
   {
     std::string content = view.Generate(vars);
 
-    cerr << "Catched exception `" << e_name << "`: " << e_what << endl;
-    cout << content << endl;
+    cerr << "# Catched exception " << e_name << ": " << e_what << endl;
+    cerr << params["backtrace"].Value() << endl;
 #ifdef SERVER_DEBUG
     out.SetHeaders("Content-Type", "text/html");
-    out.SetResponse(CrailsServer::HttpCodes::internal_server_error, content);
+    SetResponse(params, out, CrailsServer::HttpCodes::internal_server_error, content);
 #else
-    // TODO Send Content via mail to the administrator
-    Filesystem::WriteToFile("log.txt", content);
     ResponseHttpError(out, CrailsServer::HttpCodes::internal_server_error, params);
 #endif
   }
@@ -51,10 +58,12 @@ void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCo
   std::stringstream file_name;
   std::stringstream view_name;
 
-  cout << "[Http Error][" << (unsigned int)(code) << "] " << params["uri"].Value() << endl;
   file_name << (unsigned int)(code) << ".html";
-  if (SendFile("../public/" + file_name.str(), out, 0))
+  if (SendFile("../public/" + file_name.str(), out, code, 0))
+  {
+    params["response-data"]["code"] = (int)code;
     return ;
+  }
   view_name << "errors/" << file_name.str() << ".ecpp";
   {
     View view(view_name.str());
@@ -75,10 +84,10 @@ void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCo
       else
         content = view.Generate(vars);
       out.SetHeaders("Content-Type", "text/html");
-      out.SetResponse(code, content);
+      SetResponse(params, out, code, content);
       return ;
     }
-    out.SetResponse(code, "");
+    SetResponse(params, out, code, "");
   }
 }
 
@@ -120,6 +129,7 @@ void CrailsServer::ReadRequestData(const Server::request& request, Response resp
 
 void CrailsServer::operator()(const Server::request& request, Response response)
 {
+  Utils::Timer     timer;
   Databases::singleton::Initialize();
   BuildingResponse out(response);
   Params           params;
@@ -128,11 +138,11 @@ void CrailsServer::operator()(const Server::request& request, Response response)
   {
     ReadRequestData(request, response, params);
     if (request.method == "GET" && ServeFile(request, out, params))
-      ;
+      params["response-data"]["code"] = (int)HttpCodes::ok;
     else
     {
       if (!(ServeAction(request, out, params)))
-        ResponseException(out, "CrailsServer::Router", "Crails Router isn't initialized", params);
+        ResponseException(out, "Router", "Crails Router isn't initialized", params);
     }
   }
   catch (const Router::Exception302 e)
@@ -159,6 +169,23 @@ void CrailsServer::operator()(const Server::request& request, Response response)
     ResponseException(out, "Unknown exception", "Unfortunately, no data about it was harvested", params);
   }
   Databases::singleton::Finalize();
+  params["response-time"]["crails"] = timer.GetElapsedSeconds();
+  post_request_log(params);
+}
+
+void CrailsServer::post_request_log(Params& params) const
+{
+  float crails_time     = params["response-time"]["crails"];
+  float controller_time = params["response-time"]["controller"];
+  unsigned short code   = params["response-data"]["code"];
+  
+
+  cout << "# Responded to " << params["method"].Value() << " '" << params["uri"].Value();
+  cout << "' with " << code;
+  cout << " in " << crails_time << 's';
+  if (params["response-time"]["controller"].NotNil())
+    cout << " (controller: " << controller_time << "s)";
+  cout << endl << endl;
 }
 
 void CrailsServer::log(const char* to_log)
@@ -169,10 +196,13 @@ void CrailsServer::log(const char* to_log)
 /*
  * Server Actions
  */
-bool CrailsServer::SendFile(const std::string& fullpath, BuildingResponse& response, unsigned int first_bit)
+bool CrailsServer::SendFile(const std::string& fullpath, BuildingResponse& response, CrailsServer::HttpCode code, unsigned int first_bit)
 {
   file_cache.Lock();
   {
+#ifndef SERVER_DEBUG
+    bool               cached = file_cache.Contains(fullpath);
+#endif
     const std::string& str = *(file_cache.Require(fullpath));
 
     if (&str != 0)
@@ -182,13 +212,14 @@ bool CrailsServer::SendFile(const std::string& fullpath, BuildingResponse& respo
       str_length << (str.size() - first_bit);
       response.SetHeaders("Content-Length", str_length.str());
       response.SetHeaders("Content-Type",   GetMimeType(strrchr(fullpath.c_str(), '.')));
-      response.SetStatusCode(CrailsServer::HttpCodes::ok);
+      response.SetStatusCode(code);
       response.SetBody(str.c_str() + first_bit, str.size() - first_bit);
+      cout << "# Delivering asset `" << fullpath << "` ";
 #ifdef SERVER_DEBUG
       file_cache.GarbageCollect();
-      cout << "[GET asset " << fullpath << "] [Cached:False]" << endl;
+      cout << "(cache disabled)" << endl;
 #else
-      cout << "[GET asset " << fullpath << "] [Cached:True]" << endl;
+      cout << (cached ? "(was cached)" : "(was not cached)") << endl;
 #endif
       file_cache.Unlock();
       return (true);
@@ -205,7 +236,7 @@ bool CrailsServer::ServeFile(const Server::request& request, BuildingResponse& r
 
   if (pos_get_params != std::string::npos)
     fullpath.erase(pos_get_params);
-  fullpath = "../public/" + fullpath;
+  fullpath = "../public" + fullpath;
 
   { // Is a directory ?
     Directory dir;
@@ -213,23 +244,23 @@ bool CrailsServer::ServeFile(const Server::request& request, BuildingResponse& r
     if (dir.OpenDir(fullpath))
       fullpath += "/index.htm";
   }
-  return (SendFile(fullpath, response));
+  return (SendFile(fullpath, response, CrailsServer::HttpCodes::ok));
 }
 
 bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse& out, Params& params)
 {
   const Router* router = Router::singleton::Get();
-  
+
   if (router)
   {
+    string         method = (params["_method"].Nil() ? request.method : params["_method"].Value());
+    Router::Action action = router->get_action(method, params["uri"].Value(), params);
+
     params.session->Load(params["header"]);
     {
-      std::string   method = (params["_method"].Nil() ? request.method : params["_method"].Value());
-      DynStruct     data   = router->Execute(method, params["uri"].Value(), params);
+      DynStruct     data   = action(params);
       string        body   = data["body"].Value();
       HttpCode      code   = HttpCodes::ok;
-
-      cout << "[" << request.method << " route " << request.destination << "]" << endl;
 
       out.SetHeaders("Content-Type", "text/html");
       if (data["headers"].NotNil())
@@ -243,7 +274,7 @@ bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse&
       params.session->Finalize(out);
       if (data["status"].NotNil())
         code = (HttpCode)((int)data["status"]);
-      out.SetResponse(code, body);
+      SetResponse(params, out, code, body);
     }
     return (true);
   }

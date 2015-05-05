@@ -21,7 +21,7 @@ class Router
   
   SINGLETON(Router)
 public:
-  typedef std::function<DynStruct (Params&)> Callback;
+  typedef std::function<DynStruct (Params&)> Action;
   
   class Exception404
   {
@@ -34,7 +34,7 @@ public:
 
   struct Item
   {
-    Callback                 run;
+    Action                   run;
     std::string              method;
     Regex                    regex;
     std::vector<std::string> param_names;
@@ -43,12 +43,12 @@ public:
   typedef std::vector<Item> Items;
 
   void      Initialize(void);
-  DynStruct Execute(const std::string& method, const std::string& uri, Params& params) const;
+  Action    get_action(const std::string& method, const std::string& uri, Params&) const;
 
 private:
   void      ItemInitializeRegex(Item& item, std::string route);
-  void      Match(const std::string& route, Callback callback);
-  void      Match(const std::string& method, const std::string& route, Callback callback);
+  void      Match(const std::string& route, Action callback);
+  void      Match(const std::string& method, const std::string& route, Action callback);
 
   Items routes;
 };
@@ -58,7 +58,8 @@ private:
 # define SetRoute(method, route, klass, function) \
   Match(method, route, [](Params& params) -> DynStruct \
   { \
-    params["controller-action"] = #function; \
+    params["controller-data"]["name"]   = #klass; \
+    params["controller-data"]["action"] = #function; \
     klass controller(params); \
 \
     if (controller.response["status"].NotNil()) \

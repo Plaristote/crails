@@ -20,6 +20,11 @@ ControllerBase::ControllerBase(Params& params) : params(params)
   params.Session()["flash"] = "";
 }
 
+ControllerBase::~ControllerBase()
+{
+  params["response-time"]["controller"] = timer.GetElapsedSeconds();
+}
+
 void ControllerBase::initialize()
 {
   if (must_protect_from_forgery())

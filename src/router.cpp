@@ -4,7 +4,7 @@
 
 using namespace std;
 
-DynStruct Router::Execute(const string& method, const string& uri, Params& object_params) const
+Router::Action Router::get_action(const string& method, const string& uri, Params& query_params) const
 {
   auto it  = routes.begin();
   auto end = routes.end();
@@ -25,18 +25,17 @@ DynStruct Router::Execute(const string& method, const string& uri, Params& objec
         std::string param_name  = item.param_names[i -1];
         std::string param_value = uri.substr(match.rm_so, match.rm_eo - match.rm_so);
 
-        object_params[param_name] = param_value;
+        query_params[param_name] = param_value;
       }
-      object_params.Output();
       delete[] params;
-      return (item.run(object_params));
+      return item.run;
     }
     delete[] params;
   }
   throw Exception404(); // No route matched, throw 404 Error
 }
 
-void Router::Match(const std::string& route, Router::Callback callback)
+void Router::Match(const std::string& route, Router::Action callback)
 {
   Item item;
   
@@ -45,7 +44,7 @@ void Router::Match(const std::string& route, Router::Callback callback)
   routes.push_back(item);
 }
 
-void Router::Match(const std::string& method, const std::string& route, Router::Callback callback)
+void Router::Match(const std::string& method, const std::string& route, Router::Action callback)
 {
   Item item;
   
