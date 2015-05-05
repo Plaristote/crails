@@ -42,7 +42,7 @@ endif()
 find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system REQUIRED)
 
-include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} .)
+include_directories(. include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 ##
 ## Source files
