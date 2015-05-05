@@ -1,4 +1,5 @@
 #include "crails/mongodb/database.hpp"
+#include "crails/mongodb/exception.hpp"
 #include "crails/databases.hpp"
 
 using namespace MongoDB;
@@ -23,9 +24,8 @@ void Database::initialize_mongo_client()
   if (initialized == false)
   {
     mongo::client::Options options;
-    mongo::client::Status  status;
+    mongo::Status          status = mongo::client::initialize(options);
 
-    status = mongo::client::initialize(options);
     if (status.isOK())
       initialized = true;
     else
