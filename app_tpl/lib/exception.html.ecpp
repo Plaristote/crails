@@ -1,14 +1,20 @@
 // BEGIN LINKING
 #include <Boots/Utils/dynstruct.hpp>
+#include <Boots/Utils/directory.hpp>
+#include <crails/params.hpp>
 #include <algorithm>
 
 string*    @exception_name;
 string*    @exception_what;
-DynStruct* @params;
+Params*    @params;
 // END LINKING
-<% DynStruct& lparams   = *params %>
-<% string     backtrace = lparams["backtrace"].Value() %>
+<% Params   & lparams           = *params %>
+<% string     backtrace         = lparams["backtrace"].Value() %>
+<% bool       has_controller    = lparams["controller-data"].NotNil() %>
+<% string     controller_name   = lparams["controller-data"]["name"] %>
+<% string     controller_method = lparams["controller-data"]["action"] %>
 <% lparams["backtrace"].Remove() %>
+<% lparams["controller-data"].Remove() %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,8 +31,8 @@ DynStruct* @params;
 
     pre {
       background-color: #eee;
-      padding: 10px;
-      font-size: 11px;
+      padding: 5px;
+      font-size: 12px;
     }
 
     a { color: #000; }
@@ -36,51 +42,39 @@ DynStruct* @params;
 </head>
 <body>
 
-<h1><%= *exception_name %></h1>
+<% if (has_controller == true) do %>
+  <h1>Exception catched in <%= controller_name %>::<%= controller_method %></h1>
+<% end else do %>
+  <h1>Exception catched</h1>
+<% end %>
 <pre><%= *exception_what %></pre>
 
 
-<p><code>Rails.root: /home/plaristote/tmp/NoaERP-app</code></p>
+<p><code>Crails directory: <%= Directory::Current() %></code></p>
 
 <div id="traces">
-    <a href="#" onclick="document.getElementById('Framework-Trace').style.display='none';document.getElementById('Full-Trace').style.display='none';document.getElementById('Application-Trace').style.display='block';; return false;">Application Trace</a> |
-    <a href="#" onclick="document.getElementById('Application-Trace').style.display='none';document.getElementById('Full-Trace').style.display='none';document.getElementById('Framework-Trace').style.display='block';; return false;">Framework Trace</a> |
-    <a href="#" onclick="document.getElementById('Application-Trace').style.display='none';document.getElementById('Framework-Trace').style.display='none';document.getElementById('Full-Trace').style.display='block';; return false;">Full Trace</a> 
-
-    <div id="Application-Trace" style="display: block;">
+    <div id="trace" style="display: block;">
       <pre><code><%= backtrace %></code></pre>
-    </div>
-    <div id="Framework-Trace" style="display: none;">
-      <pre><code>Dolor site ahmet</code></pre>
-    </div>
-    <div id="Full-Trace" style="display: none;">
-      <pre><code>Lorem ipsum</code></pre>
     </div>
 </div>
 
 
-
-<h2 style="margin-top: 30px">Request</h2>
+<h2 id="request" style="margin-top: 30px">Request</h2>
 <p><b>Parameters</b>:
 <pre>
-<% if (params == 0) do %>
-  The parameter object wasn't sent to the exception view.
-<% end else if (lparams.Count() == 0) do %>
+<% if (lparams.Count() == 0) do %>
   This request didn't contain any parameters.
 <% end else do %>
-  <% lparams.Output(html_stream); %>
+  <% lparams.Output(html_stream) %>
 <% end %>
 </pre></p>
 
 <p><a href="#" onclick="document.getElementById('session_dump').style.display='block'; return false;">Show session dump</a></p>
 <div id="session_dump" style="display:none">
-<pre>
-  Soon the session dump here
-</pre></div>
-
-<h2 style="margin-top: 30px">Response</h2>
-<p><b>Headers</b>: <pre>None</pre></p>
-
+  <pre>
+    <% lparams.Session().Output(html_stream) %>
+  </pre>
+</div>
 
 </body>
 </html>
