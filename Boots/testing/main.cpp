@@ -25,7 +25,7 @@ int main(int ac, char **av)
   TestInitializers.push_back(TestsDirectory);
   TestInitializers.push_back(TestsData);
   TestInitializers.push_back(TestsJSON);
-  TestInitializers.push_back(TestsSerializer);
+  //TestInitializers.push_back(TestsSerializer);
   TestInitializers.push_back(TestsSync);
   TestInitializers.push_back(TestStateMachine);
   TestInitializers.push_back(TestFlyweight);

@@ -268,6 +268,9 @@ void CrailsServer::ThrowCrashSegv()
 }
 #endif
 
+std::function<void (void)> shutdown_lambda;
+static void shutdown(int) { shutdown_lambda(); }
+
 void CrailsServer::Launch(int argc, char **argv)
 {
   cout << "## Launching the amazing Crails Server ##" << endl;
@@ -276,7 +279,7 @@ void CrailsServer::Launch(int argc, char **argv)
 #ifdef USE_SEGVCATCH
   segvcatch::init_segv(&CrailsServer::ThrowCrashSegv);
 #endif
-  
+
   Router::singleton::Initialize();
   {
     Router* router = Router::singleton::Get();
@@ -307,6 +310,14 @@ void CrailsServer::Launch(int argc, char **argv)
     Server          server(server_options.address(address.c_str()).port(port.c_str()));
 #endif
 
+    signal(SIGINT, &shutdown);
+    shutdown_lambda = [&server]()
+    {
+      cout << ">> Crails server will shut down." << endl;
+      cout << ">> Waiting for requests to end..." << endl;
+      server.stop();
+      cout << ">> Done." << endl;
+    };
     server.run();
   }
   Router::singleton::Finalize();  

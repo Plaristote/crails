@@ -36,6 +36,18 @@ void TestFlyweight(UnitTest& tester)
     return ("");
   });
 
+  tester.AddTest("Flyweight", "Contains must return true/false if the object is already required or not", [] () -> string
+  {
+    MyFlyweight       my_flyweight;
+
+    if (my_flyweight.Contains(std::string("item")) == true)
+      return ("Returned true for an item that wasnt required");
+    my_flyweight.Require(std::string("item"));
+    if (my_flyweight.Contains(std::string("item")) == false)
+      return ("Returned fa;se for an item that was required");
+    return ("");
+  });
+
   tester.AddTest("Flyweight", "Must garbage collect unused objects", []() -> string
   {
     MyFlyweight       my_flyweight;

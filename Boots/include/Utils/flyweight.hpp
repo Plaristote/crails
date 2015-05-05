@@ -68,14 +68,18 @@ public:
 
   Item      Require(KEY_TYPE key)
   {
-    typename Instances::iterator cur, last;
+    auto iterator = std::find(instances.begin(), instances.end(), key);
 
-    for (cur = instances.begin(), last = instances.end() ; cur != last ; ++cur)
-    {
-      if ((*cur) == key)
-        return (Item(&(*cur)));
-    }
+    if (iterator != instances.end())
+      return (Item(&(*iterator)));
     return (Item(&Instantiate(key)));
+  }
+  
+  bool      Contains(KEY_TYPE key)
+  {
+    auto iterator = std::find(instances.begin(), instances.end(), key);
+    
+    return iterator != instances.end();
   }
 
   void      GarbageCollect(void)
