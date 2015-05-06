@@ -47,3 +47,8 @@ This tutorial is intented to show you step by step how to create a Crails applic
     * [Pagination](doc/models-mongo.md#pagination)
 
 * [SQL-based models](#)
+
+# Testing
+* [Crails Test Framework](doc/testing.md)
+  * [Adding a test suite](doc/testing.md#adding-a-test-suite)
+  * [Request tests](doc/testing.md#request-tests)

@@ -53,7 +53,7 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   view_name << "errors/" << file_name.str() << ".ecpp";
   {
     View view(view_name.str());
-      
+
     if (view.IsValid())
     {
       SharedVars  vars;
@@ -63,7 +63,7 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
       if (layout.IsValid())
       {
         std::string content_view = view.Generate(vars);
-         
+
         *vars["yield"] = &content_view;
         content = layout.Generate(vars);
       }
@@ -80,7 +80,7 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
 void Server::run_request_parsers(const HttpServer::request& request, Response response, Params& params)
 {
   RequestParsers::const_iterator handler_iterator = request_parsers.begin();
-  
+
   for (; handler_iterator != request_parsers.end() ; ++ handler_iterator)
   {
     RequestParser::Status status;
@@ -95,7 +95,7 @@ void Server::run_request_handlers(const HttpServer::request& request, BuildingRe
 {
   RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
   bool                            request_handled  = false;
-    
+
   for (; handler_iterator != request_handlers.end() ; ++handler_iterator)
   {
     request_handled = (**handler_iterator)(request, response, params);
@@ -127,8 +127,8 @@ void Server::operator()(const HttpServer::request& request, Response response)
   Databases::singleton::Initialize();
   BuildingResponse out(response);
   Params           params;
-  
-  exception_catcher.run(out, params, [this, &request, response, &out, &params]()
+
+  exception_catcher.run(out, params, [this, &request, &response, &out, &params]()
   {
     run_request_parsers(request, response, params);
     run_request_handlers(request, out, params);
@@ -143,7 +143,6 @@ void Server::post_request_log(Params& params) const
   float crails_time     = params["response-time"]["crails"];
   float controller_time = params["response-time"]["controller"];
   unsigned short code   = params["response-data"]["code"];
-  
 
   cout << "# Responded to " << params["method"].Value() << " '" << params["uri"].Value();
   cout << "' with " << code;

@@ -148,6 +148,9 @@ project.base_directory source, base_directory do
     project.file '404.html'
     project.file '500.html'
   end
+  project.directory :spec do
+    project.file 'spec.cpp'
+  end
 end
 
 FileUtils.cd base_directory do

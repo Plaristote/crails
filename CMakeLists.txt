@@ -61,6 +61,9 @@ file(GLOB crails_mongodb
 file(GLOB crails_mongodb_session
      src/session_store/mongodb/*.cpp)
 
+file(GLOB crails_tests
+     src/tests/*.cpp)
+
 ##
 ## Targets
 ##
@@ -75,6 +78,7 @@ elseif(USE_MULTITHREAD)
 endif()
 
 add_library(crails-core${crails-suffix}      SHARED ${crails_core})
+add_library(crails-tests${crails-suffix}     SHARED ${crails_tests})
 
 if (USE_SOCI)
   add_library(crails-sql${crails-suffix}     SHARED ${crails_sql})
@@ -85,25 +89,29 @@ if (USE_MONGODB)
   add_library(crails-mongodb-session${crails-suffix} SHARED ${crails_mongodb_session})
 endif()
 
-file(GLOB         headers_crails     crails/*.h crails/*.hpp)
-file(GLOB         headers_crails_sql crails/sql/*.hpp)
-file(GLOB         headers_crails_mdb crails/mongodb/*.hpp)
-file(GLOB         headers_crails_cki crails/session_store/*.hpp)
-file(GLOB         headers_crails_rhs crails/request_handlers/*.hpp)
-file(GLOB         scripts            scripts/*.rb)
-file(GLOB         scripts_generate   scripts/generate/*.rb)
-file(GLOB         scripts_templates  scripts/templates/*.erb)
-file(GLOB_RECURSE app_template       app_tpl/*)
+file(GLOB          headers_crails     crails/*.h crails/*.hpp)
+file(GLOB          headers_crails_sql crails/sql/*.hpp)
+file(GLOB          headers_crails_mdb crails/mongodb/*.hpp)
+file(GLOB          headers_crails_cki crails/session_store/*.hpp)
+file(GLOB          headers_crails_rhs crails/request_handlers/*.hpp)
+file(GLOB          headers_crails_tst crails/tests/*.hpp)
+file(GLOB          scripts            scripts/*.rb)
+file(GLOB          scripts_generate   scripts/generate/*.rb)
+file(GLOB          scripts_templates  scripts/templates/*.erb)
+file(GLOB_RECURSE  app_template       app_tpl/*)
 
-install(PROGRAMS scripts/crails         DESTINATION bin)
-instalL(FILES    ${app_template}        DESTINATION share/crails)
-install(FILES    ${scripts}             DESTINATION share/crails/scripts)
-install(FILES    ${scripts_generate}    DESTINATION share/crails/scripts/generate)
-install(FILES    ${scripts_templates}   DESTINATION share/crails/scripts/templates)
-install(FILES    ${headers_crails}      DESTINATION include/crails)
-install(FILES    ${headers_crails_cki}  DESTINATION include/crails/session_store)
-install(FILES    ${headers_crails_rhs}  DESTINATION include/crails/request_handlers)
-install(TARGETS  crails-core${crails-suffix}    LIBRARY DESTINATION lib)
+install(PROGRAMS   scripts/crails         DESTINATION bin)
+instalL(FILES      ${app_template}        DESTINATION share/crails)
+install(FILES      ${scripts}             DESTINATION share/crails/scripts)
+install(FILES      ${scripts_generate}    DESTINATION share/crails/scripts/generate)
+install(FILES      ${scripts_templates}   DESTINATION share/crails/scripts/templates)
+install(FILES      ${headers_crails}      DESTINATION include/crails)
+install(FILES      ${headers_crails_cki}  DESTINATION include/crails/session_store)
+install(FILES      ${headers_crails_rhs}  DESTINATION include/crails/request_handlers)
+install(FILES      ${headers_crails_tst}  DESTINATION include/crails/tests)
+install(TARGETS    crails-core${crails-suffix}    LIBRARY DESTINATION lib)
+install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)
+
 if (USE_SOCI)
   install(FILES    ${headers_crails_sql}  DESTINATION include/crails/sql)
   install(TARGETS  crails-sql${crails-suffix}     LIBRARY DESTINATION lib)
