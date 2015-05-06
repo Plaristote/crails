@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Router::Action Router::get_action(const string& method, const string& uri, Params& query_params) const
+const Router::Action* Router::get_action(const string& method, const string& uri, Params& query_params) const
 {
   auto it  = routes.begin();
   auto end = routes.end();
@@ -28,11 +28,11 @@ Router::Action Router::get_action(const string& method, const string& uri, Param
         query_params[param_name] = param_value;
       }
       delete[] params;
-      return item.run;
+      return &(item.run);
     }
     delete[] params;
   }
-  throw Exception404(); // No route matched, throw 404 Error
+  return 0;
 }
 
 void Router::Match(const std::string& route, Router::Action callback)

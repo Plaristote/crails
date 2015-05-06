@@ -48,7 +48,8 @@ include_directories(. include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boo
 ## Source files
 ##
 file(GLOB crails_core
-     src/*.cpp)
+     src/*.cpp
+     src/request_handlers/*.cpp)
 
 file(GLOB crails_sql
      src/sql/*.cpp)

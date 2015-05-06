@@ -5,11 +5,13 @@
 # include "session_store.hpp"
 
 struct MultipartParser;
+class  ActionRequestHandler;
 
 class Params : public DynStruct
 {
   friend struct CrailsServer;
   friend struct MultipartParser; 
+  friend class  ActionRequestHandler;
 public:
   Params(void);
   ~Params(void);

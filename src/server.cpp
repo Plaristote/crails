@@ -154,13 +154,17 @@ void CrailsServer::operator()(const Server::request& request, Response response)
   try
   {
     RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
+    bool                            request_handled  = false;
     
     ReadRequestData(request, response, params);
     for (; handler_iterator != request_handlers.end() ; ++handler_iterator)
     {
-      if ((**handler_iterator)(request, out, params))
+      request_handled = (**handler_iterator)(request, out, params);
+      if (request_handled)
         break ;
     }
+    if (!request_handled)
+      throw Router::Exception404();
   }
   catch (const Router::Exception302 e)
   {

@@ -42,8 +42,8 @@ public:
 
   typedef std::vector<Item> Items;
 
-  void      Initialize(void);
-  Action    get_action(const std::string& method, const std::string& uri, Params&) const;
+  void          Initialize(void);
+  const Action* get_action(const std::string& method, const std::string& uri, Params&) const;
 
 private:
   void      ItemInitializeRegex(Item& item, std::string route);

@@ -1,20 +1,22 @@
-#include <crails/request_handlers/action.hpp>
-#include <crails/router.hpp>
+#include "crails/request_handlers/action.hpp"
+#include "crails/router.hpp"
 
 using namespace std;
 
-bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse& out, Params& params)
+bool ActionRequestHandler::operator()(const Server::request& request, BuildingResponse& out, Params& params)
 {
   const Router* router = Router::singleton::Get();
 
   if (router)
   {
     string         method = (params["_method"].Nil() ? request.method : params["_method"].Value());
-    Router::Action action = router->get_action(method, params["uri"].Value(), params);
+    const Router::Action* action = router->get_action(method, params["uri"].Value(), params);
 
+    if (action == 0)
+      return false;
     params.session->Load(params["header"]);
     {
-      DynStruct              data   = action(params);
+      DynStruct              data   = (*action)(params);
       string                 body   = data["body"].Value();
       CrailsServer::HttpCode code   = CrailsServer::HttpCodes::ok;
 
@@ -29,11 +31,11 @@ bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse&
       }
       params.session->Finalize(out);
       if (data["status"].NotNil())
-        code = (HttpCode)((int)data["status"]);
+        code = (CrailsServer::HttpCode)((int)data["status"]);
       CrailsServer::SetResponse(params, out, code, body);
     }
-    return (true);
+    return true;
   }
-  return (false);
+  return false;
 }
 

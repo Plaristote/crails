@@ -39,6 +39,8 @@ struct CrailsServer : public CrailsServerTraits
   RequestHandler* get_request_handler(const std::string& name) const;
 
   static void Launch(int argc, char** argv);
+
+  static void SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const std::string& content);
 private:
   static void ThrowCrashSegv(void);
   static void ThrowCrashFpe(void);
@@ -52,7 +54,6 @@ private:
 
   void ResponseException(BuildingResponse& out, std::string exception_name, std::string exception_what, Params& params);
   void ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCode code, Params& params);
-  static void SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const std::string& content);
 
 #ifdef ASYNC_SERVER  
   typedef std::function<void (boost::iterator_range<char const*>,

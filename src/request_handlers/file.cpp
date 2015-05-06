@@ -1,5 +1,7 @@
 #include "crails/request_handlers/file.hpp"
 #include "crails/server.hpp"
+#include "crails/params.hpp"
+#include <Boots/Utils/directory.hpp>
 
 using namespace std;
 
