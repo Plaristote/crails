@@ -7,6 +7,7 @@
 # include "backtrace.hpp"
 # include <Boots/Utils/dynstruct.hpp>
 # include "http_server.hpp"
+# include "request_parser.hpp"
 # include "request_handler.hpp"
 
 class Params;
@@ -15,6 +16,7 @@ struct CrailsServer : public CrailsServerTraits
 {
   ~CrailsServer();
   
+  typedef std::vector<RequestParser*>  RequestParsers;
   typedef std::vector<RequestHandler*> RequestHandlers;
   
   struct Crash : public boost_ext::exception
@@ -32,6 +34,7 @@ struct CrailsServer : public CrailsServerTraits
   void post_request_log(Params& params) const;
 
   void            add_request_handler(RequestHandler* request_handler);
+  void            add_request_parser(RequestParser* request_parser);
   RequestHandler* get_request_handler(const std::string& name) const;
 
   static void Launch(int argc, char** argv);
@@ -42,24 +45,13 @@ private:
   static void ThrowCrashFpe(void);
 
   void initialize_request_pipe();
-
-  void ReadRequestData(const Server::request& request, Response response, Params& params);
-  void ParseResponse  (const Server::request& request, Response, Params& params);
-  void ParseMultipart (const Server::request& request, Response, Params& params);
-  void ParseForm      (const Server::request& request, Response, Params& params);
+  void run_request_parsers (const Server::request&, Response, Params&);
+  void run_request_handlers(const Server::request&, BuildingResponse&, Params&);
 
   void ResponseException(BuildingResponse& out, std::string exception_name, std::string exception_what, Params& params);
   void ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCode code, Params& params);
 
-#ifdef ASYNC_SERVER  
-  typedef std::function<void (boost::iterator_range<char const*>,
-                            boost::system::error_code,
-                            size_t,
-                            Server::connection_ptr)> ReadCallback;  
-  
-  ReadCallback    callback;
-#endif
-
+  RequestParsers  request_parsers;
   RequestHandlers request_handlers;
   MultipartParser multipart_parser;
 };

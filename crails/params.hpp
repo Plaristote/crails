@@ -6,12 +6,16 @@
 
 struct MultipartParser;
 class  ActionRequestHandler;
+class  BodyParser;
+class  RequestMultipartParser;
 
 class Params : public DynStruct
 {
   friend struct CrailsServer;
   friend struct MultipartParser; 
   friend class  ActionRequestHandler;
+  friend class  BodyParser;
+  friend class  RequestMultipartParser;
 public:
   Params(void);
   ~Params(void);

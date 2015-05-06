@@ -1,0 +1,23 @@
+#include "crails/server.hpp"
+#include "crails/params.hpp"
+#include <Boots/Utils/regex.hpp>
+
+using namespace std;
+
+RequestParser::Status RequestFormParser::operator()(const Server::request& request, CrailsServerTraits::Response response, Params& params)
+{
+  static const Regex is_form("^application/x-www-form-urlencoded", REG_EXTENDED);
+  if (params["method"].Value() != "GET" && content_type_matches(params, is_form))
+  {
+    wait_for_body(request, response, params);
+    return RequestParser::Stop;
+  }
+  return RequestParser::Continue;
+}
+
+void RequestFormParser::body_received(const Server::request& request, CrailsServerTraits::Response, Params& params)
+{
+  cout << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << endl;  
+  if (request.body.size() > 0)
+    cgi2params(params, request.body);
+}

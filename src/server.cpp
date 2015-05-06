@@ -11,19 +11,14 @@
 #include <iostream>
 #include <crails/request_handlers/file.hpp>
 
-#ifdef ASYNC_SERVER
-# pragma message("Building Asynchronous Server")
-#else
-# pragma message("Building Synchronous Server")
-#endif
-
-#ifdef SERVER_DEBUG
-# pragma message("Building Testing Server")
-#else
-# pragma message("Building Release Server")
-#endif
-
 using namespace std;
+
+bool RequestParser::content_type_matches(Params& params, const Regex regex)
+{
+  string type = params["header"]["Content-Type"].Value();
+
+  return (regex.Match(type));
+}
 
 void CrailsServer::SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const string& content)
 {
@@ -108,46 +103,45 @@ void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCo
   }
 }
 
-void CrailsServer::ReadRequestData(const Server::request& request, Response response, Params& params)
+void CrailsServer::run_request_parsers(const Server::request& request, Response response, Params& params)
 {
-  const char*  get_params = strrchr(request.destination.c_str(), '?');
-  std::string  uri        = request.destination;
-
-  // Setting Headers parameters
-  {
-    auto it  = request.headers.begin();
-    auto end = request.headers.end();
-
-    for (; it != end ; ++it)
-    {
-      boost::network::http::request_header_narrow header = *it;
-      params["header"][header.name] = header.value;
-    }      
-  }
-
-  // Getting get parameters
-  if (get_params != 0)
-  {
-    std::string str_params(get_params);
-
-    uri.erase(uri.size() - str_params.size());
-    str_params.erase(0, 1);
-    cgi2params(params, str_params);
-  }
+  RequestParsers::const_iterator handler_iterator = request_parsers.begin();
   
-  // Reading body if relevant
-  if (request.method != "GET")
-    ParseResponse(request, response, params);
-  
-  // Set URI and method for the posterity (is that even a word ?)
-  params["uri"]    = uri;
-  params["method"] = request.method;
+  for (; handler_iterator != request_parsers.end() ; ++ handler_iterator)
+  {
+    RequestParser::Status status;
+
+    status = (**handler_iterator)(request, response, params);
+    if (status == RequestParser::Stop)
+      break ;
+  }
+}
+
+void CrailsServer::run_request_handlers(const Server::request& request, BuildingResponse& response, Params& params)
+{
+  RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
+  bool                            request_handled  = false;
+    
+  for (; handler_iterator != request_handlers.end() ; ++handler_iterator)
+  {
+    request_handled = (**handler_iterator)(request, response, params);
+    if (request_handled)
+      break ;
+  }
+  if (!request_handled)
+    throw Router::Exception404();
 }
 
 void CrailsServer::add_request_handler(RequestHandler* request_handler)
 {
   request_handlers.push_back(request_handler);
 }
+
+void CrailsServer::add_request_parser(RequestParser* request_parser)
+{
+  request_parsers.push_back(request_parser);
+}
+
 void CrailsServer::operator()(const Server::request& request, Response response)
 {
   Utils::Timer     timer;
@@ -157,18 +151,8 @@ void CrailsServer::operator()(const Server::request& request, Response response)
 
   try
   {
-    RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
-    bool                            request_handled  = false;
-    
-    ReadRequestData(request, response, params);
-    for (; handler_iterator != request_handlers.end() ; ++handler_iterator)
-    {
-      request_handled = (**handler_iterator)(request, out, params);
-      if (request_handled)
-        break ;
-    }
-    if (!request_handled)
-      throw Router::Exception404();
+    run_request_parsers(request, response, params);
+    run_request_handlers(request, out, params);
   }
   catch (const Router::Exception302 e)
   {
@@ -297,5 +281,9 @@ CrailsServer::~CrailsServer()
   for_each(request_handlers.begin(), request_handlers.end(), [](RequestHandler* request_handler)
   {
     delete request_handler;
+  });
+  for_each(request_parsers.begin(), request_parsers.end(), [](RequestParser* request_parser)
+  {
+    delete request_parser;
   });
 }
