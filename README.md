@@ -69,9 +69,9 @@ Creating a Crails Application
 The installation of the Crails Framework should have added a ruby script named 'crails' in your bin directory.
 You can use it to create application this way:
 
-    crails create -h # Check out the options first (support for databases and all that)
-    crails create application_name --use-mongodb --use-mongo-session-store
+    crails new -h # Check out the options first (support for databases and all that)
+    crails new application_name --use-mongodb --use-mongo-session-store
 
-By default, the project will build in release mode, which means it'll link to the production server. Don't forget to change CMAKE_BUILD_TYPE in your CMakeCache.txt file if you want to link to the developer server instead.
+By default, the project will build in developer mode, which means it'll link to the debug server. Don't forget to change CMAKE_BUILD_TYPE in your CMakeCache.txt file if you want to link to the release server instead.
 
 Now that your crails application is ready, check out the [COOKBOOK](COOKBOOK.md) to see all the neat things you can do with it !
