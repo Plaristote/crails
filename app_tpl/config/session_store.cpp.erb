@@ -6,7 +6,6 @@ using namespace Crails;
 USE_SESSION_STORE(<%= options[:session_store_class] %>)
 
 <% if options[:session_store] == 'mongodb' -%>
->>>>>>> 6c3c7ac484bef8192a64c857322557626712e04f
 const std::string  MongoStore::SessionStore::collection_name    = "session_store";
 const std::string  MongoStore::SessionStore::database_name      = "mongodb";
 const unsigned int MongoStore::SessionStore::session_expiration = 60 * 30;
