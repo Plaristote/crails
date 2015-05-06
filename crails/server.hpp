@@ -6,36 +6,17 @@
 # include "multipart.hpp"
 # include "backtrace.hpp"
 # include <Boots/Utils/dynstruct.hpp>
-
-namespace http = boost::network::http;
-
-class  BuildingResponse;
-struct CrailsServer;
-
-# ifdef ASYNC_SERVER
-typedef http::async_server<CrailsServer> Server;
-
-struct CrailsServerTraits
-{
-  typedef Server::connection::status_t HttpCode;
-  typedef Server::connection           HttpCodes;
-  typedef Server::connection_ptr       Response;
-};
-#else
-typedef http::server<CrailsServer>       Server;
-
-struct CrailsServerTraits
-{
-  typedef Server::response::status_type HttpCode;
-  typedef Server::response              HttpCodes;
-  typedef Server::response&             Response;
-};
-#endif
+# include "http_server.hpp"
+# include "request_handler.hpp"
 
 class Params;
 
 struct CrailsServer : public CrailsServerTraits
 {
+  ~CrailsServer();
+  
+  typedef std::vector<RequestHandler*> RequestHandlers;
+  
   struct Crash : public boost_ext::exception
   {
     Crash(const std::string& details) : details(details) {}
@@ -50,26 +31,28 @@ struct CrailsServer : public CrailsServerTraits
   void log(const char* to_log);
   void post_request_log(Params& params) const;
 
+  void add_request_handler(RequestHandler* request_handler)
+  {
+    request_handlers.push_back(request_handler);
+  }
+  
+  RequestHandler* get_request_handler(const std::string& name) const;
+
   static void Launch(int argc, char** argv);
 private:
   static void ThrowCrashSegv(void);
   static void ThrowCrashFpe(void);
+
+  void initialize_request_pipe();
 
   void ReadRequestData(const Server::request& request, Response response, Params& params);
   void ParseResponse  (const Server::request& request, Response, Params& params);
   void ParseMultipart (const Server::request& request, Response, Params& params);
   void ParseForm      (const Server::request& request, Response, Params& params);
 
-  bool ServeFile  (const Server::request& request, BuildingResponse& response, Params& params);
-  bool ServeAction(const Server::request& request, BuildingResponse& response, Params& params);
-
-  bool SendFile(const std::string& path, BuildingResponse& response, CrailsServer::HttpCode code, unsigned int first_bit = 0);
-
   void ResponseException(BuildingResponse& out, std::string exception_name, std::string exception_what, Params& params);
   void ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCode code, Params& params);
-  void SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const std::string& content);
-
-  FileCache file_cache;
+  static void SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const std::string& content);
 
 #ifdef ASYNC_SERVER  
   typedef std::function<void (boost::iterator_range<char const*>,
@@ -79,6 +62,8 @@ private:
   
   ReadCallback    callback;
 #endif
+
+  RequestHandlers request_handlers;
   MultipartParser multipart_parser;
 };
 

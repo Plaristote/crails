@@ -9,6 +9,7 @@
 #include <crails/databases.hpp>
 #include <crails/backtrace.hpp>
 #include <iostream>
+#include <crails/request_handlers/file.hpp>
 
 #ifdef ASYNC_SERVER
 # pragma message("Building Asynchronous Server")
@@ -54,13 +55,28 @@ void CrailsServer::ResponseException(BuildingResponse& out, std::string e_name, 
 #endif
 }
 
+RequestHandler* CrailsServer::get_request_handler(const string& name) const
+{
+  auto it = request_handlers.begin();
+  
+  for (; it != request_handlers.end() ; ++it)
+  {
+    RequestHandler* request_handler = *it;
+
+    if (request_handler->get_name() == name)
+      return request_handler;
+  }
+  return 0;
+}
+
 void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCode code, Params& params)
 {
+  FileRequestHandler* file_handler = reinterpret_cast<FileRequestHandler*>(get_request_handler("file"));
   std::stringstream file_name;
   std::stringstream view_name;
 
   file_name << (unsigned int)(code) << ".html";
-  if (SendFile("../public/" + file_name.str(), out, code, 0))
+  if (file_handler && file_handler->SendFile("../public/" + file_name.str(), out, code, 0))
   {
     params["response-data"]["code"] = (int)code;
     return ;
@@ -137,13 +153,13 @@ void CrailsServer::operator()(const Server::request& request, Response response)
 
   try
   {
+    RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
+    
     ReadRequestData(request, response, params);
-    if (request.method == "GET" && ServeFile(request, out, params))
-      params["response-data"]["code"] = (int)HttpCodes::ok;
-    else
+    for (; handler_iterator != request_handlers.end() ; ++handler_iterator)
     {
-      if (!(ServeAction(request, out, params)))
-        ResponseException(out, "Router", "Crails Router isn't initialized", params);
+      if ((**handler_iterator)(request, out, params))
+        break ;
     }
   }
   catch (const Router::Exception302 e)
@@ -192,94 +208,6 @@ void CrailsServer::post_request_log(Params& params) const
 void CrailsServer::log(const char* to_log)
 {
   cout << "[Boost][Net] " << to_log << endl;
-}
-
-/*
- * Server Actions
- */
-bool CrailsServer::SendFile(const std::string& fullpath, BuildingResponse& response, CrailsServer::HttpCode code, unsigned int first_bit)
-{
-  file_cache.Lock();
-  {
-#ifndef SERVER_DEBUG
-    bool               cached = file_cache.Contains(fullpath);
-#endif
-    const std::string& str = *(file_cache.Require(fullpath));
-
-    if (&str != 0)
-    {
-      std::stringstream str_length;
-
-      str_length << (str.size() - first_bit);
-      response.SetHeaders("Content-Length", str_length.str());
-      response.SetHeaders("Content-Type",   GetMimeType(strrchr(fullpath.c_str(), '.')));
-      response.SetStatusCode(code);
-      response.SetBody(str.c_str() + first_bit, str.size() - first_bit);
-      cout << "# Delivering asset `" << fullpath << "` ";
-#ifdef SERVER_DEBUG
-      file_cache.GarbageCollect();
-      cout << "(cache disabled)" << endl;
-#else
-      cout << (cached ? "(was cached)" : "(was not cached)") << endl;
-#endif
-      file_cache.Unlock();
-      return (true);
-    }
-  }
-  file_cache.Unlock();
-  return (false);
-}
-
-bool CrailsServer::ServeFile(const Server::request& request, BuildingResponse& response, Params& params)
-{
-  std::string fullpath       = params["uri"].Value();
-  size_t      pos_get_params = fullpath.find('?');
-
-  if (pos_get_params != std::string::npos)
-    fullpath.erase(pos_get_params);
-  fullpath = "../public" + fullpath;
-
-  { // Is a directory ?
-    Directory dir;
-    
-    if (dir.OpenDir(fullpath))
-      fullpath += "/index.htm";
-  }
-  return (SendFile(fullpath, response, CrailsServer::HttpCodes::ok));
-}
-
-bool CrailsServer::ServeAction(const Server::request& request, BuildingResponse& out, Params& params)
-{
-  const Router* router = Router::singleton::Get();
-
-  if (router)
-  {
-    string         method = (params["_method"].Nil() ? request.method : params["_method"].Value());
-    Router::Action action = router->get_action(method, params["uri"].Value(), params);
-
-    params.session->Load(params["header"]);
-    {
-      DynStruct     data   = action(params);
-      string        body   = data["body"].Value();
-      HttpCode      code   = HttpCodes::ok;
-
-      out.SetHeaders("Content-Type", "text/html");
-      if (data["headers"].NotNil())
-      { // If parameters headers were set, copy them to the response
-        auto it  = data["headers"].begin();
-        auto end = data["headers"].end();
-
-        for (; it != end ; ++it)
-          out.SetHeaders((*it).Key(), (*it).Value());
-      }
-      params.session->Finalize(out);
-      if (data["status"].NotNil())
-        code = (HttpCode)((int)data["status"]);
-      SetResponse(params, out, code, body);
-    }
-    return (true);
-  }
-  return (false);
 }
 
 /*
@@ -332,6 +260,7 @@ void CrailsServer::Launch(int argc, char **argv)
     CrailsServer    handler;
     Server::options server_options(handler); 
 
+    handler.initialize_request_pipe();
     server_options.thread_pool();
 #ifdef ASYNC_SERVER
     cout << ">> Pool Thread Size: " << threads << endl;
@@ -353,4 +282,12 @@ void CrailsServer::Launch(int argc, char **argv)
     server.run();
   }
   Router::singleton::Finalize();  
+}
+
+CrailsServer::~CrailsServer()
+{
+  for_each(request_handlers.begin(), request_handlers.end(), [](RequestHandler* request_handler)
+  {
+    delete request_handler;
+  });
 }
