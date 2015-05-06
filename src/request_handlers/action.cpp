@@ -2,8 +2,9 @@
 #include "crails/router.hpp"
 
 using namespace std;
+using namespace Crails;
 
-bool ActionRequestHandler::operator()(const Server::request& request, BuildingResponse& out, Params& params)
+bool ActionRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params)
 {
   const Router* router = Router::singleton::Get();
 
@@ -16,9 +17,9 @@ bool ActionRequestHandler::operator()(const Server::request& request, BuildingRe
       return false;
     params.session->Load(params["header"]);
     {
-      DynStruct              data   = (*action)(params);
-      string                 body   = data["body"].Value();
-      CrailsServer::HttpCode code   = CrailsServer::HttpCodes::ok;
+      DynStruct        data   = (*action)(params);
+      string           body   = data["body"].Value();
+      Server::HttpCode code   = Server::HttpCodes::ok;
 
       out.SetHeaders("Content-Type", "text/html");
       if (data["headers"].NotNil())
@@ -31,8 +32,8 @@ bool ActionRequestHandler::operator()(const Server::request& request, BuildingRe
       }
       params.session->Finalize(out);
       if (data["status"].NotNil())
-        code = (CrailsServer::HttpCode)((int)data["status"]);
-      CrailsServer::SetResponse(params, out, code, body);
+        code = (Server::HttpCode)((int)data["status"]);
+      Server::SetResponse(params, out, code, body);
     }
     return true;
   }

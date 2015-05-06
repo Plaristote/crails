@@ -12,18 +12,19 @@
 #include <crails/request_handlers/file.hpp>
 
 using namespace std;
+using namespace Crails;
 
-CrailsServer::RequestParsers  CrailsServer::request_parsers;
-CrailsServer::RequestHandlers CrailsServer::request_handlers;
+Server::RequestParsers  Server::request_parsers;
+Server::RequestHandlers Server::request_handlers;
 
-void CrailsServer::SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const string& content)
+void Server::SetResponse(Params& params, BuildingResponse& out, Server::HttpCode code, const string& content)
 {
   out.SetResponse(code, content);
   params["response-data"]["code"]   = (int)code;
   params["response-data"]["length"] = content.size();
 }
 
-RequestHandler* CrailsServer::get_request_handler(const string& name)
+RequestHandler* Server::get_request_handler(const string& name)
 {
   RequestHandlers::const_iterator it = request_handlers.begin();
 
@@ -37,7 +38,7 @@ RequestHandler* CrailsServer::get_request_handler(const string& name)
   return 0;
 }
 
-void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCode code, Params& params)
+void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Params& params)
 {
   FileRequestHandler* file_handler = reinterpret_cast<FileRequestHandler*>(get_request_handler("file"));
   std::stringstream file_name;
@@ -69,14 +70,14 @@ void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCo
       else
         content = view.Generate(vars);
       out.SetHeaders("Content-Type", "text/html");
-      CrailsServer::SetResponse(params, out, code, content);
+      Server::SetResponse(params, out, code, content);
       return ;
     }
-    CrailsServer::SetResponse(params, out, code, "");
+    Server::SetResponse(params, out, code, "");
   }
 }
 
-void CrailsServer::run_request_parsers(const Server::request& request, Response response, Params& params)
+void Server::run_request_parsers(const HttpServer::request& request, Response response, Params& params)
 {
   RequestParsers::const_iterator handler_iterator = request_parsers.begin();
   
@@ -90,7 +91,7 @@ void CrailsServer::run_request_parsers(const Server::request& request, Response 
   }
 }
 
-void CrailsServer::run_request_handlers(const Server::request& request, BuildingResponse& response, Params& params)
+void Server::run_request_handlers(const HttpServer::request& request, BuildingResponse& response, Params& params)
 {
   RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
   bool                            request_handled  = false;
@@ -105,22 +106,22 @@ void CrailsServer::run_request_handlers(const Server::request& request, Building
     ResponseHttpError(response, HttpCodes::not_found, params);
 }
 
-void CrailsServer::add_request_handler(RequestHandler* request_handler)
+void Server::add_request_handler(RequestHandler* request_handler)
 {
   request_handlers.push_back(request_handler);
 }
 
-void CrailsServer::add_request_parser(RequestParser* request_parser)
+void Server::add_request_parser(RequestParser* request_parser)
 {
   request_parsers.push_back(request_parser);
 }
 
-void CrailsServer::initialize_exception_catcher()
+void Server::initialize_exception_catcher()
 {
   exception_catcher.add_exception_catcher<std::exception&>("std::exception");
 }
 
-void CrailsServer::operator()(const Server::request& request, Response response)
+void Server::operator()(const HttpServer::request& request, Response response)
 {
   Utils::Timer     timer;
   Databases::singleton::Initialize();
@@ -137,7 +138,7 @@ void CrailsServer::operator()(const Server::request& request, Response response)
   post_request_log(params);
 }
 
-void CrailsServer::post_request_log(Params& params) const
+void Server::post_request_log(Params& params) const
 {
   float crails_time     = params["response-time"]["crails"];
   float controller_time = params["response-time"]["controller"];
@@ -152,7 +153,7 @@ void CrailsServer::post_request_log(Params& params) const
   cout << endl << endl;
 }
 
-void CrailsServer::log(const char* to_log)
+void Server::log(const char* to_log)
 {
   cout << "[Boost][Net] " << to_log << endl;
 }
@@ -169,16 +170,16 @@ typedef boost::shared_ptr<thread_pool> thread_pool_ptr;
 
 #ifdef USE_SEGVCATCH
 # include <segvcatch.h>
-void CrailsServer::ThrowCrashSegv()
+void Server::ThrowCrashSegv()
 {
-  throw CrailsServer::Crash("Segmentation Fault");
+  throw Server::Crash("Segmentation Fault");
 }
 #endif
 
 std::function<void (void)> shutdown_lambda;
 static void shutdown(int) { shutdown_lambda(); }
 
-void CrailsServer::Launch(int argc, char **argv)
+void Server::Launch(int argc, char **argv)
 {
   cout << "## Launching the amazing Crails Server ##" << endl;
   Utils::ClOptions options(argc, argv);
@@ -204,17 +205,17 @@ void CrailsServer::Launch(int argc, char **argv)
     cout << ">> Initializing server" << endl;
     cout << ">> Listening on " << address << ":" << port << endl;
 
-    CrailsServer    handler;
-    Server::options server_options(handler); 
+    Server              handler;
+    HttpServer::options server_options(handler); 
 
     server_options.thread_pool();
 #ifdef ASYNC_SERVER
     cout << ">> Pool Thread Size: " << threads << endl;
     thread_pool     _thread_pool(threads);
     thread_pool_ptr thread_pool_ptr(&_thread_pool);
-    Server          server(server_options.address(address.c_str()).port(port.c_str()).thread_pool(thread_pool_ptr));
+    HttpServer      server(server_options.address(address.c_str()).port(port.c_str()).thread_pool(thread_pool_ptr));
 #else
-    Server          server(server_options.address(address.c_str()).port(port.c_str()));
+    HttpServer      server(server_options.address(address.c_str()).port(port.c_str()));
 #endif
 
     signal(SIGINT, &shutdown);
@@ -230,7 +231,7 @@ void CrailsServer::Launch(int argc, char **argv)
   Router::singleton::Finalize();  
 }
 
-CrailsServer::~CrailsServer()
+Server::~Server()
 {
   for_each(request_handlers.begin(), request_handlers.end(), [](RequestHandler* request_handler)
   {
@@ -242,7 +243,7 @@ CrailsServer::~CrailsServer()
   });
 }
 
-CrailsServer::CrailsServer()
+Server::Server()
 {
   initialize_exception_catcher();
   initialize_request_pipe();

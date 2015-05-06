@@ -14,35 +14,38 @@
 # include "server.hpp"
 # include "params.hpp"
 
-class Router
+namespace Crails
 {
-  Router() {}
-  ~Router() {}
-  
-  SINGLETON(Router)
-public:
-  typedef std::function<DynStruct (Params&)> Action;
-  
-  struct Item
+  class Router
   {
-    Action                   run;
-    std::string              method;
-    Regex                    regex;
-    std::vector<std::string> param_names;
+    Router() {}
+    ~Router() {}
+    
+    SINGLETON(Router)
+  public:
+    typedef std::function<DynStruct (Params&)> Action;
+    
+    struct Item
+    {
+      Action                   run;
+      std::string              method;
+      Regex                    regex;
+      std::vector<std::string> param_names;
+    };
+
+    typedef std::vector<Item> Items;
+
+    void          Initialize(void);
+    const Action* get_action(const std::string& method, const std::string& uri, Params&) const;
+
+  private:
+    void      ItemInitializeRegex(Item& item, std::string route);
+    void      Match(const std::string& route, Action callback);
+    void      Match(const std::string& method, const std::string& route, Action callback);
+
+    Items routes;
   };
-
-  typedef std::vector<Item> Items;
-
-  void          Initialize(void);
-  const Action* get_action(const std::string& method, const std::string& uri, Params&) const;
-
-private:
-  void      ItemInitializeRegex(Item& item, std::string route);
-  void      Match(const std::string& route, Action callback);
-  void      Match(const std::string& method, const std::string& route, Action callback);
-
-  Items routes;
-};
+}
 
 # define SYM2STRING(sym) std::string(#sym)
 

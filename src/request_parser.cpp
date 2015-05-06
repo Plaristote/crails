@@ -2,6 +2,7 @@
 #include "crails/params.hpp"
 
 using namespace std;
+using namespace Crails;
 
 bool RequestParser::content_type_matches(Params& params, const Regex regex)
 {

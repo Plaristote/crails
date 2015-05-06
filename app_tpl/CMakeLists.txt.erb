@@ -30,21 +30,23 @@ file(GLOB_RECURSE crails_app
      config/session_store.cpp)
 
 add_executable(crails-app ${crails_app})
-if (SERVER_DEBUG)
-  set(crails_core_name    crails-core-debug)
-<% if options[:sql]     == true %>  set(crails_sql_name     crails-sql-debug)<% end %>
-<% if options[:mongodb] == true %>  set(crails_mongodb_name crails-mongodb-debug)<% end %>
-else()
-  set(crails_core_name    crails-core)
-<% if options[:sql]     == true %>  set(crails_sql_name     crails-sql)<% end %>
-<% if options[:mongodb] == true %>  set(crails_mongodb_name crails-mongodb)<% end %>
+
+if(SERVER_DEBUG)
+  if(ASYNC_SERVER)
+    set(crails-suffix -multithread-debug)
+  else()
+    set(crails-suffix -debug)
+  endif()
+elseif(ASYNC_SERVER)
+  set(crails-suffix -multithread)
 endif()
 
-<% if options[:sql] == true %>set(crails_sql_dep     soci_core soci_mysql ${crails_sql_name})<% end %>
-<% if options[:mongodb] == true %>set(crails_mongodb_dep mongoclient ${crails_mongodb_name})<% end %>
+<% if options[:sql] == true %>set(crails_sql_dep     soci_core soci_mysql crails-sql${crails-suffix})<% end %>
+<% if options[:mongodb] == true %>set(crails_mongodb_dep mongoclient crails-mongodb${crails-suffix})<% end %>
+<% if options[:session_store] == 'mongodb' -%>set(crails_mongodb_dep ${crails_mongodb_dep} crails-mongodb-session${crails-suffix})<% end -%>
 
 target_link_libraries(crails-app
-                      ${crails_core_name}
+                      crails-core${crails-suffix}
                       ${Boost_LIBRARIES}
                       pthread dl crypto ssl
                       Boots

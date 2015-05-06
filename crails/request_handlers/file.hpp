@@ -3,25 +3,28 @@
 
 # include "../server.hpp"
 
-class FileRequestHandler : public RequestHandler
+namespace Crails
 {
-  friend struct CrailsServer;
-public:
-  FileRequestHandler() : RequestHandler("file")
+  class FileRequestHandler : public RequestHandler
   {
-    cache_enabled = true;
-  }
+    friend struct Server;
+  public:
+    FileRequestHandler() : RequestHandler("file")
+    {
+      cache_enabled = true;
+    }
 
-  bool operator()(const Server::request& request, BuildingResponse& response, Params& params);
+    bool operator()(const HttpServer::request& request, BuildingResponse& response, Params& params);
 
-  void set_cache_enabled(bool enable) { cache_enabled = enable; }
-  bool is_cache_enabled(void) const   { return cache_enabled;   }
+    void set_cache_enabled(bool enable) { cache_enabled = enable; }
+    bool is_cache_enabled(void) const   { return cache_enabled;   }
 
-private:
-  bool SendFile(const std::string& path, BuildingResponse& response, CrailsServer::HttpCode code, unsigned int first_bit = 0);
+  private:
+    bool SendFile(const std::string& path, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit = 0);
 
-  bool      cache_enabled;
-  FileCache file_cache;
-};
-
+    bool      cache_enabled;
+    FileCache file_cache;
+  };
+}
+  
 #endif

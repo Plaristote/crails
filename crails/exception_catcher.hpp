@@ -5,10 +5,10 @@
 # include "backtrace.hpp"
 # include <sstream>
 
-class Params;
-
 namespace Crails
 {
+  class Params;
+  
   class ExceptionCatcher
   {
     struct Context

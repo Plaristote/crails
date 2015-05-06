@@ -4,13 +4,16 @@
 # include <Boots/Utils/dynstruct.hpp>
 # include <string>
 
-struct CookieData : public DynStruct
+namespace Crails
 {
-  void        Unserialize(const std::string&);
-  std::string Serialize(void);
+  struct CookieData : public DynStruct
+  {
+    void        Unserialize(const std::string&);
+    std::string Serialize(void);
 
-  static const std::string password;
-  static const std::string salt;
-};
+    static const std::string password;
+    static const std::string salt;
+  };
+}
 
 #endif

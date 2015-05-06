@@ -2,9 +2,10 @@
 #include "crails/params.hpp"
 
 using namespace std;
+using namespace Crails;
 
 #ifdef ASYNC_SERVER
-void BodyParser::wait_for_body(const Server::request& request, CrailsServerTraits::Response response, Params& params)
+void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
   Sync::Semaphore    sem(0);
   unsigned int       to_read    = params["header"]["Content-Length"];
@@ -15,7 +16,7 @@ void BodyParser::wait_for_body(const Server::request& request, CrailsServerTrait
   callback = [this, &sem, &to_read, &total_read, &read_buffer, &response](boost::iterator_range<char const*> range,
                         boost::system::error_code error_code,
                         size_t size_read,
-                        Server::connection_ptr connection_ptr)
+                        HttpServer::connection_ptr connection_ptr)
   {
     std::cout << "Reading buffer..." << std::endl;
     for (unsigned int i = 0 ; i < size_read ; ++i)
@@ -35,7 +36,7 @@ void BodyParser::wait_for_body(const Server::request& request, CrailsServerTrait
   params.response_parsed.Post();
 }
 #else
-void BodyParser::wait_for_body(const Server::request& request, CrailsServerTraits::Response response, Params& params)
+void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
   body_received(request, response, params);
 }

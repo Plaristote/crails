@@ -1,6 +1,7 @@
 #include "crails/session_store/cookie_store.hpp"
 
 using namespace std;
+using namespace Crails;
 
 void CookieStore::Load(Data request_headers)
 {

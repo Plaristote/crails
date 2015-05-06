@@ -1,9 +1,11 @@
 #include "crails/server.hpp"
 #include "crails/params.hpp"
+#include "crails/multipart.hpp"
 
 using namespace std;
+using namespace Crails;
 
-RequestParser::Status RequestMultipartParser::operator()(const Server::request& request, CrailsServerTraits::Response response, Params& params)
+RequestParser::Status RequestMultipartParser::operator()(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
   static const Regex is_multipart("^multipart/form-data", REG_EXTENDED);
 
@@ -16,7 +18,7 @@ RequestParser::Status RequestMultipartParser::operator()(const Server::request& 
 }
 
 #ifdef ASYNC_SERVER
-void RequestMultipartParser::parse_multipart(const Server::request&, CrailsServerTraits::Response response, Params& params)
+void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerTraits::Response response, Params& params)
 {
   cout << "Going for multipart/form-data parsing" << endl;
   MultipartParser multipart_parser;
@@ -25,7 +27,7 @@ void RequestMultipartParser::parse_multipart(const Server::request&, CrailsServe
   callback = [this, &multipart_parser, &params](boost::iterator_range<char const*> range,
                       boost::system::error_code error_code,
                       size_t size_read,
-                      Server::connection_ptr connection_ptr)
+                      HttpServer::connection_ptr connection_ptr)
   {
     multipart_parser.sem.Wait();
     multipart_parser.total_read += size_read;
@@ -42,7 +44,7 @@ void RequestMultipartParser::parse_multipart(const Server::request&, CrailsServe
   params.response_parsed.Wait();
 }
 #else
-void RequestMultipartParser::parse_multipart(const Server::request& request, CrailsServerTraits::Response, Params& params)
+void RequestMultipartParser::parse_multipart(const HttpServer::request& request, ServerTraits::Response, Params& params)
 {
   MultipartParser multipart_parser;
 

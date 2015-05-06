@@ -5,16 +5,19 @@
 # include "crails/http_response.hpp"
 # include "crails/session_store.hpp"
 
-class CookieStore : public SessionStore
+namespace Crails
 {
-public:
-  void             Load(Data request_headers);
-  void             Finalize(BuildingResponse& response);
-  DynStruct&       Session(void);
-  const DynStruct& Session(void) const;
+  class CookieStore : public SessionStore
+  {
+  public:
+    void             Load(Data request_headers);
+    void             Finalize(BuildingResponse& response);
+    DynStruct&       Session(void);
+    const DynStruct& Session(void) const;
 
-private:
-  CookieData       cookies;
-};
+  private:
+    CookieData       cookies;
+  };
+}
 
 #endif

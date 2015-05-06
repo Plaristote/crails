@@ -1,6 +1,7 @@
 #include "crails/session_store/mongodb.hpp"
 
 using namespace std;
+using namespace Crails;
 
 MongoStore::SessionStore::SessionStore(MongoDB::Collection& collection, mongo::BSONObj bson_object) : Model(collection, bson_object)
 {

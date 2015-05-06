@@ -11,15 +11,18 @@ SmartPointer<SessionStore> SessionStore::Factory(void) \
   return (new classname ()); \
 }
 
-class SessionStore
+namespace Crails
 {
-public:
-  static SmartPointer<SessionStore> Factory(void);
-  
-  virtual void             Load(Data request_headers)           = 0;
-  virtual void             Finalize(BuildingResponse& response) = 0;
-  virtual DynStruct&       Session(void)                        = 0;
-  virtual const DynStruct& Session(void) const                  = 0;
-};
+  class SessionStore
+  {
+  public:
+    static SmartPointer<SessionStore> Factory(void);
+    
+    virtual void             Load(Data request_headers)           = 0;
+    virtual void             Finalize(BuildingResponse& response) = 0;
+    virtual DynStruct&       Session(void)                        = 0;
+    virtual const DynStruct& Session(void) const                  = 0;
+  };
+}
 
 #endif

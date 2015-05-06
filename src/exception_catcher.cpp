@@ -46,10 +46,10 @@ void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, 
     std::string content = view.Generate(vars);
 
     out.SetHeaders("Content-Type", "text/html");
-    CrailsServer::SetResponse(params, out, CrailsServer::HttpCodes::internal_server_error, content);
+    Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, content);
   }
 #else
-  CrailsServer::ResponseHttpError(out, CrailsServer::HttpCodes::internal_server_error, params);
+  Server::ResponseHttpError(out, Server::HttpCodes::internal_server_error, params);
 #endif
 }
 

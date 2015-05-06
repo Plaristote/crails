@@ -19,7 +19,7 @@ def compile_view filename
 
   lines.each do | line |
     if part == 0
-      if line[0] == '#'
+      if line[0] == '#' || /^\s*using\s+namespace\s+/.match(line) != nil
         include_lines << line
       else
         linking_lines << line
@@ -124,14 +124,14 @@ def compile_view filename
 
   extern "C"
   {
-    std::string generate_view(SharedVars&);
-    std::string render_view(const std::string& name, SharedVars&);
+    std::string generate_view(Crails::SharedVars&);
+    std::string render_view(const std::string& name, Crails::SharedVars&);
   }
   
   class #{class_name}
   {
   public:
-    #{class_name}(SharedVars& vars) : vars(vars)
+    #{class_name}(Crails::SharedVars& vars) : vars(vars)
     {
       #{linking_lines.join "\n"}
     }
@@ -143,12 +143,12 @@ def compile_view filename
     }
 
   private:
-    SharedVars&       vars;
-    std::stringstream #{out_var};
+    Crails::SharedVars& vars;
+    std::stringstream   #{out_var};
     #{instance_variables.join "\n"}
   };
 
-  std::string generate_view(SharedVars& vars)
+  std::string generate_view(Crails::SharedVars& vars)
   {
     #{class_name} view(vars);
     

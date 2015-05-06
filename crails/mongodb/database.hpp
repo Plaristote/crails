@@ -9,7 +9,7 @@
 
 namespace MongoDB
 {
-  class Database : public Databases::Db
+  class Database : public Crails::Databases::Db
   {
   public:
     typedef std::list<Collection> Collections;

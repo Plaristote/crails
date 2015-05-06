@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace System;
+using namespace Crails;
 
 View::View(const std::string& path)
 {

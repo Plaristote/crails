@@ -4,11 +4,12 @@
 #include <crails/mail_servers.hpp>
 
 using namespace std;
+using namespace Crails;
 
 int main(int argc, char **argv)
 {
   MailServers::singleton::Initialize();
-  CrailsServer::Launch(argc, argv);
+  Server::Launch(argc, argv);
   MailServers::singleton::Finalize();
   return (0);
 }

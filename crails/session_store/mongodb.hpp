@@ -8,39 +8,42 @@
 # include <crails/mongodb/model.hpp>
 # include <crails/mongodb/resultset.hpp>
 
-class MongoStore : public SessionStore
+namespace Crails
 {
-public:
-  class SessionStore : public MongoDB::Model
+  class MongoStore : public SessionStore
   {
   public:
-    static const std::string& CollectionName(void) { return (collection_name); }
-    static const std::string& DatabaseName(void)   { return (database_name);   }
+    class SessionStore : public MongoDB::Model
+    {
+    public:
+      static const std::string& CollectionName(void) { return (collection_name); }
+      static const std::string& DatabaseName(void)   { return (database_name);   }
 
-    MONGODB_MODEL(SessionStore)
+      MONGODB_MODEL(SessionStore)
 
-    void SetFields(Data data);
-    void GetFields(Data data);
-    void Save(void);
+      void SetFields(Data data);
+      void GetFields(Data data);
+      void Save(void);
 
-    static void Cleanup(void);
+      static void Cleanup(void);
 
-    static const std::string  collection_name;
-    static const std::string  database_name;
-    static const unsigned int session_expiration;
+      static const std::string  collection_name;
+      static const std::string  database_name;
+      static const unsigned int session_expiration;
+    };
+
+    MongoStore();
+
+    void             Load(Data request_headers);
+    void             Finalize(BuildingResponse& response);
+    DynStruct&       Session(void)       { return (session_content); }
+    const DynStruct& Session(void) const { return (session_content); }
+    
+  private:
+    SmartPointer<SessionStore> session;
+    CookieData                 cookie;
+    DynStruct                  session_content;
   };
-
-  MongoStore();
-
-  void             Load(Data request_headers);
-  void             Finalize(BuildingResponse& response);
-  DynStruct&       Session(void)       { return (session_content); }
-  const DynStruct& Session(void) const { return (session_content); }
-  
-private:
-  SmartPointer<SessionStore> session;
-  CookieData                 cookie;
-  DynStruct                  session_content;
-};
+}
 
 #endif

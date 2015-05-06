@@ -1,13 +1,14 @@
-#include "crails/controller_base.hpp"
+#include "crails/controller.hpp"
 #include "crails/router.hpp"
 #include "crails/backtrace.hpp"
 #include <Boots/Utils/directory.hpp>
 
 using namespace std;
+using namespace Crails;
 
 std::string rand_str(std::string::size_type size); // Defined in rand_str.cpp
 
-ControllerBase::ControllerBase(Params& params) : params(params)
+Controller::Controller(Params& params) : params(params)
 {
   // Set the class attributes accessible to the views
   *vars["controller"]       = this;
@@ -20,24 +21,24 @@ ControllerBase::ControllerBase(Params& params) : params(params)
   params.Session()["flash"] = "";
 }
 
-ControllerBase::~ControllerBase()
+Controller::~Controller()
 {
   params["response-time"]["controller"] = timer.GetElapsedSeconds();
 }
 
-void ControllerBase::initialize()
+void Controller::initialize()
 {
   if (must_protect_from_forgery())
     protect_from_forgery();
 }
 
-void ControllerBase::redirect_to(const string& uri)
+void Controller::redirect_to(const string& uri)
 {
   response["status"]              = 302;
   response["headers"]["Location"] = uri;
 }
 
-void ControllerBase::protect_from_forgery(void) const
+void Controller::protect_from_forgery(void) const
 {
   // If request contains a body (ie: not get), check for the CSRF token
   if (params["method"].Value() != "GET" && !(check_csrf_token()))
@@ -46,7 +47,7 @@ void ControllerBase::protect_from_forgery(void) const
   params.Session()["csrf_token"] = rand_str(16);
 }
 
-bool ControllerBase::check_csrf_token(void) const
+bool Controller::check_csrf_token(void) const
 {
   Data csrf_token = params["csrf-token"];
   
@@ -55,7 +56,7 @@ bool ControllerBase::check_csrf_token(void) const
   return (csrf_token.Value() == params.Session()["csrf_token"].Value());
 }
 
-void ControllerBase::render(const std::string& view, const std::string& layout)
+void Controller::render(const std::string& view, const std::string& layout)
 {
   Regex      match_ecpp("[.][^.]*[.]ecpp$");
   Regex      match_extension("[.][^.]*$");
@@ -86,7 +87,7 @@ void ControllerBase::render(const std::string& view, const std::string& layout)
   set_content_type_from_extension(format);
 }
 
-void ControllerBase::render(RenderType type, const string& value)
+void Controller::render(RenderType type, const string& value)
 {
   string body;
 
@@ -94,7 +95,7 @@ void ControllerBase::render(RenderType type, const string& value)
   set_content_type(type);
 }
 
-void ControllerBase::render(RenderType type, DynStruct value)
+void Controller::render(RenderType type, DynStruct value)
 {
   string       content_type;
   stringstream body;
@@ -116,7 +117,7 @@ void ControllerBase::render(RenderType type, DynStruct value)
   set_content_type(type);
 }
 
-void ControllerBase::set_content_type_from_extension(const std::string& extension)
+void Controller::set_content_type_from_extension(const std::string& extension)
 {
   string content_type;
 
@@ -128,7 +129,7 @@ void ControllerBase::set_content_type_from_extension(const std::string& extensio
   response["headers"]["Content-Type"] = content_type;
 }
 
-void ControllerBase::set_content_type(RenderType type)
+void Controller::set_content_type(RenderType type)
 {
   string content_type;
 

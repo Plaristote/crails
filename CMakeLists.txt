@@ -57,28 +57,32 @@ file(GLOB crails_sql
 
 file(GLOB crails_mongodb
      src/mongodb/*.cpp)
+     
+file(GLOB crails_mongodb_session
+     src/session_store/mongodb/*.cpp)
 
 ##
 ## Targets
 ##
-if (DEVELOPER_MODE)
-  set(crails_core_name    crails-core-debug)
-  set(crails_sql_name     crails-sql-debug)
-  set(crails_mongodb_name crails-mongodb-debug)
-else()
-  set(crails_core_name    crails-core)
-  set(crails_sql_name     crails-sql)
-  set(crails_mongodb_name crails-mongodb)
+if(DEVELOPER_MODE)
+  if(USE_MULTITHREAD)
+    set(crails-suffix -multithread-debug)
+  else()
+    set(crails-suffix -debug)
+  endif()
+elseif(USE_MULTITHREAD)
+  set(crails-suffix -multithread)
 endif()
 
-add_library(${crails_core_name}      SHARED ${crails_core})
+add_library(crails-core${crails-suffix}      SHARED ${crails_core})
 
 if (USE_SOCI)
-  add_library(${crails_sql_name}     SHARED ${crails_sql})
+  add_library(crails-sql${crails-suffix}     SHARED ${crails_sql})
 endif()
 
 if (USE_MONGODB)
-  add_library(${crails_mongodb_name} SHARED ${crails_mongodb})
+  add_library(crails-mongodb${crails-suffix} SHARED ${crails_mongodb})
+  add_library(crails-mongodb-session${crails-suffix} SHARED ${crails_mongodb_session})
 endif()
 
 file(GLOB         headers_crails     crails/*.h crails/*.hpp)
@@ -99,13 +103,14 @@ install(FILES    ${scripts_templates}   DESTINATION share/crails/scripts/templat
 install(FILES    ${headers_crails}      DESTINATION include/crails)
 install(FILES    ${headers_crails_cki}  DESTINATION include/crails/session_store)
 install(FILES    ${headers_crails_rhs}  DESTINATION include/crails/request_handlers)
-install(TARGETS  ${crails_core_name}    LIBRARY DESTINATION lib)
+install(TARGETS  crails-core${crails-suffix}    LIBRARY DESTINATION lib)
 if (USE_SOCI)
   install(FILES    ${headers_crails_sql}  DESTINATION include/crails/sql)
-  install(TARGETS  ${crails_sql_name}     LIBRARY DESTINATION lib)
+  install(TARGETS  crails-sql${crails-suffix}     LIBRARY DESTINATION lib)
 endif()
 if (USE_MONGODB)
   install(FILES    ${headers_crails_mdb}  DESTINATION include/crails/mongodb)
-  install(TARGETS  ${crails_mongodb_name} LIBRARY DESTINATION lib)
+  install(TARGETS  crails-mongodb${crails-suffix} LIBRARY DESTINATION lib)
+  install(TARGETS  crails-mongodb-session${crails-suffix} LIBRARY DESTINATION lib)
 endif()
 

@@ -41,7 +41,7 @@ class ProjectModel
   
   def generate_erb target, source, options
     path = "#{@template_path}/#{source}"
-    tpl  = ERB.new (File.new path).read
+    tpl  = ERB.new (File.new path).read, nil, '-'
     File.open target, 'w' do | f |
       f.write (tpl.result binding)
     end
@@ -80,15 +80,11 @@ OptionParser.new do |opts|
   opts.on('',   '--use-segvcatch', 'use the segvcatch library') do options[:segvcatch] = true  end
   opts.on('',   '--synchronous',   'server wont use threads')   do options[:server]    = :sync end
 
-  opts.on('',   '--session-store include type', 'set a session store (ex: -session-store mongodb MongoStore)') do |param1,param2|
-    options[:session_store]       = param1
-    options[:session_store_class] = param2
-  end
-
-  opts.on('',   '--use-mongo-session-store', 'use the mongodb based session store') do
-    options[:session_store]       = 'mongodb'
-    options[:mongodb]             = true
-    options[:session_store_class] = 'MongoStore'
+  opts.on('',   '--session-store include,type', 'set a session store (ex: -session-store mongodb,MongoStore)') do |param|
+    param = param.split ','
+    options[:session_store]       = param[0]
+    options[:session_store_class] = param[1]
+    options[:mongodb] = true if param[0] == 'mongodb'
   end
 end.parse!
 

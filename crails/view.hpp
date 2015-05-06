@@ -5,30 +5,33 @@
 # include "shared_vars.hpp"
 # include <functional>
 
-class View
+namespace Crails
 {
-public:
-  typedef std::string (*GenerateView)(SharedVars&);
-
-  View(const std::string& path);
-  
-  bool               IsValid(void) const
+  class View
   {
-    return (generate_view != 0);
-  }
+  public:
+    typedef std::string (*GenerateView)(SharedVars&);
 
-  const std::string  Generate(SharedVars& vars);
-  static std::string Render(const std::string& layout_path, const std::string& view_path, SharedVars& vars);
+    View(const std::string& path);
+    
+    bool               IsValid(void) const
+    {
+      return (generate_view != 0);
+    }
 
-private:
-  DynamicLibrary view_object;
-  GenerateView   generate_view;
-};
+    const std::string  Generate(SharedVars& vars);
+    static std::string Render(const std::string& layout_path, const std::string& view_path, SharedVars& vars);
+
+  private:
+    DynamicLibrary view_object;
+    GenerateView   generate_view;
+  };
+}
 
 extern "C"
 {
-  std::string render_view(const std::string& name, SharedVars& vars);
-  std::string render_layout(const std::string& name, SharedVars& vars, std::function<std::string ()> yield);
+  std::string render_view(const std::string& name, Crails::SharedVars& vars);
+  std::string render_layout(const std::string& name, Crails::SharedVars& vars, std::function<std::string ()> yield);
 }
 
 #endif

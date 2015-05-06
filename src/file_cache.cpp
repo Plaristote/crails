@@ -1,6 +1,7 @@
 #include "crails/file_cache.hpp"
 
 using namespace std;
+using namespace Crails;
 
 std::string* FileCache::CreateInstance(std::string key)
 {

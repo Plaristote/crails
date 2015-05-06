@@ -4,6 +4,7 @@
 #include <crails/session_store.hpp>
 
 using namespace std;
+using namespace Crails;
 
 Params::Params(void) : handle(1), response_parsed(0)
 {

@@ -3,8 +3,9 @@
 #include <Boots/Utils/regex.hpp>
 
 using namespace std;
+using namespace Crails;
 
-RequestParser::Status RequestFormParser::operator()(const Server::request& request, CrailsServerTraits::Response response, Params& params)
+RequestParser::Status RequestFormParser::operator()(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
   static const Regex is_form("^application/x-www-form-urlencoded", REG_EXTENDED);
   if (params["method"].Value() != "GET" && content_type_matches(params, is_form))
@@ -15,7 +16,7 @@ RequestParser::Status RequestFormParser::operator()(const Server::request& reque
   return RequestParser::Continue;
 }
 
-void RequestFormParser::body_received(const Server::request& request, CrailsServerTraits::Response, Params& params)
+void RequestFormParser::body_received(const HttpServer::request& request, ServerTraits::Response, Params& params)
 {
   cout << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << endl;  
   if (request.body.size() > 0)

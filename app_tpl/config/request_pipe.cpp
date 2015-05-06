@@ -2,7 +2,9 @@
 #include <crails/request_handlers/action.hpp>
 #include <crails/request_parser.hpp>
 
-void CrailsServer::initialize_request_pipe()
+using namespace Crails;
+
+void Server::initialize_request_pipe()
 {
   add_request_parser(new RequestDataParser);
   add_request_parser(new RequestFormParser);

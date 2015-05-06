@@ -2,8 +2,9 @@
 #include <crails/params.hpp>
 
 using namespace std;
+using namespace Crails;
 
-RequestParser::Status RequestJsonParser::operator()(const Server::request& request, CrailsServerTraits::Response response, Params& params)
+RequestParser::Status RequestJsonParser::operator()(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
   static const Regex is_json("^application/json", REG_EXTENDED);
 
@@ -15,7 +16,7 @@ RequestParser::Status RequestJsonParser::operator()(const Server::request& reque
   return RequestParser::Continue;
 }
 
-void RequestJsonParser::body_received(const Server::request& request, CrailsServerTraits::Response, Params& params)
+void RequestJsonParser::body_received(const HttpServer::request& request, ServerTraits::Response, Params& params)
 {
   if (request.body.size() > 0)
   {

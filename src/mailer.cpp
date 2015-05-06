@@ -1,8 +1,9 @@
 #include "crails/mailer.hpp"
 
 using namespace std;
+using namespace Crails;
 
-Mailer::Mailer(ControllerBase& controller, const std::string& configuration) : vars(controller.vars), params(controller.params), controller(controller), configuration(configuration)
+Mailer::Mailer(Controller& controller, const std::string& configuration) : vars(controller.vars), params(controller.params), controller(controller), configuration(configuration)
 {
   is_connected = false;
 }

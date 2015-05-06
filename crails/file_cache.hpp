@@ -6,23 +6,26 @@
 # include <string>
 # include <fstream>
 
-class FileCache : public Flyweight<std::string, std::string>
+namespace Crails
 {
-public:
-  void         Lock(void)
+  class FileCache : public Flyweight<std::string, std::string>
   {
-    semaphore.Wait();
-  }
+  public:
+    void         Lock(void)
+    {
+      semaphore.Wait();
+    }
 
-  void         Unlock(void)
-  {
-    semaphore.Post();
-  }
+    void         Unlock(void)
+    {
+      semaphore.Post();
+    }
 
-private:
-  std::string* CreateInstance(std::string key);
+  private:
+    std::string* CreateInstance(std::string key);
 
-  Sync::Semaphore semaphore;
-};
+    Sync::Semaphore semaphore;
+  };
+}
 
 #endif

@@ -1,6 +1,7 @@
 #include "crails/databases.hpp"
 
 using namespace std;
+using namespace Crails;
 
 Databases::Db::~Db()
 {

@@ -2,9 +2,10 @@
 #include <algorithm>
 
 using namespace std;
+using namespace Crails;
 
 #ifndef ASYNC_SERVER
-static void SetHeaderParameter(CrailsServer::Response response, const std::string& key, const std::string& value)
+static void SetHeaderParameter(Server::Response response, const std::string& key, const std::string& value)
 {
   auto it  = response.headers.begin();
   auto end = response.headers.end();
@@ -24,7 +25,7 @@ static void SetHeaderParameter(CrailsServer::Response response, const std::strin
 #endif
 
 
-void BuildingResponse::SetResponse(CrailsServer::HttpCode code, const string& body)
+void BuildingResponse::SetResponse(Server::HttpCode code, const string& body)
 {
   SetStatusCode(code);
   SetBody(body.c_str(), body.size());
@@ -52,12 +53,12 @@ void BuildingResponse::SetBody(const char* str, size_t size)
 #endif
 }
 
-void BuildingResponse::SetStatusCode(CrailsServer::HttpCode code)
+void BuildingResponse::SetStatusCode(Server::HttpCode code)
 {
 #ifdef ASYNC_SERVER
   response->set_status(code);
 #else
-  response = Server::response::stock_reply(code);
+  response = HttpServer::response::stock_reply(code);
 #endif
 }
 
@@ -73,11 +74,11 @@ void BuildingResponse::SetHeaders(const std::string& key, const std::string& val
 
 void BuildingResponse::Bundle(void )
 {
-  std::function<void (Header&)> callback;
-  std::function<void (void)>    cleanup;
+  std::function<void (Header&)>     callback;
+  std::function<void (void)>        cleanup;
 #ifdef ASYNC_SERVER
-  unsigned short                count       = headers.size();
-  Server::response_header*      arr_headers = new Server::response_header[count];
+  unsigned short                    count       = headers.size();
+  HttpServer::response_header*      arr_headers = new HttpServer::response_header[count];
   unsigned short                it          = 0;
 
   callback = [this, &arr_headers, &it](Header& header)

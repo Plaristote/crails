@@ -4,6 +4,7 @@
 #include <Boots/Utils/regex.hpp>
 
 using namespace std;
+using namespace Crails;
 
 static std::string charToHex(char c)
 {

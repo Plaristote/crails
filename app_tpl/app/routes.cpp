@@ -1,6 +1,6 @@
 #include <crails/router.hpp>
 
-void Router::Initialize(void)
+void Crails::Router::Initialize(void)
 {
   /*
    * Routes samples

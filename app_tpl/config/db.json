@@ -1,13 +1,27 @@
 {
-  "mongodb": {
-    "host": "127.0.0.1",
-    "database": "crails_db"
-  },
+  "production": {
+    "mongodb": {
+      "host": "127.0.0.1",
+      "database": "crails_db"
+    },
 
-  "mysql": {
-    "type": "sql",
-    "host": "127.0.0.1",
-    "database": "crails_db",
-    "user": "root"
+    "mysql": {
+      "type": "sql",
+      "host": "127.0.0.1",
+      "database": "crails_db",
+      "user": "root"
+    }
+  },
+  "development": {
+    "mongodb": {
+      "host": "127.0.0.1",
+      "database": "crails_db_dev"
+    }
+  },
+  "test": {
+    "mongodb": {
+      "host": "127.0.0.1",
+      "database": "crails_db_test"
+    }
   }
 }

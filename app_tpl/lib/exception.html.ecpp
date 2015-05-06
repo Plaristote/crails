@@ -4,6 +4,8 @@
 #include <crails/params.hpp>
 #include <algorithm>
 
+using namespace Crails;
+
 string*    @exception_name;
 string*    @exception_what;
 Params*    @params;

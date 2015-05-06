@@ -3,13 +3,16 @@
 
 # include "../server.hpp"
 
-class ActionRequestHandler : public RequestHandler
+namespace Crails
 {
-public:
-  ActionRequestHandler(void) : RequestHandler("action") {}
+  class ActionRequestHandler : public RequestHandler
+  {
+  public:
+    ActionRequestHandler(void) : RequestHandler("action") {}
 
-  bool operator()(const Server::request& request, BuildingResponse& out, Params& params);
-private:
-};
+    bool operator()(const HttpServer::request& request, BuildingResponse& out, Params& params);
+  private:
+  };
+}
 
 #endif

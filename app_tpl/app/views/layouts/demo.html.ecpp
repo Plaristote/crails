@@ -1,5 +1,7 @@
 #include <crails/params.hpp>
 
+using namespace Crails;
+
 Params* @params;
 string* @yield;
 // END LINKING

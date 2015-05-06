@@ -4,8 +4,9 @@
 #include <Boots/Utils/directory.hpp>
 
 using namespace std;
+using namespace Crails;
 
-bool FileRequestHandler::operator()(const Server::request& request, BuildingResponse& response, Params& params)
+bool FileRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& response, Params& params)
 {
   if (request.method == "GET")
   {
@@ -22,16 +23,16 @@ bool FileRequestHandler::operator()(const Server::request& request, BuildingResp
       if (dir.OpenDir(fullpath))
         fullpath += "/index.htm";
     }
-    if (SendFile(fullpath, response, CrailsServer::HttpCodes::ok))
+    if (SendFile(fullpath, response, Server::HttpCodes::ok))
     {
-      params["response-data"]["code"] = (int)CrailsServer::HttpCodes::ok;
+      params["response-data"]["code"] = (int)Server::HttpCodes::ok;
       return true;
     }
   }
   return false;
 }
 
-bool FileRequestHandler::SendFile(const std::string& fullpath, BuildingResponse& response, CrailsServer::HttpCode code, unsigned int first_bit)
+bool FileRequestHandler::SendFile(const std::string& fullpath, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit)
 {
   file_cache.Lock();
   {

@@ -2,6 +2,7 @@
 #include <Boots/Utils/string.hpp>
 
 using namespace std;
+using namespace Crails;
 
 string Password::md5(const string& str)
 {

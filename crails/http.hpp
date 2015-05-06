@@ -3,12 +3,15 @@
 
 # include <string>
 
-namespace Http
+namespace Crails
 {
-  namespace Url
+  namespace Http
   {
-    std::string Encode(const std::string&);
-    std::string Decode(const std::string&);
+    namespace Url
+    {
+      std::string Encode(const std::string&);
+      std::string Decode(const std::string&);
+    }
   }
 }
 

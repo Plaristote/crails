@@ -3,6 +3,7 @@
 #include "crails/http.hpp"
 
 using namespace std;
+using namespace Crails;
 
 const Router::Action* Router::get_action(const string& method, const string& uri, Params& query_params) const
 {

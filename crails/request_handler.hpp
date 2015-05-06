@@ -3,18 +3,21 @@
 
 # include "http_server.hpp"
 
-class RequestHandler
+namespace Crails
 {
-public:
-  RequestHandler(const std::string& name) : name(name) {}
-  virtual ~RequestHandler() {}
+  class RequestHandler
+  {
+  public:
+    RequestHandler(const std::string& name) : name(name) {}
+    virtual ~RequestHandler() {}
 
-  const std::string& get_name(void) const { return name; }
+    const std::string& get_name(void) const { return name; }
 
-  virtual bool operator()(const Server::request& request, BuildingResponse& response, Params& params) = 0;
-  
-private:
-  const std::string name;
-};
+    virtual bool operator()(const HttpServer::request& request, BuildingResponse& response, Params& params) = 0;
+    
+  private:
+    const std::string name;
+  };
+}
 
 #endif

@@ -3,29 +3,32 @@
 
 # include <boost/network/protocol/http/server.hpp>
 
-namespace http = boost::network::http;
+namespace Crails
+{
+  namespace http = boost::network::http;
 
-class  BuildingResponse;
-struct CrailsServer;
+  class  BuildingResponse;
+  struct Server;
 
 # ifdef ASYNC_SERVER
-typedef http::async_server<CrailsServer> Server;
+  typedef http::async_server<Server>         HttpServer;
 
-struct CrailsServerTraits
-{
-  typedef Server::connection::status_t HttpCode;
-  typedef Server::connection           HttpCodes;
-  typedef Server::connection_ptr       Response;
-};
+  struct ServerTraits
+  {
+    typedef HttpServer::connection::status_t HttpCode;
+    typedef HttpServer::connection           HttpCodes;
+    typedef HttpServer::connection_ptr       Response;
+  };
 # else
-typedef http::server<CrailsServer>       Server;
+  typedef http::server<Server>                HttpServer;
 
-struct CrailsServerTraits
-{
-  typedef Server::response::status_type HttpCode;
-  typedef Server::response              HttpCodes;
-  typedef Server::response&             Response;
-};
+  struct ServerTraits
+  {
+    typedef HttpServer::response::status_type HttpCode;
+    typedef HttpServer::response              HttpCodes;
+    typedef HttpServer::response&             Response;
+  };
 # endif
+}
 
 #endif

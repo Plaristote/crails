@@ -4,6 +4,7 @@
 #include "crails/http.hpp"
 
 using namespace std;
+using namespace Crails;
 
 static void RecursivelySetValue(Data param, std::vector<std::string> key_stack, const std::string& value)
 {

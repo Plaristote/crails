@@ -2,8 +2,9 @@
 #include "crails/params.hpp"
 
 using namespace std;
+using namespace Crails;
 
-RequestParser::Status RequestDataParser::operator()(const Server::request& request, CrailsServerTraits::Response response, Params& params)
+RequestParser::Status RequestDataParser::operator()(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
   const char*  get_params = strrchr(request.destination.c_str(), '?');
   std::string  uri        = request.destination;

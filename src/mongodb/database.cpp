@@ -2,6 +2,7 @@
 #include "crails/mongodb/exception.hpp"
 #include "crails/databases.hpp"
 
+using namespace Crails;
 using namespace MongoDB;
 using namespace std;
 
