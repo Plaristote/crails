@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 source = nil
 
@@ -20,7 +20,7 @@ end
 command      = ARGV[0]
 command_args = ARGV[1..ARGV.count]
 
-unless command == 'create'
+unless command == 'new'
   require 'fileutils'
 
   until (File.exists? 'CMakeLists.txt' and File.exists? 'app' and File.exists? 'public')
