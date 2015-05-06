@@ -1,9 +1,12 @@
 #ifndef  PARAMS_HPP
 # define PARAMS_HPP
 
-# include "server.hpp"
+# include <Boots/Utils/smart_pointer.hpp>
+# include <Boots/Sync/semaphore.hpp>
+# include <Boots/Utils/dynstruct.hpp>
 # include "session_store.hpp"
 
+struct CrailsServer;
 struct MultipartParser;
 class  ActionRequestHandler;
 class  BodyParser;

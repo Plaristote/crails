@@ -23,15 +23,6 @@ class Router
 public:
   typedef std::function<DynStruct (Params&)> Action;
   
-  class Exception404
-  {
-  };
-  
-  struct Exception302
-  {
-    std::string redirect_to;
-  };
-
   struct Item
   {
     Action                   run;

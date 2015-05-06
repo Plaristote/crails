@@ -31,12 +31,10 @@ void ControllerBase::initialize()
     protect_from_forgery();
 }
 
-void ControllerBase::RedirectTo(const string& uri)
+void ControllerBase::redirect_to(const string& uri)
 {
-  Router::Exception302 redirector;
-  
-  redirector.redirect_to = uri;
-  throw redirector;
+  response["status"]              = 302;
+  response["headers"]["Location"] = uri;
 }
 
 void ControllerBase::protect_from_forgery(void) const

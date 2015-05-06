@@ -13,12 +13,8 @@
 
 using namespace std;
 
-bool RequestParser::content_type_matches(Params& params, const Regex regex)
-{
-  string type = params["header"]["Content-Type"].Value();
-
-  return (regex.Match(type));
-}
+CrailsServer::RequestParsers  CrailsServer::request_parsers;
+CrailsServer::RequestHandlers CrailsServer::request_handlers;
 
 void CrailsServer::SetResponse(Params& params, BuildingResponse& out, CrailsServer::HttpCode code, const string& content)
 {
@@ -27,33 +23,10 @@ void CrailsServer::SetResponse(Params& params, BuildingResponse& out, CrailsServ
   params["response-data"]["length"] = content.size();
 }
 
-void CrailsServer::ResponseException(BuildingResponse& out, std::string e_name, std::string e_what, Params& params)
+RequestHandler* CrailsServer::get_request_handler(const string& name)
 {
-  cerr << "# Catched exception " << e_name << ": " << e_what << endl;
-  if (params["backtrace"].NotNil())
-    cerr << params["backtrace"].Value() << endl;
-#ifdef SERVER_DEBUG
-  View       view("../../lib/exception.html.ecpp");
-  SharedVars vars;
+  RequestHandlers::const_iterator it = request_handlers.begin();
 
-  *vars["exception_name"] = &e_name;
-  *vars["exception_what"] = &e_what;
-  *vars["params"]         = &params;
-  {
-    std::string content = view.Generate(vars);
-
-    out.SetHeaders("Content-Type", "text/html");
-    SetResponse(params, out, CrailsServer::HttpCodes::internal_server_error, content);
-  }
-#else
-  ResponseHttpError(out, CrailsServer::HttpCodes::internal_server_error, params);
-#endif
-}
-
-RequestHandler* CrailsServer::get_request_handler(const string& name) const
-{
-  auto it = request_handlers.begin();
-  
   for (; it != request_handlers.end() ; ++it)
   {
     RequestHandler* request_handler = *it;
@@ -96,10 +69,10 @@ void CrailsServer::ResponseHttpError(BuildingResponse& out, CrailsServer::HttpCo
       else
         content = view.Generate(vars);
       out.SetHeaders("Content-Type", "text/html");
-      SetResponse(params, out, code, content);
+      CrailsServer::SetResponse(params, out, code, content);
       return ;
     }
-    SetResponse(params, out, code, "");
+    CrailsServer::SetResponse(params, out, code, "");
   }
 }
 
@@ -129,7 +102,7 @@ void CrailsServer::run_request_handlers(const Server::request& request, Building
       break ;
   }
   if (!request_handled)
-    throw Router::Exception404();
+    ResponseHttpError(response, HttpCodes::not_found, params);
 }
 
 void CrailsServer::add_request_handler(RequestHandler* request_handler)
@@ -142,41 +115,23 @@ void CrailsServer::add_request_parser(RequestParser* request_parser)
   request_parsers.push_back(request_parser);
 }
 
+void CrailsServer::initialize_exception_catcher()
+{
+  exception_catcher.add_exception_catcher<std::exception&>("std::exception");
+}
+
 void CrailsServer::operator()(const Server::request& request, Response response)
 {
   Utils::Timer     timer;
   Databases::singleton::Initialize();
   BuildingResponse out(response);
   Params           params;
-
-  try
+  
+  exception_catcher.run(out, params, [this, &request, response, &out, &params]()
   {
     run_request_parsers(request, response, params);
     run_request_handlers(request, out, params);
-  }
-  catch (const Router::Exception302 e)
-  {
-    out.SetHeaders("Location", e.redirect_to);
-    params.session->Finalize(out);
-    ResponseHttpError(out, HttpCodes::moved_temporarily, params);
-  }
-  catch (const Router::Exception404 e)
-  {
-    ResponseHttpError(out, HttpCodes::not_found, params);
-  }
-#define EXCEPTION_RESPONSE(type,set_params) \
-  catch (const type e) \
-  { \
-    set_params; \
-    params["backtrace"] = boost_ext::trace(e); \
-    ResponseException(out, #type, e.what(), params); \
-  }
-  EXCEPTION_RESPONSE(CrailsServer::Crash,)
-  EXCEPTION_RESPONSE(std::exception&,)
-  catch (...)
-  {
-    ResponseException(out, "Unknown exception", "Unfortunately, no data about it was harvested", params);
-  }
+  });
   Databases::singleton::Finalize();
   params["response-time"]["crails"] = timer.GetElapsedSeconds();
   post_request_log(params);
@@ -252,7 +207,6 @@ void CrailsServer::Launch(int argc, char **argv)
     CrailsServer    handler;
     Server::options server_options(handler); 
 
-    handler.initialize_request_pipe();
     server_options.thread_pool();
 #ifdef ASYNC_SERVER
     cout << ">> Pool Thread Size: " << threads << endl;
@@ -286,4 +240,10 @@ CrailsServer::~CrailsServer()
   {
     delete request_parser;
   });
+}
+
+CrailsServer::CrailsServer()
+{
+  initialize_exception_catcher();
+  initialize_request_pipe();
 }

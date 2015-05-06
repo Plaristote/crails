@@ -46,8 +46,6 @@ protected:
     return (callback());
   }
 
-  static void     RedirectTo(const std::string& uri);
-  
   enum RenderType
   {
     JSON,
@@ -56,6 +54,8 @@ protected:
     XML,
     TEXT
   };
+
+  void            redirect_to(const std::string& uri);
 
   void            render(RenderType type, DynStruct value);
   void            render(RenderType type, const std::string& value);
