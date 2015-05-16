@@ -43,6 +43,7 @@ This tutorial is intented to show you step by step how to create a Crails applic
   * [Custom Requests](doc/models-mongo.md#custom-requests)
     * [Querying](doc/models-mongo.md#querying)
     * [Iterating](doc/models-mongo.md#iterating)
+    * [Pagination](doc/models-mongo.md#pagination)
 
 * [SQL-based models](#)
 
