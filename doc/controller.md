@@ -21,13 +21,13 @@ public:
   {
   }
     
-  void index  ();
-  void show   ();
-  void _new   ();
-  void create ();
-  void edit   ();
-  void update ();
-  void _delete();
+  void index();
+  void show();
+  void _new();
+  void create();
+  void edit();
+  void update();
+  void destroy();
 };
     
     #endif
@@ -55,10 +55,10 @@ Let's see what it looks like:
 void Router::Initialize(void)
 {
   SetRoute("GET",    "/crm_accounts",      CrmAccountsController, index);
-  SetRoute("GET",    "/crm_accounts/new",  CrmAccountsController, new);
+  SetRoute("GET",    "/crm_accounts/new",  CrmAccountsController, _new);
   SetRoute("GET",    "/crm_accounts/edit", CrmAccountsController, edit);
   SetRoute("GET",    "/crm_accounts/:id",  CrmAccountsController, show);
-  SetRoute("DELETE", "/crm_accounts/:id",  CrmAccountsController, _delete);
+  SetRoute("DELETE", "/crm_accounts/:id",  CrmAccountsController, destroy);
   SetRoute("PUT",    "/crm_accounts/:id",  CrmAccountsController, update);
   SetRoute("POST",   "/crm_accounts",      CrmAccountsController, create);
 }
@@ -212,3 +212,76 @@ Create the routes with:
   SetRoute("POST", "/file_upload", MyController, file_upload)
 ```
 And test it by uploading text files.
+
+## Filtering
+You may also want to run some code before and after each of your controller methods. Using the constructor and destructor method is an acceptable way of reaching that goal.
+
+You may for instance prevent your controller method from being called by having a response status being set in the constructor. Here's a pratical exemple, showing how you'd force a controller to only run if a user is authentified:
+
+```C++
+#include "app/models/user.hpp"
+
+class ApplicationController : public ControllerBase
+{
+protected:
+  ApplicationController(Params& params) : ControllerBase(params)
+  {
+  }
+  
+  SP(User) get_current_user()
+  {
+    if (current_user.Null() && params.Session()["user_id"].NotNil())
+      current_user = User::Find(params.Session()["user_id"].Value());
+    return current_user;
+  }
+  
+  bool require_authentified_user()
+  {
+    if (get_current_user().Null())
+    {
+      response["status"] = 401; // Unauthorized
+      return false;
+    }
+    return true;
+  }
+  
+private:
+  SP(User) current_user;
+}
+
+class ProfileController : public ApplicationController
+{
+public:
+  ProfileController(Params& params) : ApplicationController(params)
+  {
+    require_authentified_user();
+  }
+
+  void show()
+  {
+    render(JSON, get_current_user().to_data());
+  }
+}
+```
+
+Note that you may also use `params["controller-data"]["action"]` to figure out which method is going to be called from the constructor. For instance, you may want to do:
+
+```C++
+class ProfileController : public ApplicationController
+{
+public:
+  ProfileController(Params& params) : ApplicationController(params)
+  {
+    if (params["controller-data"]["action"] == "show")
+      before_show();
+  }
+  
+  void before_show()
+  {
+    require_authentified_user();
+  }
+
+  void index(); // User may not be authentified
+  void show();  // User has to be authentified
+}
+```
