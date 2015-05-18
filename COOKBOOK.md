@@ -20,6 +20,7 @@ This tutorial is intented to show you step by step how to create a Crails applic
   * [Session](doc/controller.md#session)
 * [CSRF security](doc/controller.md#controllers)
 * [File upload](doc/controller.md#controllers)
+* [Filtering](doc/controller.md#filtering)
 
 # Views
 * [Views](doc/view.md#views)
