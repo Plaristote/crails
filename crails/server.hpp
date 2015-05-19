@@ -31,11 +31,7 @@ struct CrailsServer : public CrailsServerTraits
   void log(const char* to_log);
   void post_request_log(Params& params) const;
 
-  void add_request_handler(RequestHandler* request_handler)
-  {
-    request_handlers.push_back(request_handler);
-  }
-  
+  void            add_request_handler(RequestHandler* request_handler);
   RequestHandler* get_request_handler(const std::string& name) const;
 
   static void Launch(int argc, char** argv);

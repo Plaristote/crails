@@ -144,6 +144,10 @@ void CrailsServer::ReadRequestData(const Server::request& request, Response resp
   params["method"] = request.method;
 }
 
+void CrailsServer::add_request_handler(RequestHandler* request_handler)
+{
+  request_handlers.push_back(request_handler);
+}
 void CrailsServer::operator()(const Server::request& request, Response response)
 {
   Utils::Timer     timer;
