@@ -5,7 +5,7 @@
 
 class FileRequestHandler : public RequestHandler
 {
-  friend class CrailsServer;
+  friend struct CrailsServer;
 public:
   FileRequestHandler() : RequestHandler("file")
   {
@@ -13,7 +13,7 @@ public:
   }
 
   bool operator()(const Server::request& request, BuildingResponse& response, Params& params);
-  
+
   void set_cache_enabled(bool enable) { cache_enabled = enable; }
   bool is_cache_enabled(void) const   { return cache_enabled;   }
 
