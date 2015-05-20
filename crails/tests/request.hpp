@@ -10,26 +10,22 @@ namespace Crails
   {
     class Request
     {
+      struct RouterNotInitialized : public std::exception
+      {
+        const char* what() const throw() { return "Router not initialized"; }
+      };
+
+      struct RouteNotFound : public std::exception
+      {
+        RouteNotFound(const std::string& route) : message("Route not found: " + route) {}
+        const char* what() const throw() { return message.c_str(); }
+        const std::string message;
+      };
+
     public:
-      Request(const std::string& method, const std::string& uri)
-      {
-        params["method"] = method;
-        params["uri"]    = uri;
-      }
+      Request(const std::string& method, const std::string& uri);
 
-      void run()
-      {
-        const Router* router = Router::singleton::Get();
-        if (router)
-        {
-          const Router::Action* action = router->get_action(params["method"].Value(), params["uri"].Value(), params);
-
-          if (action != 0)
-            response.Duplicate((*action)(params));
-        }
-        else
-          std::cerr << "Router not initialized" << std::endl;
-      }
+      void run();
 
       Params    params;
       DynStruct response;

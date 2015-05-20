@@ -24,6 +24,7 @@ void Helper::run()
     cout << "  " << group.first << ':' << endl;
     for_each(group.second.begin(), group.second.end(), [this](Test test)
     {
+      current_test_output = stringstream();
       cout << "    " << test.description << ':';
        try {
          current_test_result = true;
@@ -39,9 +40,12 @@ void Helper::run()
        }
        catch (const std::exception& e)
        {
+         stringstream trace;
+         trace << boost_ext::trace(e);
          current_test_result = false;
          current_test_output << "      Exception catched: '" << e.what() << "'" << endl;
-         current_test_output << "      Backtrace: " << boost_ext::trace(e) << endl;
+         if (trace.str().size() > 0)
+           current_test_output << "      Backtrace: " << endl << trace.str() << endl;
        }
        catch (...) {
          current_test_result = false;
