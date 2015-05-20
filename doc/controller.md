@@ -12,12 +12,12 @@ This is what a Crails controller looks like:
 #ifndef  CRM_ACCOUNTS_HPP
 # define CRM_ACCOUNTS_HPP
 
-# include <crais/controller_base.hpp>
+# include <crais/controller.hpp>
 
-class CrmAccountsController : public ControllerBase
+class CrmAccountsController : public Crails::Controller
 {
 public:
-  CrmAccountsController(Params& params) : ControllerBase(params)
+  CrmAccountsController(Params& params) : Crails::Controller(params)
   {
   }
     
@@ -52,7 +52,7 @@ Let's see what it looks like:
 #include <crails/router.hpp>
 #include "controllers/crm_accounts.hpp" // don't forget to include your controllers
 
-void Router::Initialize(void)
+void Crails::Router::Initialize(void)
 {
   SetRoute("GET",    "/crm_accounts",      CrmAccountsController, index);
   SetRoute("GET",    "/crm_accounts/new",  CrmAccountsController, _new);
@@ -155,7 +155,7 @@ string* @yield;
 You may disable CSRF security by overloading the `virtual bool must_protect_from_forgery() const` method.
 Example:
 ```C++
-class MyController : public BaseController
+class MyController : public Crails::Controller
 {
   bool must_protect_from_forgery() const
   {
@@ -221,10 +221,10 @@ You may for instance prevent your controller method from being called by having 
 ```C++
 #include "app/models/user.hpp"
 
-class ApplicationController : public ControllerBase
+class ApplicationController : public Crails::Controller
 {
 protected:
-  ApplicationController(Params& params) : ControllerBase(params)
+  ApplicationController(Params& params) : Crails::Controller(params)
   {
   }
   
