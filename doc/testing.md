@@ -61,7 +61,7 @@ Request tests are a good way of quickly telling whether your server works or not
       Crails::Tests::Request request("GET", "/users");
 
       request.run();
-      EXPECT(request.response["users"].Count(), >, 0)
+      EXPECT(request.response["body"].Value, ==, "{users:[{email:'test@domaincom'}]}")
     });
   });
 ```
