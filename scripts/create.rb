@@ -41,7 +41,7 @@ class ProjectModel
   
   def generate_erb target, source, options
     path = "#{@template_path}/#{source}"
-    tpl  = ERB.new (File.new path).read
+    tpl  = ERB.new (File.new path).read, nil, '-'
     File.open target, 'w' do | f |
       f.write (tpl.result binding)
     end
@@ -151,6 +151,9 @@ project.base_directory source, base_directory do
     project.directory :assets do end
     project.file '404.html'
     project.file '500.html'
+  end
+  project.directory :spec do
+    project.file 'spec.cpp'
   end
 end
 

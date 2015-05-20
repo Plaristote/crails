@@ -7,7 +7,7 @@ option(SERVER_DEBUG  "enable debugging tools"       ON)
 cmake_policy(SET CMP0042 OLD)
 
 <% cxx_options  = ''
-   cxx_options += " -DUSE_SEGVCATCH" unless options[:segvcatch] != true %>
+   cxx_options += " -DUSE_SEGVCATCH" unless options[:segvcatch] != true -%>
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-deprecated-declarations -pedantic <%= cxx_options %>")
 
 find_package(cppnetlib REQUIRED)
@@ -23,32 +23,45 @@ file(GLOB_RECURSE crails_app
      app/controllers/*.cpp
      app/models/*.cpp
      app/routes.cpp
-     app/main.cpp
      lib/models/*.cpp
      config/request_pipe.cpp
      config/salt.cpp
      config/session_store.cpp)
 
-add_executable(crails-app ${crails_app})
+file(GLOB_RECURSE server_files
+     app/main.cpp)
+
+file(GLOB_RECURSE tests_files
+     spec/**/*.cpp
+     spec/*.cpp)
+
+add_library(crails-app OBJECT ${crails_app})
+add_executable(server $<TARGET_OBJECTS:crails-app> ${server_files})
+add_executable(tests  $<TARGET_OBJECTS:crails-app> ${tests_files})
+
 if (SERVER_DEBUG)
   set(crails_core_name    crails-core-debug)
-<% if options[:sql]     == true %>  set(crails_sql_name     crails-sql-debug)<% end %>
-<% if options[:mongodb] == true %>  set(crails_mongodb_name crails-mongodb-debug)<% end %>
+  set(crails_tests_name   crails-tests-debug)
+<% if options[:sql]     == true -%>  set(crails_sql_name     crails-sql-debug)<% end -%>
+<% if options[:mongodb] == true -%>  set(crails_mongodb_name crails-mongodb-debug)<% end -%>
 else()
   set(crails_core_name    crails-core)
-<% if options[:sql]     == true %>  set(crails_sql_name     crails-sql)<% end %>
-<% if options[:mongodb] == true %>  set(crails_mongodb_name crails-mongodb)<% end %>
+  set(crails_tests_name   crails-tests)
+<% if options[:sql]     == true -%>  set(crails_sql_name     crails-sql)<% end -%>
+<% if options[:mongodb] == true -%>  set(crails_mongodb_name crails-mongodb)<% end -%>
 endif()
 
-<% if options[:sql] == true %>set(crails_sql_dep     soci_core soci_mysql ${crails_sql_name})<% end %>
-<% if options[:mongodb] == true %>set(crails_mongodb_dep mongoclient ${crails_mongodb_name})<% end %>
+<% if options[:sql] == true -%>set(crails_sql_dep     soci_core soci_mysql ${crails_sql_name})<% end -%>
+<% if options[:mongodb] == true -%>set(crails_mongodb_dep mongoclient ${crails_mongodb_name})<% end -%>
 
-target_link_libraries(crails-app
-                      ${crails_core_name}
-                      ${Boost_LIBRARIES}
-                      pthread dl crypto ssl
-                      Boots
-                      ${CPPNETLIB_LIBRARIES}
-                      <% if options[:segvcatch] == true %> segvcatch <% end %>
-                      <% if options[:sql]       == true %> ${crails_sql_dep} <% end %>
-                      <% if options[:mongodb]   == true %> ${crails_mongodb_dep} <% end %>)
+set(dependencies ${crails_core_name}
+                 ${Boost_LIBRARIES}
+                 pthread dl crypto ssl
+                 Boots
+                 ${CPPNETLIB_LIBRARIES}
+                 <% if options[:segvcatch] == true -%> segvcatch <% end -%>
+                 <% if options[:sql]       == true -%> ${crails_sql_dep} <% end -%>
+                 <% if options[:mongodb]   == true -%> ${crails_mongodb_dep} <% end -%>)
+
+target_link_libraries(server ${dependencies})
+target_link_libraries(tests  ${dependencies} ${crails_tests_name})

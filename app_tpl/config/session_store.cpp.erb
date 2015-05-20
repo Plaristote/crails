@@ -3,8 +3,8 @@
 
 USE_SESSION_STORE(<%= options[:session_store_class] %>)
 
-<% if options[:mongodb] == true %>
+<% if options[:mongodb] == true -%>
 const std::string  MongoStore::SessionStore::collection_name    = "session_store";
 const std::string  MongoStore::SessionStore::database_name      = "mongodb";
 const unsigned int MongoStore::SessionStore::session_expiration = 60 * 30;
-<% end %>
+<% end -%>
