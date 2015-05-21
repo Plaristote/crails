@@ -1,5 +1,5 @@
 require 'guard/crails-base'
-require 'notifier'
+require 'guard/crails-notifier'
 
 module ::Guard
   class CrailsCmake < Plugin
@@ -13,7 +13,7 @@ module ::Guard
 
   private
     def compile
-      `terminal-notifier -title 'Crails Guard' -message 'Your crails server is recompiling right now...'`
+      Crails::Notifier.notify 'Crails Guard', 'Your crails server is recompiling right now'
       Dir.chdir 'build' do
         puts ">> Make server"
         puts `cmake ..`
@@ -24,10 +24,10 @@ module ::Guard
           if $?.success?
             restart_server
           else
-            `terminal-notifier -title 'Crails Guard' -message 'Tests are broken'`
+            Crails::Notifier.notify 'Crails Guard', 'Tests are broken'
           end
         else
-          `terminal-notifier -title 'Crails Guard' -message 'Your crails server failed to build'`
+          Crails::Notifier.notify 'Crails Guard', 'Your crails server failed to build'
         end
       end
     end
