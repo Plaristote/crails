@@ -1,0 +1,20 @@
+$: << '.'
+
+guard 'crails-cmake' do
+  watch('CMakeLists.txt')
+  watch('build/CMakeCache.txt')
+  watch(%r{^config/.+\.[hc](pp)?$})
+  watch(%r{^app/.+\.[hc](pp)?$})
+  watch(%r{^lib/.+\.[hc](pp)?$})
+  watch(%r{^spec/.+\.[hc](pp)?$})
+end
+
+group :development do
+  guard 'crails-ecpp' do
+    watch(%r{.+\.ecpp$})
+  end
+
+  guard 'crails-mongodb-models' do
+    watch(%r{^app/models/.+\.h(pp)?$})
+  end
+end
