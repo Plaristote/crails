@@ -111,7 +111,6 @@ project.base_directory source, base_directory do
   project.generate_erb 'CMakeLists.txt', 'CMakeLists.txt.erb', options
   project.file 'Gemfile'
   project.file 'Guardfile'
-  project.file 'package.json'
   project.directory :build do end
   project.directory :app do
     project.file 'routes.cpp'
