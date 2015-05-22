@@ -50,7 +50,12 @@ Notes:
 ## Asset pipeline
 The `Guardfile` provided by crails has two tasks for compiling javascripts and css assets (`sass` and `crailsjs`). The lookup pathes for your assets are `app/assets/javascripts` and `app/assets/stylesheets`.
 
-## Javascript
+### SCSS
+The scss compiling is handled by the [guard-sass](https://github.com/hawx/guard-sass) gem.
+
+By default, it will take any scss file from `app/assets/stylesheets`, compile it, and output it in the `public/stylesheets` directory. Partial scss files are not concerned by this, but can still be required by other scss files.
+
+### Javascript
 The crailsjs task looks for the `targets` (by default, `application.js` is the only target).
 Every target is going to be built and redirected to the output directory.
 
@@ -63,7 +68,7 @@ This will look for a file `app/assets/javascripts/application.js`, compile it, a
 
 Note that your `application.js` file can require other javascript files from the `app/assets/javascripts` folder, by using the `//= require myfile.js` syntax.
 
-## Coffeescript
+### Coffeescript
 The crailsjs task also supports coffeescript. Note that, because coffeescript removes single line comments, you cannot use the `#= require` syntax. Instead, use the regular javascript syntax, and surround it with backquotes, such as this:
 
 ```coffee
