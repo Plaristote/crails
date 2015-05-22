@@ -80,3 +80,5 @@ Feel free to mix javascript and coffeescript files as you wish: crailsjs doesn't
 # Start developing
 ## Guard
 Before you start developing, you must launch `crails guard` from your application directory: this service takes care of some code generation needed for the views and models, and compiles your assets and views.
+
+It will also automatically recompile the server whenever you change the application's source code or CMake's settings.
