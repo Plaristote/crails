@@ -3,3 +3,5 @@ source 'https://rubygems.org'
 gem 'guard'
 gem 'guard-compat'
 gem 'guard-sass'
+
+gem 'coffee-script'

@@ -1,3 +1,5 @@
+require 'coffee-script'
+
 module ::Guard
   class CrailsJs < Plugin
     def initialize options = {}
@@ -8,8 +10,11 @@ module ::Guard
     def run_all
       options[:targets].each do |target|
         text        = compile_file target
+        target      = extension_to_js target
         output_file = options[:output] + '/' + target
-        File.open(output_file, 'w') { |f| f.write text }
+        File.open(output_file, 'w') do |f|
+          f.write "(function() {\n#{text}\n})();"
+        end
         puts ">> Generated #{output_file}"
       end
     end
@@ -19,19 +24,24 @@ module ::Guard
     end
 
   private
+    def extension_to_js filename
+      filename.split('.')[0...-1].join('.') + '.js'
+    end
+
     def compile_file file
       current_dir       = file.split('/')[0...-1].join('/')
-      file_content      = ''
+      full_path         = (options[:input] + '/' + file).gsub(/\/+/, '/')
+      source            = File.read full_path
+      source            = CoffeeScript.compile source, bare: true if file.match(/\.coffee$/) != nil
       comment_character = "//"
-      File.open (options[:input] + '/' + file), 'r' do |f|
-        f.each_line do |line|
-          matches = line.match /^#{comment_character}=\s+(require|include)\s+(.+)$/
-          if matches.nil?
-            file_content += line
-          else
-            required_filename = current_dir + '/' + matches[2]
-            file_content     += (compile_file required_filename) + "\n"
-          end
+      file_content      = ''
+      source.split("\n").each do |line|
+        matches = line.match(/^\s*#{comment_character}=\s+(require|include)\s+([^;]+)/)
+        if matches.nil?
+          file_content += line + "\n"
+        else
+          required_filename = current_dir + '/' + matches[2]
+          file_content     += (compile_file required_filename) + "\n"
         end
       end
       file_content
