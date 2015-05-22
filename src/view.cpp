@@ -12,8 +12,7 @@ View::View(const std::string& path)
 {
   std::string full_path;
 
-  full_path  = "../";
-  full_path += "app/views/" + path + '.' + DYNLIB_EXT;
+  full_path = "app/views/" + path + '.' + DYNLIB_EXT;
   if (view_object.Load(full_path))
     generate_view = view_object.Resolve<GenerateView>("generate_view");
   else

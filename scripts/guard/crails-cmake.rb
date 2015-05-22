@@ -1,5 +1,6 @@
 require 'guard/crails-base'
 require 'guard/crails-notifier'
+require 'guard/crails-server'
 require 'pty'
 
 module ::Guard
@@ -31,11 +32,13 @@ module ::Guard
         run_command 'make'  if $?.success?
         if $?.success?
           puts ">> Run tests"
-          run_command './tests'
-          if $?.success?
-            restart_server
-          else
-            Crails::Notifier.notify 'Crails Guard', 'Tests are broken'
+          Dir.chdir '..' do
+            run_command 'build/tests'
+            if $?.success?
+              restart_server
+            else
+              Crails::Notifier.notify 'Crails Guard', 'Tests are broken'
+            end
           end
         else
           Crails::Notifier.notify 'Crails Guard', 'Your crails server failed to build'
@@ -44,7 +47,8 @@ module ::Guard
     end
 
     def restart_server
-      puts "TODO restart server here"
+      server = CrailsServer.instance
+      server.restart_server if not server.nil?
     end
   end
 end

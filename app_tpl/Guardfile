@@ -1,4 +1,4 @@
-$: << '../scripts'
+$: << ENV['CRAILS_SHARED_DIR']
 
 group :development do
   guard 'crails-js', input: 'app/assets/javascripts', output: 'public/javascripts', targets: ['application.js']
@@ -21,3 +21,5 @@ guard 'crails-cmake' do
   watch(%r{^lib/.+\.[hc](pp)?$})
   watch(%r{^spec/.+\.[hc](pp)?$})
 end
+
+guard 'crails-server'
