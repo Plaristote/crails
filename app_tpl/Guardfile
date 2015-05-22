@@ -10,6 +10,8 @@ guard 'crails-cmake' do
 end
 
 group :development do
+  guard 'sass', input: 'app/assets/stylesheets', output: 'public/stylesheets'
+
   guard 'crails-ecpp' do
     watch(%r{.+\.ecpp$})
   end

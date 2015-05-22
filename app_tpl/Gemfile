@@ -2,5 +2,4 @@ source 'https://rubygems.org'
 
 gem 'guard'
 gem 'guard-compat'
-
-gem 'notifier'
+gem 'guard-sass'
