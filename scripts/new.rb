@@ -105,7 +105,7 @@ base_directory = ARGV[0]
 
 options[:name] = (base_directory.split '/').last
 project        = ProjectModel.new
-source         = ENV['CRAILS_SHARED_DIR']
+source         = ENV['CRAILS_SHARED_DIR'] + '/app_template/'
 
 project.base_directory source, base_directory do
   project.generate_erb 'CMakeLists.txt', 'CMakeLists.txt.erb', options
