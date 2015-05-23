@@ -5,7 +5,6 @@ This tutorial is intented to show you step by step how to create a Crails applic
 # Getting started
 * [Create a project](doc/getting-started.md#create-a-project)
 * [Configure a project](doc/getting-started.md#configure-a-project)
-  * [CMake](doc/getting-started.md#cmake)
   * [Databases](doc/getting-started.md#databases)
   * [Asset pipeline](doc/getting-started.md#asset-pipeline)
 * [Start developing](doc/getting-started.md#start-developing)
