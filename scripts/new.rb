@@ -93,27 +93,24 @@ if ARGV[0].nil?
   exit 1
 end
 
+bundler_gemspec = Gem::Specification::find_all_by_name('bundler')
+unless bundler_gemspec.any?
+  puts "/!\\ Bundler gem not found. Please install it with `gem install bundler`."
+  exit 2
+end
+bundler_gem = bundler_gemspec.first
+bundler_bin = "#{bundler_gem.bin_dir}/#{bundler_gem.executables.first}"
+
 base_directory = ARGV[0]
 
 options[:name] = (base_directory.split '/').last
 project        = ProjectModel.new
-source         = "/home/plaristote/projects/MongoDB_Test"
-
-source = unless ENV['CRAILS_SHARED_DIR'].nil?
-  ENV['CRAILS_SHARED_DIR']
-else
-  path = nil
-  (ENV['XDG_DATA_DIRS'].split ':').each do | dir |
-    full_path = "#{dir}/crails"
-    path = full_path ; break if File.directory? full_path
-  end
-  path
-end
+source         = ENV['CRAILS_SHARED_DIR'] + '/app_template/'
 
 project.base_directory source, base_directory do
   project.generate_erb 'CMakeLists.txt', 'CMakeLists.txt.erb', options
-  project.file 'Gulpfile.js'
-  project.file 'package.json'
+  project.file 'Gemfile'
+  project.file 'Guardfile'
   project.directory :build do end
   project.directory :app do
     project.file 'routes.cpp'
@@ -121,6 +118,7 @@ project.base_directory source, base_directory do
     project.directory :assets do
       project.directory :stylesheets do end
       project.directory :javascripts do
+        project.file 'application.js'
         project.file 'crails.js'
       end
     end
@@ -137,7 +135,6 @@ project.base_directory source, base_directory do
   end
   project.directory :config do
     project.file 'db.json'
-    project.file 'assets.json'
     project.file 'mailers.json'
     project.file 'request_pipe.cpp'
     project.generate_erb 'salt.cpp',          'salt.cpp.erb',          options
@@ -151,6 +148,7 @@ project.base_directory source, base_directory do
   project.directory :spec do
     project.file 'spec.cpp'
   end
+  project.directory :logs do end
 end
 
 FileUtils.cd base_directory do
@@ -158,10 +156,8 @@ FileUtils.cd base_directory do
     puts "\033[32m[CMAKE]\033[0m " + "Configuring building tools"
     `cmake ..`
   end
-  puts "\033[32m[NODEJS]\033[0m " + "Installing dependencies"
-  `npm install`
-  puts "\033[32m[GULP]\033[0m " + "Running asset pipeline"
-  `gulp ecpp`
+  puts "\033[32m[BUNDLER]\033[0m " + "Installing dependencies"
+  puts `#{bundler_bin} install`
 end
 
 puts ""

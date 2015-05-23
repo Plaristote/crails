@@ -1,0 +1,1 @@
+//= require crails.js

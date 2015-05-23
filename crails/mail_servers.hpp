@@ -74,7 +74,7 @@ namespace Crails
     
     MailServers(void)
     {
-      DataTree* data_tree = DataTree::Factory::JSON("../config/mailers.json");
+      DataTree* data_tree = DataTree::Factory::JSON("config/mailers.json");
       
       if (data_tree)
       {

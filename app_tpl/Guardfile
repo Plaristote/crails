@@ -1,0 +1,25 @@
+$: << ENV['CRAILS_SHARED_DIR']
+
+group :development do
+  guard 'crails-js', input: 'app/assets/javascripts', output: 'public/assets', targets: ['application.js']
+  guard 'sass',      input: 'app/assets/stylesheets', output: 'public/assets'
+
+  guard 'crails-ecpp' do
+    watch(%r{.+\.ecpp$})
+  end
+
+  guard 'crails-mongodb-models' do
+    watch(%r{^app/models/.+\.h(pp)?$})
+  end
+end
+
+guard 'crails-cmake' do
+  watch('CMakeLists.txt')
+  watch('build/CMakeCache.txt')
+  watch(%r{^config/.+\.[hc](pp)?$})
+  watch(%r{^app/.+\.[hc](pp)?$})
+  watch(%r{^lib/.+\.[hc](pp)?$})
+  watch(%r{^spec/.+\.[hc](pp)?$})
+end
+
+guard 'crails-server', port: 3001, run_on_start: true

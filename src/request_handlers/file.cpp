@@ -15,7 +15,7 @@ bool FileRequestHandler::operator()(const HttpServer::request& request, Building
 
     if (pos_get_params != std::string::npos)
       fullpath.erase(pos_get_params);
-    fullpath = "../public" + fullpath;
+    fullpath = "public" + fullpath;
 
     { // Is a directory ?
       Directory dir;

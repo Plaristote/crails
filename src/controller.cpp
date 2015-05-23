@@ -79,7 +79,7 @@ void Controller::render(const std::string& view, const std::string& layout)
   else if (!(match_extension.Match(view, &match, 1)))
   {
     format = view.substr(match.rm_so + 1, match.rm_eo - match.rm_so - 1);
-    Filesystem::FileContent("../app/views/" + view, body);
+    Filesystem::FileContent("app/views/" + view, body);
   }
   else
     throw boost_ext::invalid_argument("Could not detect format for view `" + view + '`');

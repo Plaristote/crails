@@ -45,7 +45,7 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   std::stringstream view_name;
 
   file_name << (unsigned int)(code) << ".html";
-  if (file_handler && file_handler->SendFile("../public/" + file_name.str(), out, code, 0))
+  if (file_handler && file_handler->SendFile("public/" + file_name.str(), out, code, 0))
   {
     params["response-data"]["code"] = (int)code;
     return ;
