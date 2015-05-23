@@ -81,19 +81,19 @@ Feel free to mix javascript and coffeescript files as you wish: crailsjs doesn't
 Guard will help you set everything up in your environment. Use the command `crails guard` to launch guard. Note that by default, the command 'crails guard' will launch a server on port 3001: you may disable this behaviour by removing the `run_on_start` option from the `crails-server` guard in the Guardfile.
 
 Once you've launched the `crails guard` command, you'll be taken to a prompt. Here's a list of the commands you may use:
-#### crailsjs
-- will compile your javascript and coffeescript files
-
-#### sass
-- will compile your stylesheets
+#### crailsserver
+- will start a server on port 3001 if none is already launched
+- the logs will be redirected to `logs/out.log` and `logs/err.log`
 
 #### crailscmake
 - will recompile your code and run the tests.
 - if a server is launched, crailscmake will restart it when the compilation and tests are successfull
 
-#### crailsserver
-- will start a server if none is already launched
-- the logs will be redirected to `logs/out.log` and `logs/err.log`
+#### crailsjs
+- will compile your javascript and coffeescript files
+
+#### sass
+- will compile your stylesheets
 
 #### all
 - will run all the tasks
