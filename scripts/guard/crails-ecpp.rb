@@ -150,48 +150,8 @@ module ::Guard
       code = code.gsub /\bdo([^a-zA-Z_(\[\]])/, '{\1'
       code = code.gsub /\bend([^a-zA-Z_(\[\]])/, '; }\1'
 
-      code = <<CPP
-#include <sstream>
-#include <iostream>
-#include <crails/shared_vars.hpp>
-
-#{include_lines.join "\n"}
-
-using namespace std;
-
-extern "C"
-{
-  std::string generate_view(Crails::SharedVars&);
-  std::string render_view(const std::string& name, Crails::SharedVars&);
-}
-
-class #{class_name}
-{
-public:
-  #{class_name}(Crails::SharedVars& vars) : vars(vars)
-  {
-    #{linking_lines.join "\n"}
-  }
-
-  std::string render(void)
-  {
-    #{code}
-    return (#{out_var}.str());
-  }
-
-private:
-  Crails::SharedVars& vars;
-  std::stringstream   #{out_var};
-  #{instance_variables.join "\n"}
-};
-
-std::string generate_view(Crails::SharedVars& vars)
-{
-  #{class_name} view(vars);
-
-  return (view.render());
-}
-CPP
+      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/view.cpp.erb").read, nil, '-'
+      code = template.result(instance_eval { binding })
 
       # Write source file
       File.open "#{filename}.cpp", 'w' do |file|

@@ -41,6 +41,7 @@ module ::Guard
 
     def compiler
       compiler_path = get_cmake_variable 'CMAKE_CXX_COMPILER:FILEPATH'
+      compiler_path = '/usr/bin/g++' if compiler_path.nil?
       compiler_path = if File.symlink? compiler_path
         File.readlink compiler_path
       else
