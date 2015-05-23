@@ -9,4 +9,9 @@ bundler_bin = "#{bundler_gem.bin_dir}/#{bundler_gem.executables.first}"
 arguments = $*.map {|i| "'#{i}'"}
 
 puts "Using #{bundler_bin}"
-exec "#{bundler_bin} exec guard #{arguments.join ' '}"
+cmd = "#{bundler_bin} exec guard #{arguments.join ' '}"
+
+`#{bundler_bin} check`
+cmd = "#{bundler_bin} && #{cmd}" unless $?.success?
+
+exec cmd
