@@ -13,13 +13,14 @@ module Crails
     end
 
     def spawn
+      puts "Spawning"
       start_time = Time.now
       @pid       = fork do
         launch
       end
       File.open('server.pid', 'w') {|f| f.write @pid}
       Process.wait @pid
-      File.delete('server.pid')
+      File.delete('server.pid') rescue ''
       if $?.exitstatus != 0 && @interrupting != true
         elapsed_time = Time.now - start_time
         if elapsed_time > 5
