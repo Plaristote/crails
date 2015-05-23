@@ -28,11 +28,13 @@ module ::Guard
     def compile_library options
       command  = "#{compiler} #{gcc_options.join ' '} "
       command += options[:file]
-      command += " -o #{options[:out]}" unless options[:out].nil?
+      command += " -o #{options[:out]}"
       output   = `#{command}`
       puts output
-      unless $?.success?
-        throw "CrailsEcpp: Failed to build"
+      if $?.success?
+        ">> Generated #{options[:out]}"
+      else
+        raise [:task_has_failed]
       end
     end
 

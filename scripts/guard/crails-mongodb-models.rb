@@ -27,7 +27,10 @@ module ::Guard
 
       # SCAN CLASS
       file_content.scan /MONGODB_MODEL\s*\([a-zA-Z0-9_]+\)/ do |param|
-        throw "#{filename} hosts several MONGODB_MODEL. Don't do that." if not classname.nil?
+        if not classname.nil?
+          puts "/!\\ #{filename} hosts several MONGODB_MODEL. Don't do that." if not classname.nil?
+          raise [:task_has_failed]
+        end
         classname  = param[14...param.length-1]
       end
 

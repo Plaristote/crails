@@ -35,7 +35,7 @@ module ::Guard
           Dir.chdir '..' do
             run_command 'build/tests'
             if $?.success?
-              restart_server
+              restart_server if File.exists?('server.pid')
             else
               Crails::Notifier.notify 'Crails Guard', 'Tests are broken'
             end

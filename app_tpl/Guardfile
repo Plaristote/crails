@@ -1,8 +1,8 @@
 $: << ENV['CRAILS_SHARED_DIR']
 
 group :development do
-  guard 'crails-js', input: 'app/assets/javascripts', output: 'public/javascripts', targets: ['application.js']
-  guard 'sass',      input: 'app/assets/stylesheets', output: 'public/stylesheets'
+  guard 'crails-js', input: 'app/assets/javascripts', output: 'public/assets', targets: ['application.js']
+  guard 'sass',      input: 'app/assets/stylesheets', output: 'public/assets'
 
   guard 'crails-ecpp' do
     watch(%r{.+\.ecpp$})

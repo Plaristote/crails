@@ -118,6 +118,7 @@ project.base_directory source, base_directory do
     project.directory :assets do
       project.directory :stylesheets do end
       project.directory :javascripts do
+        project.file 'application.js'
         project.file 'crails.js'
       end
     end
@@ -147,6 +148,7 @@ project.base_directory source, base_directory do
   project.directory :spec do
     project.file 'spec.cpp'
   end
+  project.directory :logs do end
 end
 
 FileUtils.cd base_directory do
