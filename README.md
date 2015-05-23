@@ -40,7 +40,6 @@ unknown compiling issue. Please let me know if you meet any issues with building
 
 Here's a list of the dependecies:
 - ruby >= 1.9
-- nodejs
 - cpp-netlib
 - segvcatch (optional)
 - soci (optional, used by crails-sql)
