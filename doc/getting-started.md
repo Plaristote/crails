@@ -93,6 +93,7 @@ Once you've launched the `crails guard` command, you'll be taken to a prompt. He
 
 #### crailsserver
 - will start a server if none is already launched
+- the logs will be redirected to `logs/out.log` and `logs/err.log`
 
 #### all
 - will run all the tasks
