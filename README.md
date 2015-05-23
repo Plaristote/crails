@@ -64,6 +64,8 @@ When the developer mode is on, the Crails Framework provides a number of tools (
 
 Developer and Production server do not conflict: you may want to compile the project twice, with and without the developer mode option, which would give you the ability to swap between developer and production mode simply by changing the CMAKE_BUILD_TYPE variable to Release or Debug in your project's CMakeCache.txt.
 
+There are two types of server available: aysnchronous and synchronous. To compile one or the other, use the `-DUSE_MULTITHREAD=[ON|OFF]` option with cmake.
+
 Creating a Crails Application
 ========
 The installation of the Crails Framework should have added a ruby script named 'crails' in your bin directory.
@@ -72,6 +74,8 @@ You can use it to create application this way:
     crails new -h # Check out the options first (support for databases and all that)
     crails new application_name --use-mongodb --use-mongo-session-store
 
-By default, the project will build in developer mode, which means it'll link to the debug server. Don't forget to change CMAKE_BUILD_TYPE in your CMakeCache.txt file if you want to link to the release server instead.
+By default, the project will build in developer mode, which means it'll link to the debug server. Use `crails set-env production` to link to the production libraries instead. If you want to link with the debug libraries again, use `crails set-env development`.
+
+You can switch between multithreaded and single threaded environment as well with the commands `crails set-env multithread` and `crails set-env synchronous`.
 
 Now that your crails application is ready, check out the [COOKBOOK](COOKBOOK.md) to see all the neat things you can do with it !
