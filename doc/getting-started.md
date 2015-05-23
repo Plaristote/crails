@@ -78,7 +78,21 @@ The crailsjs task also supports coffeescript. Note that, because coffeescript re
 Feel free to mix javascript and coffeescript files as you wish: crailsjs doesn't care.
 
 # Start developing
-## Guard
-Before you start developing, you must launch `crails guard` from your application directory: this service takes care of some code generation needed for the views and models, and compiles your assets and views.
+Guard will help you set everything up in your environment. Use the command `crails guard` to launch guard. Note that by default, the command 'crails guard' will launch a server on port 3001: you may disable this behaviour by removing the `run_on_start` option from the `crails-server` guard in the Guardfile.
 
-It will also automatically recompile the server whenever you change the application's source code or CMake's settings.
+Once you've launched the `crails guard` command, you'll be taken to a prompt. Here's a list of the commands you may use:
+#### crailsjs
+- will compile your javascript and coffeescript files
+
+#### sass
+- will compile your stylesheets
+
+#### crailscmake
+- will recompile your code and run the tests.
+- if a server is launched, crailscmake will restart it when the compilation and tests are successfull
+
+#### crailsserver
+- will start a server if none is already launched
+
+#### all
+- will run all the tasks
