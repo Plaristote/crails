@@ -19,7 +19,7 @@ void MongoStore::load(Data request_headers)
     cout << "[MongoStore] Session Id = " << cookie["session_id"].Value() << endl;
     session = SessionStore::Find(cookie["session_id"].Value());
     if (session.NotNull())
-      session->GetFields(session_content);
+      session->get_fields(session_content);
     else
       cout << "[MongoStore] Could not find the session object in the database" << endl;
   }
@@ -33,8 +33,8 @@ void MongoStore::finalize(BuildingResponse& response)
   {
     if (session.Null())
       session = new SessionStore(SessionStore::Create());
-    session->SetFields(session_content);
-    session->Save();
+    session->set_fields(session_content);
+    session->save();
     while (cookie.Count())
       cookie[0].Remove();
     cookie["session_id"] = session->Id();
@@ -43,7 +43,7 @@ void MongoStore::finalize(BuildingResponse& response)
   }
 }
 
-void MongoStore::SessionStore::GetFields(Data data)
+void MongoStore::SessionStore::get_fields(Data data)
 {
   set<string> field_names;
 
@@ -63,7 +63,7 @@ void MongoStore::SessionStore::GetFields(Data data)
   }
 }
 
-void MongoStore::SessionStore::Save(void)
+void MongoStore::SessionStore::save(void)
 {
   Collection& collection = MONGODB_GET_COLLECTION(database_name, collection_name);
 
@@ -79,7 +79,7 @@ void MongoStore::SessionStore::Save(void)
   }
 }
 
-void MongoStore::SessionStore::SetFields(Data data)
+void MongoStore::SessionStore::set_fields(Data data)
 {
   mongo::BSONObjBuilder builder;
   auto                  it         = data.begin();

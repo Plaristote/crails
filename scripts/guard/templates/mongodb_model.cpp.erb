@@ -58,7 +58,7 @@ SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
 // FIELDS
 void <%= classname %>::initialize_fields()
 {
-  fields.clear();
+  MongoDB::Model::initialize_fields();
 <% fields.each do |field| -%>
   <%= field[:name] %>.initialize("<%= field[:name] %>", bson_object, <%= field[:default] %>);
   fields.push_back(&<%= field[:name] %>);

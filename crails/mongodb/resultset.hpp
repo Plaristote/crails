@@ -59,7 +59,7 @@ namespace MongoDB
       Collection&       collection      = Crails::Databases::singleton::Get()->get_database<MongoDB::Database>(database)[collection_name];
 
       return (prepare(collection, query));
-    }    
+    }
 
     void each(std::function<bool (MODEL&)> functor)
     {
@@ -79,7 +79,7 @@ namespace MongoDB
           MODEL          model(collection, object);
 
           model.result_set = results;
-          model.InitializeFields();
+          model.initialize_fields();
           fetched.push_back(model);
           if (!(functor(*fetched.rbegin())))
             break ;

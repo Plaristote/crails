@@ -21,9 +21,9 @@ namespace Crails
 
       MONGODB_MODEL(SessionStore)
 
-      void SetFields(Data data);
-      void GetFields(Data data);
-      void Save(void);
+      void set_fields(Data data);
+      void get_fields(Data data);
+      void save(void);
 
       static void Cleanup(void);
 

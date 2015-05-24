@@ -4,7 +4,7 @@
 using namespace MongoDB;
 using namespace std;
 
-bool Model::GetOidFromObject(mongo::BSONObj object, mongo::OID& oid)
+bool Model::get_oid_from_object(mongo::BSONObj object, mongo::OID& oid)
 {
   mongo::BSONElement id_element;
   bool               has_oid;
@@ -16,7 +16,7 @@ bool Model::GetOidFromObject(mongo::BSONObj object, mongo::OID& oid)
 
 Model::Model(Collection& collection, mongo::BSONObj bson_object) : bson_object(bson_object), collection(collection), result_set(nullptr)
 {
-  has_id             = GetOidFromObject(bson_object, id);
+  has_id             = get_oid_from_object(bson_object, id);
   fields_initialized = false;
 }
 
@@ -25,12 +25,12 @@ Model::Model(const Model& copy) : bson_object(copy.bson_object), id(copy.id), ha
   fields_initialized = false;
 }
 
-void Model::InitializeFields(void)
+void Model::initialize_fields(void)
 {
   fields.clear();
 }
 
-bool Model::Refresh(void)
+bool Model::refresh(void)
 {
   auto_ptr<mongo::DBClientCursor> list = collection.query(MONGO_QUERY("_id" << id));
   
@@ -39,13 +39,13 @@ bool Model::Refresh(void)
     mongo::BSONObj object = list->next();
     
     bson_object = object;
-    InitializeFields();
+    initialize_fields();
     return (true);
   }
   return (false);
 }
 
-mongo::BSONObj Model::Update(void)
+mongo::BSONObj Model::update(void)
 {
   mongo::BSONObjBuilder        builder;
   mongo::BSONObj               object;
@@ -59,28 +59,28 @@ mongo::BSONObj Model::Update(void)
   object = builder.obj();
   if (!(has_id))
   {
-    has_id = GetOidFromObject(object, id);
+    has_id = get_oid_from_object(object, id);
     return (object);
   }
   return (BSON("$set" << object));
 }
 
-void Model::Save(void)
+void Model::save(void)
 {
   if (has_id)
   {
     mongo::Query query = MONGO_QUERY("_id" << id);
 
-    collection.update(Update(), query);
+    collection.update(update(), query);
   }
   else
   {
-    ForceUpdate();
-    collection.insert(Update());
+    force_update();
+    collection.insert(update());
   }
 }
 
-void Model::Remove(void)
+void Model::remove(void)
 {
   if (has_id)
   {

@@ -73,28 +73,25 @@ namespace MongoDB
 
     std::string        Id(void)  const { return (id.toString()); }
     mongo::OID         OID(void) const { return (id);            }
-    virtual void       Save(void);
-    virtual void       Remove(void);
-    bool               Refresh(void);
-    Collection&        GetCollection(void)       { return (collection); }
-    const Collection&  GetCollection(void) const { return (collection); }
+    virtual void       save(void);
+    virtual void       remove(void);
+    bool               refresh(void);
+    Collection&        get_collection(void)       { return (collection); }
+    const Collection&  get_collection(void) const { return (collection); }
+
+    bool               exists(void) const { return (has_id); }
 
   private:
-    static bool        GetOidFromObject(mongo::BSONObj object, mongo::OID& oid);
-    mongo::BSONObj     Update(void);
+    static bool        get_oid_from_object(mongo::BSONObj object, mongo::OID& oid);
+    mongo::BSONObj     update(void);
 
   protected:
-    virtual void       InitializeFields(void);
+    virtual void       initialize_fields(void);
 
     void               set_owner_id(const std::string& relation_name, const std::string& id_string);
-    void               ForceUpdate(void)
+    void               force_update(void)
     {
       std::for_each(fields.begin(), fields.end(), [](IField* field) { field->ForceUpdate(); });
-    }
-
-    bool               Exists(void) const
-    {
-      return (has_id);
     }
 
     struct IField;
