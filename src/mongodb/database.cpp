@@ -40,7 +40,7 @@ void Database::authenticate_with(const std::string& username, const std::string&
   this->password = password;
 }
 
-void Database::Connect(void)
+void Database::connect(void)
 {
   if (!connected)
   {
@@ -75,7 +75,7 @@ void Database::refresh_collections(void)
   
     while (it != end)
     {
-      list<string>::const_iterator match = std::find(collection_fetch.begin(), collection_fetch.end(), it->GetFullName());
+      list<string>::const_iterator match = std::find(collection_fetch.begin(), collection_fetch.end(), it->get_full_name());
       
       if (match != collection_fetch.end())
         ++it;

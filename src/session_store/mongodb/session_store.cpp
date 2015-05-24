@@ -36,7 +36,7 @@ MongoStore::SessionStore MongoStore::SessionStore::Create(Data params)
 {
   const string         database        = SessionStore::DatabaseName();
   const string         collection_name = SessionStore::CollectionName();
-  MongoDB::Collection& collection      = Databases::singleton::Get()->GetDatabase<MongoDB::Database>(database)[collection_name];
+  MongoDB::Collection& collection      = Databases::singleton::Get()->get_database<MongoDB::Database>(database)[collection_name];
   mongo::BSONObj       obj;
   {
     mongo::BSONObjBuilder builder;

@@ -15,7 +15,7 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
 
     if (action == 0)
       return false;
-    params.session->Load(params["header"]);
+    params.session->load(params["header"]);
     {
       DynStruct        data   = (*action)(params);
       string           body   = data["body"].Value();
@@ -30,7 +30,7 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
         for (; it != end ; ++it)
           out.SetHeaders((*it).Key(), (*it).Value());
       }
-      params.session->Finalize(out);
+      params.session->finalize(out);
       if (data["status"].NotNil())
         code = (Server::HttpCode)((int)data["status"]);
       Server::SetResponse(params, out, code, body);

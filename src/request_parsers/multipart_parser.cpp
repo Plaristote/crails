@@ -23,7 +23,7 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerT
   cout << "Going for multipart/form-data parsing" << endl;
   MultipartParser multipart_parser;
 
-  multipart_parser.Initialize(params);
+  multipart_parser.initialize(params);
   callback = [this, &multipart_parser, &params](boost::iterator_range<char const*> range,
                       boost::system::error_code error_code,
                       size_t size_read,
@@ -33,7 +33,7 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerT
     multipart_parser.total_read += size_read;
     for (unsigned int i = 0 ; i < size_read ; ++i)
       multipart_parser.read_buffer += range[i];
-    multipart_parser.Parse(params);
+    multipart_parser.parse(params);
     if (multipart_parser.total_read < multipart_parser.to_read)
       connection_ptr->read(callback);
     else
@@ -49,9 +49,9 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request& request,
   MultipartParser multipart_parser;
 
   cout << "[" << request.method << " " << request.destination << "] Going for multipart/form-data parsing" << endl;
-  multipart_parser.Initialize(params);
+  multipart_parser.initialize(params);
   multipart_parser.read_buffer = request.body;
-  multipart_parser.Parse(params);
+  multipart_parser.parse(params);
   params.response_parsed.Post();
 }
 #endif

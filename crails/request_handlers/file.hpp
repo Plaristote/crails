@@ -20,7 +20,7 @@ namespace Crails
     bool is_cache_enabled(void) const   { return cache_enabled;   }
 
   private:
-    bool SendFile(const std::string& path, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit = 0);
+    bool send_file(const std::string& path, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit = 0);
 
     bool      cache_enabled;
     FileCache file_cache;

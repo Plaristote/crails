@@ -35,13 +35,13 @@ namespace Crails
 
     typedef std::vector<Item> Items;
 
-    void          Initialize(void);
+    void          initialize(void);
     const Action* get_action(const std::string& method, const std::string& uri, Params&) const;
 
   private:
-    void      ItemInitializeRegex(Item& item, std::string route);
-    void      Match(const std::string& route, Action callback);
-    void      Match(const std::string& method, const std::string& route, Action callback);
+    void      item_initialize_regex(Item& item, std::string route);
+    void      match(const std::string& route, Action callback);
+    void      match(const std::string& method, const std::string& route, Action callback);
 
     Items routes;
   };
@@ -50,7 +50,7 @@ namespace Crails
 # define SYM2STRING(sym) std::string(#sym)
 
 # define SetRoute(method, route, klass, function) \
-  Match(method, route, [](Params& params) -> DynStruct \
+  match(method, route, [](Params& params) -> DynStruct \
   { \
     params["controller-data"]["name"]   = #klass; \
     params["controller-data"]["action"] = #function; \

@@ -14,8 +14,8 @@ namespace Crails
     {
     }
 
-    void         Initialize(Params&);
-    void         Parse(Params&);
+    void         initialize(Params&);
+    void         parse(Params&);
 
     std::string  read_buffer;
     unsigned int to_read;

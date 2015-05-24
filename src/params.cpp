@@ -19,7 +19,7 @@ Params::~Params(void)
   });
 }
 
-const Params::File* Params::Upload(const std::string& key) const
+const Params::File* Params::get_upload(const std::string& key) const
 {
   Files::const_iterator it = std::find(files.begin(), files.end(), key);
   

@@ -66,6 +66,7 @@ namespace Crails
     virtual bool    must_protect_from_forgery(void) const { return (true); };
 
     Params&         params;
+    DynStruct&      session;
     DynStruct       response;
     SharedVars      vars;
     Data            flash;

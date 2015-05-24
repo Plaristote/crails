@@ -9,7 +9,7 @@ MongoStore::MongoStore()
 {
 }
 
-void MongoStore::Load(Data request_headers)
+void MongoStore::load(Data request_headers)
 {
   string cookie_string = request_headers["Cookie"].Value();
 
@@ -25,7 +25,7 @@ void MongoStore::Load(Data request_headers)
   }
 }
 
-void MongoStore::Finalize(BuildingResponse& response)
+void MongoStore::finalize(BuildingResponse& response)
 {
   bool is_session_empty = session_content.Count() <= 1 && session_content["flash"].Count() == 0;
 
@@ -68,12 +68,12 @@ void MongoStore::SessionStore::Save(void)
   Collection& collection = MONGODB_GET_COLLECTION(database_name, collection_name);
 
   if (has_id)
-    collection.Update(bson_object, MONGO_QUERY("_id" << id));
+    collection.update(bson_object, MONGO_QUERY("_id" << id));
   else
   {
     mongo::BSONElement id_element;
 
-    collection.Insert(bson_object);
+    collection.insert(bson_object);
     if ((has_id = bson_object.getObjectID(id_element)))
       id = id_element.OID();
   }
@@ -94,8 +94,6 @@ void MongoStore::SessionStore::SetFields(Data data)
   for (; it != end ; ++it)
     builder << (*it).Key() << (*it).Value();
   bson_object = builder.obj();
-//  cout << "Set session: ";
-//  data.Output();
 }
 
 void MongoStore::SessionStore::Cleanup(void)
@@ -104,5 +102,5 @@ void MongoStore::SessionStore::Cleanup(void)
   unsigned int                                  timestamp   = DateTime::Now();
   unsigned int                                  expiring_at = timestamp - session_expiration;
 
-  collection.Remove(BSON("_updated_at" << mongo::LT << expiring_at));
+  collection.remove(BSON("_updated_at" << mongo::LT << expiring_at));
 }

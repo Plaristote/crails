@@ -7,14 +7,14 @@ Databases::Db::~Db()
 {
 }
 
-void Databases::CleanupDatabases()
+void Databases::cleanup_databases()
 {
   for (auto it = databases.begin() ; it != databases.end() ; ++it)
     delete *it;
   databases.clear();
 }
 
-Databases::Db* Databases::GetDatabaseFromName(const std::string& key)
+Databases::Db* Databases::get_database_from_name(const std::string& key)
 {
   for (auto it = databases.begin() ; it != databases.end() ; ++it)
   {

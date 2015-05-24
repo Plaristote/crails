@@ -37,7 +37,7 @@ namespace MongoDB
     {
       typename std::auto_ptr<mongo::DBClientCursor> results_auto_ptr;
 
-      results_auto_ptr = collection.Query(query,
+      results_auto_ptr = collection.query(query,
                                           n_to_return,
                                           n_to_skip,
                                           fields_to_return,
@@ -56,7 +56,7 @@ namespace MongoDB
     {
       const std::string database        = MODEL::DatabaseName();
       const std::string collection_name = MODEL::CollectionName();
-      Collection&       collection      = Crails::Databases::singleton::Get()->GetDatabase<MongoDB::Database>(database)[collection_name];
+      Collection&       collection      = Crails::Databases::singleton::Get()->get_database<MongoDB::Database>(database)[collection_name];
 
       return (prepare(collection, query));
     }    
@@ -95,8 +95,14 @@ namespace MongoDB
 
     unsigned int count(void)
     {
-      // TODO investigate itcount and eventual peeking for this
-      return (entries().size());
+      if (results.Null())
+        return collection.count(query);
+      return entries().size();
+    }
+
+    void remove(bool single_removal = false)
+    {
+      collection.remove(query, single_removal);
     }
 
   private:

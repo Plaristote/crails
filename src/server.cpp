@@ -45,7 +45,7 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   std::stringstream view_name;
 
   file_name << (unsigned int)(code) << ".html";
-  if (file_handler && file_handler->SendFile("public/" + file_name.str(), out, code, 0))
+  if (file_handler && file_handler->send_file("public/" + file_name.str(), out, code, 0))
   {
     params["response-data"]["code"] = (int)code;
     return ;
@@ -192,7 +192,7 @@ void Server::Launch(int argc, char **argv)
     Router* router = Router::singleton::Get();
 
     cout << ">> Initializing routes" << endl;
-    router->Initialize();
+    router->initialize();
     cout << ">> Route initialized" << endl;
   }
   {

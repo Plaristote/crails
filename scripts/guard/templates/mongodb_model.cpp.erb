@@ -103,7 +103,7 @@ SP(<%= data[:type] %>) <%= classname %>::get_<%= data[:relation_name] %>(void) c
   MongoDB::Collection& collection      = CRAILS_DATABASE(MongoDB, database)[collection_name];
   mongo::OID           foreign_oid     = get_<%= data[:relation_name] %>_id();
   mongo::Query         query           = MONGO_QUERY("_id" << foreign_oid);
-  auto                 ptr             = collection.Query(query);
+  auto                 ptr             = collection.query(query);
 
   if (ptr->more())
     return (SP(<%= data[:type] %>)(new <%= data[:type] %>(collection, ptr->next())));
@@ -118,7 +118,7 @@ SP(<%= data[:type] %>) <%= classname %>::get_<%= data[:relation_name] %>(void) c
   std::string  association      = <%= data[:type] %>::CollectionName();
   std::string  association_name = "<%= data[:remote_field] + "_id" %>";
   mongo::Query query            = MONGO_QUERY(association_name << OID());
-  SP(MongoDB::ResultSet<<%= data[:type] %>>) results = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.Db()[association], query);
+  SP(MongoDB::ResultSet<<%= data[:type] %>>) results = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.get_database()[association], query);
 
   if (results->Count() == 0)
     return (SP(<%= data[:type] %>)());
@@ -133,7 +133,7 @@ SP(MongoDB::ResultSet<<%= data[:type] %>>) <%= classname %>::get_<%= data[:relat
   std::string      association      = <%= data[:type] %>::CollectionName();
   std::string      association_name = "<%= data[:remote_field] + "_id" %>";
   mongo::Query     query            = MONGO_QUERY(association_name << OID());
-  return MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.Db()[association], query);
+  return MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.get_database()[association], query);
 }
 <% end %>
 
@@ -145,9 +145,9 @@ SP(MongoDB::ResultSet<<%= data[:type] %>>) <%= classname %>::get_<%= data[:relat
   SP(MongoDB::ResultSet<<%= data[:type] %>>) ptr;
 
 <% if data[:host] == true %>
-  ptr = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.Db()[<%= data[:type] %>::CollectionName()], BSON("_id" << BSON("$in" << get_<%= data[:relation_name] %>_ids())));
+  ptr = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.get_database()[<%= data[:type] %>::CollectionName()], BSON("_id" << BSON("$in" << get_<%= data[:relation_name] %>_ids())));
   <% else %>
-  ptr = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.Db()[<%= data[:type] %>::CollectionName()], BSON("<%= data[:foreign_key] %>_ids" << OID()));
+  ptr = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.get_database()[<%= data[:type] %>::CollectionName()], BSON("<%= data[:foreign_key] %>_ids" << OID()));
   <% end %>
   return (ptr);
 }

@@ -8,7 +8,7 @@ using namespace Crails;
 
 std::string rand_str(std::string::size_type size); // Defined in rand_str.cpp
 
-Controller::Controller(Params& params) : params(params)
+Controller::Controller(Params& params) : params(params), session(params.get_session())
 {
   // Set the class attributes accessible to the views
   *vars["controller"]       = this;
@@ -16,9 +16,9 @@ Controller::Controller(Params& params) : params(params)
   *vars["flash"]            = &flash;
 
   // Initialize flash variable and reset corresponding cookie
-  flash.Duplicate(params.Session()["flash"]);
-  params.Session()["flash"].CutBranch();
-  params.Session()["flash"] = "";
+  flash.Duplicate(session["flash"]);
+  session["flash"].CutBranch();
+  session["flash"] = "";
 }
 
 Controller::~Controller()
@@ -44,7 +44,7 @@ void Controller::protect_from_forgery(void) const
   if (params["method"].Value() != "GET" && !(check_csrf_token()))
     throw ExceptionCSRF();
   // Generate a new CSRF token for this request
-  params.Session()["csrf_token"] = rand_str(16);
+  session["csrf_token"] = rand_str(16);
 }
 
 bool Controller::check_csrf_token(void) const
@@ -53,7 +53,7 @@ bool Controller::check_csrf_token(void) const
   
   if (csrf_token.Nil())
     return (false); // CSRF Token wasn't specified in the request
-  return (csrf_token.Value() == params.Session()["csrf_token"].Value());
+  return (csrf_token.Value() == session["csrf_token"].Value());
 }
 
 void Controller::render(const std::string& view, const std::string& layout)

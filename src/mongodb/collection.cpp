@@ -4,12 +4,12 @@
 using namespace MongoDB;
 using namespace std;
 
-const string Collection::GetFullName(void) const
+const string Collection::get_full_name(void) const
 {
-  return (db.GetName() + '.' + name);
+  return (db.get_name() + '.' + name);
 }
 
-unsigned int Collection::Count(mongo::BSONObj query)
+unsigned int Collection::count(const mongo::Query& query)
 {
-  return (connection.count(GetFullName(), query));
+  return (connection.count(get_full_name(), query));
 }

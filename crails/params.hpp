@@ -40,18 +40,18 @@ namespace Crails
     //
     
     Data            operator[](const std::string& key)       { return (DynStruct::operator[](key)); }
-    const File*     operator[](const std::string& key) const { return (Upload(key)); }
+    const File*     operator[](const std::string& key) const { return (get_upload(key)); }
   #ifdef __llvm__
     Data            operator[](const char* key)       { return (DynStruct::operator[](std::string(key))); }
-    const File*     operator[](const char* key) const { return (Upload(key)); }
+    const File*     operator[](const char* key) const { return (get_upload(key)); }
   #endif
-    const File*     Upload(const std::string& key) const;
+    const File*     get_upload(const std::string& key) const;
 
-    void Lock(void)   { handle.Wait(); }
-    void Unlock(void) { handle.Post(); }
+    void lock(void)   { handle.Wait(); }
+    void unlock(void) { handle.Post(); }
 
-    DynStruct&       Session(void)       { return ((*session).Session()); }
-    const DynStruct& Session(void) const { return ((*session).Session()); }
+    DynStruct&       get_session(void)       { return ((*session).to_data()); }
+    const DynStruct& get_session(void) const { return ((*session).to_data()); }
 
   private:
     SmartPointer<SessionStore> session;

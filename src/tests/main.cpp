@@ -13,7 +13,7 @@ int main(int, char**)
 
   Databases::singleton::Initialize();
   Router::singleton::Initialize();
-  Router::singleton::Get()->Initialize();
+  Router::singleton::Get()->initialize();
   runner.setup();
   if (runner.execute())
     exit_status = 0;

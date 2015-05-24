@@ -23,7 +23,7 @@ bool FileRequestHandler::operator()(const HttpServer::request& request, Building
       if (dir.OpenDir(fullpath))
         fullpath += "/index.htm";
     }
-    if (SendFile(fullpath, response, Server::HttpCodes::ok))
+    if (send_file(fullpath, response, Server::HttpCodes::ok))
     {
       params["response-data"]["code"] = (int)Server::HttpCodes::ok;
       return true;
@@ -32,7 +32,7 @@ bool FileRequestHandler::operator()(const HttpServer::request& request, Building
   return false;
 }
 
-bool FileRequestHandler::SendFile(const std::string& fullpath, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit)
+bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit)
 {
   file_cache.Lock();
   {

@@ -10,10 +10,10 @@ namespace Crails
   class CookieStore : public SessionStore
   {
   public:
-    void             Load(Data request_headers);
-    void             Finalize(BuildingResponse& response);
-    DynStruct&       Session(void);
-    const DynStruct& Session(void) const;
+    void             load(Data request_headers);
+    void             finalize(BuildingResponse& response);
+    DynStruct&       to_data(void);
+    const DynStruct& to_data(void) const;
 
   private:
     CookieData       cookies;

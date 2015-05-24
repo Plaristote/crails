@@ -35,10 +35,10 @@ namespace Crails
     MongoStore();
     ~MongoStore();
 
-    void             Load(Data request_headers);
-    void             Finalize(BuildingResponse& response);
-    DynStruct&       Session(void)       { return (session_content); }
-    const DynStruct& Session(void) const { return (session_content); }
+    void             load(Data request_headers);
+    void             finalize(BuildingResponse& response);
+    DynStruct&       to_data(void)       { return (session_content); }
+    const DynStruct& to_data(void) const { return (session_content); }
     
   private:
     SmartPointer<SessionStore> session;

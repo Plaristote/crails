@@ -18,11 +18,11 @@ namespace Crails
   public:
     virtual ~SessionStore() {}
     static SmartPointer<SessionStore> Factory(void);
-    
-    virtual void             Load(Data request_headers)           = 0;
-    virtual void             Finalize(BuildingResponse& response) = 0;
-    virtual DynStruct&       Session(void)                        = 0;
-    virtual const DynStruct& Session(void) const                  = 0;
+
+    virtual void             load(Data request_headers)           = 0;
+    virtual void             finalize(BuildingResponse& response) = 0;
+    virtual DynStruct&       to_data(void)                        = 0;
+    virtual const DynStruct& to_data(void) const                  = 0;
   };
 }
 

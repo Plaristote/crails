@@ -9,7 +9,7 @@
 using namespace std;
 using namespace Crails;
 
-void MultipartParser::Parse(Params& params)
+void MultipartParser::parse(Params& params)
 {
   bool blocked;
   
@@ -95,9 +95,9 @@ void MultipartParser::Parse(Params& params)
         {
           string field = content_data["name"];
 
-          params.Lock();
+          params.lock();
           params[field] = read_buffer.substr(0, pos - 4);
-          params.Unlock();
+          params.unlock();
           read_buffer.erase(0, pos);
           parsed_state = 0;
           blocked = false;
@@ -143,7 +143,7 @@ void MultipartParser::Parse(Params& params)
   } while (!blocked);
 }
 
-void MultipartParser::Initialize(Params& params)
+void MultipartParser::initialize(Params& params)
 {
   string             type     = params["header"]["Content-Type"].Value();
   Regex              get_boundary("boundary=(.*)", REG_EXTENDED);

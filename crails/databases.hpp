@@ -7,7 +7,7 @@
 # include "environment.hpp"
 
 # define CRAILS_DATABASE(type,database) \
-  Databases::singleton::Get()->GetDatabase<type::Database>(database)
+  Databases::singleton::Get()->get_database<type::Database>(database)
 
 namespace Crails
 {
@@ -25,8 +25,8 @@ namespace Crails
       virtual ~Db();
 
       bool              operator==(const std::string& name) const { return (this->name == name); }
-      const std::string Type(void) { return (type); }
-      virtual void      Connect(void) = 0;
+      const std::string get_type(void) { return (type); }
+      virtual void      connect(void) = 0;
 
     protected:
       std::string       name;
@@ -53,18 +53,18 @@ namespace Crails
 
     ~Databases()
     {
-      CleanupDatabases();
+      cleanup_databases();
       if (config_file)
         delete config_file;
     }
 
-    void CleanupDatabases();
+    void cleanup_databases();
 
   public:
-    Db* GetDatabaseFromName(const std::string& key);
+    Db* get_database_from_name(const std::string& key);
 
     template<typename TYPE>
-    Db* InitializeDatabase(const std::string& key)
+    Db* initialize_database(const std::string& key)
     {
       Data  settings(config_file);
       Data  environment_settings = settings[ENVIRONMENT];
@@ -77,15 +77,15 @@ namespace Crails
     }
 
     template<typename TYPE>
-    TYPE& GetDatabase(const std::string& key)
+    TYPE& get_database(const std::string& key)
     {
-      Db* db = GetDatabaseFromName(key);
+      Db* db = get_database_from_name(key);
 
       if (!db)
-        db = InitializeDatabase<TYPE>(key);
-      if (db->Type() != TYPE::ClassType())
-        throw Databases::Exception("Expected type '" + TYPE::ClassType() + "', got '" + db->Type() + '\'');
-      db->Connect();
+        db = initialize_database<TYPE>(key);
+      if (db->get_type() != TYPE::ClassType())
+        throw Databases::Exception("Expected type '" + TYPE::ClassType() + "', got '" + db->get_type() + '\'');
+      db->connect();
       return (*(reinterpret_cast<TYPE*>(db)));
     }
 
