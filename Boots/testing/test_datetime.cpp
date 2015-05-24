@@ -1,5 +1,5 @@
-#include <Utils/test.hpp>
-#include <Utils/datetime.hpp>
+#include <Boots/Utils/test.hpp>
+#include <Boots/Utils/datetime.hpp>
 #include <iostream>
 #include <ctime>
 
@@ -12,7 +12,7 @@ void TestDateTime(UnitTest& tester)
     time_t   timestamp = std::time(0);
     DateTime datetime(timestamp);
 
-    if (timestamp != (unsigned int)datetime)
+    if (timestamp != (int)datetime)
       return ("timestamps didn't match");
     return ("");
   });
@@ -20,7 +20,7 @@ void TestDateTime(UnitTest& tester)
   {
     time_t timestamp = std::time(0);
 
-    if (timestamp != (unsigned int)DateTime::Now())
+    if (timestamp != (int)DateTime::Now())
       return ("timestamps didn't match");
     return ("");
   });

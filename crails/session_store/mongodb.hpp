@@ -33,6 +33,7 @@ namespace Crails
     };
 
     MongoStore();
+    ~MongoStore();
 
     void             Load(Data request_headers);
     void             Finalize(BuildingResponse& response);

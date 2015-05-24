@@ -45,12 +45,6 @@ Here's a list of the dependecies:
 - soci (optional, used by crails-sql)
 - mongoclient (optional, used by crail-mongodb)
 
-Bulding Boots
---------
-Go to the Boots folder, create a build directory, go in the build directory and type:
-
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
-
 Building the Crails Framework
 --------
 To the root of the project's directory, create a build directory, go in there, and once again, type:

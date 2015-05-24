@@ -16,6 +16,7 @@ namespace Crails
   class SessionStore
   {
   public:
+    virtual ~SessionStore() {}
     static SmartPointer<SessionStore> Factory(void);
     
     virtual void             Load(Data request_headers)           = 0;

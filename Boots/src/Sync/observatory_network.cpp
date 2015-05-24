@@ -1,6 +1,6 @@
-#include <Sync/observatory_network.hpp>
+#include <Boots/Sync/observatory_network.hpp>
 #include <iostream>
-#include <Network/socket.hpp>
+#include <Boots/Network/socket.hpp>
 
 using namespace Sync;
 

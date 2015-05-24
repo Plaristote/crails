@@ -1,5 +1,5 @@
-#include <Utils/test.hpp>
-#include <Sync/functorthread.hpp>
+#include <Boots/Utils/test.hpp>
+#include <Boots/Sync/functorthread.hpp>
 
 using namespace std;
 using namespace Sync;

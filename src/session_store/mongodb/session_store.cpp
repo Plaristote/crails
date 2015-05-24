@@ -11,6 +11,10 @@ MongoStore::SessionStore::SessionStore(const SessionStore& copy) : Model(copy)
 {
 }
 
+MongoStore::~MongoStore()
+{
+}
+
 SmartPointer<MongoStore::SessionStore> MongoStore::SessionStore::Find(const string& id_string)
 {
   mongo::OID id;

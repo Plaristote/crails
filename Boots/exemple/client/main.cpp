@@ -1,7 +1,7 @@
-#include <Utils/application.hpp>
-#include <Utils/cl_options.hpp>
-#include <Network/network.hpp>
-#include <Sync/functorthread.hpp>
+#include <Boots/Utils/application.hpp>
+#include <Boots/Utils/cl_options.hpp>
+#include <Boots/Network/network.hpp>
+#include <Boots/Sync/functorthread.hpp>
 
 class MyClient : public Sync::SignalRemoteSource
 {

@@ -67,6 +67,7 @@ namespace MongoDB
   public:
     Model(Collection& collection, mongo::BSONObj bson_object);
     Model(const Model& copy);
+    virtual ~Model() {}
 
     std::string        Id(void)  const { return (id.toString()); }
     mongo::OID         OID(void) const { return (id);            }

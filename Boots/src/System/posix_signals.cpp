@@ -1,4 +1,4 @@
-#include <System/posix_signals.hpp>
+#include <Boots/System/posix_signals.hpp>
 #include <unistd.h>
 
 using namespace Posix;
@@ -6,7 +6,7 @@ using namespace std;
 
 #ifdef _POSIX_REALTIME_SIGNALS
 # include <signal.h>
-# include <System/process.hpp>
+# include <Boots/System/process.hpp>
 
 Signals::Signals()
 {

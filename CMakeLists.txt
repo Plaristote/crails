@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+add_subdirectory(Boots)
+
 project(crails_project)
 
 option(USE_MULTITHREAD "Asynchronous Server" ON)
@@ -42,7 +44,7 @@ endif()
 find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system REQUIRED)
 
-include_directories(. include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 ##
 ## Source files

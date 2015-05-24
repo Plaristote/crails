@@ -1,4 +1,4 @@
-#include <Sync/thread.hpp>
+#include <Boots/Sync/thread.hpp>
 
 using namespace Sync;
 

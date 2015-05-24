@@ -1,4 +1,4 @@
-#include <Sync/semaphore.hpp>
+#include <Boots/Sync/semaphore.hpp>
 #include <iostream>
 
 using namespace Sync;
