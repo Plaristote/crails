@@ -15,7 +15,7 @@ module ::Guard
   private
     def compile_model filepath
       file_content            = (File.open filepath).read
-      filename                = filepath.match(/\/app\/models\/(.*).h(pp)?$/)[1]
+      filename                = filepath.match(/app\/models\/(.*).h(pp)?$/)[1]
       relative_path           = filename + '.cpp'
       classname               = nil
       fields                  = []
