@@ -59,11 +59,21 @@ SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
 void <%= classname %>::initialize_fields()
 {
   fields.clear();
-<% fields.each do |field| %>
+<% fields.each do |field| -%>
   <%= field[:name] %>.initialize("<%= field[:name] %>", bson_object, <%= field[:default] %>);
   fields.push_back(&<%= field[:name] %>);
-<% end %>
+<% end -%>
   fields_initialized = true;
+}
+
+DynStruct <%= classname %>::to_data() const
+{
+  DynStruct data;
+
+<% fields.each do |field| -%>
+  data["<%= field[:name] %>"] = get_<%= field[:name] %>();
+<% end -%>
+  return data;
 }
 
 <% fields.each do |field| %>

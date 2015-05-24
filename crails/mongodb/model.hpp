@@ -3,6 +3,7 @@
 
 # include <mongo/client/dbclient.h>
 # include <Boots/Utils/smart_pointer.hpp>
+# include <Boots/Utils/dynstruct.hpp>
 # include "exception.hpp"
 # include "array.hpp"
 # include "collection.hpp"
@@ -18,6 +19,7 @@
   classname(const classname& copy); \
   static SmartPointer<classname> Find(const std::string& id_str); \
   static classname Create(Data params = Data()); \
+  DynStruct to_data() const; \
   void initialize_fields(void);
 
 # define MONGODB_REQUIRE(filename)

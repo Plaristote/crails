@@ -143,7 +143,7 @@ module ::Guard
         fields << relation_field
       end
 
-      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/mongodb_model.cpp.erb").read
+      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/mongodb_model.cpp.erb").read, nil, '-'
       path     = Pathname.new "lib/models/#{relative_path}"
 
       FileUtils.mkdir_p path.dirname
