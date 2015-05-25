@@ -43,9 +43,9 @@ void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, 
   *vars["exception_what"] = &e_what;
   *vars["params"]         = &params;
   {
-    std::string content = view.Generate(vars);
+    std::string content = view.generate(vars);
 
-    out.SetHeaders("Content-Type", "text/html");
+    out.set_headers("Content-Type", "text/html");
     Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, content);
   }
 #else

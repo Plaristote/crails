@@ -21,14 +21,14 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
       string           body   = data["body"].Value();
       Server::HttpCode code   = Server::HttpCodes::ok;
 
-      out.SetHeaders("Content-Type", "text/html");
+      out.set_headers("Content-Type", "text/html");
       if (data["headers"].NotNil())
       { // If parameters headers were set, copy them to the response
         auto it  = data["headers"].begin();
         auto end = data["headers"].end();
 
         for (; it != end ; ++it)
-          out.SetHeaders((*it).Key(), (*it).Value());
+          out.set_headers((*it).Key(), (*it).Value());
       }
       params.session->finalize(out);
       if (data["status"].NotNil())

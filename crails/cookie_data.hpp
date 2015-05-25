@@ -8,8 +8,8 @@ namespace Crails
 {
   struct CookieData : public DynStruct
   {
-    void        Unserialize(const std::string&);
-    std::string Serialize(void);
+    void        unserialize(const std::string&);
+    std::string serialize(void);
 
     static const std::string password;
     static const std::string salt;

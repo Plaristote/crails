@@ -13,7 +13,7 @@ void MongoStore::load(Data request_headers)
 {
   string cookie_string = request_headers["Cookie"].Value();
 
-  cookie.Unserialize(cookie_string);
+  cookie.unserialize(cookie_string);
   if (cookie["session_id"].NotNil())
   {
     cout << "[MongoStore] Session Id = " << cookie["session_id"].Value() << endl;
@@ -38,7 +38,7 @@ void MongoStore::finalize(BuildingResponse& response)
     while (cookie.Count())
       cookie[0].Remove();
     cookie["session_id"] = session->Id();
-    response.SetHeaders("Set-Cookie", cookie.Serialize());
+    response.set_headers("Set-Cookie", cookie.serialize());
     MongoStore::SessionStore::Cleanup();
   }
 }

@@ -15,7 +15,7 @@ struct ExtensionMatch
   std::string mime;
 };
 
-std::string GetMimeType(const std::string& filename)
+std::string get_mimetype(const std::string& filename)
 {
   static const ExtensionMatch extensions[] = {
     ExtensionMatch("(htm|html)", "text/html"),

@@ -19,7 +19,7 @@ Server::RequestHandlers Server::request_handlers;
 
 void Server::SetResponse(Params& params, BuildingResponse& out, Server::HttpCode code, const string& content)
 {
-  out.SetResponse(code, content);
+  out.set_response(code, content);
   params["response-data"]["code"]   = (int)code;
   params["response-data"]["length"] = content.size();
 }
@@ -54,22 +54,22 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   {
     View view(view_name.str());
 
-    if (view.IsValid())
+    if (view.is_valid())
     {
       SharedVars  vars;
       View        layout("layouts/application.html.ecpp");
       std::string content;
 
-      if (layout.IsValid())
+      if (layout.is_valid())
       {
-        std::string content_view = view.Generate(vars);
+        std::string content_view = view.generate(vars);
 
         *vars["yield"] = &content_view;
-        content = layout.Generate(vars);
+        content = layout.generate(vars);
       }
       else
-        content = view.Generate(vars);
-      out.SetHeaders("Content-Type", "text/html");
+        content = view.generate(vars);
+      out.set_headers("Content-Type", "text/html");
       Server::SetResponse(params, out, code, content);
       return ;
     }

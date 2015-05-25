@@ -104,7 +104,7 @@ std::string Http::Url::Decode(const std::string& src)
   return (result);
 }
 
-string CookieData::Serialize(void)
+string CookieData::serialize(void)
 {
   try
   {
@@ -124,7 +124,7 @@ string CookieData::Serialize(void)
   return ("");
 }
 
-void CookieData::Unserialize(const string& str)
+void CookieData::unserialize(const string& str)
 {
   try
   {

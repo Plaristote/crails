@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Crails;
 
-static void RecursivelySetValue(Data param, std::vector<std::string> key_stack, const std::string& value)
+static void recursively_set_value(Data param, std::vector<std::string> key_stack, const std::string& value)
 {
   if (key_stack.size() == 0)
     param = Http::Url::Decode(value);
@@ -15,7 +15,7 @@ static void RecursivelySetValue(Data param, std::vector<std::string> key_stack, 
     Data next = param[Http::Url::Decode(key_stack.front())];
 
     key_stack.erase(key_stack.begin());
-    RecursivelySetValue(next, key_stack, value);
+    recursively_set_value(next, key_stack, value);
   }
 }
 
@@ -62,7 +62,7 @@ void cgi2params(DynStruct& params, const std::string& encoded_str)
         str.erase(0, 1);
         if (!(regex.Match(str, &match, 1)))
         {
-          RecursivelySetValue(params, key_stacks, str.substr(match.rm_so, match.rm_eo));
+          recursively_set_value(params, key_stacks, str.substr(match.rm_so, match.rm_eo));
           key_stacks.clear();
           str.erase(match.rm_so, match.rm_eo);
         }

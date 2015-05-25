@@ -68,7 +68,7 @@ void Controller::render(const std::string& view, const std::string& layout)
     if (layout != "")
     {
       format = view.substr(match.rm_so + 1, match.rm_eo - match.rm_so - 6);
-      body   = View::Render(layout + '.' + format + ".ecpp", view, vars);
+      body   = View::render(layout + '.' + format + ".ecpp", view, vars);
     }
     else
     {

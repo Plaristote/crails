@@ -25,13 +25,13 @@ namespace Crails
     BuildingResponse(Server::Response response) : response(response)
     {}
     
-    void SetResponse(Server::HttpCode code, const std::string& body);
+    void set_response(Server::HttpCode code, const std::string& body);
 
-    void SetStatusCode(Server::HttpCode code);
-    void SetHeaders(const std::string& key, const std::string& value);
-    void SetBody(const char* str, size_t size);
+    void set_status_code(Server::HttpCode code);
+    void set_headers(const std::string& key, const std::string& value);
+    void set_body(const char* str, size_t size);
     
-    void Bundle(void);
+    void bundle(void);
 
   private:
     Server::Response response;

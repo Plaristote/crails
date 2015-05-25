@@ -25,20 +25,20 @@ static void SetHeaderParameter(Server::Response response, const std::string& key
 #endif
 
 
-void BuildingResponse::SetResponse(Server::HttpCode code, const string& body)
+void BuildingResponse::set_response(Server::HttpCode code, const string& body)
 {
-  SetStatusCode(code);
-  SetBody(body.c_str(), body.size());
+  set_status_code(code);
+  set_body(body.c_str(), body.size());
 }
 
-void BuildingResponse::SetBody(const char* str, size_t size)
+void BuildingResponse::set_body(const char* str, size_t size)
 {
   // Set the Content-Length parameter
   {
     std::stringstream stream;
 
     stream << size;
-    SetHeaders("Content-Length", stream.str());
+    set_headers("Content-Length", stream.str());
   }
 #ifdef ASYNC_SERVER
   std::string  out;
@@ -47,13 +47,13 @@ void BuildingResponse::SetBody(const char* str, size_t size)
 #endif
   out.resize(size);
   std::copy(str, str + size, out.begin());
-  Bundle();
+  bundle();
 #ifdef ASYNC_SERVER
   response->write(out);
 #endif
 }
 
-void BuildingResponse::SetStatusCode(Server::HttpCode code)
+void BuildingResponse::set_status_code(Server::HttpCode code)
 {
 #ifdef ASYNC_SERVER
   response->set_status(code);
@@ -62,7 +62,7 @@ void BuildingResponse::SetStatusCode(Server::HttpCode code)
 #endif
 }
 
-void BuildingResponse::SetHeaders(const std::string& key, const std::string& value)
+void BuildingResponse::set_headers(const std::string& key, const std::string& value)
 {
   Headers::iterator it = std::find(headers.begin(), headers.end(), key);
   
@@ -72,7 +72,7 @@ void BuildingResponse::SetHeaders(const std::string& key, const std::string& val
     it->value = value;
 }
 
-void BuildingResponse::Bundle(void )
+void BuildingResponse::bundle(void )
 {
   std::function<void (Header&)>     callback;
   std::function<void (void)>        cleanup;

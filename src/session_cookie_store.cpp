@@ -7,13 +7,13 @@ void CookieStore::load(Data request_headers)
 {
   string     cookie_string = request_headers["Cookie"].Value();
 
-  cookies.Unserialize(cookie_string);
+  cookies.unserialize(cookie_string);
 }
 
 void CookieStore::finalize(BuildingResponse& response)
 {
   if (cookies.Count() > 0)
-    response.SetHeaders("Set-Cookie", cookies.Serialize());
+    response.set_headers("Set-Cookie", cookies.serialize());
 }
 
 DynStruct& CookieStore::to_data(void)

@@ -14,13 +14,13 @@ namespace Crails
 
     View(const std::string& path);
     
-    bool               IsValid(void) const
+    bool               is_valid(void) const
     {
       return (generate_view != 0);
     }
 
-    const std::string  Generate(SharedVars& vars);
-    static std::string Render(const std::string& layout_path, const std::string& view_path, SharedVars& vars);
+    const std::string  generate(SharedVars& vars);
+    static std::string render(const std::string& layout_path, const std::string& view_path, SharedVars& vars);
 
   private:
     DynamicLibrary view_object;

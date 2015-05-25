@@ -44,7 +44,7 @@ void MultipartParser::parse(Params& params)
         unsigned int form_len = matches[1].rm_eo - form_so;
         unsigned int form_end = matches[0].rm_eo;
 
-        content_data.Unserialize(read_buffer.substr(form_so, form_len));
+        content_data.unserialize(read_buffer.substr(form_so, form_len));
         for (unsigned short i = 0 ; i < content_data.Count() ; ++i)
         {
           Data   data = content_data[i];

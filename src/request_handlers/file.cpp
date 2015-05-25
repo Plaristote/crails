@@ -46,10 +46,10 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
       std::stringstream str_length;
 
       str_length << (str.size() - first_bit);
-      response.SetHeaders("Content-Length", str_length.str());
-      response.SetHeaders("Content-Type",   GetMimeType(strrchr(fullpath.c_str(), '.')));
-      response.SetStatusCode(code);
-      response.SetBody(str.c_str() + first_bit, str.size() - first_bit);
+      response.set_headers("Content-Length", str_length.str());
+      response.set_headers("Content-Type",   GetMimeType(strrchr(fullpath.c_str(), '.')));
+      response.set_status_code(code);
+      response.set_body(str.c_str() + first_bit, str.size() - first_bit);
       cout << "# Delivering asset `" << fullpath << "` ";
 #ifdef SERVER_DEBUG
       file_cache.GarbageCollect();
