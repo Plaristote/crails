@@ -42,15 +42,44 @@ namespace Crails
         std::string            description;
         std::function<void ()> callback;
       };
+      
+      struct Group
+      {
+        std::string            name;
+        std::list<Test>        tests;
+        std::function<void ()> before, after;
+      };
 
-      typedef std::pair<std::string, std::list<Test> >        Group;
-      typedef std::list<Group>                                Groups;
-
+      typedef std::list<Group> Groups;
+      
+    private:
+      void run_test(Group, Test);
+      void run_protected_test(Group, Test);
+      void display_test_results(Test);
+      
+    protected:
+      void before(std::function<void()> callback)
+      {
+        if (current_group.name == "")
+          before_all = callback;
+        else
+          current_group.before = callback;
+      }
+      
+      void after(std::function<void()> callback)
+      {
+        if (current_group.name == "")
+          after_all = callback;
+        else
+          current_group.after = callback;
+      }
+      
       void describe(const std::string& name, std::function<void ()> block)
       {
-        current_group.first = name;
+        current_group.name = name;
         block();
         groups.push_back(current_group);
+        current_group.name = "";
       }
 
       void xit(const std::string& description, std::function<void ()> block)
@@ -59,7 +88,7 @@ namespace Crails
 
         test.pending     = true;
         test.description = description;
-        current_group.second.push_back(test);
+        current_group.tests.push_back(test);
       }
 
       void it(const std::string& description, std::function<void ()> block)
@@ -69,12 +98,13 @@ namespace Crails
         test.pending     = false;
         test.description = description;
         test.callback    = block;
-        current_group.second.push_back(test);
+        current_group.tests.push_back(test);
       }
 
     private:
       Groups            groups;
       Group             current_group;
+      std::function<void()> before_all, after_all;
     public:
       bool              current_test_result;
       std::stringstream current_test_output;
