@@ -63,6 +63,6 @@ namespace Crails
 
 // Helpers
 void        cgi2params(DynStruct& params, const std::string& encoded_str);
-std::string GetMimeType(const std::string& filename);
+std::string get_mimetype(const std::string& filename);
 
 #endif

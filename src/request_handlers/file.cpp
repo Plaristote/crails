@@ -47,7 +47,7 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
 
       str_length << (str.size() - first_bit);
       response.set_headers("Content-Length", str_length.str());
-      response.set_headers("Content-Type",   GetMimeType(strrchr(fullpath.c_str(), '.')));
+      response.set_headers("Content-Type",   get_mimetype(strrchr(fullpath.c_str(), '.')));
       response.set_status_code(code);
       response.set_body(str.c_str() + first_bit, str.size() - first_bit);
       cout << "# Delivering asset `" << fullpath << "` ";
