@@ -16,7 +16,7 @@ namespace Sync
   {
   # ifdef _WIN32
     typedef HANDLE Handle;
-    typedef DWORD  ThreadId; 
+    typedef DWORD  ThreadId;
   # else
     typedef sem_t           Handle;
     typedef std::thread::id ThreadId;
@@ -27,14 +27,12 @@ namespace Sync
     public:
       Lock(Semaphore& semaphore) : _semaphore(semaphore)
       {
-        if (&_semaphore != 0)
-          _semaphore.Wait();
+        _semaphore.Wait();
       }
 
       ~Lock(void)
       {
-        if (&_semaphore != 0)
-          _semaphore.Post();
+        _semaphore.Post();
       }
 
     private:
