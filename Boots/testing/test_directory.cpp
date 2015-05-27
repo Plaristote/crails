@@ -20,7 +20,7 @@ void TestsDirectory(UnitTest& tester)
   });
   tester.AddTest("Filesystem", "Checking if a file exists", []() -> string
   {
-    if (!(Filesystem::FileExists("test")))
+    if (!(Filesystem::FileExists("boots-tests")))
       return ("Returned false for an existing file");
     if ((Filesystem::FileExists("test.donotexist")))
       return ("Returned true for a non-existing file");
@@ -30,9 +30,9 @@ void TestsDirectory(UnitTest& tester)
   {
     if (!(Directory::MakeDir("testdir")))
       return ("Can't perform test without a working MakeDir");
-    if (Filesystem::FileCopy("test", "testdir/test.copy"))
+    if (Filesystem::FileCopy("boots-tests", "testdir/test.copy"))
     {
-      if (Filesystem::FileExists("test.copy"))
+      if (Filesystem::FileExists("testdir/test.copy"))
         return ("");
       return ("Failed to properly copy file");
     }
