@@ -39,6 +39,44 @@ void Crails::Tests::Runner::setup()
 
 Now, when you run the `tests` executable in your build directory, `MyTestSuite` will be run.
 
+### Running code before/after the tests
+You may want to run code to prepare and cleanup your tests: and that's why the methods `before` and `after` are here for you.
+Here's a sample of code showing you how they'd run:
+
+```C++
+class MyTestSuite : public Crails::Tests::Helper
+{
+  // You may define instances variables here so that they may
+  // be shared between all your tests.
+public:
+  MyTestSuite() : Crails::Tests::Helper("MyTest")
+  {
+    before([this]()
+    {
+      // This lambda will be run before all the tests from this suite
+    });
+
+    after([this]()
+    {
+      // This lambda will be run after all the tests from this suite
+    });
+
+    describe("some_method", [this]()
+    {
+      before([this]()
+      {
+        // This lambda will be run before the tests from this `describe`
+      });
+
+      it("should check something", [this]()
+      {
+        EXPECT("value", ==, "value")
+      });
+    });
+  }
+}
+```
+
 ### Pending test
 It's sometimes useful to have the ability to disable some tests from your suite. When you want set a test as 'pending', just replace `it` with `xit`, such as this:
 
