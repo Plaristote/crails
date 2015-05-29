@@ -12,6 +12,7 @@ Request::Request(const std::string& method, const std::string& uri)
 void Request::run()
 {
   const Router* router = Router::singleton::Get();
+
   if (router)
   {
     const Router::Action* action = router->get_action(params["method"].Value(), params["uri"].Value(), params);
@@ -20,6 +21,8 @@ void Request::run()
       response.Duplicate((*action)(params));
     else
       throw RouteNotFound(params["method"].Value() + '#' + params["uri"].Value());
+    if (response["status"].Nil())
+      response["status"] = 200;
   }
   else
     throw RouterNotInitialized();

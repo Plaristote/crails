@@ -59,6 +59,15 @@ void Database::connect(void)
   }
 }
 
+void Database::drop_all_collections(void)
+{
+  for_each(collections.begin(), collections.end(), [this](Collection collection)
+  {
+    connection.dropCollection(collection.get_full_name());
+  });
+  refresh_collections();
+}
+
 void Database::drop_collection(const std::string& name)
 {
   connection.dropCollection(name);
@@ -68,7 +77,7 @@ void Database::drop_collection(const std::string& name)
 void Database::refresh_collections(void)
 {
   list<string> collection_fetch = connection.getCollectionNames(name);
-  
+
   {
     Collections::iterator it  = collections.begin();
     Collections::iterator end = collections.end();
@@ -83,18 +92,21 @@ void Database::refresh_collections(void)
         it = collections.erase(it);
     }
   }
-  
+
   {
     list<string>::const_iterator it  = collection_fetch.begin();
     list<string>::const_iterator end = collection_fetch.end();
-    
+
     for (; it != end ; ++it)
     {
-      const string name  = it->substr(this->name.size() + 1);
-      auto         match = std::find(collections.begin(), collections.end(), name);
+      if (it->length() > this->name.size() + 1)
+      {
+        const string name  = it->substr(this->name.size() + 1);
+        auto         match = std::find(collections.begin(), collections.end(), name);
 
-      if (match == collections.end())
-        collections.push_back(Collection(connection, *this, name));
+        if (match == collections.end())
+          collections.push_back(Collection(connection, *this, name));
+      }
     }
   }
 }

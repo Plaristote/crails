@@ -101,6 +101,14 @@ public:
     stream >> out;
     return (out);
   }
+  
+  template<typename T>
+  T Or(const T& var)
+  {
+    if (NotNil())
+      return (*this);
+    return (var);
+  }
 
   /*! \brief Sets the DataBranch to nil, thus removing it cleanly when Data is destroyed */
   void Remove(void)       { if (_data) _data->nil = true; }

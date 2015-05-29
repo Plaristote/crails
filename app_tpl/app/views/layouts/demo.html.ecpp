@@ -10,7 +10,7 @@ string* @yield;
 <html>
   <head>
     <title>Crails template demo layout</title>
-    <meta name="csrf-token" content="<%= params->Session()["csrf_token"].Value() %>"/>
+    <meta name="csrf-token" content="<%= params->get_session()["csrf_token"].Value() %>"/>
     <script type="text/javascript" src="/assets/application.js" />
   </head>
   <body>

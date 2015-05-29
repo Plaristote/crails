@@ -1,4 +1,5 @@
 require 'guard/crails-base'
+require 'guard/crails-notifier'
 
 module ::Guard
   class CrailsEcpp < CrailsPlugin
@@ -32,9 +33,9 @@ module ::Guard
       output   = `#{command}`
       puts output
       if $?.success?
-        ">> Generated #{options[:out]}"
+        ">> Generated #{options[:out]}".green
       else
-        raise [:task_has_failed]
+        "/!\\ Failed to generate #{options[:out]}".red
       end
     end
 

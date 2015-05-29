@@ -74,7 +74,7 @@ Params*    @params;
 <p><a href="#" onclick="document.getElementById('session_dump').style.display='block'; return false;">Show session dump</a></p>
 <div id="session_dump" style="display:none">
   <pre>
-    <% lparams.Session().Output(html_stream) %>
+    <% lparams.get_session().Output(html_stream) %>
   </pre>
 </div>
 

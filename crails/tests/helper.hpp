@@ -22,7 +22,7 @@ namespace Crails
   {
     struct ExpectationFailed
     {
-      ExpectationFailed(const std::string& expectation_text, const std::string& file_reference, const std::string& expected, const std::string& obtained)
+      ExpectationFailed(const std::string& expectation_text, const std::string& file_reference, const std::string& obtained, const std::string& expected)
         : expectation_text(expectation_text), file_reference(file_reference), expected(expected), obtained(obtained)
       {
       }

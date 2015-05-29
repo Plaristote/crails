@@ -1,11 +1,19 @@
 #include <algorithm>
 #include "app/models/<%= filename %>.hpp"
-<% requires.each do |required_file| %>#include "app/models/<%= required_file %>.hpp"
-<% end %>
+<% requires.each do |required_file| -%>
+#include "app/models/<%= required_file %>.hpp"
+<% end -%>
 
 using namespace std;
 using namespace MongoDB;
 using namespace Crails;
+
+#define COLLECTION CRAILS_DATABASE(MongoDB,<%= classname %>::DatabaseName())[<%= classname %>::CollectionName()]
+
+<%= classname %>::<%= classname %>(Data params) : Model(COLLECTION, data_to_bson(params))
+{
+  initialize_fields();
+}
 
 <%= classname %>::<%= classname %>(MongoDB::Collection& collection, mongo::BSONObj bson_object) : Model(collection, bson_object)
 {
@@ -15,6 +23,20 @@ using namespace Crails;
 <%= classname %>::<%= classname %>(const <%= classname %>& copy) : Model(copy)
 {
   initialize_fields();
+}
+
+mongo::BSONObj <%= classname %>::data_to_bson(Data params)
+{
+  mongo::BSONObjBuilder builder;
+
+  if (!(params.Nil()))
+  {
+    for_each(params.begin(), params.end(), [&builder](Data param)
+    {
+      builder << param.Key() << param.Value();
+    });
+  }
+  return builder.obj();
 }
 
 SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
@@ -36,23 +58,7 @@ SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
 
 <%= classname %> <%= classname %>::Create(Data params)
 {
-  const string         database        = <%= classname %>::DatabaseName();
-  const string         collection_name = <%= classname %>::CollectionName();
-  MongoDB::Collection& collection      = CRAILS_DATABASE(MongoDB,database)[collection_name];
-  mongo::BSONObj       obj;
-  {
-    mongo::BSONObjBuilder builder;
-
-    if (!(params.Nil()))
-    {
-      for_each(params.begin(), params.end(), [&builder](Data param)
-      {
-        builder << param.Key() << param.Value();
-      });
-    }
-    obj = builder.obj();
-  }
-  return (<%= classname %>(collection, obj));
+  return (<%= classname %>(params));
 }
 
 // FIELDS

@@ -53,7 +53,6 @@ mongo::BSONObj Model::update(void)
   std::list<IField*>::iterator end = fields.end();
 
   if (!(has_id)) { builder.genOID(); }
-  cout << "Updating " << fields.size() << " fields." << endl;
   for (; it != end ; ++it)
     (*it)->BuildUpdate(builder);
   object = builder.obj();

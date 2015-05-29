@@ -15,12 +15,16 @@
 
 # define MONGODB_MODEL(classname) \
   friend class MongoDB::ResultSet<classname>; \
+  classname(Data params = Data()); \
   classname(MongoDB::Collection& collection, mongo::BSONObj bson_object); \
   classname(const classname& copy); \
   static SmartPointer<classname> Find(const std::string& id_str); \
+  static SP(MongoDB::ResultSet<classname>) Where(mongo::Query query = mongo::Query()) \
+  { return MongoDB::ResultSet<classname>::prepare(query); } \
   static classname Create(Data params = Data()); \
   DynStruct to_data() const; \
-  void initialize_fields(void);
+  void initialize_fields(void); \
+  static mongo::BSONObj data_to_bson(Data);
 
 # define MONGODB_REQUIRE(filename)
 

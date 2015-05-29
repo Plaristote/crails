@@ -25,6 +25,7 @@ namespace MongoDB
     Collections&               get_collections(void)             { return (collections); }
     const Collections&         get_collections(void) const       { return (collections); }
     void                       refresh_collections(void);
+    void                       drop_all_collections(void);
     void                       drop_collection(const std::string& name);
 
     void                       connect(void);

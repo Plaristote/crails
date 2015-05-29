@@ -1,3 +1,4 @@
 Boots/build
 build/
 .*.sw*
+.kdev4

@@ -100,9 +100,14 @@ namespace MongoDB
       return entries().size();
     }
 
-    void remove(bool single_removal = false)
+    void remove(void)
     {
-      collection.remove(query, single_removal);
+      collection.remove(query, false);
+    }
+    
+    void remove_one(void)
+    {
+      collection.remove(query, true);
     }
 
   private:

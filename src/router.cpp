@@ -72,7 +72,6 @@ void Router::item_initialize_regex(Item& item, std::string route)
       route             = route.substr(match.rm_eo);
     }
     regexified_route += route;
-    std::cout << regexified_route << std::endl;
     item.regex.SetPattern(regexified_route, REG_EXTENDED);
   }
 }
