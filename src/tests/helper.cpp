@@ -1,4 +1,5 @@
 #include "crails/tests/helper.hpp"
+#include <crails/logger.hpp>
 #include <algorithm>
 #include <iostream>
 
@@ -18,13 +19,18 @@ Helper::Helper(const string& name) : name(name)
 
 void Helper::run()
 {
+  log.set_stdout(current_test_stdout);
+  log.set_stderr(current_test_stdout);
   cout << name << ':' << endl;
   for_each(groups.begin(), groups.end(), [this](Group group)
   {
     cout << "  " << group.name << ':' << endl;
     for_each(group.tests.begin(), group.tests.end(), [this, group](Test test)
     {
+      current_test_stdout.str(string());
       current_test_output.str(string());
+      current_test_stdout.clear();
+      current_test_output.clear();
       if (test.pending == false)
         run_protected_test(group, test);
       display_test_results(test);
@@ -90,6 +96,7 @@ void Helper::display_test_results(Test test)
   {
     cout << KRED << " Failed" << endl;
     cerr << current_test_output.str() << KNRM << endl;
+    cerr << current_test_stdout.str() << endl;
     failed_count++;
   }
 }

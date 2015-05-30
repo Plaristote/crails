@@ -44,13 +44,14 @@ void Database::connect(void)
 {
   if (!connected)
   {
+    mongo::HostAndPort host_and_port(hostname, port);
     std::stringstream stream;
     std::string       err;
 
     stream << hostname << ':' << port;
-    if (connection.connect(stream.str(), err))
+    connection.connect(mongo::HostAndPort(hostname, port), err);
+    if (connection.connect(host_and_port, err))
     {
-      std::cout << "[MongoDB] New connection to " << stream.str() << std::endl;
       refresh_collections();
       connected = true;
     }

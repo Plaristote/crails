@@ -83,11 +83,15 @@ public:
   
   static TYPE* Get(void)
   {
-    Sync::Semaphore::Lock lock(sem);
-    auto it = std::find(instances.begin(), instances.end(), std::this_thread::get_id());
+    auto it        = instances.begin();
+    auto end       = instances.end();
+    auto thread_id = std::this_thread::get_id();
     
-    if (it != instances.end())
-      return (it->ptr);
+    for (; it != end ; ++it)
+    {
+      if (*it == thread_id)
+        return (it->ptr);
+    }
     return (0);
   }
   

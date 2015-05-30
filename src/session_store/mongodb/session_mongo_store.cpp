@@ -1,5 +1,6 @@
 # include <Boots/Utils/datetime.hpp>
-# include "crails/session_store/mongodb.hpp"
+# include <crails/session_store/mongodb.hpp>
+# include <crails/logger.hpp>
 
 using namespace Crails;
 using namespace MongoDB;
@@ -16,12 +17,12 @@ void MongoStore::load(Data request_headers)
   cookie.unserialize(cookie_string);
   if (cookie["session_id"].NotNil())
   {
-    cout << "[MongoStore] Session Id = " << cookie["session_id"].Value() << endl;
+    log << Logger::Info << "[MongoStore] Session Id = " << cookie["session_id"].Value() << Logger::endl;
     session = SessionStore::Find(cookie["session_id"].Value());
     if (session.NotNull())
       session->get_fields(session_content);
     else
-      cout << "[MongoStore] Could not find the session object in the database" << endl;
+      log << Logger::Info << "[MongoStore] Could not find the session object in the database" << Logger::endl;
   }
 }
 

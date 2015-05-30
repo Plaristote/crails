@@ -1,6 +1,7 @@
 #include "crails/server.hpp"
 #include "crails/params.hpp"
 #include "crails/multipart.hpp"
+#include "crails/logger.hpp"
 
 using namespace std;
 using namespace Crails;
@@ -20,7 +21,7 @@ RequestParser::Status RequestMultipartParser::operator()(const HttpServer::reque
 #ifdef ASYNC_SERVER
 void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerTraits::Response response, Params& params)
 {
-  cout << "Going for multipart/form-data parsing" << endl;
+  log << Logger::Debug << "Going for multipart/form-data parsing" << Logger::endl;
   MultipartParser multipart_parser;
 
   multipart_parser.initialize(params);
@@ -48,7 +49,7 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request& request,
 {
   MultipartParser multipart_parser;
 
-  cout << "[" << request.method << " " << request.destination << "] Going for multipart/form-data parsing" << endl;
+  log << Logger::Debug << "[" << request.method << " " << request.destination << "] Going for multipart/form-data parsing" << Logger::endl;
   multipart_parser.initialize(params);
   multipart_parser.read_buffer = request.body;
   multipart_parser.parse(params);

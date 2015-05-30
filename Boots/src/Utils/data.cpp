@@ -197,7 +197,6 @@ DataBranch::~DataBranch()
   Children::iterator it;
   Children::iterator end;
 
-  //std::cout << "Deleting databranch" << endl;
   if (father)
   {
     it  = father->children.begin();

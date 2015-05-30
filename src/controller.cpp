@@ -1,6 +1,7 @@
 #include "crails/controller.hpp"
 #include "crails/router.hpp"
 #include "crails/backtrace.hpp"
+#include <crails/logger.hpp>
 #include <Boots/Utils/directory.hpp>
 
 using namespace std;
@@ -72,7 +73,7 @@ void Controller::render(const std::string& view, const std::string& layout)
     }
     else
     {
-      cout << "calling render view for " << view << endl;
+      log << Logger::Info << "calling render view for " << view << Logger::endl;
       body   = render_view(view, vars);
     }
   }

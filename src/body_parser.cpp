@@ -1,5 +1,6 @@
 #include "crails/server.hpp"
 #include "crails/params.hpp"
+#include <crails/logger.hpp>
 
 using namespace std;
 using namespace Crails;
@@ -18,13 +19,13 @@ void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits:
                         size_t size_read,
                         HttpServer::connection_ptr connection_ptr)
   {
-    std::cout << "Reading buffer..." << std::endl;
+    log << Logger::Info << "Reading buffer..." << Logger::endl;
     for (unsigned int i = 0 ; i < size_read ; ++i)
       read_buffer += range[i];
     total_read += size_read;
     if (total_read == to_read)
     {
-      std::cout << "Finished reading..." << std::endl;
+      log << Logger::Info << "Finished reading..." << Logger::endl;
       sem.Post();
     }
     else

@@ -1,6 +1,7 @@
 #include "crails/request_handlers/file.hpp"
 #include "crails/server.hpp"
 #include "crails/params.hpp"
+#include "crails/logger.hpp"
 #include <Boots/Utils/directory.hpp>
 
 using namespace std;
@@ -50,17 +51,17 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
       response.set_headers("Content-Type",   get_mimetype(strrchr(fullpath.c_str(), '.')));
       response.set_status_code(code);
       response.set_body(str.c_str() + first_bit, str.size() - first_bit);
-      cout << "# Delivering asset `" << fullpath << "` ";
+      log << Logger::Info << "# Delivering asset `" << fullpath << "` ";
 #ifdef SERVER_DEBUG
       file_cache.GarbageCollect();
-      cout << "(cache disabled)" << endl;
+      log << "(cache disabled)" << Logger::endl;
 #else
       if (cache_enabled)
-        cout << (cached ? "(was cached)" : "(was not cached)") << endl;
+        log << (cached ? "(was cached)" : "(was not cached)") << Logger::endl;
       else
       {
         file_cache.GarbageCollect();
-        cout << "(cache disabled)" << endl;
+        log << "(cache disabled)" << Logger::endl;
       }
 #endif
       file_cache.Unlock();

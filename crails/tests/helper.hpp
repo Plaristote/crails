@@ -108,6 +108,7 @@ namespace Crails
     public:
       bool              current_test_result;
       std::stringstream current_test_output;
+      std::stringstream current_test_stdout;
       std::string       name;
 
       unsigned short passed_count, failed_count, pending_count;

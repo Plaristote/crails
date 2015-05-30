@@ -1,5 +1,6 @@
 #include "crails/server.hpp"
 #include "crails/params.hpp"
+#include "crails/logger.hpp"
 #include <Boots/Utils/regex.hpp>
 
 using namespace std;
@@ -18,7 +19,7 @@ RequestParser::Status RequestFormParser::operator()(const HttpServer::request& r
 
 void RequestFormParser::body_received(const HttpServer::request& request, ServerTraits::Response, Params& params)
 {
-  cout << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << endl;  
+  log << Logger::Info << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << Logger::endl;
   if (request.body.size() > 0)
     cgi2params(params, request.body);
 }
