@@ -21,7 +21,7 @@ RequestParser::Status RequestMultipartParser::operator()(const HttpServer::reque
 #ifdef ASYNC_SERVER
 void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerTraits::Response response, Params& params)
 {
-  log << Logger::Debug << "Going for multipart/form-data parsing" << Logger::endl;
+  logger << Logger::Debug << "Going for multipart/form-data parsing" << Logger::endl;
   MultipartParser multipart_parser;
 
   multipart_parser.initialize(params);
@@ -49,7 +49,7 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request& request,
 {
   MultipartParser multipart_parser;
 
-  log << Logger::Debug << "[" << request.method << " " << request.destination << "] Going for multipart/form-data parsing" << Logger::endl;
+  logger << Logger::Debug << "[" << request.method << " " << request.destination << "] Going for multipart/form-data parsing" << Logger::endl;
   multipart_parser.initialize(params);
   multipart_parser.read_buffer = request.body;
   multipart_parser.parse(params);

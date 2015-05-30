@@ -8,6 +8,7 @@
 # include <crails/shared_vars.hpp>
 # include <crails/view.hpp>
 # include <crails/params.hpp>
+# include <crails/logger.hpp>
 
 # define RESCUE_FROM(render_data) \
   static DynStruct RescueFrom(std::function<DynStruct (Params&)> callback, Params& params) \

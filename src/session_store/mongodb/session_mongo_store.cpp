@@ -17,12 +17,12 @@ void MongoStore::load(Data request_headers)
   cookie.unserialize(cookie_string);
   if (cookie["session_id"].NotNil())
   {
-    log << Logger::Info << "[MongoStore] Session Id = " << cookie["session_id"].Value() << Logger::endl;
+    logger << Logger::Debug << "[MongoStore] Session Id = " << cookie["session_id"].Value() << Logger::endl;
     session = SessionStore::Find(cookie["session_id"].Value());
     if (session.NotNull())
       session->get_fields(session_content);
     else
-      log << Logger::Info << "[MongoStore] Could not find the session object in the database" << Logger::endl;
+      logger << Logger::Debug << "[MongoStore] Could not find the session object in the database" << Logger::endl;
   }
 }
 

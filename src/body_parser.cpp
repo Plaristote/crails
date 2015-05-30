@@ -19,13 +19,13 @@ void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits:
                         size_t size_read,
                         HttpServer::connection_ptr connection_ptr)
   {
-    log << Logger::Info << "Reading buffer..." << Logger::endl;
+    logger << Logger::Info << "Reading buffer..." << Logger::endl;
     for (unsigned int i = 0 ; i < size_read ; ++i)
       read_buffer += range[i];
     total_read += size_read;
     if (total_read == to_read)
     {
-      log << Logger::Info << "Finished reading..." << Logger::endl;
+      logger << Logger::Info << "Finished reading..." << Logger::endl;
       sem.Post();
     }
     else

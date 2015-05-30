@@ -19,8 +19,8 @@ Helper::Helper(const string& name) : name(name)
 
 void Helper::run()
 {
-  log.set_stdout(current_test_stdout);
-  log.set_stderr(current_test_stdout);
+  logger.set_stdout(current_test_stdout);
+  logger.set_stderr(current_test_stdout);
   cout << name << ':' << endl;
   for_each(groups.begin(), groups.end(), [this](Group group)
   {

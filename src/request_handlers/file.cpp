@@ -51,17 +51,17 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
       response.set_headers("Content-Type",   get_mimetype(strrchr(fullpath.c_str(), '.')));
       response.set_status_code(code);
       response.set_body(str.c_str() + first_bit, str.size() - first_bit);
-      log << Logger::Info << "# Delivering asset `" << fullpath << "` ";
+      logger << Logger::Info << "# Delivering asset `" << fullpath << "` ";
 #ifdef SERVER_DEBUG
       file_cache.GarbageCollect();
-      log << "(cache disabled)" << Logger::endl;
+      logger << Logger::Info << "(cache disabled)" << Logger::endl;
 #else
       if (cache_enabled)
-        log << (cached ? "(was cached)" : "(was not cached)") << Logger::endl;
+        logger << (cached ? "(was cached)" : "(was not cached)") << Logger::endl;
       else
       {
         file_cache.GarbageCollect();
-        log << "(cache disabled)" << Logger::endl;
+        logger << "(cache disabled)" << Logger::endl;
       }
 #endif
       file_cache.Unlock();

@@ -11,7 +11,6 @@
 #include <iostream>
 #include <crails/request_handlers/file.hpp>
 #include <crails/logger.hpp>
-#undef log
 
 using namespace std;
 using namespace Crails;
@@ -146,17 +145,17 @@ void Server::post_request_log(Params& params) const
   float controller_time = params["response-time"]["controller"];
   unsigned short code   = params["response-data"]["code"];
 
-  Logger::instance << Logger::Info << "# Responded to " << params["method"].Value() << " '" << params["uri"].Value();
-  Logger::instance << "' with " << code;
-  Logger::instance << " in " << crails_time << 's';
+  logger << Logger::Info << "# Responded to " << params["method"].Value() << " '" << params["uri"].Value();
+  logger << "' with " << code;
+  logger << " in " << crails_time << 's';
   if (params["response-time"]["controller"].NotNil())
-    Logger::instance << " (controller: " << controller_time << "s)";
-  Logger::instance << Logger::endl << Logger::endl;
+    logger << " (controller: " << controller_time << "s)";
+  logger << Logger::endl << Logger::endl;
 }
 
 void Server::log(const char* to_log)
 {
-  Logger::instance << Logger::Error << "[cpp-netlib] " << to_log << Logger::endl;
+  logger << Logger::Error << "[cpp-netlib] " << to_log << Logger::endl;
 }
 
 /*
@@ -182,7 +181,7 @@ static void shutdown(int) { shutdown_lambda(); }
 
 void Server::Launch(int argc, char **argv)
 {
-  Logger::instance << Logger::Info << "## Launching the amazing Crails Server ##" << Logger::endl;
+  logger << Logger::Info << "## Launching the amazing Crails Server ##" << Logger::endl;
   Utils::ClOptions options(argc, argv);
 
 #ifdef USE_SEGVCATCH
@@ -193,9 +192,9 @@ void Server::Launch(int argc, char **argv)
   {
     Router* router = Router::singleton::Get();
 
-    Logger::instance << Logger::Info << ">> Initializing routes" << Logger::endl;
+    logger << Logger::Info << ">> Initializing routes" << Logger::endl;
     router->initialize();
-    Logger::instance << Logger::Info << ">> Route initialized" << Logger::endl;
+    logger << Logger::Info << ">> Route initialized" << Logger::endl;
   }
   {
     std::string    address = options.GetValue("-h", "--hostname", std::string("127.0.0.1"));
@@ -203,15 +202,15 @@ void Server::Launch(int argc, char **argv)
 #ifdef ASYNC_SERVER
     unsigned short threads = options.GetValue("-t", "--threads",  std::thread::hardware_concurrency());
 #endif
-    Logger::instance << ">> Initializing server" << Logger::endl;
-    Logger::instance << ">> Listening on " << address << ":" << port << Logger::endl;
+    logger << ">> Initializing server" << Logger::endl;
+    logger << ">> Listening on " << address << ":" << port << Logger::endl;
 
     Server              handler;
     HttpServer::options server_options(handler); 
 
     server_options.thread_pool();
 #ifdef ASYNC_SERVER
-    Logger::instance << ">> Pool Thread Size: " << threads << Logger::endl;
+    logger << ">> Pool Thread Size: " << threads << Logger::endl;
     thread_pool     _thread_pool(threads);
     thread_pool_ptr thread_pool_ptr(&_thread_pool);
     HttpServer      server(server_options.address(address.c_str()).port(port.c_str()).thread_pool(thread_pool_ptr));
@@ -222,10 +221,10 @@ void Server::Launch(int argc, char **argv)
     signal(SIGINT, &shutdown);
     shutdown_lambda = [&server]()
     {
-      Logger::instance << Logger::Info << ">> Crails server will shut down." << Logger::endl;
-      Logger::instance << ">> Waiting for requests to end..." << Logger::endl;
+      logger << Logger::Info << ">> Crails server will shut down." << Logger::endl;
+      logger << ">> Waiting for requests to end..." << Logger::endl;
       server.stop();
-      Logger::instance << ">> Done." << Logger::endl;
+      logger << ">> Done." << Logger::endl;
     };
     server.run();
   }

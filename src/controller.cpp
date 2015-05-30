@@ -73,7 +73,7 @@ void Controller::render(const std::string& view, const std::string& layout)
     }
     else
     {
-      log << Logger::Info << "calling render view for " << view << Logger::endl;
+      logger << Logger::Info << "calling render view for " << view << Logger::endl;
       body   = render_view(view, vars);
     }
   }

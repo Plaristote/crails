@@ -5,13 +5,16 @@
 using namespace std;
 using namespace Crails;
 
-Logger Logger::instance;
-
 #ifdef ASYNC_SERVER
 # define log_prefix << '[' << std::this_thread::get_id() << "] "
 #else
 # define log_prefix
 #endif
+
+namespace Crails
+{
+  Logger logger;
+}
 
 Logger::Logger()
 {

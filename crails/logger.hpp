@@ -6,15 +6,11 @@
 # include <thread>
 # include <mutex>
 
-# define log Crails::Logger::instance
-
 namespace Crails
 {
   class Logger
   {
   public:
-    static Logger instance;
-    
     enum Symbol
     {
       Info,
@@ -53,6 +49,8 @@ namespace Crails
     std::ostream* stdout;
     std::ostream* stderr;
   };
+
+  extern Logger logger;
 }
 
 #endif
