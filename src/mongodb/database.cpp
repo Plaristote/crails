@@ -45,8 +45,8 @@ void Database::connect(void)
   if (!connected)
   {
     mongo::HostAndPort host_and_port(hostname, port);
-    std::stringstream stream;
-    std::string       err;
+    stringstream       stream;
+    string             err;
 
     stream << hostname << ':' << port;
     connection.connect(mongo::HostAndPort(hostname, port), err);
@@ -66,55 +66,35 @@ void Database::drop_all_collections(void)
   {
     connection.dropCollection(collection.get_full_name());
   });
-  refresh_collections();
 }
 
 void Database::drop_collection(const std::string& name)
 {
   connection.dropCollection(name);
-  refresh_collections();
 }
 
 void Database::refresh_collections(void)
 {
   list<string> collection_fetch = connection.getCollectionNames(name);
+  list<string>::const_iterator it  = collection_fetch.begin();
+  list<string>::const_iterator end = collection_fetch.end();
 
+  for (; it != end ; ++it)
   {
-    Collections::iterator it  = collections.begin();
-    Collections::iterator end = collections.end();
-  
-    while (it != end)
+    if (it->length() > this->name.size() + 1)
     {
-      list<string>::const_iterator match = std::find(collection_fetch.begin(), collection_fetch.end(), it->get_full_name());
-      
-      if (match != collection_fetch.end())
-        ++it;
-      else
-        it = collections.erase(it);
-    }
-  }
+      const string name  = it->substr(this->name.size() + 1);
+      auto         match = find(collections.begin(), collections.end(), name);
 
-  {
-    list<string>::const_iterator it  = collection_fetch.begin();
-    list<string>::const_iterator end = collection_fetch.end();
-
-    for (; it != end ; ++it)
-    {
-      if (it->length() > this->name.size() + 1)
-      {
-        const string name  = it->substr(this->name.size() + 1);
-        auto         match = std::find(collections.begin(), collections.end(), name);
-
-        if (match == collections.end())
-          collections.push_back(Collection(connection, *this, name));
-      }
+      if (match == collections.end())
+        collections.push_back(Collection(connection, *this, name));
     }
   }
 }
 
 Collection& Database::operator[](const string& name)
 {
-  auto it = std::find(collections.begin(), collections.end(), name);
+  auto it = find(collections.begin(), collections.end(), name);
 
   if (it == collections.end())
   {

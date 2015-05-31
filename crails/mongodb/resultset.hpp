@@ -13,15 +13,12 @@ namespace MongoDB
 {
   class Collection;
 
-  template<typename MODEL>
-  class ResultSet
+  class ResultSetBase
   {
   public:
-    ResultSet(Collection& collection, mongo::Query query) : collection(collection),
-    n_to_skip(0), n_to_return(0), query_options(0),
-    batch_size(0), fields_to_return(0), query(query)
-    {
-    }
+    unsigned int count(void);
+    void         remove(void);
+    void         remove_one(void);
 
     void set_skip(int n_to_skip)                      { this->n_to_skip        = n_to_skip;     }
     void set_limit(int n_to_return)                   { this->n_to_return      = n_to_return;   }
@@ -29,24 +26,25 @@ namespace MongoDB
     void set_query_options(int query_options)         { this->query_options    = query_options; }
     void set_batch_size(int batch_size)               { this->batch_size       = batch_size;    }
 
-    void ensure_result_fetched()
-    {
-      if (results.Null())
-        fetch();
-    }
+  protected:
+    ResultSetBase(Collection& collection, mongo::Query query);
 
-    void fetch()
-    {
-      typename std::auto_ptr<mongo::DBClientCursor> results_auto_ptr;
+    void ensure_result_fetched();
+    void fetch();
 
-      results_auto_ptr = collection.query(query,
-                                          n_to_return,
-                                          n_to_skip,
-                                          fields_to_return,
-                                          query_options,
-                                          batch_size);
-      this->results    = results_auto_ptr.get();
-      results_auto_ptr.release();
+    Collection&                          collection;
+    int                                  n_to_skip, n_to_return, query_options, batch_size;
+    mongo::BSONObj*                      fields_to_return;
+    mongo::Query                         query;
+    SmartPointer<mongo::DBClientCursor>  results;
+  };
+  
+  template<typename MODEL>
+  class ResultSet : public ResultSetBase
+  {
+  public:
+    ResultSet(Collection& collection, mongo::Query query) : ResultSetBase(collection, query)
+    {
     }
 
     static SmartPointer<ResultSet> prepare(Collection& collection, mongo::Query query = mongo::Query())
@@ -66,6 +64,7 @@ namespace MongoDB
     void each(std::function<bool (MODEL&)> functor)
     {
       ensure_result_fetched();
+      if (results.NotNull())
       {
         typename std::list<MODEL>::iterator it  = fetched.begin();
         typename std::list<MODEL>::iterator end = fetched.end();
@@ -83,42 +82,30 @@ namespace MongoDB
           model.result_set = results;
           model.initialize_fields();
           fetched.push_back(model);
-          if (!(functor(*fetched.rbegin())))
-            break ;
+          if (functor)
+          {
+            if (!(functor(*fetched.rbegin())))
+              break ;
+          }
         }
       }
+      else
+        throw MongoDB::Exception("the collection's query returned a null pointer instead of a DBCursor");
     }
-
+    
     std::list<MODEL>& entries(void)
     {
-      each([](MODEL&) -> bool { return (true); });
+      ensure_result_fetched();
+      if (results.NotNull() && results->more())
+      {
+        std::function<bool (MODEL&)> empty_functor;
+
+        each(empty_functor);
+      }
       return (fetched);
     }
 
-    unsigned int count(void)
-    {
-      if (results.Null())
-        return collection.count(query);
-      return entries().size();
-    }
-
-    void remove(void)
-    {
-      collection.remove(query, false);
-    }
-    
-    void remove_one(void)
-    {
-      collection.remove(query, true);
-    }
-
   private:
-    Collection&                          collection;
-    int                                  n_to_skip, n_to_return, query_options, batch_size;
-    mongo::BSONObj*                      fields_to_return;
-    mongo::Query                         query;
-
-    SmartPointer<mongo::DBClientCursor>  results;
     std::list<MODEL>                     fetched;
 
     std::string                          foreign_key;

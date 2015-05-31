@@ -11,7 +11,8 @@ int main(int, char**)
 {
   Runner runner;
   int    exit_status = 1;
-  
+
+  Crails::environment = "test";
   Databases::singleton::Initialize();
   Router::singleton::Initialize();
   Router::singleton::Get()->initialize();

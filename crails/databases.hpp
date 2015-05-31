@@ -67,7 +67,7 @@ namespace Crails
     Db* initialize_database(const std::string& key)
     {
       Data  settings(config_file);
-      Data  environment_settings = settings[ENVIRONMENT];
+      Data  environment_settings = settings[Crails::environment];
       TYPE* database       = new TYPE(environment_settings[key]);
       Db*   database_as_db = database;
 

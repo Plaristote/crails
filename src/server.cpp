@@ -1,5 +1,6 @@
 #include <Boots/Utils/directory.hpp>
 #include <Boots/Utils/timer.hpp>
+#include <Boots/Utils/backtrace.hpp>
 #include <crails/server.hpp>
 #include <crails/router.hpp>
 #include <crails/http_response.hpp>
@@ -7,7 +8,6 @@
 #include <crails/view.hpp>
 #include <crails/params.hpp>
 #include <crails/databases.hpp>
-#include <crails/backtrace.hpp>
 #include <iostream>
 #include <crails/request_handlers/file.hpp>
 #include <crails/logger.hpp>

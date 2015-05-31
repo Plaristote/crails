@@ -21,21 +21,18 @@ class SmartPointer
 public:
   SmartPointer(void) : pointer(nullptr)
   {
-    counter  = new unsigned int;
-    *counter = 1;
+    initialize_counter();
   }
 
   SmartPointer(T* pointer) : pointer(pointer)
   {
-    counter  = new unsigned int;
-    *counter = 1;
+    initialize_counter();
   }
 
   SmartPointer(const std::unique_ptr<T>& ptr)
   {
     pointer  = ptr.get();
-    counter  = new unsigned int;
-    *counter = 1;
+    initialize_counter();
     ptr.release();
   }
 
@@ -48,40 +45,30 @@ public:
 
   ~SmartPointer(void)
   {
-    *counter -= 1;
-    if (*counter == 0)
-    {
-      if (pointer)
-        delete pointer;
-      delete counter;
-    }
+    cleanup();
   }
 
   SmartPointer& operator=(T* n_pointer)
   {
-    *counter -= 1;
-    if (*counter == 0)
+    if (n_pointer != pointer)
     {
-      delete pointer;
-      delete counter;
+      cleanup();
+      pointer  = n_pointer;
+      counter  = new unsigned int;
+      *counter = 1;
     }
-    pointer  = n_pointer;
-    counter  = new unsigned int;
-    *counter = 1;
     return (*this);
   }
-
+  
   SmartPointer& operator=(const SmartPointer& smart_ptr)
   {
-    *counter -= 1;
-    if (*counter == 0)
+    if (smart_ptr.pointer != pointer)
     {
-      delete pointer;
-      delete counter;
+      cleanup();
+      counter   = smart_ptr.counter;
+      pointer   = smart_ptr.pointer;
+      *counter += 1;
     }
-    counter   = smart_ptr.counter;
-    pointer   = smart_ptr.pointer;
-    *counter += 1;
     return (*this);
   }
 
@@ -96,6 +83,12 @@ public:
   }
 
   T* operator->()
+  {
+    if (pointer == 0) { throw NullPointerException(); }
+    return (pointer);
+  }
+  
+  const T* operator->() const
   {
     if (pointer == 0) { throw NullPointerException(); }
     return (pointer);
@@ -116,6 +109,23 @@ public:
   T*       Pointer(void) const { return (pointer); }
 
 private:
+  void initialize_counter()
+  {
+    counter  = new unsigned int;
+    *counter = 1;
+  }
+  
+  void cleanup()
+  {
+    *counter -= 1;
+    if (*counter == 0)
+    {
+      if (pointer)
+        delete pointer;
+      delete counter;
+    }
+  }
+  
   T*            pointer;
   unsigned int* counter;
 };
