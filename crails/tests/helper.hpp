@@ -79,6 +79,7 @@ namespace Crails
         current_group.name = name;
         block();
         groups.push_back(current_group);
+        current_group.tests.clear();
         current_group.name = "";
       }
 
