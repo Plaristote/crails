@@ -2,8 +2,9 @@
 # define SMART_POINTER
 
 # include <memory>
+# include "backtrace.hpp"
 
-struct NullPointerException : public std::exception
+struct NullPointerException : public boost_ext::exception
 {
 public:
   const char* what() const throw()

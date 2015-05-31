@@ -2,7 +2,6 @@
 # define SERVER_HPP
 
 # include "file_cache.hpp"
-# include "backtrace.hpp"
 # include <Boots/Utils/dynstruct.hpp>
 # include "http_server.hpp"
 # include "request_parser.hpp"
@@ -19,20 +18,20 @@ namespace Crails
   
     Server();
     ~Server();
-    
+
     typedef std::vector<RequestParser*>  RequestParsers;
     typedef std::vector<RequestHandler*> RequestHandlers;
-    
+
     struct Crash : public boost_ext::exception
     {
       Crash(const std::string& details) : details(details) {}
-      
+
       const char* what(void) const throw()
       { return (details.c_str()); }
-      
+
       std::string details;
     };
-    
+
     void operator()(const HttpServer::request& request, Response response);
     void log(const char* to_log);
     void post_request_log(Params& params) const;

@@ -2,7 +2,7 @@
 # define EXCEPTION_CATCHER_HPP
 
 # include "http_server.hpp"
-# include "backtrace.hpp"
+# include <Boots/Utils/backtrace.hpp>
 # include <sstream>
 
 namespace Crails
