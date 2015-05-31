@@ -86,6 +86,7 @@ void Model::remove(void)
     mongo::Query query = MONGO_QUERY("_id" << id);
     
     collection.remove(query, true);
+    has_id = false;
   }
 }
 
