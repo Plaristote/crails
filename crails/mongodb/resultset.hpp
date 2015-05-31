@@ -17,7 +17,9 @@ namespace MongoDB
   class ResultSet
   {
   public:
-    ResultSet(Collection& collection, mongo::Query query) : collection(collection), query(query)
+    ResultSet(Collection& collection, mongo::Query query) : collection(collection),
+    n_to_skip(0), n_to_return(0), query_options(0),
+    batch_size(0), fields_to_return(0), query(query)
     {
     }
 
