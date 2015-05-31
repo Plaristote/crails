@@ -216,6 +216,7 @@ DataTree* DataTree::Factory::StringJSON(const std::string& filename)
 //
 // File Writer
 //
+bool DataTree::Writers::humanized_json = false;
 
 static bool isNumeric(std::string& str)
 {
@@ -305,7 +306,7 @@ static std::string appendArray(Data data, unsigned short indent)
         toWrite += appendValue(*it, indent + 2);
         ++it;
         if (it  != end)
-          toWrite += ", ";
+          toWrite += ",";
     }
     toWrite += ']';
     return (toWrite);
@@ -325,16 +326,20 @@ static std::string appendObject(Data data, unsigned short indent)
           ++it;
           continue ;
         }
-        toWrite += '\n';
-        for (unsigned short iIndent = indent + 2 ; iIndent ; --iIndent)
-            toWrite += ' ';
-        toWrite += "\"" + (*it).Key() + "\": ";
+        if (DataTree::Writers::humanized_json)
+        {
+          toWrite += '\n';
+          for (unsigned short iIndent = indent + 2 ; iIndent ; --iIndent)
+              toWrite += ' ';
+        }
+        toWrite += "\"" + (*it).Key() + "\":";
         toWrite += appendValue(*it, indent + 2);
         ++it;
         if (it  != end)
           toWrite += ',';
     }
-    toWrite += '\n';
+    if (DataTree::Writers::humanized_json)
+      toWrite += '\n';
     for (unsigned short iIndent = indent ; iIndent ; --iIndent)
         toWrite += ' ';
     toWrite += '}';

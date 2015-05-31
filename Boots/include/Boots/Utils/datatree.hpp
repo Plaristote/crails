@@ -210,8 +210,10 @@ public:
 
   struct Writers
   {
-      static bool JSON(Data, const std::string& filename);
-      static bool StringJSON(Data, std::string& str);
+    static bool JSON(Data, const std::string& filename);
+    static bool StringJSON(Data, std::string& str);
+    
+    static bool humanized_json;
   };
 
   friend struct Factory;
