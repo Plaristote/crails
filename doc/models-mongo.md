@@ -20,11 +20,10 @@ target_link_libraries(crails-app
 ```C++
 #ifndef  USER_HPP
 # define USER_HPP
-        
+
 # include <crails/mongodb/model.hpp>
-# include <crails/mongodb/resultset.hpp>
 # include <crails/password.hpp>
-        
+
 class User : public MongoDB::Model
 {
   // MONGODB_COLLECTION defines the names of the database (as specified in `conf/db.json`) and collection to use.
@@ -194,11 +193,11 @@ Has and belongs to many relationships are similar, but one of the model has to h
 
 The generated methods will be:
 ```
-  SmartPointer<ResultSet<Game> >   Player::get_games();
+  SmartPointer<Criteria<Game> >    Player::get_games();
   void                             Player::add_to_games(Game&) const;
   void                             Player::remove_from_games(Game&) const;
 
-  SmartPointer<ResultSet<Player> > Game::get_players();
+  SmartPointer<Criteria<Player> >  Game::get_players();
   void                             Game::add_to_players(const Player&);
   void                             Game::remove_from_players(const Player&);
   MongoDB::Array<mongo::OID>       Game::get_players_ids() const;
@@ -218,7 +217,7 @@ When your requirements are a bit more specific, you'll need to make your own req
   void MyController::get_by_name()
   {
     std::string         name    = params["name"];
-    SP(ResultSet<User>) results = ResultSet<User>::prepare(MONGO_QUERY("name" << name));
+    SP(Criteria<User>)  results = Criteria<User>::prepare(MONGO_QUERY("name" << name));
     std::stringstream   text;
 
     text << "Found " << results->count() << " users with name `" << name '`' << std::endl;
@@ -229,14 +228,14 @@ When your requirements are a bit more specific, you'll need to make your own req
 A simple documentation for the `mongo::Query` object is available [here](https://github.com/mongodb/mongo-cxx-driver/wiki/Tutorial#query).
 
 #### Iterating
-You may also iterate on the results using `ResultSet<T>::Each(std::function<bool(T&)>)`.
+You may also iterate on the results using `Criteria<T>::Each(std::function<bool(T&)>)`.
 
 ```C++
   void MyController::get_by_name()
   {
-    std::string         name    = params["name"];
-    SP(ResultSet<User>) results = ResultSet<User>::prepare(MONGO_QUERY("name" << name));
-    std::stringstream   text;
+    std::string        name    = params["name"];
+    SP(Criteria<User>) results = Criteria<User>::prepare(MONGO_QUERY("name" << name));
+    std::stringstream  text;
 
     results->each([&text](User& user) -> bool {
       text << "User(" << user.Id() << ") matching name" << std::endl;
@@ -252,7 +251,7 @@ You may also only fetch a subset of the results, using pagination:
 ```C++
   std::list<User> MyController::get_user_page(int page, int items_per_pages)
   {
-    SP(ResultSet<User>) results = ResultSet<User>::prepare();
+    SP(Criteria<User>) results = Criteria<User>::prepare();
 
     results->set_skip(page * items_per_pages);
     results->set_limit(items_per_pages);

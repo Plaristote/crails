@@ -111,13 +111,13 @@ The request object also contains a `Params` object that you can use to further c
   {
     it("should create an user", [this]()
     {
-      unsigned short user_count = ResultSet<User>::Query()->Count();
+      unsigned short user_count = Criteria<User>::Query()->Count();
       Crails::Tests::Request request("POST", "/users");
       
       request.params["user"]["email"] = "test@domain.com";
       request.params["user"]["password"] = "password";
       request.run();
-      EXPECT(ResultSet<User>::Query()->Count(), ==, (user_count + 1))
+      EXPECT(Criteria<User>::Query()->Count(), ==, (user_count + 1))
     });
   });
 ```

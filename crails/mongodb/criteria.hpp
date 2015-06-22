@@ -1,5 +1,5 @@
-#ifndef  MONGODB_RESULTSET_HPP
-# define MONGODB_RESULTSET_HPP
+#ifndef  MONGODB_CRITERIA_HPP
+# define MONGODB_CRITERIA_HPP
 
 # include <mongo/client/dbclient.h>
 # include <functional>
@@ -13,7 +13,7 @@ namespace MongoDB
 {
   class Collection;
 
-  class ResultSetBase
+  class CriteriaBase
   {
   public:
     unsigned int count(void);
@@ -27,7 +27,7 @@ namespace MongoDB
     void set_batch_size(int batch_size)               { this->batch_size       = batch_size;    }
 
   protected:
-    ResultSetBase(Collection& collection, mongo::Query query);
+    CriteriaBase(Collection& collection, mongo::Query query);
 
     void ensure_result_fetched();
     void fetch();
@@ -38,21 +38,21 @@ namespace MongoDB
     mongo::Query                         query;
     SmartPointer<mongo::DBClientCursor>  results;
   };
-  
+
   template<typename MODEL>
-  class ResultSet : public ResultSetBase
+  class Criteria : public CriteriaBase
   {
   public:
-    ResultSet(Collection& collection, mongo::Query query) : ResultSetBase(collection, query)
+    Criteria(Collection& collection, mongo::Query query) : CriteriaBase(collection, query)
     {
     }
 
-    static SmartPointer<ResultSet> prepare(Collection& collection, mongo::Query query = mongo::Query())
+    static SmartPointer<Criteria> prepare(Collection& collection, mongo::Query query = mongo::Query())
     {
-      return (new ResultSet(collection, query));
+      return (new Criteria(collection, query));
     }
-    
-    static SmartPointer<ResultSet> prepare(mongo::Query query = mongo::Query())
+
+    static SmartPointer<Criteria> prepare(mongo::Query query = mongo::Query())
     {
       const std::string database        = MODEL::DatabaseName();
       const std::string collection_name = MODEL::CollectionName();
@@ -66,33 +66,15 @@ namespace MongoDB
       ensure_result_fetched();
       if (results.NotNull())
       {
-        typename std::list<MODEL>::iterator it  = fetched.begin();
-        typename std::list<MODEL>::iterator end = fetched.end();
+        bool should_continue = run_for_aggregated_results(functor);
 
-        for (; it != end ; ++it)
-        {
-          if (!(functor(*it)))
-            return ;
-        }
-        while (results->more())
-        {
-          mongo::BSONObj object = results->next();
-          MODEL          model(collection, object);
-
-          model.result_set = results;
-          model.initialize_fields();
-          fetched.push_back(model);
-          if (functor)
-          {
-            if (!(functor(*fetched.rbegin())))
-              break ;
-          }
-        }
+        if (should_continue)
+          run_for_unaggregated_results(functor);
       }
       else
         throw MongoDB::Exception("the collection's query returned a null pointer instead of a DBCursor");
     }
-    
+
     std::list<MODEL>& entries(void)
     {
       ensure_result_fetched();
@@ -105,12 +87,64 @@ namespace MongoDB
       return (fetched);
     }
 
+    SP(MODEL) first(void)
+    {
+      if (fetched.size() == 0 && results->more())
+        aggregate_next_result();
+      if (fetched.size() > 0)
+        return new MODEL(*fetched.begin());
+      return NULL;
+    }
+
+    SP(MODEL) last(void)
+    {
+      if (entries().size() > 0)
+        return new MODEL(*entries().rbegin());
+      return NULL;
+    }
+
   private:
+    bool run_for_aggregated_results(std::function<bool (MODEL&)> functor)
+    {
+      typename std::list<MODEL>::iterator it  = fetched.begin();
+      typename std::list<MODEL>::iterator end = fetched.end();
+
+      for (; it != end ; ++it)
+      {
+        if (!(functor(*it)))
+          return false;
+      }
+      return true;
+    }
+
+    void run_for_unaggregated_results(std::function<bool (MODEL&)> functor)
+    {
+      while (results->more())
+      {
+        aggregate_next_result();
+        if (functor)
+        {
+          if (!(functor(*fetched.rbegin())))
+            break ;
+        }
+      }
+    }
+
+    void aggregate_next_result()
+    {
+      mongo::BSONObj object = results->next();
+      MODEL          model(collection, object);
+
+      model.result_set = results;
+      model.initialize_fields();
+      fetched.push_back(model);
+    }
+
     std::list<MODEL>                     fetched;
 
     std::string                          foreign_key;
     mongo::OID                           foreign_oid;
-  };  
+  };
 }
 
 #endif

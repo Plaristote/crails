@@ -49,7 +49,7 @@ SmartPointer<<%= classname %>> <%= classname %>::Find(const string& id_string)
     throw MongoDB::Exception(string("Invalid call to <%= classname %>::Find with OID '") + id_string + '\'');
   else
   {
-    SmartPointer<MongoDB::ResultSet<<%= classname %>> > results = MongoDB::ResultSet<<%= classname %>>::prepare(MONGO_QUERY("_id" << id));
+    SmartPointer<MongoDB::Criteria<<%= classname %>> > results = MongoDB::Criteria<<%= classname %>>::prepare(MONGO_QUERY("_id" << id));
     SmartPointer<<%= classname %>>                      result(nullptr);
 
     results->set_limit(1);
@@ -127,7 +127,7 @@ SP(<%= data[:type] %>) <%= classname %>::get_<%= data[:relation_name] %>(void) c
   std::string  association      = <%= data[:type] %>::CollectionName();
   std::string  association_name = "<%= data[:remote_field] + "_id" %>";
   mongo::Query query            = MONGO_QUERY(association_name << OID());
-  SP(MongoDB::ResultSet<<%= data[:type] %>>) results = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.get_database()[association], query);
+  SP(MongoDB::Criteria<<%= data[:type] %>>) results = MongoDB::Criteria<<%= data[:type] %>>::prepare(collection.get_database()[association], query);
 
   if (results->Count() == 0)
     return (SP(<%= data[:type] %>)());
@@ -137,26 +137,26 @@ SP(<%= data[:type] %>) <%= classname %>::get_<%= data[:relation_name] %>(void) c
 
 // has_many
 <% has_many.each do |data| %>
-SP(MongoDB::ResultSet<<%= data[:type] %>>) <%= classname %>::get_<%= data[:relation_name] %>s (void) const
+SP(MongoDB::Criteria<<%= data[:type] %>>) <%= classname %>::get_<%= data[:relation_name] %>s (void) const
 {
   std::string      association      = <%= data[:type] %>::CollectionName();
   std::string      association_name = "<%= data[:remote_field] + "_id" %>";
   mongo::Query     query            = MONGO_QUERY(association_name << OID());
-  return MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.get_database()[association], query);
+  return MongoDB::Criteria<<%= data[:type] %>>::prepare(collection.get_database()[association], query);
 }
 <% end %>
 
 // has_and_belongs_to_many
 <% has_and_belongs_to_many.each do |data| %>
 
-SP(MongoDB::ResultSet<<%= data[:type] %>>) <%= classname %>::get_<%= data[:relation_name] %>s (void) const
+SP(MongoDB::Criteria<<%= data[:type] %>>) <%= classname %>::get_<%= data[:relation_name] %>s (void) const
 {
-  SP(MongoDB::ResultSet<<%= data[:type] %>>) ptr;
+  SP(MongoDB::Criteria<<%= data[:type] %>>) ptr;
 
 <% if data[:host] == true %>
-  ptr = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.get_database()[<%= data[:type] %>::CollectionName()], BSON("_id" << BSON("$in" << get_<%= data[:relation_name] %>_ids())));
+  ptr = MongoDB::Criteria<<%= data[:type] %>>::prepare(collection.get_database()[<%= data[:type] %>::CollectionName()], BSON("_id" << BSON("$in" << get_<%= data[:relation_name] %>_ids())));
   <% else %>
-  ptr = MongoDB::ResultSet<<%= data[:type] %>>::prepare(collection.get_database()[<%= data[:type] %>::CollectionName()], BSON("<%= data[:foreign_key] %>_ids" << OID()));
+  ptr = MongoDB::Criteria<<%= data[:type] %>>::prepare(collection.get_database()[<%= data[:type] %>::CollectionName()], BSON("<%= data[:foreign_key] %>_ids" << OID()));
   <% end %>
   return (ptr);
 }

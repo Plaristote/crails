@@ -6,7 +6,6 @@
 # include "crails/session_store.hpp"
 
 # include <crails/mongodb/model.hpp>
-# include <crails/mongodb/resultset.hpp>
 
 namespace Crails
 {

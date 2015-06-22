@@ -1,36 +1,36 @@
-#include <crails/mongodb/resultset.hpp>
+#include <crails/mongodb/criteria.hpp>
 
 using namespace MongoDB;
 using namespace std;
 
-ResultSetBase::ResultSetBase(Collection& collection, mongo::Query query) : collection(collection),
+CriteriaBase::CriteriaBase(Collection& collection, mongo::Query query) : collection(collection),
 n_to_skip(0), n_to_return(0), query_options(0),
 batch_size(0), fields_to_return(0), query(query)
 {
 }
 
-unsigned int ResultSetBase::count(void)
+unsigned int CriteriaBase::count(void)
 {
   return collection.count(query);
 }
 
-void ResultSetBase::remove(void)
+void CriteriaBase::remove(void)
 {
   collection.remove(query, false);
 }
 
-void ResultSetBase::remove_one(void)
+void CriteriaBase::remove_one(void)
 {
   collection.remove(query, true);
 }
 
-void ResultSetBase::ensure_result_fetched()
+void CriteriaBase::ensure_result_fetched()
 {
   if (results.Null())
     fetch();
 }
 
-void ResultSetBase::fetch()
+void CriteriaBase::fetch()
 {
   typename std::auto_ptr<mongo::DBClientCursor> results_auto_ptr;
 

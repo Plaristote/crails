@@ -14,13 +14,13 @@
   static MongoDB::Collection& Collection() { return (MONGODB_GET_COLLECTION(#database,#collection)); }
 
 # define MONGODB_MODEL(classname) \
-  friend class MongoDB::ResultSet<classname>; \
+  friend class MongoDB::Criteria<classname>; \
   classname(Data params = Data()); \
   classname(MongoDB::Collection& collection, mongo::BSONObj bson_object); \
   classname(const classname& copy); \
   static SmartPointer<classname> Find(const std::string& id_str); \
-  static SP(MongoDB::ResultSet<classname>) Where(mongo::Query query = mongo::Query()) \
-  { return MongoDB::ResultSet<classname>::prepare(query); } \
+  static SP(MongoDB::Criteria<classname>) Where(mongo::Query query = mongo::Query()) \
+  { return MongoDB::Criteria<classname>::prepare(query); } \
   static classname Create(Data params = Data()); \
   DynStruct to_data() const; \
   void initialize_fields(void); \
@@ -40,7 +40,7 @@
   MONGODB_HAS_ONE_AS(type,remote_field,type)
 
 # define MONGODB_HAS_MANY_AS(type,remote_field,relation_name) \
-  SP(MongoDB::ResultSet<type>) get_##relation_name##s (void) const;
+  SP(MongoDB::Criteria<type>) get_##relation_name##s (void) const;
 
 # define MONGODB_HAS_MANY(type,remote_field) \
   MONGODB_HAS_MANY_AS(type,remote_field,type)
@@ -55,12 +55,12 @@
 
 # define MONGODB_HAS_AND_BELONGS_TO_MANY_HOST(type,relation_name) \
   MONGODB_FIELD(MongoDB::Array<mongo::OID>, relation_name##_ids, MongoDB::Array<mongo::OID>()) \
-  SP(MongoDB::ResultSet<type>) get_##relation_name##s (void) const; \
+  SP(MongoDB::Criteria<type>) get_##relation_name##s (void) const; \
   void add_to_##relation_name##s (const type&); \
   void remove_from_##relation_name##s (const type&);
 
 # define MONGODB_HAS_AND_BELONGS_TO_MANY(type,relation_name,foreign_name) \
-  SP(MongoDB::ResultSet<type>) get_##relation_name##s (void) const; \
+  SP(MongoDB::Criteria<type>) get_##relation_name##s (void) const; \
   void add_to_##relation_name##s (type&) const; \
   void remove_from_##relation_name##s (type&) const;
 
@@ -185,6 +185,6 @@ namespace MongoDB
   void Model::Field<mongo::OID>::initialize(const std::string& key, mongo::BSONObj bson_object, mongo::OID def);
 }
 
-# include "resultset.hpp"
+# include "criteria.hpp"
 
 #endif
