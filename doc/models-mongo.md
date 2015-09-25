@@ -208,7 +208,7 @@ Don't forget that no matter on which object you call the `add_to_...` and `remov
 
 ### Custom requests
 
-When your requirements are a bit more specific, you'll need to make your own requests. You may use helpers from the `ResulSet` template to achieve this:
+When your requirements are a bit more specific, you'll need to make your own requests. You may use helpers from the `Criteria` template to achieve this:
 
 #### Querying
 ```C++
