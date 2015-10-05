@@ -126,7 +126,12 @@ void Controller::set_content_type_from_extension(const std::string& extension)
     content_type = "text/html";
   else if (extension == "css")
     content_type = "text/css";
+  else if (extension == "json")
+    content_type = "application/json";
+  else if (extension == "js")
+    content_type = "application/javascript";
   else
+    content_type = "application/octet-stream";
   response["headers"]["Content-Type"] = content_type;
 }
 
