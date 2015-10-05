@@ -125,7 +125,6 @@ void Server::initialize_exception_catcher()
 void Server::operator()(const HttpServer::request& request, Response response)
 {
   Utils::Timer     timer;
-  Databases::singleton::Initialize();
   BuildingResponse out(response);
   Params           params;
 
@@ -134,7 +133,6 @@ void Server::operator()(const HttpServer::request& request, Response response)
     run_request_parsers(request, response, params);
     run_request_handlers(request, out, params);
   });
-  Databases::singleton::Finalize();
   params["response-time"]["crails"] = timer.GetElapsedSeconds();
   post_request_log(params);
 }

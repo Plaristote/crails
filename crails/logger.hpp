@@ -1,7 +1,6 @@
 #ifndef  CRAILS_LOGGER_HPP
 # define CRAILS_LOGGER_HPP
 
-# include <Boots/Utils/singleton.hpp>
 # include <sstream>
 # include <thread>
 # include <mutex>
@@ -22,8 +21,6 @@ namespace Crails
 
     struct Buffer
     {
-      friend class ThreadSingleton<Logger::Buffer>;
-      typedef ThreadSingleton<Logger::Buffer> singleton;
       std::stringstream stream;
       Symbol            level;
     };
@@ -38,13 +35,13 @@ namespace Crails
     template<typename T>
     Logger& operator<<(const T item)
     {
-      get_buffer()->stream << item;
+      buffer.stream << item;
       return *this;
     }
 
-    Buffer* get_buffer() const;
     void flush();
   private:
+    static thread_local Buffer buffer;
     std::mutex    mutex;
     std::ostream* stdout;
     std::ostream* stderr;

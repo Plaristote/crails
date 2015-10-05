@@ -14,6 +14,7 @@ using namespace Crails;
 namespace Crails
 {
   Logger logger;
+  thread_local Logger::Buffer Logger::buffer;
 }
 
 Logger::Logger()
@@ -36,46 +37,30 @@ void Logger::set_stdout(ostream& stream)
   mutex.unlock();
 }
 
-Logger::Buffer* Logger::get_buffer() const
-{
-  Buffer* buffer = Buffer::singleton::Get();
-  
-  if (buffer == 0)
-  {
-    Buffer::singleton::Initialize();
-    buffer = Buffer::singleton::Get();
-  }
-  return buffer;
-}
-
 void Logger::flush()
 {
-  Buffer* buffer = get_buffer();
-
   mutex.lock();
-  switch (buffer->level)
+  switch (buffer.level)
   {
     case Info:
-      *stdout log_prefix << buffer->stream.str();
+      *stdout log_prefix << buffer.stream.str();
       break ;
     default:
-      *stderr log_prefix << buffer->stream.str();
+      *stderr log_prefix << buffer.stream.str();
       break ;
   }
   mutex.unlock();
-  buffer->stream.str("");
-  buffer->stream.clear();
+  buffer.stream.str("");
+  buffer.stream.clear();
 }
 
 Logger& Logger::operator<<(Symbol level)
 {
-  Buffer* buffer = get_buffer();
-  
   if (level == endl)
     *this << "\n\r";
-  if (buffer->level != level)
+  if (buffer.level != level)
     flush();
   if (level != endl)
-    buffer->level = level;
+    buffer.level = level;
   return (*this);
 }

@@ -1,22 +1,18 @@
 #ifndef  DATABASES_HPP
 # define DATABASES_HPP
 
-# include <Boots/Utils/singleton.hpp>
 # include <Boots/Utils/datatree.hpp>
 # include <vector>
 # include "environment.hpp"
 
 # define CRAILS_DATABASE(type,database) \
-  Databases::singleton::Get()->get_database<type::Database>(database)
+  Crails::databases.get_database<type::Database>(database)
 
 namespace Crails
 {
   class Databases
   {
-    friend class ThreadSingleton<Databases>;
   public:
-    typedef ThreadSingleton<Databases> singleton;
-
     class Db
     {
       friend class Databases;
@@ -43,7 +39,6 @@ namespace Crails
       std::string message;
     };
 
-  private:
     Databases()
     {
       config_file = DataTree::Factory::JSON("config/db.json");
@@ -60,7 +55,6 @@ namespace Crails
 
     void cleanup_databases();
 
-  public:
     Db* get_database_from_name(const std::string& key);
 
     template<typename TYPE>
@@ -93,6 +87,8 @@ namespace Crails
     DataTree*              config_file;
     Dbs                    databases;
   };
+
+  extern thread_local Databases databases;
 }
 
 #endif

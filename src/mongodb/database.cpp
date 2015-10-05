@@ -10,7 +10,7 @@ Database::Database(Data settings) :
   Db(ClassType()),
   name    (settings["database"].Value()),
   hostname(settings["host"].Value()),
-  port    (settings["port"].Nil() ? 27017 : settings["port"])
+  port    (settings["port"].Nil() ? (unsigned short)27017 : (unsigned short)settings["port"])
 {
   initialize_mongo_client();
   if (settings["username"].NotNil())

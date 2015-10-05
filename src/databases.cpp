@@ -3,6 +3,8 @@
 using namespace std;
 using namespace Crails;
 
+thread_local Crails::Databases Crails::databases;
+
 Databases::Db::~Db()
 {
 }
