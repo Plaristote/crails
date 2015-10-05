@@ -6,7 +6,6 @@
 
 # include <crails/databases.hpp>
 # include <crails/shared_vars.hpp>
-# include <crails/view.hpp>
 # include <crails/params.hpp>
 # include <crails/logger.hpp>
 
@@ -60,9 +59,9 @@ namespace Crails
 
     void            redirect_to(const std::string& uri);
 
+    void            render(const std::string& view);
     void            render(RenderType type, DynStruct value);
     void            render(RenderType type, const std::string& value);
-    void            render(const std::string& view, const std::string& layout = "layouts/application");
 
     virtual bool    must_protect_from_forgery(void) const { return (true); };
 

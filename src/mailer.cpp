@@ -8,11 +8,11 @@ Mailer::Mailer(Controller& controller, const std::string& configuration) : vars(
   is_connected = false;
 }
 
-void Mailer::render(const std::string& view, const std::string& layout)
+void Mailer::render(const std::string& view)
 {
   std::string backup = controller.response["body"].Value();
 
-  controller.render(view, layout);
+  controller.render(view);
   mail.SetBody(controller.response["body"].Value());
   controller.response["body"] = backup;
 }

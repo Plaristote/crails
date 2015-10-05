@@ -2,7 +2,8 @@
 #include "crails/server.hpp"
 #include "crails/params.hpp"
 #ifdef SERVER_DEBUG
-# include <crails/view.hpp>
+# include "crails/shared_vars.hpp"
+std::string render_lib_exception_html(Crails::SharedVars&);
 #endif
 
 using namespace std;
@@ -36,14 +37,13 @@ void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, 
   if (params["backtrace"].NotNil())
     cerr << params["backtrace"].Value() << endl;
 #ifdef SERVER_DEBUG
-  View       view("../../lib/exception.html.ecpp");
   SharedVars vars;
 
   *vars["exception_name"] = &e_name;
   *vars["exception_what"] = &e_what;
   *vars["params"]         = &params;
   {
-    std::string content = view.generate(vars);
+    std::string content = render_lib_exception_html(vars);
 
     out.set_headers("Content-Type", "text/html");
     Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, content);

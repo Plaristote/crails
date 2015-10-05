@@ -52,7 +52,8 @@ include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLU
 file(GLOB crails_core
      src/*.cpp
      src/request_handlers/*.cpp
-     src/request_parsers/*.cpp)
+     src/request_parsers/*.cpp
+     src/renderers/*.cpp)
 
 file(GLOB crails_sql
      src/sql/*.cpp)
@@ -96,6 +97,7 @@ file(GLOB          headers_crails_sql crails/sql/*.hpp)
 file(GLOB          headers_crails_mdb crails/mongodb/*.hpp)
 file(GLOB          headers_crails_cki crails/session_store/*.hpp)
 file(GLOB          headers_crails_rhs crails/request_handlers/*.hpp)
+file(GLOB          headers_crails_rdr crails/renderers/*.hpp)
 file(GLOB          headers_crails_tst crails/tests/*.hpp)
 file(GLOB          scripts            scripts/*.rb)
 file(GLOB          scripts_templates  scripts/guard/templates/*.erb)
@@ -110,6 +112,7 @@ install(FILES      ${guard_plugins}       DESTINATION share/crails/guard)
 install(FILES      ${headers_crails}      DESTINATION include/crails)
 install(FILES      ${headers_crails_cki}  DESTINATION include/crails/session_store)
 install(FILES      ${headers_crails_rhs}  DESTINATION include/crails/request_handlers)
+install(FILES      ${headers_crails_rdr}  DESTINATION include/crails/renderers)
 install(FILES      ${headers_crails_tst}  DESTINATION include/crails/tests)
 install(TARGETS    crails-core${crails-suffix}    LIBRARY DESTINATION lib)
 install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)

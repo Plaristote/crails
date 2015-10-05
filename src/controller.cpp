@@ -1,5 +1,6 @@
 #include "crails/controller.hpp"
 #include "crails/router.hpp"
+#include "crails/renderer.hpp"
 #include <crails/logger.hpp>
 #include <Boots/Utils/backtrace.hpp>
 #include <Boots/Utils/directory.hpp>
@@ -57,35 +58,20 @@ bool Controller::check_csrf_token(void) const
   return (csrf_token.Value() == session["csrf_token"].Value());
 }
 
-void Controller::render(const std::string& view, const std::string& layout)
+void Controller::render(const std::string& view)
 {
-  Regex      match_ecpp("[.][^.]*[.]ecpp$");
-  Regex      match_extension("[.][^.]*$");
-  regmatch_t match;
-  string     format, body;
+  std::string format = params["headers"]["Accept"].Value();
 
-  if (!(match_ecpp.Match(view, &match, 1)))
+  for (auto it = renderers.begin() ; it != renderers.end() ; ++it)
   {
-    if (layout != "")
+    Renderer* renderer = *it;
+
+    if (renderer->can_render(format, view))
     {
-      format = view.substr(match.rm_so + 1, match.rm_eo - match.rm_so - 6);
-      body   = View::render(layout + '.' + format + ".ecpp", view, vars);
-    }
-    else
-    {
-      logger << Logger::Info << "calling render view for " << view << Logger::endl;
-      body   = render_view(view, vars);
+      renderer->render(view, params, response, vars);
+      return ;
     }
   }
-  else if (!(match_extension.Match(view, &match, 1)))
-  {
-    format = view.substr(match.rm_so + 1, match.rm_eo - match.rm_so - 1);
-    Filesystem::FileContent("app/views/" + view, body);
-  }
-  else
-    throw boost_ext::invalid_argument("Could not detect format for view `" + view + '`');
-  response["body"]                    = body;
-  set_content_type_from_extension(format);
 }
 
 void Controller::render(RenderType type, const string& value)

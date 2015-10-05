@@ -16,7 +16,7 @@ namespace Crails
     SharedVars&  vars;
     Params&      params;
 
-    void render(const std::string& view, const std::string& layout = "");
+    void render(const std::string& view);
     void send(void);
     
   private:

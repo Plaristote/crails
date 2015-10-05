@@ -1,6 +1,16 @@
 require 'guard/crails-base'
 require 'guard/crails-notifier'
 
+class String
+  def underscore
+    self.gsub(/::/, '/').
+    gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+    gsub(/([a-z\d])([A-Z])/,'\1_\2').
+    tr("-", "_").
+    downcase
+  end
+end
+
 module ::Guard
   class CrailsEcpp < CrailsPlugin
     def run_all
@@ -10,43 +20,41 @@ module ::Guard
     def run_on_modifications(paths)
       paths.each do |path|
         compile_ecpp path
-        compile_library({
-          out:  "#{path}.#{dynlib_extension}",
-          file: "#{path}.cpp"
-        })
+        compile_renderer watched_files
       end
     end
 
   private
-    def gcc_options
-      base = [ '-fPIC', '--std=c++11', '-shared', '-Wall', '-Wno-return-type-c-linkage', '-Wno-unused-private-field' ]
-      base << '-g'                        if developer_mode == true
-      base << '-undefined dynamic_lookup' if compiler == 'clang++'
-      base << '-I./app'
-      base
+    def compile_renderer watched_files
+      templates = Array.new
+
+      watched_files.each do |filename|
+        view_name, class_name, function_name = get_names filename
+         templates << { name: view_name, function: function_name }
+      end
+
+      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/html_renderer.cpp.erb").read, nil, '-'
+      code = template.result(instance_eval { binding })
+      File.open ".html_templates.cpp", 'w' do |file|
+        file.write code
+        puts ">> Generated file .html_templates.cpp"
+      end
     end
 
-    def compile_library options
-      command  = "#{compiler} #{gcc_options.join ' '} "
-      command += options[:file]
-      command += " -o #{options[:out]}"
-      output   = `#{command}`
-      puts output
-      if $?.success?
-        ">> Generated #{options[:out]}".green
-      else
-        "/!\\ Failed to generate #{options[:out]}".red
-      end
+    def get_names filename
+      view_name     = (filename.scan /(app\/views\/)?(.*)[.][a-z0-9]+[.]ecpp$/).flatten[1]
+      class_name    = (view_name.split /_|-|\b|\//).map {|w| w.strip.capitalize }.join
+      class_name    = class_name.gsub /[.\/]/, ''
+      function_name = "render_#{class_name.underscore}_html"
+      [view_name, class_name, function_name]
     end
 
     def compile_ecpp filename
       context_global = 1
       context_balise = 2
 
-      file_content = (File.open filename).read
-      view_name    = (filename.scan /(.*)[.][a-z0-9]+[.]ecpp$/).flatten.first
-      class_name   = (view_name.split /_|-|\b|\//).map {|w| w.strip.capitalize }.join
-      class_name   = class_name.gsub /[.\/]/, ''
+      file_content  = (File.open filename).read
+      view_name, class_name, function_name = get_names filename
 
       lines = file_content.split "\n"
 
@@ -151,7 +159,7 @@ module ::Guard
       code = code.gsub /\bdo([^a-zA-Z_(\[\]])/, '{\1'
       code = code.gsub /\bend([^a-zA-Z_(\[\]])/, '; }\1'
 
-      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/view.cpp.erb").read, nil, '-'
+      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/html_template.cpp.erb").read, nil, '-'
       code = template.result(instance_eval { binding })
 
       # Write source file

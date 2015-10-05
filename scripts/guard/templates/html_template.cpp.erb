@@ -31,7 +31,7 @@ private:
   <%= instance_variables.join "\n" %>
 };
 
-std::string generate_view(Crails::SharedVars& vars)
+std::string <%= function_name %>(Crails::SharedVars& vars)
 {
   <%= class_name %> view(vars);
 
