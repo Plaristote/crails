@@ -5,7 +5,7 @@
 #include <crails/router.hpp>
 #include <crails/http_response.hpp>
 #include <crails/session_store.hpp>
-#include <crails/view.hpp>
+#include <crails/renderer.hpp>
 #include <crails/params.hpp>
 #include <crails/databases.hpp>
 #include <iostream>
@@ -45,36 +45,21 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   std::stringstream file_name;
   std::stringstream view_name;
 
-  file_name << (unsigned int)(code) << ".html";
-  if (file_handler && file_handler->send_file("public/" + file_name.str(), out, code, 0))
-  {
+  file_name << (unsigned int)(code);
+  if (file_handler &&
+      file_handler->send_file("public/" + file_name.str() + ".html", out, code, 0))
     params["response-data"]["code"] = (int)code;
-    return ;
-  }
-  view_name << "errors/" << file_name.str() << ".ecpp";
+  else
   {
-    View view(view_name.str());
+    SharedVars  vars;
+    Data        response = params["response-data"];
+    std::string content_type;
 
-    if (view.is_valid())
-    {
-      SharedVars  vars;
-      View        layout("layouts/application.html.ecpp");
-      std::string content;
-
-      if (layout.is_valid())
-      {
-        std::string content_view = view.generate(vars);
-
-        *vars["yield"] = &content_view;
-        content = layout.generate(vars);
-      }
-      else
-        content = view.generate(vars);
-      out.set_headers("Content-Type", "text/html");
-      Server::SetResponse(params, out, code, content);
-      return ;
-    }
-    Server::SetResponse(params, out, code, "");
+    view_name << "errors/" << file_name.str();
+    Renderer::render(view_name.str(), params, response, vars);
+    if (response["headers"]["Content-Type"].NotNil())
+      out.set_headers("Content-Type", response["headers"]["Content-Type"].Value());
+    Server::SetResponse(params, out, code, response["body"].Value());
   }
 }
 

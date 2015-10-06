@@ -13,7 +13,7 @@ namespace Crails
     HtmlRenderer();
 
     bool can_render(const std::string& accept_header, const std::string& view) const;
-    void render(const std::string& view, Data params, Data response, SharedVars& vars) const;
+    void render_template(const std::string& view, Data params, Data response, SharedVars& vars) const;
   };
 }
 

@@ -9,11 +9,12 @@ bool HtmlRenderer::can_render(const std::string& accept_header, const std::strin
   return (false);
 }
 
-void HtmlRenderer::render(const std::string& view, Data params, Data response, SharedVars& vars) const
+void HtmlRenderer::render_template(const std::string& view, Data params, Data response, SharedVars& vars) const
 {
   auto tpl  = templates.find(view);
   std::string html_view = (*tpl).second((vars));
 
+  response["headers"]["Content-Type"] = "text/html";
   if (response["layout"].NotNil() && view != response["layout"].Value())
   {
     *(vars["yield"]) = &html_view;
