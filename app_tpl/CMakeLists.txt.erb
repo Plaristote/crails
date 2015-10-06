@@ -64,6 +64,7 @@ endif()
 <% if options[:session_store] == 'mongodb' -%>set(crails_mongodb_dep ${crails_mongodb_dep} crails-mongodb-session${crails-suffix})<% end -%>
 
 set(dependencies      crails-core${crails-suffix}
+                      crails-html${crails-suffix}
                       ${Boost_LIBRARIES}
                       pthread dl crypto ssl
                       Boots

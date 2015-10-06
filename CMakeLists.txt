@@ -64,6 +64,9 @@ file(GLOB crails_mongodb
 file(GLOB crails_mongodb_session
      src/session_store/mongodb/*.cpp)
 
+file(GLOB crails_html
+     src/renderers/html_renderer.cpp)
+
 file(GLOB crails_tests
      src/tests/*.cpp)
 
@@ -81,6 +84,7 @@ elseif(USE_MULTITHREAD)
 endif()
 
 add_library(crails-core${crails-suffix}      SHARED ${crails_core})
+add_library(crails-html${crails-suffix}      SHARED ${crails_html})
 add_library(crails-tests${crails-suffix}     SHARED ${crails_tests})
 
 if (USE_SOCI)
@@ -115,6 +119,7 @@ install(FILES      ${headers_crails_rhs}  DESTINATION include/crails/request_han
 install(FILES      ${headers_crails_rdr}  DESTINATION include/crails/renderers)
 install(FILES      ${headers_crails_tst}  DESTINATION include/crails/tests)
 install(TARGETS    crails-core${crails-suffix}    LIBRARY DESTINATION lib)
+install(TARGETS    crails-html${crails-suffix}    LIBRARY DESTINATION lib)
 install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)
 
 if (USE_SOCI)
