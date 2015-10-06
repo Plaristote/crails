@@ -3,7 +3,7 @@
 #include "crails/params.hpp"
 #ifdef SERVER_DEBUG
 # include "crails/shared_vars.hpp"
-std::string render_lib_exception_html(Crails::SharedVars&);
+# include "crails/renderer.hpp"
 #endif
 
 using namespace std;
@@ -43,10 +43,12 @@ void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, 
   *vars["exception_what"] = &e_what;
   *vars["params"]         = &params;
   {
-    std::string content = render_lib_exception_html(vars);
+    Data response = params["response-data"];
 
-    out.set_headers("Content-Type", "text/html");
-    Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, content);
+    Renderer::render("lib/exception", params, response, vars);
+    if (response["headers"]["Content-Type"].NotNil())
+      out.set_headers("Content-Type", response["headers"]["Content-Type"].Value());
+    Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, response["body"].Value());
   }
 #else
   Server::ResponseHttpError(out, Server::HttpCodes::internal_server_error, params);
