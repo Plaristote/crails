@@ -52,8 +52,7 @@ include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLU
 file(GLOB crails_core
      src/*.cpp
      src/request_handlers/*.cpp
-     src/request_parsers/*.cpp
-     src/renderers/*.cpp)
+     src/request_parsers/*.cpp)
 
 file(GLOB crails_sql
      src/sql/*.cpp)
@@ -64,8 +63,8 @@ file(GLOB crails_mongodb
 file(GLOB crails_mongodb_session
      src/session_store/mongodb/*.cpp)
 
-file(GLOB crails_html
-     src/renderers/html_renderer.cpp)
+file(GLOB crails_html src/renderers/html_renderer.cpp)
+file(GLOB crails_json src/renderers/json_renderer.cpp)
 
 file(GLOB crails_tests
      src/tests/*.cpp)
@@ -85,6 +84,7 @@ endif()
 
 add_library(crails-core${crails-suffix}      SHARED ${crails_core})
 add_library(crails-html${crails-suffix}      SHARED ${crails_html})
+add_library(crails-json${crails-suffix}      SHARED ${crails_json})
 add_library(crails-tests${crails-suffix}     SHARED ${crails_tests})
 
 if (USE_SOCI)
@@ -120,6 +120,7 @@ install(FILES      ${headers_crails_rdr}  DESTINATION include/crails/renderers)
 install(FILES      ${headers_crails_tst}  DESTINATION include/crails/tests)
 install(TARGETS    crails-core${crails-suffix}    LIBRARY DESTINATION lib)
 install(TARGETS    crails-html${crails-suffix}    LIBRARY DESTINATION lib)
+install(TARGETS    crails-json${crails-suffix}    LIBRARY DESTINATION lib)
 install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)
 
 if (USE_SOCI)

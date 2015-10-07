@@ -7,8 +7,6 @@ namespace Crails
 {
   class HtmlRenderer : public Renderer
   {
-    typedef std::string (*GenerateView)(SharedVars&);
-    typedef std::map<std::string, GenerateView> Templates;
   public:
     HtmlRenderer();
 
