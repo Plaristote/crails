@@ -16,15 +16,14 @@ public:
 
   std::string render(void)
   {
-    stream << "{";
+    stream << '{';
     <%= code %>
-    stream >> "}";
+    stream >> '}';
     return (stream.str());
   }
 
 private:
   Crails::SharedVars& vars;
-  std::stringstream   <%= out_var %>;
   <%= instance_variables.join "\n" %>
 };
 
