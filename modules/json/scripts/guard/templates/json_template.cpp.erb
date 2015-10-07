@@ -1,0 +1,37 @@
+#include <sstream>
+#include <iostream>
+#include <crails/shared_vars.hpp>
+#include <crails/renderers/json_renderer.hpp>
+<%= include_lines.join "\n" -%>
+
+using namespace std;
+
+class <%= class_name %> : private JsonTemplate
+{
+public:
+  <%= class_name %>(Crails::SharedVars& vars) : vars(vars)
+  {
+    <%= linking_lines.join "\n" %>
+  }
+
+  std::string render(void)
+  {
+    stream << "{";
+    <%= code %>
+    stream >> "}";
+    return (stream.str());
+  }
+
+private:
+  Crails::SharedVars& vars;
+  std::stringstream   <%= out_var %>;
+  <%= instance_variables.join "\n" %>
+};
+
+std::string <%= function_name %>(Crails::SharedVars& vars)
+{
+  <%= class_name %> template(vars);
+
+  return (template.render());
+}
+

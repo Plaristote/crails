@@ -18,6 +18,10 @@ namespace Crails
   class JsonTemplate
   {
   public:
+    JsonTemplate() : first_item_in_object(true)
+    {
+    }
+
     template<typename T>
     void json(const std::string& key, const T val)
     {
@@ -57,6 +61,8 @@ namespace Crails
       stream << ']';
     }
 
+  protected:
+    std::stringstream stream;
   private:
     template<typename T>
     void        add_value(const T val)
@@ -70,7 +76,6 @@ namespace Crails
     std::string javascript_escape(std::string val) const;
 
     bool first_item_in_object;
-    std::stringstream stream;
   };
 }
 
