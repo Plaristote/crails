@@ -1,7 +1,7 @@
 #ifndef  JSON_RENDERER_HPP
 # define JSON_RENDERER_HPP
 
-# include "../renderer.hpp"
+# include <crails/renderer.hpp>
 # include <functional>
 
 namespace Crails
