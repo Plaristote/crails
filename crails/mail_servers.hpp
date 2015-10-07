@@ -12,10 +12,10 @@ namespace Crails
   {
     SINGLETON(MailServers)
   public:
-    void ConfigureMailServer(const std::string& conf_name, Smtp::Server& server)
+    void ConfigureMailServer(const std::string& conf_name, Smtp::Server& server) const
     {
       auto iterator = server_confs.find(conf_name);
-      
+
       if (iterator != server_confs.end())
         iterator->second.ConnectServer(server);
     }
