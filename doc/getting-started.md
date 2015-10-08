@@ -2,16 +2,40 @@
 The first step to use the Crails Framewrok after having it installed is to use the create script to generate all
 the files your project might need.
 
-    crails create myapplication --use-mongodb
+    crails new myapplication
 
 This command creates a Crails appliatin in the directory myapplication.
 It needs to be build and run from the buid directory.
 
-You can use `crails create -h` to list the options.
+You can use `crails new -h` to list the options.
 
 # Configure a project
+## Request Pipeline
+The file `config/request_pipe.cpp` allows you to define the path that a request will follow inside the Crails server. Crails' pipeline is composed of two types of objects:
+
+   - The request parsers, collecting data from the requests headers and body.
+   - The request handlers, which have the responsability of providing a response to the request.
+
+By default, Crails comes with a number of parsers and handlers:
+
+```C++
+void Server::initialize_request_pipe()
+{
+  add_request_parser(new RequestDataParser); // parses the URI parameters (?param=value)
+  add_request_parser(new RequestFormParser); // parses a body with Content-Type application/x-www-form-urlencoded 
+  add_request_parser(new RequestJsonParser); // parses a body with Content-Type application/json
+  add_request_parser(new RequestMultipartParser); // parses a body with Content-Type multipart/form-data
+
+  add_request_handler(new FileRequestHandler);   // provides an answer using files from the /public folder
+  add_request_handler(new ActionRequestHandler); // uses the Crails::Router to redirect the query to your controllers
+}
+```
+
+You may edit `config/request_pipe.cpp` to lighten your application's pipeline, by removing features you don't want to use.
+You may also write your own request parsers, or handlers, and append them to the pipeline using this file (TODO: document creation of RequestParser/RequestHandlers).
+
 ## Databases
-The file `conf/db.json` is used to load and connect to the proper databases.
+The file `config/db.json` is used to load and connect to the proper databases.
 
 ```JSON
 {
@@ -78,8 +102,7 @@ The crailsjs task also supports coffeescript. Note that, because coffeescript re
 Feel free to mix javascript and coffeescript files as you wish: crailsjs doesn't care.
 
 # Start developing
-Guard will help you set everything up in your environment. Use the command `crails guard` to launch guard. Note that by default, the command 'crails guard' will launch a server on port 3001: you may disable this behaviour by removing the `run_on_start` option from the `crails-server` guard in the Guardfile.
-
+Guard will help you set everything up in your environment. Use the command `crails guard` to launch guard.
 Once you've launched the `crails guard` command, you'll be taken to a prompt. Here's a list of the commands you may use:
 #### crailsserver
 - will start a server on port 3001 if none is already launched
