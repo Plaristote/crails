@@ -18,21 +18,6 @@ of Crails Framework.
 
 Install Crails Framework
 ========
-MacOS
---------
-You may use a brew formula to install crails on Mac:
-
-    brew tap Plaristote/libs
-    brew install crails --HEAD # the formula is head only
-
-There are some options available for that formula:
-
-    brew install crails --HEAD --with-mongo-cxx-driver # with mongodb backend
-    brew install crails --HEAD --with-soci             # with mysql backend
-    brew install crails --HEAD --with-soci --async     # build server for multithreaded use 
-
-N.B: mongo-cxx-driver and soci support in Crails are currently broken on MacOS.
-
 Compiling
 --------
 This project was only compiled on an Archlinux. It should work fine with any unix-like OS, but there might be some
@@ -42,18 +27,21 @@ Here's a list of the dependecies:
 - ruby >= 1.9
 - cpp-netlib
 - segvcatch (optional)
-- soci (optional, used by crails-sql)
-- mongoclient (optional, used by crail-mongodb)
+- [soci](http://soci.sourceforge.net) (optional, used by crails-sql)
+- [mongo-cxx-driver](https://github.com/mongodb/mongo-cxx-driver/tree/legacy]) (optional, used by crail-mongodb)
+- [libmemcached](http://libmemcached.org) (optional, used by crails-cache)
 
 Building the Crails Framework
 --------
 To the root of the project's directory, create a build directory, go in there, and once again, type:
 
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
+    cmake ..
+    make
+    sudo make install
 
-When the developer mode is on, the Crails Framework provides a number of tools (disabled caching of views and assets, displaying exceptions as HTML response...) that you simply need while working on a Crails application. On your development machine, you would want to compile the framework with this command line:
+When the developer mode is on, the Crails Framework provides a number of tools (disabled caching of assets, using renderers to display exceptions) that you simply need while working on a Crails application. On your development machine, you would want to compile the framework with this command line:
 
-    cmake -DDEVELOPER_MODE=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make && sudo make install
+    cmake -DDEVELOPER_MODE=ON
 
 Developer and Production server do not conflict: you may want to compile the project twice, with and without the developer mode option, which would give you the ability to swap between developer and production mode simply by changing the CMAKE_BUILD_TYPE variable to Release or Debug in your project's CMakeCache.txt.
 
@@ -65,7 +53,7 @@ The installation of the Crails Framework should have added a ruby script named '
 You can use it to create application this way:
 
     crails new -h # Check out the options first (support for databases and all that)
-    crails new application_name --use-mongodb --use-mongo-session-store
+    crails new application_name
 
 By default, the project will build in developer mode, which means it'll link to the debug server. Use `crails set-env production` to link to the production libraries instead. If you want to link with the debug libraries again, use `crails set-env development`.
 
