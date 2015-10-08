@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(crails-html)
 
+include_directories(.)
+
 file(GLOB crails_html            src/html_renderer.cpp)
 file(GLOB headers_crails_html    crails/renderers/html_renderer.hpp)
 file(GLOB guard_html_plugins     scripts/guard/*.rb)
