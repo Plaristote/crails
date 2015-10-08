@@ -1,4 +1,5 @@
 require 'guard/crails-base'
+require 'erb'
 
 class String
   def underscore
@@ -42,14 +43,15 @@ module ::Guard
     end
 
     def get_names filename
-      view_name     = (filename.scan /(app\/views\/)?(.*)[.][a-z0-9]+[.]#{@extension}$/).flatten[1]
+      #                              Folder          Name|Format        Extension
+      view_name     = (filename.scan /(app\/views\/)?(.*)([.][a-z0-9]+)?[.]#{@extension}$/).flatten[1]
       class_name    = (view_name.split /_|-|\b|\//).map {|w| w.strip.capitalize }.join
       class_name    = class_name.gsub /[.\/]/, ''
       function_name = "render_#{class_name.underscore}_#{@template_type}"
       [view_name, class_name, function_name]
     end
-    
-    def write_template_to_file binding_context
+
+    def write_template_to_file filename, binding_context
       template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/#{@template_type}_template.cpp.erb").read, nil, '-'
       code = template.result(binding_context)
 
@@ -59,7 +61,7 @@ module ::Guard
         puts ">> Generated file #{filename}.cpp"
       end
     end
-    
+
     def process_lines lines
       include_lines = Array.new
       linking_lines = Array.new

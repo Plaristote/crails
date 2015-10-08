@@ -29,8 +29,8 @@ private:
 
 std::string <%= function_name %>(Crails::SharedVars& vars)
 {
-  <%= class_name %> template(vars);
+  <%= class_name %> _template(vars);
 
-  return (template.render());
+  return (_template.render());
 }
 

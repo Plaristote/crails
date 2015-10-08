@@ -10,8 +10,8 @@ group :before_compile do
     watch(%r{.+\.ecpp$})
   end
 
-  guard 'crails-ejson' do
-    watch(%r{.+\.ejson$})
+  guard 'crails-cjson' do
+    watch(%r{.+\.cjson$})
   end
 
   guard 'crails-mongodb-models' do

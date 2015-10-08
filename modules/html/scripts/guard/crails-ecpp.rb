@@ -3,12 +3,13 @@ require 'guard/crails-notifier'
 
 module ::Guard
   class CrailsEcpp < CrailsTemplatePlugin
-    def initialize
+    def initialize arg
+      super arg
       @template_type = "html"
       @extension     = "ecpp"
     end
 
-    def compile_ecpp filename
+    def compile_html filename
       context_global = 1
       context_balise = 2
 
@@ -72,7 +73,7 @@ module ::Guard
       code = code.gsub /\bdo([^a-zA-Z_(\[\]])/, '{\1'
       code = code.gsub /\bend([^a-zA-Z_(\[\]])/, '; }\1'
 
-      write_template_to_file(instance_eval { binding })
+      write_template_to_file(filename, instance_eval { binding })
     end
   end
 end

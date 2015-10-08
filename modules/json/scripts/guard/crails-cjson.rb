@@ -3,20 +3,21 @@ require 'guard/crails-notifier'
 
 module ::Guard
   class CrailsCjson < CrailsTemplatePlugin
-    def initialize
+    def initialize arg
+      super arg
       @template_type = "json"
-      @extension     = "ejson"
+      @extension     = "cjson"
     end
 
-    def compile_ecpp filename
+    def compile_json filename
       file_content  = (File.open filename).read
       view_name, class_name, function_name = get_names filename
 
       lines = file_content.split "\n"
       include_lines, linking_lines, content_lines = process_lines lines
       instance_variables, linking_lines = process_linking_lines linking_lines
-      code = process_linked_variables(contents_line.join "\n")
-      write_template_to_file(instance_eval { binding })
+      code = process_linked_variables(content_lines.join "\n")
+      write_template_to_file(filename, instance_eval { binding })
     end
   end
 end
