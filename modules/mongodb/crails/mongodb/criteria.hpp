@@ -56,7 +56,7 @@ namespace MongoDB
     {
       const std::string database        = MODEL::DatabaseName();
       const std::string collection_name = MODEL::CollectionName();
-      Collection&       collection      = Crails::databases.get_database<MongoDB::Database>(database)[collection_name];
+      Collection&       collection      = CRAILS_DATABASE(MongoDB::Database,database)(database)[collection_name];
 
       return (prepare(collection, query));
     }
