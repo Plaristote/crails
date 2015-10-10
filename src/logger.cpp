@@ -56,11 +56,14 @@ void Logger::flush()
 
 Logger& Logger::operator<<(Symbol level)
 {
-  if (level == endl)
-    *this << "\n\r";
-  if (buffer.level != level)
-    flush();
-  if (level != endl)
-    buffer.level = level;
+  if (log_level >= buffer.level)
+  {
+    if (level == endl)
+      *this << "\n\r";
+    if (buffer.level != level)
+      flush();
+    if (level != endl)
+      buffer.level = level;
+  }
   return (*this);
 }

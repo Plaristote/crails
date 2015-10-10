@@ -4,6 +4,8 @@
 
 using namespace Crails;
 
+const Logger::Symbol Logger::log_level = Info;
+
 void Server::initialize_request_pipe()
 {
   add_request_parser(new RequestDataParser);

@@ -12,7 +12,7 @@ namespace Crails
   public:
     enum Symbol
     {
-      Info,
+      Info = 0,
       Debug,
       Warning,
       Error,
@@ -35,12 +35,14 @@ namespace Crails
     template<typename T>
     Logger& operator<<(const T item)
     {
-      buffer.stream << item;
+      if (log_level >= buffer.level)
+        buffer.stream << item;
       return *this;
     }
 
     void flush();
   private:
+    static const Symbol log_level;
     static thread_local Buffer buffer;
     std::mutex    mutex;
     std::ostream* stdout;
