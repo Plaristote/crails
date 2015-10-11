@@ -4,10 +4,10 @@ add_subdirectory(Boots)
 
 project(crails_project)
 
-option(USE_MULTITHREAD "Asynchronous Server" ON)
+option(USE_MULTITHREAD "Asynchronous Server" OFF)
 option(USE_MEMCACHED   "Memcached"           ON)
 option(USE_MONGODB     "MongoDB"             ON)
-option(USE_SOCI        "Soci"                OFF)
+option(USE_SOCI        "Soci"                ON)
 option(DEVELOPER_MODE  "Developer mode"      ON)
 
 cmake_policy(SET CMP0042 OLD)

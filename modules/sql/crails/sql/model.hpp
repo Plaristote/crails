@@ -1,14 +1,17 @@
 #ifndef  SQL_MODEL_HPP
 # define SQL_MODEL_HPP
 
+# include "database.hpp"
 # include "table.hpp"
 
 # define TABLE(db_name, table_name) \
   static const std::string DatabaseName(void)   { return (#db_name);    } \
   static const std::string CollectionName(void) { return (#table_name); }  \
+  static SQL::Table        GetTable(void) { return CRAILS_DATABASE(SQL,#db_name)[#table_name]; } \
   \
-  static void DbMigrate(SQL::Database& db) \
+  static void DbMigrate() \
   { \
+    SQL::Database& db = CRAILS_DATABASE(SQL,#db_name); \
     SQL::TableDescription desc = db.Describe(#table_name); \
     std::vector<SQL::TableDescription::Field> fields = { \
       SQL::TableDescription::Field("id", "int primary key auto_increment"),
@@ -78,7 +81,7 @@ namespace SQL
       initialized      = false;
       initialize_id();
     }
-    
+
     Model(Table table, soci::row& row) : table(table)
     {
       current_field_it = 0;

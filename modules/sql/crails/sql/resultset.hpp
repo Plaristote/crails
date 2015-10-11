@@ -3,6 +3,7 @@
 
 # include "table.hpp"
 # include "include/sql.hpp"
+# include <Boots/Utils/smart_pointer.hpp>
 
 namespace SQL
 {
@@ -36,18 +37,18 @@ namespace SQL
         ++iterator;
       }
     }
-    
-    static ResultSet* Query(const std::string& query)
+
+    static SP(ResultSet) Query(const std::string& query)
     {
       const std::string database        = MODEL::DatabaseName();
       const std::string collection_name = MODEL::CollectionName();
-      SqlDb&            sqldb           = Databases::singleton::Get()->GetDb<SqlDb>(database);
+      SQL::Database&    sqldb           = CRAILS_DATABASE(SQL,database);
       Table             collection      = sqldb[collection_name];
       soci::rowset<soci::row> res = (sqldb.sql.prepare << query);
 
       return (new ResultSet<MODEL>(collection, res));
     }
-    
+
     std::list<MODEL>& Entries(void)
     {
       Each([](MODEL&) -> bool { return (true); });

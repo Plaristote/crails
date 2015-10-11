@@ -49,14 +49,7 @@ namespace SQL
       this->name = name;
     }
 
-    void             Connect(void)
-    {
-      if (!connected)
-      {
-        sql.open(factory, connect_cmd);
-        connected = true;
-      }
-    }
+    void             connect(void);
 
     Table            operator[](const std::string& name);
     TableDescription Describe(const std::string& table_name);

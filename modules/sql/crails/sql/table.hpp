@@ -17,7 +17,6 @@ namespace SQL
     template<typename MODEL>
     MODEL          Find(unsigned int id)
     {
-      std::cout << "select * from " << table_name << " where id='" << id << '\'' << std::endl;
       soci::rowset<soci::row> rs  = (sql.prepare << "select * from " << table_name << " where id='" << id << '\'');
       auto                    it  = rs.begin();
       auto                    end = rs.end();
@@ -32,7 +31,7 @@ namespace SQL
       {
         soci::row&   row = *it;
         MODEL        model(*this, row);
-        
+
         return (model);
       }
     }
@@ -42,7 +41,7 @@ namespace SQL
       std::cout << query << std::endl;
       sql << query;
     }
-    
+
     void Query(const std::string& query, int& value)
     {
       std::cout << query << std::endl;

@@ -13,12 +13,12 @@ Database::Database(Data settings) : Db(ClassType()), connected(false)
   string backend = settings["type"].Value();
 
   if (backend == "mysql")
-    InitializeForMySQL();
+    InitializeForMySQL(settings);
   else if (backend == "postgresql")
-    InitializeForPostgreSQL();
+    InitializeForPostgreSQL(settings);
   else
-    InitializeForSqlite();
-  SetDbName(settings["database"].Value());
+    InitializeForSqlite(settings);
+  name = settings["database"].Value();
 }
 
 void Database::InitializeForMySQL(Data data)
@@ -53,6 +53,15 @@ void Database::InitializeForSqlite(Data data)
     cmd = data["file"].Value();
   connect_cmd = cmd;
   factory     = "sqlite3";
+}
+
+void Database::connect(void)
+{
+  if (!connected)
+  {
+    sql.open(factory, connect_cmd);
+    connected = true;
+  }
 }
 
 Table Database::operator[](const std::string& name)

@@ -59,7 +59,7 @@ elseif(USE_MULTITHREAD)
   set(crails-suffix -multithread)
 endif()
 
-<% if options[:sql] == true -%>set(crails_sql_dep     soci_core soci_mysql crails-sql${crails-suffix})<% end -%>
+<% if options[:sql] == true -%>set(crails_sql_dep soci_core soci_mysql crails-sql${crails-suffix})<% end -%>
 <% if options[:mongodb] == true -%>set(crails_mongodb_dep mongoclient crails-mongodb${crails-suffix})<% end -%>
 <% if options[:session_store] == 'mongodb' -%>set(crails_mongodb_dep ${crails_mongodb_dep} crails-mongodb-session${crails-suffix})<% end -%>
 
