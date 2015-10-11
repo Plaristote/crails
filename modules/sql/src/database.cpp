@@ -8,7 +8,7 @@ using namespace Crails;
 /*
  * Database
  */
-Database::Database(Data settings) : Db(ClassType(), connected(false)
+Database::Database(Data settings) : Db(ClassType()), connected(false)
 {
   string backend = settings["type"].Value();
 
