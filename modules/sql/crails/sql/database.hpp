@@ -42,9 +42,7 @@ namespace SQL
   public:
     static const std::string ClassType(void) { return ("sql"); }
 
-    Database(Data settings) : Db(ClassType())
-    {
-    }
+    Database(Data settings);
 
     void             SetDbName(const std::string& name)
     {
