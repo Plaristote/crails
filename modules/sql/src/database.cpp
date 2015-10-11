@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace SQL;
+using namespace Crails;
 
 /*
  * Database

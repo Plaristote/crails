@@ -27,7 +27,7 @@ namespace SQL
         std::stringstream stream;
         
         stream << "No document of type " << table_name << " with id " << id;
-        throw Databases::Exception(stream.str());
+        throw Crails::Databases::Exception(stream.str());
       }
       {
         soci::row&   row = *it;

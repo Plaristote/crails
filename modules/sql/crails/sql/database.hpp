@@ -37,7 +37,7 @@ namespace SQL
   
   class Table;
 
-  class Database : public Databases::Db
+  class Database : public Crails::Databases::Db
   {
   public:
     static const std::string ClassType(void) { return ("sql"); }
