@@ -65,6 +65,7 @@ end
 require 'optparse'
 
 options = {
+            base_directory:      ARGV[0],
             sql:                 false,
             mongodb:             false,
             segvcatch:           false,
@@ -86,6 +87,10 @@ OptionParser.new do |opts|
     options[:session_store_class] = param[1]
     options[:mongodb] = true if param[0] == 'mongodb'
   end
+
+  opts.on('',   '--directory directory', 'set app directory (defaults to the app name)') do |param|
+    options[:base_directory] = param
+  end
 end.parse!
 
 if ARGV[0].nil?
@@ -101,7 +106,7 @@ end
 bundler_gem = bundler_gemspec.first
 bundler_bin = "#{bundler_gem.bin_dir}/#{bundler_gem.executables.first}"
 
-base_directory = ARGV[0]
+base_directory = options[:base_directory]
 
 options[:name] = (base_directory.split '/').last
 project        = ProjectModel.new
