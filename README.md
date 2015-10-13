@@ -20,16 +20,17 @@ Install Crails Framework
 ========
 Compiling
 --------
-This project was only compiled on an Archlinux. It should work fine with any unix-like OS, but there might be some
-unknown compiling issue. Please let me know if you meet any issues with building.
+This project has been compiled using `gcc 4.9`. It should support `clang` as well, though this support is not actively maintained for now.
 
 Here's a list of the dependecies:
-- ruby >= 1.9
+- ruby >= 1.9 (development only)
 - cpp-netlib
 - segvcatch (optional)
 - [soci](http://soci.sourceforge.net) (optional, used by crails-sql)
 - [mongo-cxx-driver](https://github.com/mongodb/mongo-cxx-driver/tree/legacy]) (optional, used by crail-mongodb)
 - [libmemcached](http://libmemcached.org) (optional, used by crails-cache)
+
+MacOSX users, you're out of luck (sort of): this project requires the `thread_local` feature from C++11, which Apple has removed from clang. You can still work using the `cedar14-compat` branch.
 
 Building the Crails Framework
 --------
