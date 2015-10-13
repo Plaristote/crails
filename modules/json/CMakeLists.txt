@@ -11,7 +11,7 @@ file(GLOB scripts_json_templates scripts/guard/templates/*.erb)
 
 add_library(crails-json${crails-suffix} SHARED ${crails_json})
 
-install(FILES ${header_crails_json}     DESTINATION include/crails/renderers)
+install(FILES ${headers_crails_json}    DESTINATION include/crails/renderers)
 install(FILES ${scripts_json_templates} DESTINATION share/crails/guard/templates)
 install(FILES ${guard_json_plugins}     DESTINATION share/crails/guard)
 install(TARGETS crails-json${crails-suffix} LIBRARY DESTINATION lib)

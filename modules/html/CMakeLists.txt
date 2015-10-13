@@ -11,7 +11,7 @@ file(GLOB scripts_html_templates scripts/guard/templates/*.erb)
 
 add_library(crails-html${crails-suffix} SHARED ${crails_html})
 
-install(FILES ${header_html_json}       DESTINATION include/crails/renderers)
+install(FILES ${headers_crails_html}    DESTINATION include/crails/renderers)
 install(FILES ${scripts_html_templates} DESTINATION share/crails/guard/templates)
 install(FILES ${guard_html_plugins}     DESTINATION share/crails/guard)
 install(TARGETS crails-html${crails-suffix} LIBRARY DESTINATION lib)
