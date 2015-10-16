@@ -19,7 +19,7 @@ namespace Crails
       response["headers"]["Content-Type"] = "text/html";
       if (response["layout"].NotNil() && view != response["layout"].Value())
       {
-	*(vars["yield"]) = &html_view;
+	vars["yield"] = &html_view;
 	render(response["layout"], params, response, vars);
       }
       else

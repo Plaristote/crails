@@ -39,9 +39,9 @@ void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, 
 #ifdef SERVER_DEBUG
   SharedVars vars;
 
-  *vars["exception_name"] = &e_name;
-  *vars["exception_what"] = &e_what;
-  *vars["params"]         = &params;
+  vars["exception_name"] = e_name;
+  vars["exception_what"] = e_what;
+  vars["params"]         = &params;
   {
     Data response = params["response-data"];
 
