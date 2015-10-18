@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
 #include <crails/shared_vars.hpp>
-#include <crails/renderers/json_renderer.hpp>
+#include <crails/json_template.hpp>
 <%= include_lines.join "\n" -%>
 
 using namespace std;
@@ -9,22 +9,24 @@ using namespace std;
 class <%= class_name %> : private JsonTemplate
 {
 public:
-  <%= class_name %>(Crails::SharedVars& vars) : vars(vars)
+  <%= class_name %>(Crails::SharedVars& vars) :
+    vars(vars)<%= ',' if lines[:variables_initialization].count > 0 %>
+    <%= lines[:variables_initialization].join ",\n" %>
   {
-    <%= linking_lines.join "\n" %>
   }
 
   std::string render(void)
   {
+    <%= lines[:linking_lines].join "\n" %>
     stream << '{';
     <%= code %>
-    stream >> '}';
+    stream << '}';
     return (stream.str());
   }
 
 private:
   Crails::SharedVars& vars;
-  <%= instance_variables.join "\n" %>
+  <%= lines[:instance_variables].join "\n" %>
 };
 
 std::string <%= function_name %>(Crails::SharedVars& vars)

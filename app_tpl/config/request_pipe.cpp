@@ -1,6 +1,7 @@
 #include <crails/request_handlers/file.hpp>
 #include <crails/request_handlers/action.hpp>
 #include <crails/request_parser.hpp>
+#include <crails/logger.hpp>
 
 using namespace Crails;
 

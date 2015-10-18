@@ -47,6 +47,7 @@ module ::Guard
       view_name     = (filename.scan /(app\/views\/)?(.*)([.][a-z0-9]+)?[.]#{@extension}$/).flatten[1]
       class_name    = (view_name.split /_|-|\b|\//).map {|w| w.strip.capitalize }.join
       class_name    = class_name.gsub /[.\/]/, ''
+      class_name   += @extension.capitalize
       function_name = "render_#{class_name.underscore}_#{@template_type}"
       [view_name, class_name, function_name]
     end
@@ -86,14 +87,15 @@ module ::Guard
     end
 
     def process_linked_variables code
-      #            Type      Sep Name
-      code.gsub /@([a-zA-Z_]+)\(([^)]+)\)/, '((\2)*(vars["\1"]))'
+      #            Name      Sep Type
+      code.gsub /@([a-zA-Z_]+)\(([^)]+)\)/, '(boost::any_cast<\2 >(vars["\1"]))'
     end
 
     def process_linking_lines linking_lines
       instance_variables = []
       tmp_lines = linking_lines
-      linking_lines = Array.new
+      linking_lines = []
+      variables_initialization = []
       tmp_lines.each do | line |
         if line.match /@[a-zA-Z_]+/
           type = line.scan /^([a-zA-Z0-9_]+(<[a-zA-Z_0-9]+[*&]*>){0,1}[*&]*)/
@@ -102,20 +104,26 @@ module ::Guard
             type = type.first.first
             name = name.first[1..name.first.size]
             instance_variables << "#{type} #{name};"
-            line = if not (type =~ /^SmartPointer</).nil?
-              # If the type is a SmartPointer, dereference
-              "#{name} = #{type}(*((#{type}*)*(vars[\"#{name}\"]))); // Smart Pointer"
-            elsif not (type =~ /&$/).nil?
-              # If the type is a reference, dereference
-              "#{name} = *((#{type[0...-1]}*)*(vars[\"#{name}\"])); // Reference"
+            line = if is_type_a_reference? type
+              "#{name}(*(boost::any_cast<#{type[0...-1]}*>(vars[\"#{name}\"])))"
             else
-              "#{name} = (#{type})*(vars[\"#{name}\"]);"
+              "#{name}(boost::any_cast<#{type} >(vars[\"#{name}\"]))"
             end
+            variables_initialization << line
+            next
           end
         end
         linking_lines << line
       end
-      [instance_variables, linking_lines]
+      {
+        instance_variables: instance_variables,
+        linking_lines: linking_lines,
+        variables_initialization: variables_initialization
+      }
+    end
+    
+    def is_type_a_reference? type
+      not (type =~ /&$/).nil?
     end
   end
 end

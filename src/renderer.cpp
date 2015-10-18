@@ -1,5 +1,5 @@
 #include <crails/renderer.hpp>
-
+#include <iostream>
 using namespace Crails;
 using namespace std;
 
@@ -54,7 +54,7 @@ Renderer::Context::Context(Renderer* renderer, Data params, Data response, Share
 
 Renderer::Context::~Context()
 {
-  Renderer::current_context = Renderer::Context();
+  Renderer::current_context.renderer = 0;
 }
 
 const Renderer::Context& Renderer::Context::operator=(const Context& copy)

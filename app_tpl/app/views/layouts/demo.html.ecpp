@@ -2,7 +2,7 @@
 
 using namespace Crails;
 
-Params* @params;
+Params& @params;
 string* @yield;
 // END LINKING
 

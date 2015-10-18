@@ -13,9 +13,9 @@ std::string rand_str(std::string::size_type size); // Defined in rand_str.cpp
 Controller::Controller(Params& params) : params(params), session(params.get_session())
 {
   // Set the class attributes accessible to the views
-  *vars["controller"]       = this;
-  *vars["params"]           = &params;
-  *vars["flash"]            = &flash;
+  vars["controller"] = this;
+  vars["params"]     = &params;
+  vars["flash"]      = &flash;
 
   // Initialize flash variable and reset corresponding cookie
   flash.Duplicate(session["flash"]);
