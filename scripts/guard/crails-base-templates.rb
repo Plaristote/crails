@@ -86,8 +86,8 @@ module ::Guard
     end
 
     def process_linked_variables code
-      #            Type      Sep Name
-      code.gsub /@([a-zA-Z_]+)\(([^)]+)\)/, '((\2)*(vars["\1"]))'
+      #            Name      Sep Type
+      code.gsub /@([a-zA-Z_]+)\(([^)]+)\)/, '(boost::any_cast<\2 >(vars["\1"]))'
     end
 
     def process_linking_lines linking_lines
@@ -102,15 +102,7 @@ module ::Guard
             type = type.first.first
             name = name.first[1..name.first.size]
             instance_variables << "#{type} #{name};"
-            line = if not (type =~ /^SmartPointer</).nil?
-              # If the type is a SmartPointer, dereference
-              "#{name} = #{type}(*((#{type}*)*(vars[\"#{name}\"]))); // Smart Pointer"
-            elsif not (type =~ /&$/).nil?
-              # If the type is a reference, dereference
-              "#{name} = *((#{type[0...-1]}*)*(vars[\"#{name}\"])); // Reference"
-            else
-              "#{name} = (#{type})*(vars[\"#{name}\"]);"
-            end
+            line = "#{name}(boost::any_cast<#{type} >(vars[\"#{name}\"]))"
           end
         end
         linking_lines << line

@@ -14,9 +14,10 @@ extern "C"
 class <%= class_name %>
 {
 public:
-  <%= class_name %>(Crails::SharedVars& vars) : vars(vars)
+  <%= class_name %>(Crails::SharedVars& vars) :
+    vars(vars)<%= ',' if linking_lines.count > 0) %>
+    <%= linking_line.join ",\n" %>
   {
-    <%= linking_lines.join "\n" %>
   }
 
   std::string render(void)
