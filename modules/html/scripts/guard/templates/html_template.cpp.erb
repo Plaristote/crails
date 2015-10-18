@@ -22,7 +22,7 @@ public:
 
   std::string render(void)
   {
-    <%= lines[:linking_lines].join "\n" -%>
+    <%= lines[:linking_lines].join "\n" %>
     <%= code %>
     return (<%= out_var %>.str());
   }
