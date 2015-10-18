@@ -6,17 +6,16 @@
 
 using namespace Crails;
 
-string*    @exception_name;
-string*    @exception_what;
-Params*    @params;
+string  @exception_name;
+string  @exception_what;
+Params& @params;
 // END LINKING
-<% Params   & lparams           = *params %>
-<% string     backtrace         = lparams["backtrace"].Value() %>
-<% bool       has_controller    = lparams["controller-data"].NotNil() %>
-<% string     controller_name   = lparams["controller-data"]["name"] %>
-<% string     controller_method = lparams["controller-data"]["action"] %>
-<% lparams["backtrace"].Remove() %>
-<% lparams["controller-data"].Remove() %>
+<% string     backtrace         = params["backtrace"].Value() %>
+<% bool       has_controller    = params["controller-data"].NotNil() %>
+<% string     controller_name   = params["controller-data"]["name"] %>
+<% string     controller_method = params["controller-data"]["action"] %>
+<% params["backtrace"].Remove() %>
+<% params["controller-data"].Remove() %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,7 +48,7 @@ Params*    @params;
 <% end else do %>
   <h1>Exception catched</h1>
 <% end %>
-<pre><%= *exception_what %></pre>
+<pre><%= exception_what %></pre>
 
 
 <p><code>Crails directory: <%= Directory::Current() %></code></p>
@@ -64,17 +63,17 @@ Params*    @params;
 <h2 id="request" style="margin-top: 30px">Request</h2>
 <p><b>Parameters</b>:
 <pre>
-<% if (lparams.Count() == 0) do %>
+<% if (params.Count() == 0) do %>
   This request didn't contain any parameters.
 <% end else do %>
-  <% lparams.Output(html_stream) %>
+  <% params.Output(html_stream) %>
 <% end %>
 </pre></p>
 
 <p><a href="#" onclick="document.getElementById('session_dump').style.display='block'; return false;">Show session dump</a></p>
 <div id="session_dump" style="display:none">
   <pre>
-    <% lparams.get_session().Output(html_stream) %>
+    <% params.get_session().Output(html_stream) %>
   </pre>
 </div>
 

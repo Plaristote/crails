@@ -93,7 +93,8 @@ module ::Guard
     def process_linking_lines linking_lines
       instance_variables = []
       tmp_lines = linking_lines
-      linking_lines = Array.new
+      linking_lines = []
+      variables_initialization = []
       tmp_lines.each do | line |
         if line.match /@[a-zA-Z_]+/
           type = line.scan /^([a-zA-Z0-9_]+(<[a-zA-Z_0-9]+[*&]*>){0,1}[*&]*)/
@@ -102,12 +103,26 @@ module ::Guard
             type = type.first.first
             name = name.first[1..name.first.size]
             instance_variables << "#{type} #{name};"
-            line = "#{name}(boost::any_cast<#{type} >(vars[\"#{name}\"]))"
+            line = if is_type_a_reference? type
+              "#{name}(*(boost::any_cast<#{type[0...-1]}*>(vars[\"#{name}\"])))"
+            else
+              "#{name}(boost::any_cast<#{type} >(vars[\"#{name}\"]))"
+            end
+            variables_initialization << line
+            next
           end
         end
         linking_lines << line
       end
-      [instance_variables, linking_lines]
+      {
+        instance_variables: instance_variables,
+        linking_lines: linking_lines,
+        variables_initialization: variables_initialization
+      }
+    end
+    
+    def is_type_a_reference? type
+      not (type =~ /&$/).nil?
     end
   end
 end

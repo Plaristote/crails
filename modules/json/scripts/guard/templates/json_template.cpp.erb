@@ -10,13 +10,14 @@ class <%= class_name %> : private JsonTemplate
 {
 public:
   <%= class_name %>(Crails::SharedVars& vars) :
-    vars(vars)<%= ',' if linking_lines.count > 0) %>
-    <%= linking_line.join ",\n" %>
+    vars(vars)<%= ',' if lines[:variables_initialization].count > 0 %>
+    <%= lines[:variables_initialization].join ",\n" %>
   {
   }
 
   std::string render(void)
   {
+    <%= lines[:linking_lines].join "\n" -%>
     stream << '{';
     <%= code %>
     stream >> '}';
@@ -25,7 +26,7 @@ public:
 
 private:
   Crails::SharedVars& vars;
-  <%= instance_variables.join "\n" %>
+  <%= lines[:instance_variables].join "\n" %>
 };
 
 std::string <%= function_name %>(Crails::SharedVars& vars)
