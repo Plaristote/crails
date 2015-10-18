@@ -2,10 +2,29 @@
 
 using namespace Crails;
 
-std::string JsonTemplate::javascript_escape(std::string val) const
+std::string JsonTemplate::javascript_escape(const std::string& input) const
 {
-  // TODO implement javascript_escape
-  return val;
+  std::string output;
+
+  output.reserve(input.length());
+  for (std::string::size_type i = 0; i < input.length(); ++i)
+  {
+    switch (input[i])
+    {
+      case '"':  output += "\\\""; break;
+      case '/':  output += "\\/";  break;
+      case '\b': output += "\\b";  break;
+      case '\f': output += "\\f";  break;
+      case '\n': output += "\\n";  break;
+      case '\r': output += "\\r";  break;
+      case '\t': output += "\\t";  break;
+      case '\\': output += "\\\\"; break;
+      default:
+        output += input[i];
+        break;
+    }
+  }
+  return output;
 }
 
 void JsonTemplate::add_separator()

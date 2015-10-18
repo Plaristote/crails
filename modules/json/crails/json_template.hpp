@@ -68,7 +68,7 @@ namespace Crails
     void        add_separator();
     void        add_key(const std::string& key);
     void        add_object(std::function<void()> func);
-    std::string javascript_escape(std::string val) const;
+    std::string javascript_escape(const std::string& val) const;
 
     bool first_item_in_object;
   };
