@@ -1,4 +1,5 @@
-#include "crails/mailer.hpp"
+#include <crails/mailer.hpp>
+#include <crails/renderer.hpp>
 
 using namespace std;
 using namespace Crails;
@@ -10,11 +11,11 @@ Mailer::Mailer(Controller& controller, const std::string& configuration) : vars(
 
 void Mailer::render(const std::string& view)
 {
-  std::string backup = controller.response["body"].Value();
+  DynStruct mail_params, mail_response;
 
-  controller.render(view);
-  mail.SetBody(controller.response["body"].Value());
-  controller.response["body"] = backup;
+  mail_params["headers"]["Accept"] = "text/html text/plain";
+  Renderer::render(view, mail_params, mail_response, controller.vars);
+  mail.SetBody(mail_response["body"].Value());
 }
 
 void Mailer::send(void)

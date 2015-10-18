@@ -26,5 +26,5 @@ namespace Crails
     bool         is_connected;
   };
 }
-  
+
 #endif
