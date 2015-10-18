@@ -12,7 +12,7 @@ bool HtmlRenderer::can_render(const std::string& accept_header, const std::strin
 void HtmlRenderer::render_template(const std::string& view, Data params, Data response, SharedVars& vars) const
 {
   auto tpl  = templates.find(view);
-  std::string html_view = (*tpl).second((vars));
+  std::string html_view = (*tpl).second(this, vars);
 
   response["headers"]["Content-Type"] = "text/html";
   if (response["layout"].NotNil() && view != response["layout"].Value())

@@ -9,8 +9,8 @@ using namespace std;
 class <%= class_name %> : public Crails::JsonTemplate
 {
 public:
-  <%= class_name %>(Crails::SharedVars& vars) :
-    vars(vars)<%= ',' if lines[:variables_initialization].count > 0 %>
+  <%= class_name %>(const Crails::Renderer* renderer, Crails::SharedVars& vars) :
+    JsonTemplate(renderer, vars)<%= ',' if lines[:variables_initialization].count > 0 %>
     <%= lines[:variables_initialization].join ",\n" %>
   {
   }
@@ -25,13 +25,12 @@ public:
   }
 
 private:
-  Crails::SharedVars& vars;
   <%= lines[:instance_variables].join "\n" %>
 };
 
-std::string <%= function_name %>(Crails::SharedVars& vars)
+std::string <%= function_name %>(const Crails::Renderer* renderer, Crails::SharedVars& vars)
 {
-  <%= class_name %> _template(vars);
+  <%= class_name %> _template(renderer, vars);
 
   return (_template.render());
 }

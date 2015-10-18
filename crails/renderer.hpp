@@ -3,27 +3,25 @@
 
 # include <map>
 # include <Boots/Utils/datatree.hpp>
+# include <Boots/Utils/backtrace.hpp>
 # include "shared_vars.hpp"
 
 namespace Crails
 {
+  struct MissingTemplate : public boost_ext::exception
+  {
+    MissingTemplate(const std::string& name) : name(name) {}
+    const char* what() const throw() { return std::string("Template not found: '" + name + "'").c_str(); }
+    std::string name;
+  };
+
+  class Template;
+  
   class Renderer
   {
-    struct Context
-    {
-      Context() : renderer(0), vars(0) {}
-      Context(Renderer* renderer, Data params, Data response, SharedVars& vars);
-      ~Context();
-
-      const Context& operator=(const Context& copy);
-
-      Renderer*   renderer;
-      Data        params, response;
-      SharedVars* vars;
-    };
-
+    friend class Template;
   protected:
-    typedef std::string (*Generator)(SharedVars&);
+    typedef std::string (*Generator)(const Renderer*, SharedVars&);
     typedef std::map<std::string, Generator> Templates;
 
   public:
@@ -39,7 +37,6 @@ namespace Crails
 
   protected:
     Templates templates;
-    static thread_local Context current_context;
   };
 
   extern std::list<Renderer*> renderers;

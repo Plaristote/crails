@@ -4,7 +4,7 @@ using namespace Crails;
 using namespace std;
 
 <% templates.each do |template| -%>
-string <%= template[:function] %>(SharedVars&);
+string <%= template[:function] %>(const Renderer*, SharedVars&);
 <% end -%>
 
 JsonRenderer::JsonRenderer()

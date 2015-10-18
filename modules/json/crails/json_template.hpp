@@ -4,13 +4,16 @@
 # include <functional>
 # include <sstream>
 # include <string>
+# include <crails/template.hpp>
 
 namespace Crails
 {
-  class JsonTemplate
+  class JsonTemplate : public Template
   {
   public:
-    JsonTemplate() : first_item_in_object(true)
+    JsonTemplate(const Renderer* renderer, SharedVars& vars) : 
+      Template(renderer, vars),
+      first_item_in_object(true)
     {
     }
 

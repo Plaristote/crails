@@ -1,21 +1,16 @@
 #include <sstream>
 #include <iostream>
 #include <crails/shared_vars.hpp>
+#include <crails/template.hpp>
 <%= include_lines.join "\n" -%>
 
 using namespace std;
 
-extern "C"
-{
-  std::string generate_view(Crails::SharedVars&);
-  std::string render_view(const std::string& name, Crails::SharedVars&);
-}
-
-class <%= class_name %>
+class <%= class_name %> : public Crails::Template
 {
 public:
-  <%= class_name %>(Crails::SharedVars& vars) :
-    vars(vars)<%= ',' if lines[:variables_initialization].count > 0 %>
+  <%= class_name %>(const Crails::Renderer* renderer, Crails::SharedVars& vars) :
+    Template(renderer, vars)<%= ',' if lines[:variables_initialization].count > 0 %>
     <%= lines[:variables_initialization].join ",\n" %>
   {
   }
@@ -28,7 +23,6 @@ public:
   }
 
 private:
-  Crails::SharedVars& vars;
   std::stringstream   <%= out_var %>;
   <%= lines[:instance_variables].join "\n" %>
 };

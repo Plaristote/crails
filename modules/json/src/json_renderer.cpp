@@ -12,7 +12,7 @@ bool JsonRenderer::can_render(const std::string& accept_header, const std::strin
 void JsonRenderer::render_template(const std::string& view, Data params, Data response, SharedVars& vars) const
 {
   auto tpl = templates.find(view);
-  std::string json_view = (*tpl).second((vars));
+  std::string json_view = (*tpl).second(this, vars);
 
   response["headers"]["Content-Type"] = "application/json";
   response["body"] = json_view;
