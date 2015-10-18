@@ -27,7 +27,7 @@ Here's a list of the dependecies:
 - cpp-netlib
 - segvcatch (optional)
 - [soci](http://soci.sourceforge.net) (optional, used by crails-sql)
-- [mongo-cxx-driver](https://github.com/mongodb/mongo-cxx-driver/tree/legacy]) (optional, used by crail-mongodb)
+- [mongo-cxx-driver](https://github.com/mongodb/mongo-cxx-driver/tree/legacy) (optional, used by crail-mongodb)
 - [libmemcached](http://libmemcached.org) (optional, used by crails-cache)
 
 MacOSX users, you're out of luck (sort of): this project requires the `thread_local` feature from C++11, which Apple has removed from clang. You can still work using the `cedar14-compat` branch.
