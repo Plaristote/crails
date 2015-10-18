@@ -32,6 +32,12 @@ void JsonTemplate::add_object(std::function<void()> func)
 namespace Crails
 {
   template<>
+  void JsonTemplate::add_value<const char*>(const char* val)
+  {
+    stream << '"' << javascript_escape(val) << '"';
+  }
+
+  template<>
   void JsonTemplate::add_value<std::string>(const std::string val)
   {
     stream << '"' << javascript_escape(val) << '"';

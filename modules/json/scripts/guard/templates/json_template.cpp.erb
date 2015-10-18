@@ -17,10 +17,10 @@ public:
 
   std::string render(void)
   {
-    <%= lines[:linking_lines].join "\n" -%>
+    <%= lines[:linking_lines].join "\n" %>
     stream << '{';
     <%= code %>
-    stream >> '}';
+    stream << '}';
     return (stream.str());
   }
 
