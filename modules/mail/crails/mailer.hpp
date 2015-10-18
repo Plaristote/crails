@@ -2,7 +2,7 @@
 # define MAILER_HPP
 
 # include "mail_servers.hpp"
-# include "controller.hpp"
+# include <crails/controller.hpp>
 
 namespace Crails
 {
