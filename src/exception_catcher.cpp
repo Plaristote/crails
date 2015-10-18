@@ -1,6 +1,7 @@
 #include "crails/exception_catcher.hpp"
 #include "crails/server.hpp"
 #include "crails/params.hpp"
+#include "crails/logger.hpp"
 #ifdef SERVER_DEBUG
 # include "crails/shared_vars.hpp"
 # include "crails/renderer.hpp"
@@ -33,9 +34,9 @@ void ExceptionCatcher::run(BuildingResponse& out, Params& params, std::function<
 
 void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, string e_what, Params& params)
 {
-  cerr << "# Catched exception " << e_name << ": " << e_what << endl;
+  logger << Logger::Error << "# Catched exception " << e_name << ": " << e_what << Logger::endl;
   if (params["backtrace"].NotNil())
-    cerr << params["backtrace"].Value() << endl;
+    logger << params["backtrace"].Value() << Logger::endl;
 #ifdef SERVER_DEBUG
   SharedVars vars;
 
