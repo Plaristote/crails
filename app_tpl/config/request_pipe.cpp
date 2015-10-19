@@ -1,11 +1,8 @@
 #include <crails/request_handlers/file.hpp>
 #include <crails/request_handlers/action.hpp>
 #include <crails/request_parser.hpp>
-#include <crails/logger.hpp>
 
 using namespace Crails;
-
-const Logger::Symbol Logger::log_level = Info;
 
 void Server::initialize_request_pipe()
 {

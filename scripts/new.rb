@@ -84,6 +84,7 @@ project.base_directory source, base_directory do
   end
   project.directory :config do
     project.file 'db.json'
+    project.file 'logger.cpp'
     project.file 'request_pipe.cpp'
     project.file 'renderers.cpp'
     project.generate_erb 'salt.cpp',          'salt.cpp.erb',          options
