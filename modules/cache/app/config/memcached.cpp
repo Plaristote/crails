@@ -1,3 +1,3 @@
-#include "../lib/memcache.hpp"
+#include <crails/memcached.hpp>
 
 const std::string Cache::config = "--SERVER=memcached";
