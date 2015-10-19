@@ -1,0 +1,20 @@
+{
+  "production": {
+    "mongodb": {
+      "host": "127.0.0.1",
+      "database": "crails_db"
+    }
+  },
+  "development": {
+    "mongodb": {
+      "host": "127.0.0.1",
+      "database": "crails_db_dev"
+    }
+  },
+  "test": {
+    "mongodb": {
+      "host": "127.0.0.1",
+      "database": "crails_db_test"
+    }
+  }
+}
