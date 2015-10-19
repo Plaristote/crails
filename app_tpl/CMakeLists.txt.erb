@@ -73,5 +73,7 @@ set(dependencies      crails-core${crails-suffix}
                       <% if options[:sql]       == true %> ${crails_sql_dep} <% end %>
                       <% if options[:mongodb]   == true %> ${crails_mongodb_dep} <% end %>)
 
+<%= CMAKE_CUSTOM_DEPENDENCIES_HEADER %>
+
 target_link_libraries(server ${dependencies})
 target_link_libraries(tests  ${dependencies} crails-tests${crails-suffix})

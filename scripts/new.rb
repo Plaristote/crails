@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require "#{ENV['CRAILS_SHARED_DIR']}/scripts/lib/project_model"
+require "#{ENV['CRAILS_SHARED_DIR']}/scripts/lib/cmakelists"
 
 ##
 ## Command Line Options management
@@ -83,7 +84,6 @@ project.base_directory source, base_directory do
   end
   project.directory :config do
     project.file 'db.json'
-    project.file 'mailers.json'
     project.file 'request_pipe.cpp'
     project.file 'renderers.cpp'
     project.generate_erb 'salt.cpp',          'salt.cpp.erb',          options
