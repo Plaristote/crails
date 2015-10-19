@@ -14,14 +14,23 @@ if source.nil?
 end
 
 if source.nil?
-  puts "Missing crails shared directory. Please check your installation."
+  puts "Missing crails shared directory. Please check your installation, or manually set the environemnt variable CRAILS_SHARED_DIR."
   exit 1
 else
   ENV['CRAILS_SHARED_DIR'] = source
 end
 
 command      = ARGV[0]
-command_args = ARGV[1..ARGV.count]
+command_args = ARGV[1..-1].join ' ' rescue ''
+
+if command.nil?
+  puts 'Available commands:'
+  Dir["#{ENV['CRAILS_SHARED_DIR']}/scripts/*.rb"].each do |cmd|
+    cmd_name = cmd.scan(/([^\/]+)[.]rb$/).flatten.first
+    puts " - #{cmd_name}"
+  end
+  exit 0
+end
 
 unless command == 'new'
   require 'fileutils'
@@ -35,6 +44,4 @@ unless command == 'new'
   end
 end
 
-puts "Executing Crails script in #{Dir.pwd}"
-
-system "ruby #{source}/scripts/#{command}.rb #{command_args.join ' '}"
+system "ruby #{source}/scripts/#{command}.rb #{command_args}"
