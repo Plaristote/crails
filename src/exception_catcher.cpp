@@ -34,9 +34,10 @@ void ExceptionCatcher::run(BuildingResponse& out, Params& params, std::function<
 
 void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, string e_what, Params& params)
 {
-  logger << Logger::Error << "# Catched exception " << e_name << ": " << e_what << Logger::endl;
+  logger << Logger::Error << "# Catched exception " << e_name << ": " << e_what;
   if (params["backtrace"].NotNil())
-    logger << params["backtrace"].Value() << Logger::endl;
+    logger << "\n" << params["backtrace"].Value();
+  logger << Logger::endl;
 #ifdef SERVER_DEBUG
   SharedVars vars;
 
@@ -46,7 +47,18 @@ void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, 
   {
     Data response = params["response-data"];
 
-    Renderer::render("lib/exception", params, response, vars);
+    try {
+      Renderer::render("lib/exception", params, response, vars);
+    }
+    catch (MissingTemplate exception) {
+      logger << Logger::Warning
+        << "# Template lib/exception not found for format "
+        << params["headers"]["Accept"].Value()
+        << Logger::endl;
+    }
+    catch (...) {
+      logger << Logger::Error << "# Template lib/exception crashed" << Logger::endl;
+    }
     if (response["headers"]["Content-Type"].NotNil())
       out.set_headers("Content-Type", response["headers"]["Content-Type"].Value());
     Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, response["body"].Value());
