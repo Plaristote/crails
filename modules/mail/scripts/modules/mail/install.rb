@@ -21,3 +21,4 @@ main_cpp = MainCppEditor.new
 main_cpp.add_include     "crails/mail_servers.hpp"
 main_cpp.add_initializer "MailServers::singleton::Initialize();"
 main_cpp.add_finalizer   "MailServers::singleton::Finalize();"
+main_cpp.write

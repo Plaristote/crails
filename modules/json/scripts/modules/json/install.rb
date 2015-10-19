@@ -24,3 +24,12 @@ CMakeLists.add_crails_module 'json'
 renderers_cpp = RenderersCppEditor.new
 renderers_cpp.add_include 'crails/renderers/json_renderer.hpp'
 renderers_cpp.add_initializer 'renderers.push_back(new JsonRenderer);'
+renderers_cpp.write
+
+guardfile = GuardfileEditor.new
+guardfile.add_task 'before_compile', <<RUBY
+  guard 'crails-cjson' do
+    watch(%r{.+\.cjson$})
+  end
+RUBY
+guardfile.write

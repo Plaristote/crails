@@ -24,3 +24,12 @@ CMakeLists.add_crails_module 'html'
 renderers_cpp = RenderersCppEditor.new
 renderers_cpp.add_include 'crails/renderers/html_renderer.hpp'
 renderers_cpp.add_initializer 'renderers.push_back(new HtmlRenderer);'
+renderers_cpp.write
+
+guardfile = GuardfileEditor.new
+guardfile.add_task 'before_compile', <<RUBY
+  guard 'crails-ecpp' do
+    watch(%r{.+\.ecpp$})
+  end
+RUBY
+guardfile.write

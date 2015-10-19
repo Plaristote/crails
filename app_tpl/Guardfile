@@ -6,14 +6,6 @@ group :assets do
 end
 
 group :before_compile do
-  guard 'crails-ecpp' do
-    watch(%r{.+\.ecpp$})
-  end
-
-  guard 'crails-cjson' do
-    watch(%r{.+\.cjson$})
-  end
-
   guard 'crails-mongodb-models' do
     watch(%r{^app/models/.+\.h(pp)?$})
   end

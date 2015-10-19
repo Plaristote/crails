@@ -2,6 +2,17 @@ MAINCPP_INITIALIZER_HEADER = "// Initializers"
 MAINCPP_FINALIZER_HEADER   = "// Finalizers"
 
 class SourceEditor
+  def initialize
+    @content = File.read @source_file
+  end
+
+  def write
+    File.open(@source_file, 'w') do |file|
+      file.write @content
+    end
+    puts "\033[32m[EDITED]\033[0m " + "File #{@source_file}"
+  end
+  
   def add_initializer line
     append_to @initializer_header, "  #{line}"
   end
@@ -18,14 +29,10 @@ class SourceEditor
   end
 private
   def append_to header, str
-    content = File.read @source_file
-    content.gsub!(
+    @content.gsub!(
       header,
       "#{header}\n#{str}"
     )
-    File.open(@source_file, 'w') do |file|
-      file.write content
-    end
   end
 end
 
@@ -35,6 +42,7 @@ class MainCppEditor < SourceEditor
     @finalizer_header   = "// Finalizers"
     @source_file        = "app/main.cpp"
     @known_header       = "crails/server.hpp"
+    super
   end
 end
 
@@ -43,5 +51,18 @@ class RenderersCppEditor < SourceEditor
     @initializer_header = "// Append renderers"
     @source_file        = "config/renderers.cpp"
     @known_header       = "crails/renderer.hpp"
+    super
+  end
+end
+
+class GuardfileEditor < SourceEditor
+  def initialize
+    @source_file = "Guardfile"
+    super
+  end
+
+  def add_task task_name, code
+    @initializer_header = "group :#{task_name} do"
+    add_initializer code
   end
 end
