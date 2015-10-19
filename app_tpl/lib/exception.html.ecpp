@@ -10,12 +10,12 @@ string  @exception_name;
 string  @exception_what;
 Params& @params;
 // END LINKING
-<% string     backtrace         = params["backtrace"].Value() %>
-<% bool       has_controller    = params["controller-data"].NotNil() %>
-<% string     controller_name   = params["controller-data"]["name"] %>
-<% string     controller_method = params["controller-data"]["action"] %>
-<% params["backtrace"].Remove() %>
-<% params["controller-data"].Remove() %>
+<% string     backtrace         = params["backtrace"].Value() -%>
+<% bool       has_controller    = params["controller-data"].NotNil() -%>
+<% string     controller_name   = params["controller-data"]["name"] -%>
+<% string     controller_method = params["controller-data"]["action"] -%>
+<% params["backtrace"].Remove() -%>
+<% params["controller-data"].Remove() -%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,11 +43,11 @@ Params& @params;
 </head>
 <body>
 
-<% if (has_controller == true) do %>
+<% if (has_controller == true) do -%>
   <h1>Exception catched in <%= controller_name %>::<%= controller_method %></h1>
-<% end else do %>
+<% end else do -%>
   <h1>Exception catched</h1>
-<% end %>
+<% end -%>
 <pre><%= exception_what %></pre>
 
 
@@ -63,11 +63,11 @@ Params& @params;
 <h2 id="request" style="margin-top: 30px">Request</h2>
 <p><b>Parameters</b>:
 <pre>
-<% if (params.Count() == 0) do %>
+<% if (params.Count() == 0) do -%>
   This request didn't contain any parameters.
-<% end else do %>
+<% end else do -%>
   <% params.Output(html_stream) %>
-<% end %>
+<% end -%>
 </pre></p>
 
 <p><a href="#" onclick="document.getElementById('session_dump').style.display='block'; return false;">Show session dump</a></p>

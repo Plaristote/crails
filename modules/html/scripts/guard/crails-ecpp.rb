@@ -23,6 +23,7 @@ module ::Guard
       i        = 0
       context  = context_global
       out_var  = "html_stream"
+      ignore_next_line_return = false
 
       code = "#{out_var} << \""
 
@@ -40,14 +41,20 @@ module ::Guard
             context = context_balise
             i    += 2
           elsif contents[i] == "\n"
-            code += "\\n"
+            code += "\\n" unless ignore_next_line_return
             i    += 1
+            ignore_next_line_return = false
           else
             code += contents[i]
             i    += 1
           end
         elsif context == context_balise
-          if contents[i..i+1] == '%>'
+          if contents[i..i+2] == '-%>'
+            code   += ";\n#{out_var} << \""
+            context = context_global
+            i      += 3
+            ignore_next_line_return = true
+          elsif contents[i..i+1] == '%>'
             code   += ";\n#{out_var} << \""
             context = context_global
             i      += 2
