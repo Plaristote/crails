@@ -37,8 +37,9 @@ class ProjectModel
   def generate_erb target, source, options
     path = "#{@template_path}/#{source}"
     tpl  = ERB.new (File.new path).read, nil, '-'
+    options[:binding] ||= binding
     File.open target, 'w' do | f |
-      f.write (tpl.result binding)
+      f.write (tpl.result options[:binding])
     end
     puts "\033[32m[GENERATED]\033[0m " + "File #{target}"
   end

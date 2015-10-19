@@ -31,18 +31,13 @@ file(GLOB_RECURSE crails_app
      app/models/*.cpp
      app/views/*.cpp
      app/routes.cpp
-     lib/models/*.cpp
-     config/request_pipe.cpp
-     config/renderers.cpp
-     config/salt.cpp
-     config/session_store.cpp
-     .*.cpp)
+     config/*.cpp
+     lib/*.cpp)
 
 file(GLOB_RECURSE server_files
      app/main.cpp)
 
 file(GLOB_RECURSE tests_files
-     spec/**/*.cpp
      spec/*.cpp)
 
 add_library(crails-app OBJECT ${crails_app})

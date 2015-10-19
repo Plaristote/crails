@@ -35,7 +35,7 @@ module ::Guard
 
       template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/#{@template_type}_renderer.cpp.erb").read, nil, '-'
       code = template.result(instance_eval { binding })
-      filename = ".#{@template_type}_templates.cpp"
+      filename = "lib/renderers/#{@template_type}.cpp"
       File.open filename, 'w' do |file|
         file.write code
         puts ">> Generated file #{filename}"
