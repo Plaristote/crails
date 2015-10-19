@@ -1,4 +1,3 @@
-#include <iostream>
 #include <crails/server.hpp>
 #include <crails/databases.hpp>
 #include <crails/mail_servers.hpp>
@@ -8,8 +7,12 @@ using namespace Crails;
 
 int main(int argc, char **argv)
 {
-  MailServers::singleton::Initialize();
+  // Initializers
+
+  // Application loop
   Server::Launch(argc, argv);
-  MailServers::singleton::Finalize();
+
+  // Finalizers
+
   return (0);
 }
