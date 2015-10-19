@@ -1,6 +1,5 @@
 #include <crails/server.hpp>
 #include <crails/databases.hpp>
-#include <crails/mail_servers.hpp>
 
 using namespace std;
 using namespace Crails;
