@@ -100,6 +100,7 @@ install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)
 
 add_subdirectory(modules/html)
 add_subdirectory(modules/json)
+add_subdirectory(modules/mail)
 
 if (USE_MEMCACHED)
   add_subdirectory(modules/cache)
