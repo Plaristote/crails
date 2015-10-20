@@ -1,20 +1,16 @@
 Crails
 ======
+Crails Framework is an MVC web development framework aiming to bring a Rails-like experience to C++
+developers. Despite being inspired by Ruby on Rails, it is much lighter and simpler.
 
-The Crails Framework for C++ MVC development of web applications.
-
-WARNING: Ths is still under heavy development. You wouldn't want to use this for any seious work right now,
-it's still quite into the experimenting stage.
-
-What is Crails Framework
-======
-Crails Framework is an MVC web development framework aiming to bring the joy of a Rails-like experience to C++
-developers.
-It's a cpp-netlib based HTTP server using a routing system, MVC design, C++-compiled views templates, asset
+It's a cpp-netlib based HTTP server using a routing system, MVC design, C++-compiled templates, asset
 precompilation and database abstraction.
 
-Tutorials and samples of code will be made available at some point in the futur to intoduce you to the capabilities
-of Crails Framework.
+Crails is modular, and comes by default with a bunch of modules:
+- With crails-html and crails-json, you have the ability to write templates that are then compiled into C++
+- With crails-mongodb and crails-sql, you get an object oriented database abstraction
+- With crails-cache, you get a simple API to handle your caching using memcached
+- With crails-mail, you get the ability to easily render and send mails
 
 Install Crails Framework
 ========
@@ -48,16 +44,47 @@ Developer and Production server do not conflict: you may want to compile the pro
 
 There are two types of server available: aysnchronous and synchronous. To compile one or the other, use the `-DUSE_MULTITHREAD=[ON|OFF]` option with cmake.
 
-Creating a Crails Application
-========
-The installation of the Crails Framework should have added a ruby script named 'crails' in your bin directory.
-You can use it to create application this way:
+If you want to swap between environments, make sure you have installed every flavour of Crails that you are going to use.
 
-    crails new -h # Check out the options first (support for databases and all that)
-    crails new application_name
+Walkthrough
+=======
+The Crails Framework comes with the `crails` command, which is a Ruby toolset giving you a large set of commands to create and manage your application.
+The first step you'll have to go through is the creation of your application:
 
-By default, the project will build in developer mode, which means it'll link to the debug server. Use `crails set-env production` to link to the production libraries instead. If you want to link with the debug libraries again, use `crails set-env development`.
+    crails new my_crails_app
 
-You can switch between multithreaded and single threaded environment as well with the commands `crails set-env multithread` and `crails set-env synchronous`.
+This will generate all the necessary files in the folder `./my_crails_app`.
+Once you've done that, the next thing you should do is pick which modules from crails you are going to be using. To do that, use the `crails module` command.
 
-Now that your crails application is ready, check out the [COOKBOOK](COOKBOOK.md) to see all the neat things you can do with it !
+    cd my_crails_app
+    crails module # lists the available modules
+    crails module html install
+    crails module mongodb install
+
+At any point, you may also change some of the framework internal settings, using `crails set-env`:
+
+    # disable development mode, and use a thread pool to handle HTTP requests
+    crails set-env production
+    crails set-env multithread
+    # enable development mode, and use a single thread to handle HTTP requests
+    crails set-env development
+    crails set-env synchronous
+
+Once your application is created and configured, you may launch the `crails guard` tool. It has several applications:
+  - The task `assets` compiles your javascript and stylesheet assets;
+  - The task `before_compile` generates code for modules that need it (crails-html, crails-json, ...);
+  - The task `compile` compiles your code and run the tests;
+  - It watches your files to automatically re-run the tasks when needed;
+
+Here's how you'd use `crails guard`:
+
+    crails guard # launches the guard shell
+    guard> assets
+    guard> before_compile
+    guard> compile
+
+Now that everything is ready, you may launch your server using the `crails server` command:
+
+    crails server -p 8080 -h 0.0.0.0
+
+Note that `crails server` binds to port 3001 and host 127.0.0.1 by default.
