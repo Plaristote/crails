@@ -40,7 +40,7 @@
   MONGODB_HAS_ONE_AS(type,remote_field,type)
 
 # define MONGODB_HAS_MANY_AS(type,remote_field,relation_name) \
-  SP(MongoDB::Criteria<type>) get_##relation_name##s (void) const;
+  SP(MongoDB::HasMany<type>) get_##relation_name##s (void) const;
 
 # define MONGODB_HAS_MANY(type,remote_field) \
   MONGODB_HAS_MANY_AS(type,remote_field,type)
@@ -93,6 +93,7 @@ namespace MongoDB
     virtual void       initialize_fields(void);
 
     void               set_owner_id(const std::string& relation_name, const std::string& id_string);
+    void               set_foreign_id(const std::string& foreign_key, const mongo::OID id);
     void               force_update(void)
     {
       std::for_each(fields.begin(), fields.end(), [](IField* field) { field->ForceUpdate(); });

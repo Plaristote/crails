@@ -137,12 +137,11 @@ SP(<%= data[:type] %>) <%= classname %>::get_<%= data[:relation_name] %>(void) c
 
 // has_many
 <% has_many.each do |data| %>
-SP(MongoDB::Criteria<<%= data[:type] %>>) <%= classname %>::get_<%= data[:relation_name] %>s (void) const
+SP(MongoDB::HasMany<<%= data[:type] %>>) <%= classname %>::get_<%= data[:relation_name] %>s (void) const
 {
   std::string      association      = <%= data[:type] %>::CollectionName();
   std::string      association_name = "<%= data[:remote_field] + "_id" %>";
-  mongo::Query     query            = MONGO_QUERY(association_name << OID());
-  return MongoDB::Criteria<<%= data[:type] %>>::prepare(collection.get_database()[association], query);
+  return MongoDB::HasMany<<%= data[:type] %>>::prepare(collection.get_database()[association], association_name, OID());
 }
 <% end %>
 

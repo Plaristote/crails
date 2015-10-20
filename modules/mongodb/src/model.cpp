@@ -108,12 +108,17 @@ Model::Field<mongo::OID>::Field(const Model::Field<mongo::OID>& field)
   has_changed = field.has_changed;
 }
 
+void Model::set_foreign_id(const string& foreign_key, const mongo::OID id)
+{
+  GetField<mongo::OID>(foreign_key).Set(id);
+}
+
 void Model::set_owner_id(const string& relation_name, const string& id_string)
 {
   if (id_string.size() == 24)
   {
     mongo::OID id; id.init(id_string);
-    GetField<mongo::OID>(relation_name + "_id").Set(id);
+    set_foreign_id(relation_name + "_id", id);
   }
   else
     throw MongoDB::Exception(std::string("Invalid call to set_") + relation_name + std::string("_id with OID '") + id_string + '\'');

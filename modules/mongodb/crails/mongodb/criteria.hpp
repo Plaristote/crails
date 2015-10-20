@@ -19,7 +19,9 @@ namespace MongoDB
     unsigned int count(void);
     void         remove(void);
     void         remove_one(void);
+    void         where(mongo::Query);
 
+    void sort_by(const std::string& key, char value = 1);
     void set_skip(int n_to_skip)                      { this->n_to_skip        = n_to_skip;     }
     void set_limit(int n_to_return)                   { this->n_to_return      = n_to_return;   }
     void set_fields_to_return(mongo::BSONObj* fields) { this->fields_to_return = fields;        }
@@ -34,6 +36,8 @@ namespace MongoDB
 
     Collection&                          collection;
     int                                  n_to_skip, n_to_return, query_options, batch_size;
+    std::string                          sort_key;
+    char                                 sort_order;
     mongo::BSONObj*                      fields_to_return;
     mongo::Query                         query;
     SmartPointer<mongo::DBClientCursor>  results;
@@ -141,6 +145,24 @@ namespace MongoDB
     }
 
     std::list<MODEL>                     fetched;
+  };
+
+  template<typename MODEL>
+  class HasMany : public Criteria<MODEL>
+  {
+  public:
+    HasMany(Collection& collection, std::string& key, mongo::OID oid) :
+      Criteria<MODEL>(collection, MONGO_QUERY(key << oid)),
+      foreign_key(key),
+      foreign_oid(oid)
+    {
+    }
+
+    HasMany& operator<<(MODEL& model)
+    {
+      model.set_foreign_id(foreign_key, foreign_oid);
+      return *this;
+    }
 
     std::string                          foreign_key;
     mongo::OID                           foreign_oid;

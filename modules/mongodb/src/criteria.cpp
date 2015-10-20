@@ -4,14 +4,28 @@ using namespace MongoDB;
 using namespace std;
 
 CriteriaBase::CriteriaBase(Collection& collection, mongo::Query query) : collection(collection),
-n_to_skip(0), n_to_return(0), query_options(0),
-batch_size(0), fields_to_return(0), query(query)
+query_options(0), batch_size(0), sort_order(0), fields_to_return(0), query(query)
 {
 }
 
 unsigned int CriteriaBase::count(void)
 {
   return collection.count(query);
+}
+
+void CriteriaBase::where(mongo::Query new_query)
+{
+  mongo::BSONObjBuilder query_builder;
+
+  query_builder.appendElements(query.getFilter());
+  query_builder.appendElements(new_query.getFilter());
+  query = mongo::Query(query_builder.obj());
+}
+
+void CriteriaBase::sort_by(const string& key, char value)
+{
+  sort_key = key;
+  sort_order = value;
 }
 
 void CriteriaBase::remove(void)
@@ -34,6 +48,8 @@ void CriteriaBase::fetch()
 {
   typename std::auto_ptr<mongo::DBClientCursor> results_auto_ptr;
 
+  if (sort_order != 0)
+    query = query.sort(sort_key, sort_order);
   results_auto_ptr = collection.query(query,
                                       n_to_return,
                                       n_to_skip,
