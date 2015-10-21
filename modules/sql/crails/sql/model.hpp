@@ -2,37 +2,27 @@
 # define SQL_MODEL_HPP
 
 # include <crails/sql/table.hpp>
-# include <crails/sql/criteria.hpp>
 
-# define TABLE(db_name, table_name) \
+# define SQL_STORE_IN(db_name, table_name) \
   static const std::string DatabaseName(void)   { return (#db_name);    } \
   static const std::string CollectionName(void) { return (#table_name); }  \
   static SQL::Table        GetTable(void) { return CRAILS_DATABASE(SQL,#db_name)[#table_name]; } \
-  \
-  static void DbMigrate() \
-  { \
-    SQL::Database& db = CRAILS_DATABASE(SQL,#db_name); \
-    SQL::TableDescription desc = db.Describe(#table_name); \
-    std::vector<SQL::TableDescription::Field> fields = { \
-      SQL::TableDescription::Field("id", "int primary key auto_increment"),
+  static void              DatabaseMigrate(void);
 
-# define TABLE_FIELD(name, type) \
-    SQL::TableDescription::Field(#name, type)
-
-# define END_TABLE \
-    }; \
-    desc.SetTableSchema(fields); \
-  }
+# define SQL_MODEL(classname) \
+  classname(); \
+  classname(soci::row&); \
+  void initialize_fields();
 
 # define SQL_FIELD(type,fname,default) \
-  Field<type> field_##fname; \
+  SQL::Field<type> field_##fname; \
   \
-  type get_fname (void) const \
+  type get_##fname (void) const \
   { \
     return (field_##fname.value); \
   } \
   \
-  void set_##fname (const type cpy&) \
+  void set_##fname (const type& cpy) \
   { \
     field_##fname.value = cpy; \
   }
@@ -52,9 +42,9 @@ namespace SQL
   };
 
   template<typename T>
-  struct Field
+  struct Field : public IField
   {
-    Field(const std::string& key, T& value) : IField(key), value(value)
+    Field(const std::string& key, const T& value) : IField(key), value(value)
     {
     }
 
@@ -65,12 +55,12 @@ namespace SQL
       stream << value;
       return stream.str();
     }
-    
+
     void initialize(soci::row& row)
     {
-      for (short i = 0 ; i < row.size() ; ++i)
+      for (size_t i = 0 ; i < row.size() ; ++i)
       {
-        if (row.get_properties(i).get_name())
+        if (key == row.get_properties(i).get_name())
         {
           value = row.get<T>(i);
           break ;
@@ -79,10 +69,10 @@ namespace SQL
     }
 
     T value;
-  }
+  };
 
   template<>
-  struct Field<std::string>
+  struct Field<std::string> : public IField
   {
     Field(const std::string& key, const std::string& value) : IField(key), value(value)
     {
@@ -112,9 +102,9 @@ namespace SQL
 
     void initialize(soci::row& row)
     {
-      for (short i = 0 ; i < row.size() ; ++i)
+      for (size_t i = 0 ; i < row.size() ; ++i)
       {
-        if (row.get_properties(i).get_name())
+        if (key == row.get_properties(i).get_name())
         {
           value = row.get<std::string>(i);
           break ;
@@ -122,36 +112,24 @@ namespace SQL
       }
     }
   };
-  
+
   class Model
   {
   protected:
-    Model(Table table) :
-      field_id("id", 0), table(table), row_ptr(0), initialized(false)
-    {
-      add_field(field_id);
-    }
+    Model(Table table);
+    Model(Table table, soci::row& row);
 
-    Model(Table table, soci::row& row) :
-      field_id("id", 0), table(table), row_ptr(&row), initialized(true)
-    {
-      add_field(field_id);
-    }
-
-    void add_field(IField* field)
-    {
-      if (row_ptr)
-        field->initialize(*row_ptr);
-      fields.push_back(field);
-    }
+    void add_field(IField& field);
 
   public:
+    virtual ~Model() {}
+
     bool         exists(void) const
     {
       return (initialized);
     }
 
-    long Id(void) const { return (id()); }
+    unsigned long Id(void) const { return (get_id()); }
 
     SQL_FIELD(long, id, 0)
 
@@ -161,29 +139,15 @@ namespace SQL
     }
 
   private:
-    void insert(void)
-    {
-      Criteria criteria(table);
+    void insert(void);
+    void update(void);
 
-      field_id.value = criteria.insert(fields);
-      if (field_id.value != 0)
-        initialized = true;
-    }
-
-    void update(void)
-    {
-      Criteria criteria(table);
-      
-      criteria.where("id", Equal, Id());
-      criteria.update(fields);
-    }
-
-  protected:    
+  protected:
     Table                table;
     std::vector<IField*> fields;
     bool                 initialized;
     soci::row*           row_ptr;
   };
 }
-    
+
 #endif

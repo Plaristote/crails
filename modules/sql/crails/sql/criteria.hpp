@@ -3,9 +3,13 @@
 
 # include <soci/soci.h>
 # include <crails/sql/table.hpp>
+# include <crails/sql/database.hpp>
+# include <Boots/Utils/smart_pointer.hpp>
 
 namespace SQL
 {
+  class IField;
+
   class Criteria
   {
   public:
@@ -24,8 +28,8 @@ namespace SQL
       GreaterThanOrEqualTo,
       LessThan,
       LessThanOrEqualTo,
-      Equal,
-      Different,
+      EqualTo,
+      DifferentFrom,
       Like
     };
 
@@ -38,7 +42,7 @@ namespace SQL
     Criteria& skip(int n_to_skip);
     Criteria& limit(int n_to_return);
     Criteria& order_by(const std::string& key, SortOrder sort_order);
-    Criteria& or();
+    Criteria& or_();
 
     template<typename T>
     Criteria& where(const std::string& key, Operator op, const T value)
@@ -48,20 +52,22 @@ namespace SQL
 
       value_stream << value;
       value_as_string = value_stream.str();
-      where.reserve(where.length() + key.length() + value_as_string.length() + 10);
-      where += (where.length() == 0) ? " WHERE " : " AND ";
-      where += key + ' ' + operator_to_string(op) + ' ' + value_as_string;
+      where_string.reserve(where_string.length() + key.length() + value_as_string.length() + 10);
+      where_string += (where_string.length() == 0) ? " WHERE " : " AND ";
+      where_string += key + ' ' + operator_to_string(op) + ' ' + value_as_string;
       return *this;
     }
 
     template<typename MODEL>
     void each(std::function<bool (MODEL)> functor)
     {
-      if (results.begin() == results.end())
+      if (results.Null())
         fetch_results();
-      for (auto it = results.begin() ; it != results.end() ; ++it)
+      for (auto it = results->begin() ; it != results->end() ; ++it)
       {
-        if (!(functor(MODEL model(table, *it))))
+        MODEL model(table, *it);
+
+        if (!(functor(model)))
           break ;
       }
     }
@@ -77,7 +83,7 @@ namespace SQL
       SQL::Database&    sqldb           = CRAILS_DATABASE(SQL,database);
       Table             collection      = sqldb[collection_name];
 
-      return (Criteria(table));
+      return (Criteria(collection));
     }
 
   private:
@@ -85,11 +91,11 @@ namespace SQL
     std::string append_order_by_to_query(std::string& query) const;
     const char* operator_to_string(Operator op) const;
 
-    Table                   table;
-    int                     n_to_skip, n_to_return;
-    OrderItems              order_items;
-    std::string             where;
-    soci::rowset<soci::row> results;
+    Table                       table;
+    int                         n_to_skip, n_to_return;
+    OrderItems                  order_items;
+    std::string                 where_string;
+    SP(soci::rowset<soci::row>) results;
   };
 }
 

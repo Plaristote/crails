@@ -11,6 +11,8 @@ namespace SQL
   class Table
   {
   public:
+    soci::session& sql;
+
     Table(soci::session& sql, const std::string& name) : sql(sql), table_name(name)
     {}
 
@@ -24,7 +26,7 @@ namespace SQL
       if (it == end)
       {
         std::stringstream stream;
-        
+
         stream << "No document of type " << table_name << " with id " << id;
         throw Crails::Databases::Exception(stream.str());
       }
@@ -40,14 +42,8 @@ namespace SQL
     {
       return (table_name);
     }
-    
-    soci::session& get_session()
-    {
-      return sql;
-    }
 
   private:
-    soci::session& sql;
     std::string    table_name;
   };
 }

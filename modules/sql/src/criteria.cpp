@@ -1,4 +1,5 @@
 #include <crails/sql/criteria.hpp>
+#include <crails/sql/model.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace std;
@@ -11,17 +12,21 @@ Criteria::Criteria(Table table) : table(table), n_to_skip(0), n_to_return(0)
 
 unsigned int Criteria::count()
 {
-  table.sql << ("SELECT COUNT(id) FROM " + table.get_name() + where);
+  unsigned int count;
+  string       query = "SELECT COUNT(*) FROM " + table.get_name() + where_string;
+
+  table.sql << query, into(count);
+  return count;
 }
 
 void Criteria::remove()
 {
-  table.sql << ("DELETE * FROM " + table.get_name() + where);
+  table.sql << ("DELETE * FROM " + table.get_name() + where_string);
 }
 
 void Criteria::remove_one()
 {
-  table.sql << ("DELETE * FROM " + table.get_name() + where + " LIMIT 1");
+  table.sql << ("DELETE * FROM " + table.get_name() + where_string + " LIMIT 1");
 }
 
 void Criteria::update(const vector<IField*>& fields) const
@@ -29,7 +34,7 @@ void Criteria::update(const vector<IField*>& fields) const
   std::string query;
   bool        need_coma = false;
   
-  query.reserve(12 + table.get_name().length() + where.length() + fields.length() * 15);
+  query.reserve(12 + table.get_name().length() + where_string.length() + fields.size() * 15);
   query = "UPDATE " + table.get_name() + " SET ";
   for (auto it = fields.begin() ; it != fields.end() ; ++it)
   {
@@ -37,11 +42,11 @@ void Criteria::update(const vector<IField*>& fields) const
       query += ',';
     if ((*it)->has_changed)
     {
-      query += (*it)->key + '=' + (*it)->to_string();
+      query += (*it)->key + '=' + (*it)->get_string();
       need_coma = true;
     }
   }
-  query += where;
+  query += where_string;
   table.sql << query;
 }
 
@@ -51,7 +56,7 @@ long Criteria::insert(const vector<IField*>& fields) const
   std::string query;
   bool        need_coma = false;
 
-  query.reserve(21 + table.get_name().length() + fields.length() * 10);
+  query.reserve(21 + table.get_name().length() + fields.size() * 10);
   query = "INSERT INTO " + table.get_name() + " VALUES(";
   for (auto it = fields.begin() ; it != fields.end() ; ++it)
   {
@@ -59,7 +64,7 @@ long Criteria::insert(const vector<IField*>& fields) const
       query += ',';
     else
       need_coma = true;
-    query += (*it)->to_string();
+    query += (*it)->get_string();
   }
   query += ')';
   table.sql << query;
@@ -67,17 +72,17 @@ long Criteria::insert(const vector<IField*>& fields) const
   return id;
 }
 
-void Criteria::fetch_results() const
+void Criteria::fetch_results()
 {
   std::string query;
 
-  query.reserve(30 + table.get_name().length() + where.length() + order_items.length() * 6);
-  query = "SELECT * FROM " + table.get_name() + where;
+  query.reserve(30 + table.get_name().length() + where_string.length() + order_items.size() * 10);
+  query = "SELECT * FROM " + table.get_name() + where_string;
   if (n_to_skip >= 0 && n_to_return > 0)
     query += " LIMIT " + boost::lexical_cast<string>(n_to_skip) + ',' + boost::lexical_cast<string>(n_to_return);
-  if (order_items.length() > 0)
+  if (order_items.size() > 0)
     query = append_order_by_to_query(query);
-  results = (table.sql.prepare << query);
+  results = new soci::rowset<soci::row>((table.sql.prepare << query));
 }
 
 std::string Criteria::append_order_by_to_query(std::string& query) const
@@ -119,32 +124,11 @@ Criteria& Criteria::order_by(const std::string& key, SortOrder sort_order)
   return *this;
 }
 
-Criteria& Criteria::or()
+Criteria& Criteria::or_()
 {
-  where.reserve(where.length() + 6);
-  where.insert(0, "(");
-  where += ") OR ";
-}
-
-template<>
-Criteria& Criteria::where<std::string>(const std::string& key, Operator op, const std::string& value)
-{
-  const unsigned char estimated_value_length = value.length() * 1.1 + 4;
-
-  where.reserve(where.length() + key.length() + estimated_value_length + 12);
-  where += (where.length() == 0) ? " WHERE " : " AND ";
-  where += key + ' ' + operator_to_string(op) + " \"";
-  for (std::string::size_type i = 0; i < value.length(); ++i) {
-    switch (value[i])
-    {
-    case '"':
-    case '\\':
-      where += '\\';
-    default:
-      where += value[i];
-    }
-  }
-  where += '"';
+  where_string.reserve(where_string.length() + 6);
+  where_string.insert(0, "(");
+  where_string += ") OR ";
   return *this;
 }
 
@@ -157,7 +141,34 @@ const char* Criteria::operator_to_string(Operator op) const
     case LessThan:             return "<";
     case LessThanOrEqualTo:    return "<=";
     case EqualTo:              return "=";
+    case DifferentFrom:        return "!=";
     case Like:                 return "LIKE";
   }
   return "=";
+}
+
+namespace SQL
+{
+  template<>
+  Criteria& Criteria::where<std::string>(const std::string& key, Operator op, const std::string value)
+  {
+    const unsigned char estimated_value_length = value.length() * 1.1 + 4;
+
+    where_string.reserve(where_string.length() + key.length() + estimated_value_length + 12);
+    where_string += (where_string.length() == 0) ? " WHERE " : " AND ";
+    where_string += key + ' ' + operator_to_string(op) + " \"";
+    for (std::string::size_type i = 0; i < value.length(); ++i)
+    {
+      switch (value[i])
+      {
+      case '"':
+      case '\\':
+        where_string += '\\';
+      default:
+        where_string += value[i];
+      }
+    }
+    where_string += '"';
+    return *this;
+  }
 }

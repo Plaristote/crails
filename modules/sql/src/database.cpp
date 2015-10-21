@@ -104,7 +104,7 @@ TableDescription::TableDescription(soci::session& sql, const std::string name) :
     {
       soci::row&  row = *it;
       Field       field;
-      
+
       field.name = row.get<std::string>(0);
       field.type = row.get<std::string>(1);
       fields.push_back(field);

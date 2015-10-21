@@ -1,0 +1,53 @@
+#include <algorithm>
+#include "app/models/<%= filename %>.hpp"
+<% requires.each do |required_file| -%>
+#include "app/models/<%= required_file %>.hpp"
+<% end -%>
+
+using namespace std;
+using namespace SQL;
+using namespace Crails;
+
+<% field_initializers = '' -%>
+<% fields.each_with_index do |field, index| -%>
+  <% field_initializers += ",\n  " if index > 0 -%>
+  <% field_initializers += "field_#{field[:name]}(#{field[:name].inspect}, #{field[:default]})" -%>
+<% end -%>
+
+<%= classname %>::<%= classname %>() :
+  Model(GetTable())<%= ',' if field_initializers.length > 0 %>
+  <%= field_initializers %>
+{
+  initialize_fields();
+}
+
+<%= classname %>::<%= classname %>(soci::row& row) :
+  Model(GetTable(), row)<%= ',' if field_initializers.length > 0 %>
+  <%= field_initializers %>
+{
+  initialize_fields();
+  <% fields.each do |field| -%>
+  field_<%= field[:name] %>.initialize(row);
+  <% end -%>
+}
+
+void <%= classname %>::initialize_fields()
+{
+  <% fields.each do |field| -%>
+  add_field(field_<%= field[:name] %>);
+  <% end -%>
+}
+
+// Migration
+void <%= classname %>::DatabaseMigrate()
+{
+  SQL::Database& db = CRAILS_DATABASE(SQL, DatabaseName());
+  SQL::TableDescription desc = db.Describe(CollectionName());
+  vector<SQL::TableDescription::Field> fields = {
+    SQL::TableDescription::Field("id", "int primary key auto_increment"),
+    <% fields.each_with_index do |field, index| -%>
+      <%= ",\n" if index > 0 -%>
+      SQL::TableDescription::Field(<%= field[:name].inspect %>, <%= field[:sql_type].inspect %>)<% end -%>
+  };
+  desc.SetTableSchema(fields);
+}
