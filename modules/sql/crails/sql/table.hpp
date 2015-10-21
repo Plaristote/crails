@@ -13,9 +13,9 @@ namespace SQL
   public:
     Table(soci::session& sql, const std::string& name) : sql(sql), table_name(name)
     {}
-    
+
     template<typename MODEL>
-    MODEL          Find(unsigned int id)
+    MODEL          find(unsigned int id)
     {
       soci::rowset<soci::row> rs  = (sql.prepare << "select * from " << table_name << " where id='" << id << '\'');
       auto                    it  = rs.begin();
@@ -35,22 +35,15 @@ namespace SQL
         return (model);
       }
     }
-    
-    void Query(const std::string& query)
-    {
-      std::cout << query << std::endl;
-      sql << query;
-    }
 
-    void Query(const std::string& query, int& value)
-    {
-      std::cout << query << std::endl;
-      sql << query, soci::into(value);
-    }
-
-    const std::string& GetName(void) const
+    const std::string& get_name(void) const
     {
       return (table_name);
+    }
+    
+    soci::session& get_session()
+    {
+      return sql;
     }
 
   private:

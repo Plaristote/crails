@@ -1,8 +1,8 @@
 #ifndef  SQL_MODEL_HPP
 # define SQL_MODEL_HPP
 
-# include "database.hpp"
-# include "table.hpp"
+# include <crails/sql/table.hpp>
+# include <crails/sql/criteria.hpp>
 
 # define TABLE(db_name, table_name) \
   static const std::string DatabaseName(void)   { return (#db_name);    } \
@@ -23,175 +23,162 @@
     }; \
     desc.SetTableSchema(fields); \
   }
-  
-# define SQL_FIELD_WITH_VISIBILITY(type,fname,default,visibility) \
-  private:\
-    Field<type> field_##fname; \
-  visibility:\
-    type fname (void) const \
-    { \
-      return (field_##fname.Get()); \
-    } \
-    \
-    void set_##fname (const type cpy) \
-    { \
-      field_##fname.Set(cpy); \
-    } \
-    \
-  protected:\
-    void initialize_##fname (void) \
-    { \
-      if (row_ptr) \
-      { \
-        soci::row& row = *row_ptr; \
-        \
-        if (current_field_it < row.size()) \
-        { \
-          field_##fname.value = row.get<type>(current_field_it); \
-          field_##fname.name  = row.get_properties(current_field_it).get_name(); \
-          current_field_it++; \
-          fields.push_back(&field_##fname); \
-        } \
-        initialized = true; \
-      } \
-      else \
-      { \
-        field_##fname.value = default; \
-        field_##fname.name  = #fname; \
-        current_field_it++; \
-        fields.push_back(&field_##fname); \
-        initialized = false; \
-      } \
-    } \
-    \
-  public:
 
 # define SQL_FIELD(type,fname,default) \
-  SQL_FIELD_WITH_VISIBILITY(type,fname,default,public)
+  Field<type> field_##fname; \
+  \
+  type get_fname (void) const \
+  { \
+    return (field_##fname.value); \
+  } \
+  \
+  void set_##fname (const type cpy&) \
+  { \
+    field_##fname.value = cpy; \
+  }
 
 namespace SQL
 {
+  struct IField
+  {
+    IField(const std::string& key) : key(key), has_changed(false)
+    {
+    }
+
+    const std::string   key;
+    bool                has_changed;
+    virtual std::string get_string() = 0;
+    virtual void        initialize(soci::row&) = 0;
+  };
+
+  template<typename T>
+  struct Field
+  {
+    Field(const std::string& key, T& value) : IField(key), value(value)
+    {
+    }
+
+    std::string get_string()
+    {
+      std::stringstream stream;
+
+      stream << value;
+      return stream.str();
+    }
+    
+    void initialize(soci::row& row)
+    {
+      for (short i = 0 ; i < row.size() ; ++i)
+      {
+        if (row.get_properties(i).get_name())
+        {
+          value = row.get<T>(i);
+          break ;
+        }
+      }
+    }
+
+    T value;
+  }
+
+  template<>
+  struct Field<std::string>
+  {
+    Field(const std::string& key, const std::string& value) : IField(key), value(value)
+    {
+    }
+
+    std::string value;
+
+    std::string get_string()
+    {
+      std::string out;
+
+      out.reserve(value.length() * 1.1 + 4);
+      out += '"';
+      for (std::string::size_type i = 0; i < value.length(); ++i) {
+        switch (value[i])
+        {
+        case '"':
+        case '\\':
+          out += '\\';
+        default:
+          out += value[i];
+        }
+      }
+      out += '"';
+      return out;
+    }
+
+    void initialize(soci::row& row)
+    {
+      for (short i = 0 ; i < row.size() ; ++i)
+      {
+        if (row.get_properties(i).get_name())
+        {
+          value = row.get<std::string>(i);
+          break ;
+        }
+      }
+    }
+  };
+  
   class Model
   {
+  protected:
+    Model(Table table) :
+      field_id("id", 0), table(table), row_ptr(0), initialized(false)
+    {
+      add_field(field_id);
+    }
+
+    Model(Table table, soci::row& row) :
+      field_id("id", 0), table(table), row_ptr(&row), initialized(true)
+    {
+      add_field(field_id);
+    }
+
+    void add_field(IField* field)
+    {
+      if (row_ptr)
+        field->initialize(*row_ptr);
+      fields.push_back(field);
+    }
+
   public:
-    Model(Table table) : table(table)
-    {
-      current_field_it = 0;
-      row_ptr          = 0;
-      initialized      = false;
-      initialize_id();
-    }
-
-    Model(Table table, soci::row& row) : table(table)
-    {
-      current_field_it = 0;
-      row_ptr          = &row;
-      initialized      = false;
-      initialize_id();
-    }
-
-    virtual void InitializeFields(void)
-    {
-      fields.clear();
-    }
-
-    bool         Exists(void) const
+    bool         exists(void) const
     {
       return (initialized);
     }
 
-    unsigned int Id(void) const { return (id()); }
+    long Id(void) const { return (id()); }
 
-    struct IField
-    {
-      virtual void AppendUpdate(std::stringstream&) = 0;
-      virtual void AppendInsert(std::stringstream&) = 0;
-      
-      std::string name;
-      std::string type;
-      bool        has_changed;
-    };
-    
-    template<typename T>
-    struct Field : public IField
-    {
-      Field(void)
-      {
-        has_changed = false;
-      }
-      
-      virtual void AppendUpdate(std::stringstream& stream)
-      {
-        stream << name << "='" << value << "' ";
-      }
-      
-      virtual void AppendInsert(std::stringstream& stream)
-      {
-        stream << '"' << value << '"';
-      }
+    SQL_FIELD(long, id, 0)
 
-      T    Get(void) const { return (value); }
-      void Set(const T& cpy) { value = cpy; has_changed = true; }
-
-      T    value;
-    };
-    
-    SQL_FIELD_WITH_VISIBILITY(int, id, 0, private)
-    
-    void Save(void)
+    void save(void)
     {
-      initialized ? Update() : Insert();
+      initialized ? update() : insert();
     }
-    
+
   private:
-    void Insert(void)
+    void insert(void)
     {
-      std::stringstream query;
-      auto it = fields.begin();
-      auto end = fields.end();
-      int  count = 0;
-      
-      query << "insert into " << table.GetName() << " values(";
-      for (; it != end ; ++it)
-      {
-        if (count)
-          query << ',';
-        (*it)->AppendInsert(query);
-        ++count;
-      }
-      query << ')';
-      table.Query(query.str());
-      table.Query("select LAST_INSERT_ID() from " + table.GetName() + " limit 0,1", field_id.value);
-      initialized = true;
+      Criteria criteria(table);
+
+      field_id.value = criteria.insert(fields);
+      if (field_id.value != 0)
+        initialized = true;
     }
-    
-    void Update(void)
+
+    void update(void)
     {
-      std::stringstream query;
-      auto it    = fields.begin();
-      auto end   = fields.end();
-      int  count = 0;
+      Criteria criteria(table);
       
-      query << "update " << table.GetName();
-      for (; it != end ; ++it)
-      {
-        if ((*it)->has_changed)
-        {
-          if (!count)
-            query << " set ";
-          else
-            query << " and ";
-          (*it)->AppendUpdate(query);
-          ++count;
-        }
-      }
-      query << " where id='" << Id() << '\'';
-      if (count)
-        table.Query(query.str());      
+      criteria.where("id", Equal, Id());
+      criteria.update(fields);
     }
-    
+
   protected:    
-    unsigned short       current_field_it;
     Table                table;
     std::vector<IField*> fields;
     bool                 initialized;

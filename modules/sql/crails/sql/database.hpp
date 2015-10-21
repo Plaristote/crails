@@ -60,9 +60,9 @@ namespace SQL
     std::string   name;
     std::string   factory, connect_cmd;
   private:
-   void InitializeForMySQL(Data);
-   void InitializeForPostgreSQL(Data);
-   void InitializeForSqlite(Data);
+    void InitializeForMySQL(Data);
+    void InitializeForPostgreSQL(Data);
+    void InitializeForSqlite(Data);
 
     bool          connected;
   };
