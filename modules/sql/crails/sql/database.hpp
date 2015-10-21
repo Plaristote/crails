@@ -44,6 +44,8 @@ namespace SQL
 
     Database(Data settings);
 
+    const std::string& get_backend_name() const { return factory; }
+
     void             SetDbName(const std::string& name)
     {
       this->name = name;

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <crails/sql/type_mapper.hpp>
 #include "app/models/<%= filename %>.hpp"
 <% requires.each do |required_file| -%>
 #include "app/models/<%= required_file %>.hpp"
@@ -45,9 +46,8 @@ void <%= classname %>::DatabaseMigrate()
   SQL::TableDescription desc = db.Describe(CollectionName());
   vector<SQL::TableDescription::Field> fields = {
     SQL::TableDescription::Field("id", "int primary key auto_increment"),
-    <% fields.each_with_index do |field, index| -%>
-      <%= ",\n" if index > 0 -%>
-      SQL::TableDescription::Field(<%= field[:name].inspect %>, <%= field[:sql_type].inspect %>)<% end -%>
+    <% fields.each_with_index do |field, index| -%><%= ",\n" if index > 0 -%>
+    SQL::TableDescription::Field(<%= field[:name].inspect %>, SQL::TypeMapper<<%= field[:type] %> >::get_for_backend(db.get_backend_name()))<% end %>
   };
   desc.SetTableSchema(fields);
 }
