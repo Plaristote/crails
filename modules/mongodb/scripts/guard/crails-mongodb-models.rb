@@ -34,6 +34,8 @@ module ::Guard
         classname  = param[14...param.length-1]
       end
 
+      return if classname.nil?
+
       # SCAN REQUIRES
       file_content.scan /MONGODB_REQUIRE\s*\(([a-zA-Z0-9_\/]+)\)/ do |param|
         requires << param.first
