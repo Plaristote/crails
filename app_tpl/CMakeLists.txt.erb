@@ -54,17 +54,13 @@ elseif(USE_MULTITHREAD)
   set(crails-suffix -multithread)
 endif()
 
-<% if options[:mongodb] == true -%>set(crails_mongodb_dep mongoclient crails-mongodb${crails-suffix})<% end -%>
-<% if options[:session_store] == 'mongodb' -%>set(crails_mongodb_dep ${crails_mongodb_dep} crails-mongodb-session${crails-suffix})<% end -%>
-
 set(dependencies      crails-core${crails-suffix}
                       crails-html${crails-suffix}
                       ${Boost_LIBRARIES}
                       pthread dl crypto ssl
                       Boots
                       ${CPPNETLIB_LIBRARIES}
-                      <% if options[:segvcatch] == true %> segvcatch <% end %>
-                      <% if options[:mongodb]   == true %> ${crails_mongodb_dep} <% end %>)
+                      <% if options[:segvcatch] == true %> segvcatch <% end %>)
 
 <%= CMAKE_CUSTOM_DEPENDENCIES_HEADER %>
 

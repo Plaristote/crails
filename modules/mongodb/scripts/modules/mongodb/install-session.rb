@@ -16,3 +16,11 @@ project.base_directory source, base_directory do
 end
 
 CMakeLists.add_crails_module 'mongodb-session'
+
+guardfile = GuardfileEditor.new
+guardfile.add_task 'before_compile', <<RUBY
+  guard 'crails-mongodb-models' do
+    watch(%r{app/models/.+\.h(pp)?$})
+  end
+RUBY
+guardfile.write

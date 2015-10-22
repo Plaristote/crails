@@ -6,9 +6,6 @@ group :assets do
 end
 
 group :before_compile do
-  guard 'crails-mongodb-models' do
-    watch(%r{^app/models/.+\.h(pp)?$})
-  end
 end
 
 group :compile do
