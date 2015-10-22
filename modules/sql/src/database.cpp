@@ -23,36 +23,39 @@ Database::Database(Data settings) : Db(ClassType()), connected(false)
 
 void Database::InitializeForMySQL(Data data)
 {
-  string cmd = "dbname=" + data["database"].Value();
-
-  if (data["user"].NotNil())
-    cmd += " user=" + data["user"].Value();
-  if (data["password"].NotNil())
-    cmd += " password=" + data["password"].Value();
-  if (data["host"].NotNil())
-    cmd += " host=" + data["host"].Value();
-  if (data["port"].NotNil())
-    cmd += " port=" + data["port"].Value();
-  if (data["unix_socket"].NotNil())
-    cmd += " unix_socket=" + data["unix_socket"].Value();
-  connect_cmd = cmd;
   factory     = "mysql";
+  connect_cmd = "dbname=" + data["database"].Value();
+  if (data["user"].NotNil())
+    connect_cmd += " user=" + data["user"].Value();
+  if (data["password"].NotNil())
+    connect_cmd += " password=" + data["password"].Value();
+  if (data["host"].NotNil())
+    connect_cmd += " host=" + data["host"].Value();
+  if (data["port"].NotNil())
+    connect_cmd += " port=" + data["port"].Value();
+  if (data["unix_socket"].NotNil())
+    connect_cmd += " unix_socket=" + data["unix_socket"].Value();
 }
 
 void Database::InitializeForPostgreSQL(Data data)
 {
   factory     = "postgresql";
   connect_cmd = "dbname=" + data["database"].Value();
+  if (data["password"].NotNil())
+    connect_cmd += " password=" + data["password"].Value();
+  if (data["host"].NotNil())
+    connect_cmd += " host=" + data["host"].Value();
+  if (data["port"].NotNil())
+    connect_cmd += " port=" + data["port"].Value();
 }
 
 void Database::InitializeForSqlite(Data data)
 {
-  string cmd = "sqlite.db";
-
+  factory = "sqlite3";
   if (data["file"].NotNil())
-    cmd = data["file"].Value();
-  connect_cmd = cmd;
-  factory     = "sqlite3";
+    connect_cmd = data["file"].Value();
+  else
+    connect_cmd = "sqlite.db";
 }
 
 void Database::connect(void)
@@ -92,7 +95,7 @@ bool Database::TableExists(const std::string& table_name)
 /*
  * Table Description
  */
-TableDescription::TableDescription(soci::session& sql, const std::string name) : table_name(name), sql(sql)
+TableDescription::TableDescription(soci::session& sql, const std::string name) : table_name(name), sql(sql), tr(sql)
 {
   try
   {
@@ -120,6 +123,7 @@ TableDescription::TableDescription(soci::session& sql, const std::string name) :
 void TableDescription::SetTableSchema(std::vector<Field> updated_fields)
 {
   table_exists ? UpdateTable(updated_fields) : InsertTable(updated_fields);
+  tr.commit();
 }
 
 void TableDescription::InsertTable(std::vector<Field> updated_fields)

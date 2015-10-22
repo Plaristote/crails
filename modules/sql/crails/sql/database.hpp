@@ -32,6 +32,7 @@ namespace SQL
     std::vector<Field> fields;
     std::string        table_name;
     soci::session&     sql;
+    soci::transaction  tr;
     bool               table_exists;
   };
   
@@ -45,11 +46,6 @@ namespace SQL
     Database(Data settings);
 
     const std::string& get_backend_name() const { return factory; }
-
-    void             SetDbName(const std::string& name)
-    {
-      this->name = name;
-    }
 
     void             connect(void);
 
