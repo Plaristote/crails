@@ -40,9 +40,9 @@ file(GLOB_RECURSE server_files
 file(GLOB_RECURSE tests_files
      spec/*.cpp)
 
-add_library(crails-app OBJECT ${crails_app})
-add_executable(server $<TARGET_OBJECTS:crails-app> ${server_files})
-add_executable(tests  $<TARGET_OBJECTS:crails-app> ${tests_files})
+add_library(crails-app SHARED ${crails_app})
+add_executable(server ${server_files})
+add_executable(tests  ${tests_files})
 
 if(DEVELOPER_MODE)
   if(USE_MULTITHREAD)
@@ -54,7 +54,8 @@ elseif(USE_MULTITHREAD)
   set(crails-suffix -multithread)
 endif()
 
-set(dependencies      crails-core${crails-suffix}
+set(dependencies      crails-app
+                      crails-core${crails-suffix}
                       crails-html${crails-suffix}
                       ${Boost_LIBRARIES}
                       pthread dl crypto ssl
