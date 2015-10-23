@@ -15,6 +15,13 @@ project.base_directory source, base_directory do
   project.directory :config do
     project.file 'db.json'
   end
+
+  project.directory :tasks do
+    project.directory :sql_migrate do
+      project.file 'CMakeLists.txt'
+      project.file 'main.cpp'
+    end
+  end
 end
 
 CMakeLists.add_dependency 'soci_core'
@@ -22,6 +29,7 @@ backends.each do |backend|
   CMakeLists.add_dependency "soci_#{backend}"
 end
 CMakeLists.add_crails_module 'sql'
+CMakeLists.add_crails_task 'sql_migrate'
 
 guardfile = GuardfileEditor.new
 guardfile.add_task 'before_compile', <<RUBY
