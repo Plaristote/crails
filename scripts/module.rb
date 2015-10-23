@@ -17,7 +17,7 @@ else
     puts "Could not find a crails module named `#{_module}`"
     exit -1
   end
-  
+
   if command.nil?
     puts "Available commands for module #{_module}:"
     Dir["#{ENV['CRAILS_SHARED_DIR']}/scripts/modules/#{_module}/*"].each do |cmd|
