@@ -20,8 +20,8 @@ module ::Guard
     def run_on_modifications(paths)
       paths.each do |path|
         self.send "compile_#{@template_type}", path
-        compile_renderer watched_files
       end
+      compile_renderer watched_files
     end
 
   protected

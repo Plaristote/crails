@@ -1,7 +1,7 @@
 #ifndef  SQL_MODEL_HPP
 # define SQL_MODEL_HPP
 
-# include <crails/sql/table.hpp>
+# include <crails/sql/database.hpp>
 
 # define SQL_STORE_IN(db_name, table_name) \
   static const std::string DatabaseName(void)   { return (#db_name);    } \

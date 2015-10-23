@@ -113,4 +113,4 @@ end
 puts ""
 puts "  Successfully created a Crails App !"
 puts "    -> Build by typing\t'cd #{options[:name]}/build && cmake .. && make'"
-puts "    -> Launch by typing\t'./crails-app'"
+puts "    -> Launch by typing\t'crails server'"
