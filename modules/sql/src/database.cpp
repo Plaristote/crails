@@ -95,7 +95,10 @@ bool Database::TableExists(const std::string& table_name)
 /*
  * Table Description
  */
-TableDescription::TableDescription(soci::session& sql, const std::string name) : table_name(name), sql(sql), tr(sql)
+TableDescription::TableDescription(soci::session& sql, const std::string name) :
+  table_name(name),
+  sql(sql),
+  tr(new soci::transaction(sql))
 {
   try
   {
@@ -123,7 +126,7 @@ TableDescription::TableDescription(soci::session& sql, const std::string name) :
 void TableDescription::SetTableSchema(std::vector<Field> updated_fields)
 {
   table_exists ? UpdateTable(updated_fields) : InsertTable(updated_fields);
-  tr.commit();
+  tr->commit();
 }
 
 void TableDescription::InsertTable(std::vector<Field> updated_fields)

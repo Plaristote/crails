@@ -4,6 +4,7 @@
 # include <soci/soci.h>
 # include <string>
 # include <crails/databases.hpp>
+# include <Boots/Utils/smart_pointer.hpp>
 
 namespace SQL
 {
@@ -29,11 +30,11 @@ namespace SQL
     void UpdateTable(std::vector<Field> updated_fields);
     
   private:
-    std::vector<Field> fields;
-    std::string        table_name;
-    soci::session&     sql;
-    soci::transaction  tr;
-    bool               table_exists;
+    std::vector<Field>    fields;
+    std::string           table_name;
+    soci::session&        sql;
+    SP(soci::transaction) tr;
+    bool                  table_exists;
   };
   
   class Table;
