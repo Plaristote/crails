@@ -4,7 +4,7 @@ class CMakeLists
   class << self
     def add_dependency name
       append "set(dependencies ${dependencies} #{name})"
-      puts "[CMAKE] Added dependency #{name}"
+      puts "\033[32m[CMAKE]\033[0m Added dependency #{name}"
     end
 
     def add_crails_module name
@@ -28,7 +28,6 @@ class CMakeLists
       File.open('CMakeLists.txt', 'w') do |file|
         file.write content
       end
-      puts "\033[32m[EDITED]\033[0m " + "File CMakeLists.txt"
     end
   end
 end
