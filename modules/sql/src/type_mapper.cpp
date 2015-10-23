@@ -44,4 +44,13 @@ namespace SQL
       return mapper[backend];
     }
   };
+
+  template<>
+  struct TypeMapper<float>
+  {
+    static std::string get_for_backend(const std::string& backend)
+    {
+      return TypeMapper<double>::get_for_backend(backend);
+    }
+  };
 }
