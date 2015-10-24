@@ -11,6 +11,7 @@
 #include <iostream>
 #include <crails/request_handlers/file.hpp>
 #include <crails/logger.hpp>
+#include <crails/program_options.hpp>
 
 using namespace std;
 using namespace Crails;
@@ -165,7 +166,7 @@ static void shutdown(int) { shutdown_lambda(); }
 void Server::Launch(int argc, char **argv)
 {
   logger << Logger::Info << "## Launching the amazing Crails Server ##" << Logger::endl;
-  Utils::ClOptions options(argc, argv);
+  ProgramOptions options(argc, argv);
 
 #ifdef USE_SEGVCATCH
   segvcatch::init_segv(&CrailsServer::ThrowCrashSegv);
@@ -180,10 +181,10 @@ void Server::Launch(int argc, char **argv)
     logger << Logger::Info << ">> Route initialized" << Logger::endl;
   }
   {
-    std::string    address = options.GetValue("-h", "--hostname", std::string("127.0.0.1"));
-    std::string    port    = options.GetValue("-p", "--port",     std::string("3001"));
+    std::string    address = options.get_value("hostname", std::string("127.0.0.1"));
+    std::string    port    = options.get_value("port",     std::string("3001"));
 #ifdef ASYNC_SERVER
-    unsigned short threads = options.GetValue("-t", "--threads",  std::thread::hardware_concurrency());
+    unsigned short threads = options.get_value("threads",  std::thread::hardware_concurrency());
 #endif
     logger << ">> Initializing server" << Logger::endl;
     logger << ">> Listening on " << address << ":" << port << Logger::endl;
