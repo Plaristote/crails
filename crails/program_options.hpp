@@ -2,22 +2,33 @@
 # define PROGRAM_OPTIONS_HPP
 
 # include <boost/program_options.hpp>
+# include <crails/server.hpp>
 
 namespace Crails
 {
   class ProgramOptions
   {
+    typedef boost::network::http::server_options<boost::network::http::tags::http_server, Crails::Server> ServerOptions;
   public:
     ProgramOptions(int argc, char** argv);
 
+    HttpServer::options get_server_options(Crails::Server&) const;
+
     template<typename T>
-    T get_value(const std::string& option_name, const T& default_value)
+    T get_value(const std::string& option_name, const T& default_value) const
     {
       if (vm.count(option_name))
         return vm[option_name].as<T>();
       return default_value;
     }
+
   private:
+    void initialize_interface(HttpServer::options&) const;
+#ifdef ASYNC_SERVER
+    void initialize_thread_pool(HttpServer::options&) const;
+    void initialize_ssl_context(HttpServer::options&) const;
+#endif
+    
     boost::program_options::variables_map vm;
   };
 }

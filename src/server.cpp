@@ -181,26 +181,8 @@ void Server::Launch(int argc, char **argv)
     logger << Logger::Info << ">> Route initialized" << Logger::endl;
   }
   {
-    std::string    address = options.get_value("hostname", std::string("127.0.0.1"));
-    std::string    port    = options.get_value("port",     std::string("3001"));
-#ifdef ASYNC_SERVER
-    unsigned short threads = options.get_value("threads",  std::thread::hardware_concurrency());
-#endif
-    logger << ">> Initializing server" << Logger::endl;
-    logger << ">> Listening on " << address << ":" << port << Logger::endl;
-
-    Server              handler;
-    HttpServer::options server_options(handler); 
-
-    server_options.thread_pool();
-#ifdef ASYNC_SERVER
-    logger << ">> Pool Thread Size: " << threads << Logger::endl;
-    thread_pool     _thread_pool(threads);
-    thread_pool_ptr thread_pool_ptr(&_thread_pool);
-    HttpServer      server(server_options.address(address.c_str()).port(port.c_str()).thread_pool(thread_pool_ptr));
-#else
-    HttpServer      server(server_options.address(address.c_str()).port(port.c_str()));
-#endif
+    Server     handler;
+    HttpServer server(options.get_server_options(handler));
 
     signal(SIGINT, &shutdown);
     shutdown_lambda = [&server]()

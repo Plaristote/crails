@@ -89,6 +89,7 @@ project.base_directory source, base_directory do
     project.file 'renderers.cpp'
     project.generate_erb 'salt.cpp',          'salt.cpp.erb',          options
     project.generate_erb 'session_store.cpp', 'session_store.cpp.erb', options
+    project.file 'ssl.cpp'
   end
   project.directory :public do
     project.directory :assets do end
