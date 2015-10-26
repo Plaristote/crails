@@ -50,14 +50,14 @@ namespace Crails
     void lock(void)   { handle.Wait(); }
     void unlock(void) { handle.Post(); }
 
-    DynStruct&       get_session(void)       { return ((*session).to_data()); }
-    const DynStruct& get_session(void) const { return ((*session).to_data()); }
+    DynStruct&       get_session(void)       { return (session->to_data()); }
+    const DynStruct& get_session(void) const { return (session->to_data()); }
 
   private:
-    SmartPointer<SessionStore> session;
-    Sync::Semaphore            handle;
-    Sync::Semaphore            response_parsed;
-    Files                      files;
+    std::unique_ptr<SessionStore> session;
+    Sync::Semaphore               handle;
+    Sync::Semaphore               response_parsed;
+    Files                         files;
   };
 }
 

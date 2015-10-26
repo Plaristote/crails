@@ -34,13 +34,13 @@ namespace MongoDB
     void ensure_result_fetched();
     void fetch();
 
-    Collection&                          collection;
-    int                                  n_to_skip, n_to_return, query_options, batch_size;
-    std::string                          sort_key;
-    char                                 sort_order;
-    mongo::BSONObj*                      fields_to_return;
-    mongo::Query                         query;
-    SmartPointer<mongo::DBClientCursor>  results;
+    Collection&                            collection;
+    int                                    n_to_skip, n_to_return, query_options, batch_size;
+    std::string                            sort_key;
+    char                                   sort_order;
+    mongo::BSONObj*                        fields_to_return;
+    mongo::Query                           query;
+    std::unique_ptr<mongo::DBClientCursor> results;
   };
 
   template<typename MODEL>
@@ -51,12 +51,12 @@ namespace MongoDB
     {
     }
 
-    static SmartPointer<Criteria> prepare(Collection& collection, mongo::Query query = mongo::Query())
+    static std::unique_ptr<Criteria> prepare(Collection& collection, mongo::Query query = mongo::Query())
     {
-      return (new Criteria(collection, query));
+      return (std::unique_ptr<Criteria>(new Criteria(collection, query)));
     }
 
-    static SmartPointer<Criteria> prepare(mongo::Query query = mongo::Query())
+    static std::unique_ptr<Criteria> prepare(mongo::Query query = mongo::Query())
     {
       const std::string database        = MODEL::DatabaseName();
       const std::string collection_name = MODEL::CollectionName();
@@ -68,7 +68,7 @@ namespace MongoDB
     void each(std::function<bool (MODEL&)> functor)
     {
       ensure_result_fetched();
-      if (results.NotNull())
+      if (results)
       {
         bool should_continue = run_for_aggregated_results(functor);
 
@@ -82,7 +82,7 @@ namespace MongoDB
     std::list<MODEL>& entries(void)
     {
       ensure_result_fetched();
-      if (results.NotNull() && results->more())
+      if (results && results->more())
       {
         std::function<bool (MODEL&)> empty_functor;
 

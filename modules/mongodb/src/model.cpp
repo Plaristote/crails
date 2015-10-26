@@ -14,13 +14,13 @@ bool Model::get_oid_from_object(mongo::BSONObj object, mongo::OID& oid)
   return (has_oid);
 }
 
-Model::Model(Collection& collection, mongo::BSONObj bson_object) : bson_object(bson_object), collection(collection), result_set(nullptr)
+Model::Model(Collection& collection, mongo::BSONObj bson_object) : bson_object(bson_object), collection(collection)
 {
   has_id             = get_oid_from_object(bson_object, id);
   fields_initialized = false;
 }
 
-Model::Model(const Model& copy) : bson_object(copy.bson_object), id(copy.id), has_id(copy.has_id), collection(copy.collection), result_set(copy.result_set)
+Model::Model(const Model& copy) : bson_object(copy.bson_object), id(copy.id), has_id(copy.has_id), collection(copy.collection)
 {
   fields_initialized = false;
 }

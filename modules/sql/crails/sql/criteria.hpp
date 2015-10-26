@@ -61,7 +61,7 @@ namespace SQL
     template<typename MODEL>
     void each(std::function<bool (MODEL)> functor)
     {
-      if (results.Null())
+      if (results)
         fetch_results();
       for (auto it = results->begin() ; it != results->end() ; ++it)
       {

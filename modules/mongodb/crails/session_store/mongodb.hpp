@@ -40,9 +40,9 @@ namespace Crails
     const DynStruct& to_data(void) const { return (session_content); }
     
   private:
-    SmartPointer<SessionStore> session;
-    CookieData                 cookie;
-    DynStruct                  session_content;
+    std::unique_ptr<SessionStore> session;
+    CookieData                    cookie;
+    DynStruct                     session_content;
   };
 }
 

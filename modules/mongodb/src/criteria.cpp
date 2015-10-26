@@ -40,7 +40,7 @@ void CriteriaBase::remove_one(void)
 
 void CriteriaBase::ensure_result_fetched()
 {
-  if (results.Null())
+  if (!results)
     fetch();
 }
 
@@ -50,12 +50,10 @@ void CriteriaBase::fetch()
 
   if (sort_order != 0)
     query = query.sort(sort_key, sort_order);
-  results_auto_ptr = collection.query(query,
-                                      n_to_return,
-                                      n_to_skip,
-                                      fields_to_return,
-                                      query_options,
-                                      batch_size);
-  this->results    = results_auto_ptr.get();
-  results_auto_ptr.release();
+  results = collection.query(query,
+                             n_to_return,
+                             n_to_skip,
+                             fields_to_return,
+                             query_options,
+                             batch_size);
 }

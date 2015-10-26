@@ -18,8 +18,8 @@
   classname(Data params = Data()); \
   classname(MongoDB::Collection& collection, mongo::BSONObj bson_object); \
   classname(const classname& copy); \
-  static SmartPointer<classname> Find(const std::string& id_str); \
-  static SP(MongoDB::Criteria<classname>) Where(mongo::Query query = mongo::Query()) \
+  static std::unique_ptr<classname> Find(const std::string& id_str); \
+  static std::unique_ptr<MongoDB::Criteria<classname> > Where(mongo::Query query = mongo::Query()) \
   { return MongoDB::Criteria<classname>::prepare(query); } \
   static classname Create(Data params = Data()); \
   DynStruct to_data() const; \
@@ -106,7 +106,6 @@ namespace MongoDB
     std::list<IField*>                   fields;
     bool                                 has_id, fields_initialized;
     Collection&                          collection;
-    SmartPointer<mongo::DBClientCursor>  result_set; // Must hold reference to result set if was part of a result set
 
     /*
      * Field Management

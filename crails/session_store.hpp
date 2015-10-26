@@ -3,12 +3,11 @@
 
 # include "crails/cookie_data.hpp"
 # include "crails/http_response.hpp"
-# include <Boots/Utils/smart_pointer.hpp>
 
 # define USE_SESSION_STORE(classname) \
-SmartPointer<SessionStore> SessionStore::Factory(void) \
+std::unique_ptr<SessionStore> SessionStore::Factory(void) \
 { \
-  return (new classname ()); \
+  return (std::unique_ptr<SessionStore>(new classname ())); \
 }
 
 namespace Crails
@@ -17,7 +16,7 @@ namespace Crails
   {
   public:
     virtual ~SessionStore() {}
-    static SmartPointer<SessionStore> Factory(void);
+    static std::unique_ptr<SessionStore> Factory(void);
 
     virtual void             load(Data request_headers)           = 0;
     virtual void             finalize(BuildingResponse& response) = 0;

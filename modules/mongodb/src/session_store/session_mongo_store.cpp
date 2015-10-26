@@ -19,7 +19,7 @@ void MongoStore::load(Data request_headers)
   {
     logger << Logger::Debug << "[MongoStore] Session Id = " << cookie["session_id"].Value() << Logger::endl;
     session = SessionStore::Find(cookie["session_id"].Value());
-    if (session.NotNull())
+    if (session)
       session->get_fields(session_content);
     else
       logger << Logger::Debug << "[MongoStore] Could not find the session object in the database" << Logger::endl;
@@ -30,10 +30,10 @@ void MongoStore::finalize(BuildingResponse& response)
 {
   bool is_session_empty = session_content.Count() <= 1 && session_content["flash"].Count() == 0;
 
-  if (!session.Null() || !is_session_empty)
+  if (!session || !is_session_empty)
   {
-    if (session.Null())
-      session = new SessionStore(SessionStore::Create());
+    if (!session)
+      session = unique_ptr<SessionStore>(new SessionStore(SessionStore::Create()));
     session->set_fields(session_content);
     session->save();
     while (cookie.Count())
