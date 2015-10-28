@@ -4,6 +4,7 @@
 # include <Boots/Utils/singleton.hpp>
 # include <crails/smtp.hpp>
 # include <crails/datatree.hpp>
+# include <crails/smtp.hpp>
 # include <map>
 
 namespace Crails
