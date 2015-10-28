@@ -11,7 +11,7 @@ bool FileRequestHandler::operator()(const HttpServer::request& request, Building
 {
   if (request.method == "GET")
   {
-    std::string fullpath       = params["uri"].Value();
+    std::string fullpath       = params["uri"].as<string>();
     size_t      pos_get_params = fullpath.find('?');
 
     if (pos_get_params != std::string::npos)

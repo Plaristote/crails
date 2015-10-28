@@ -11,11 +11,11 @@ Mailer::Mailer(Controller& controller, const std::string& configuration) : vars(
 
 void Mailer::render(const std::string& view)
 {
-  DynStruct mail_params, mail_response;
+  DataTree mail_params, mail_response;
 
   mail_params["headers"]["Accept"] = "text/html text/plain";
-  Renderer::render(view, mail_params, mail_response, controller.vars);
-  mail.SetBody(mail_response["body"].Value());
+  Renderer::render(view, mail_params.as_data(), mail_response.as_data(), controller.vars);
+  mail.SetBody(mail_response["body"].as<string>());
 }
 
 void Mailer::send(void)

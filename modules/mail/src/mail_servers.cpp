@@ -7,20 +7,17 @@ using namespace Crails;
 
 MailServers::MailServers(void)
 {
-  DataTree* data_tree = DataTree::Factory::JSON("config/mailers.json");
-  
-  if (data_tree)
-  {
-    LoadMailServers(data_tree);
-    delete data_tree;
-  }
+  DataTree data_tree;
+
+  data_tree.from_json_file("config/mailers.json");
+  LoadMailServers(data_tree.as_data());
 }
 
 void MailServers::LoadMailServers(Data data)
 {
-  for_each(data.begin(), data.end(), [this](Data server_data)
+  data.each([this](Data server_data)
   {
-    server_confs.emplace(server_data.Key(), Conf(server_data));
+    server_confs.emplace(server_data.get_key(), Conf(server_data));
   });
 }
 
@@ -45,18 +42,18 @@ MailServers::Conf::Conf(Data server_data)
     { "cram_md5",   Smtp::Server::CRAM_MD5 }
   };
 
-  hostname           = server_data["hostname"].Value();
+  hostname           = server_data["hostname"].as<string>();
   port               = server_data["port"];
-  use_tls            = server_data["tls"].Value() == "true";
-  use_authentication = server_data["authentication"].NotNil();
+  use_tls            = server_data["tls"].as<string>() == "true";
+  use_authentication = server_data["authentication"].exists();
   if (use_authentication)
   {
-    auto auth_protocol_it = auth_protocols.find(server_data["authentication"]["protocol"].Value());
+    auto auth_protocol_it = auth_protocols.find(server_data["authentication"]["protocol"].as<string>());
 
     if (auth_protocol_it != auth_protocols.end())
     {
-      username                = server_data["authentication"]["username"].Value();
-      password                = server_data["authentication"]["password"].Value();
+      username                = server_data["authentication"]["username"].as<string>();
+      password                = server_data["authentication"]["password"].as<string>();
       authentication_protocol = auth_protocol_it->second;
     }
   }

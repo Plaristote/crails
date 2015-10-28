@@ -28,7 +28,7 @@ RequestParser::Status RequestDataParser::operator()(const HttpServer::request& r
 
     uri.erase(uri.size() - str_params.size());
     str_params.erase(0, 1);
-    cgi2params(params, str_params);
+    cgi2params(params.as_data(), str_params);
   }
   
   // Set URI and method for the posterity (is that even a word ?)

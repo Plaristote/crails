@@ -5,12 +5,12 @@
 # include <functional>
 # include <vector>
 # include <string>
-# include <Boots/Utils/dynstruct.hpp>
 # include <iostream>
 
 # include <Boots/Utils/singleton.hpp>
 # include <Boots/Utils/regex.hpp>
 
+# include "datatree.hpp"
 # include "server.hpp"
 # include "params.hpp"
 
@@ -20,11 +20,11 @@ namespace Crails
   {
     Router() {}
     ~Router() {}
-    
+
     SINGLETON(Router)
   public:
-    typedef std::function<DynStruct (Params&)> Action;
-    
+    typedef std::function<DataTree (Params&)> Action;
+
     struct Item
     {
       Action                   run;
@@ -50,20 +50,18 @@ namespace Crails
 # define SYM2STRING(sym) std::string(#sym)
 
 # define SetRoute(method, route, klass, function) \
-  match(method, route, [](Params& params) -> DynStruct \
+  match(method, route, [](Params& params) -> DataTree \
   { \
     params["controller-data"]["name"]   = #klass; \
     params["controller-data"]["action"] = #function; \
     klass controller(params); \
 \
-    if (controller.response["status"].NotNil()) \
+    if (controller.response["status"].exists()) \
       return (controller.response); \
-    return (klass::RescueFrom([&controller]() -> DynStruct { \
-      controller.initialize(); \
-      if (controller.response["status"].Nil()) \
-        controller.function(); \
-      return (controller.response); \
-    })); \
+    controller.initialize(); \
+    if (!controller.response["status"].exists()) \
+      controller.function(); \
+    return (controller.response); \
   });
 
 # define Crudify(resource_name, controller) \

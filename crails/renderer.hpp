@@ -1,10 +1,11 @@
 #ifndef  RENDERER_HPP
 # define RENDERER_HPP
 
+# include <list>
 # include <map>
-# include <Boots/Utils/datatree.hpp>
 # include <Boots/Utils/backtrace.hpp>
 # include "shared_vars.hpp"
+# include "datatree.hpp"
 
 namespace Crails
 {

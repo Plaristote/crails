@@ -18,9 +18,8 @@ Controller::Controller(Params& params) : params(params), session(params.get_sess
   vars["flash"]      = &flash;
 
   // Initialize flash variable and reset corresponding cookie
-  flash.Duplicate(session["flash"]);
-  session["flash"].CutBranch();
-  session["flash"] = "";
+  flash.as_data().merge(session["flash"]);
+  session["flash"].destroy();
 }
 
 Controller::~Controller()
@@ -40,27 +39,27 @@ void Controller::redirect_to(const string& uri)
   response["headers"]["Location"] = uri;
 }
 
-void Controller::protect_from_forgery(void) const
+void Controller::protect_from_forgery(void)
 {
   // If request contains a body (ie: not get), check for the CSRF token
-  if (params["method"].Value() != "GET" && !(check_csrf_token()))
+  if (params["method"].as<string>() != "GET" && !(check_csrf_token()))
     throw ExceptionCSRF();
   // Generate a new CSRF token for this request
   session["csrf_token"] = rand_str(16);
 }
 
-bool Controller::check_csrf_token(void) const
+bool Controller::check_csrf_token(void)// const
 {
   Data csrf_token = params["csrf-token"];
   
-  if (csrf_token.Nil())
+  if (!(csrf_token.exists()))
     return (false); // CSRF Token wasn't specified in the request
-  return (csrf_token.Value() == session["csrf_token"].Value());
+  return (csrf_token.as<string>() == session["csrf_token"].as<string>());
 }
 
 void Controller::render(const std::string& view)
 {
-  Renderer::render(view, params, response, vars);
+  Renderer::render(view, params.as_data(), response.as_data(), vars);
 }
 
 void Controller::render(RenderType type, const string& value)
@@ -71,7 +70,7 @@ void Controller::render(RenderType type, const string& value)
   set_content_type(type);
 }
 
-void Controller::render(RenderType type, DynStruct value)
+void Controller::render(RenderType type, Data value)
 {
   string       content_type;
   stringstream body;
@@ -80,10 +79,7 @@ void Controller::render(RenderType type, DynStruct value)
   {
     case JSON:
     {
-      std::string json;
-
-      DataTree::Writers::StringJSON(value, json);
-      body << json;
+      value.output(body);
       break ;
     }
     default:

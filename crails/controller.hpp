@@ -1,27 +1,11 @@
 #ifndef  CRAILS_CONTROLLER_HPP
 # define CRAILS_CONTROLLER_HPP
 
-# include <Boots/Utils/dynstruct.hpp>
 # include <Boots/Utils/timer.hpp>
-
 # include <crails/databases.hpp>
 # include <crails/shared_vars.hpp>
 # include <crails/params.hpp>
 # include <crails/logger.hpp>
-
-# define RESCUE_FROM(render_data) \
-  static DynStruct RescueFrom(std::function<DynStruct (Params&)> callback, Params& params) \
-  { \
-    DynStruct render_data; \
-    \
-    try \
-    { \
-      return (callback(params)); \
-    }
-    
-# define END_RESCUE_FROM \
-    return (render_data); \
-  }
 
 namespace Crails
 {
@@ -43,11 +27,6 @@ namespace Crails
 
     void initialize(void);
     
-    static DynStruct RescueFrom(std::function<DynStruct ()> callback)
-    {
-      return (callback());
-    }
-
     enum RenderType
     {
       JSON,
@@ -60,19 +39,19 @@ namespace Crails
     void            redirect_to(const std::string& uri);
 
     void            render(const std::string& view);
-    void            render(RenderType type, DynStruct value);
+    void            render(RenderType type, Data value);
     void            render(RenderType type, const std::string& value);
 
     virtual bool    must_protect_from_forgery(void) const { return (true); };
 
     Params&         params;
-    DynStruct&      session;
-    DynStruct       response;
+    Data            session;
+    DataTree        response;
     SharedVars      vars;
-    Data            flash;
+    DataTree        flash;
   private:
-    void            protect_from_forgery(void) const;
-    bool            check_csrf_token(void) const;
+    void            protect_from_forgery(void);
+    bool            check_csrf_token(void);// const;
     void            set_content_type(RenderType);
     void            set_content_type_from_extension(const std::string&);
 

@@ -10,29 +10,28 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
 
   if (router)
   {
-    string         method = (params["_method"].Nil() ? request.method : params["_method"].Value());
-    const Router::Action* action = router->get_action(method, params["uri"].Value(), params);
+    string         method = (params["_method"].exists() ? params["_method"].as<string>() : request.method);
+    const Router::Action* action = router->get_action(method, params["uri"].as<string>(), params);
 
     if (action == 0)
       return false;
     params.session->load(params["header"]);
     {
-      DynStruct        data   = (*action)(params);
-      string           body   = data["body"].Value();
+      DataTree         data   = (*action)(params);
+      string           body   = data["body"].as<string>();
       Server::HttpCode code   = Server::HttpCodes::ok;
 
       out.set_headers("Content-Type", "text/html");
-      if (data["headers"].NotNil())
-      { // If parameters headers were set, copy them to the response
-        auto it  = data["headers"].begin();
-        auto end = data["headers"].end();
-
-        for (; it != end ; ++it)
-          out.set_headers((*it).Key(), (*it).Value());
+      if (data["headers"].exists())
+      {
+        data["headers"].each([&out](Data header)
+        {
+          out.set_headers(header.get_key(), header.as<string>());
+        });
       }
       params.session->finalize(out);
-      if (data["status"].NotNil())
-        code = (Server::HttpCode)((int)data["status"]);
+      if (data["status"].exists())
+        code = (Server::HttpCode)(data["status"].as<int>());
       Server::SetResponse(params, out, code, body);
     }
     return true;

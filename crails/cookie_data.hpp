@@ -1,12 +1,12 @@
 #ifndef  COOKIE_DATA_HPP
 # define COOKIE_DATA_HPP
 
-# include <Boots/Utils/dynstruct.hpp>
 # include <string>
+# include "datatree.hpp"
 
 namespace Crails
 {
-  struct CookieData : public DynStruct
+  struct CookieData : public DataTree
   {
     void        unserialize(const std::string&);
     std::string serialize(void);

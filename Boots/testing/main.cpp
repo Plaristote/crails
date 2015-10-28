@@ -3,8 +3,6 @@
 
 using namespace std;
 
-void TestsData(UnitTest&);
-void TestsJSON(UnitTest&);
 void TestsSerializer(UnitTest&);
 void TestsDirectory(UnitTest&);
 void TestFlyweight(UnitTest&);
@@ -20,8 +18,6 @@ int main(int ac, char **av)
   UnitTest tester;
 
   TestInitializers.push_back(TestsDirectory);
-  TestInitializers.push_back(TestsData);
-  TestInitializers.push_back(TestsJSON);
   //TestInitializers.push_back(TestsSerializer);
   TestInitializers.push_back(TestFlyweight);
   TestInitializers.push_back(TestSemaphore);

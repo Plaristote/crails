@@ -57,10 +57,10 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
     std::string content_type;
 
     view_name << "errors/" << file_name.str();
-    Renderer::render(view_name.str(), params, response, vars);
-    if (response["headers"]["Content-Type"].NotNil())
-      out.set_headers("Content-Type", response["headers"]["Content-Type"].Value());
-    Server::SetResponse(params, out, code, response["body"].Value());
+    Renderer::render(view_name.str(), params.as_data(), response, vars);
+    if (response["headers"]["Content-Type"].exists())
+      out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
+    Server::SetResponse(params, out, code, response["body"].as<string>());
   }
 }
 
@@ -126,14 +126,13 @@ void Server::operator()(const HttpServer::request& request, Response response)
 void Server::post_request_log(Params& params) const
 {
   float crails_time     = params["response-time"]["crails"];
-  float controller_time = params["response-time"]["controller"];
   unsigned short code   = params["response-data"]["code"];
 
-  logger << Logger::Info << "# Responded to " << params["method"].Value() << " '" << params["uri"].Value();
+  logger << Logger::Info << "# Responded to " << params["method"].as<string>() << " '" << params["uri"].as<string>();
   logger << "' with " << code;
   logger << " in " << crails_time << 's';
-  if (params["response-time"]["controller"].NotNil())
-    logger << " (controller: " << controller_time << "s)";
+  if (params["response-time"]["controller"].exists())
+    logger << " (controller: " << params["response-time"]["controller"].as<float>() << "s)";
   logger << Logger::endl << Logger::endl;
 }
 

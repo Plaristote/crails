@@ -9,7 +9,7 @@ using namespace Crails;
 RequestParser::Status RequestFormParser::operator()(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
   static const Regex is_form("^application/x-www-form-urlencoded", REG_EXTENDED);
-  if (params["method"].Value() != "GET" && content_type_matches(params, is_form))
+  if (params["method"].as<string>() != "GET" && content_type_matches(params, is_form))
   {
     wait_for_body(request, response, params);
     return RequestParser::Stop;
@@ -21,5 +21,5 @@ void RequestFormParser::body_received(const HttpServer::request& request, Server
 {
   logger << Logger::Info << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << Logger::endl;
   if (request.body.size() > 0)
-    cgi2params(params, request.body);
+    cgi2params(params.as_data(), request.body);
 }

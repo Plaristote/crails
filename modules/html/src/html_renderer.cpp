@@ -1,5 +1,6 @@
 #include <crails/renderers/html_renderer.hpp>
 
+using namespace std;
 using namespace Crails;
 
 bool HtmlRenderer::can_render(const std::string& accept_header, const std::string& view) const
@@ -15,7 +16,7 @@ void HtmlRenderer::render_template(const std::string& view, Data params, Data re
   std::string html_view = (*tpl).second(this, vars);
 
   response["headers"]["Content-Type"] = "text/html";
-  if (response["layout"].NotNil() && view != response["layout"].Value())
+  if (response["layout"].exists() && view != response["layout"].as<string>())
   {
     vars["yield"] = &html_view;
     render(response["layout"], params, response, vars);

@@ -37,7 +37,7 @@ void MultipartParser::parse(Params& params)
     {
       const Regex reg("([^\r]+)\r\n", REG_EXTENDED);
       regmatch_t          matches[2];
-      
+
       if (!(reg.Match(read_buffer, matches, 2)))
       {
         unsigned int form_so  = matches[1].rm_so;
@@ -45,18 +45,16 @@ void MultipartParser::parse(Params& params)
         unsigned int form_end = matches[0].rm_eo;
 
         content_data.unserialize(read_buffer.substr(form_so, form_len));
-        for (unsigned short i = 0 ; i < content_data.Count() ; ++i)
+        content_data.as_data().each([this](Data data)
         {
-          Data   data = content_data[i];
-          string str  = data.Value();
+          string str = data.as<std::string>();
 
           if (str.size() > 0)
             str.erase(0, 1);
           if (str.size() > 0)
             str.erase(str.size() - 1, str.size());
           data = str;
-        }
-        content_data.Output();
+        });
         read_buffer.erase(0, form_end);
         parsed_state++;
           cout << "Parsed state 2" << endl;
@@ -67,7 +65,7 @@ void MultipartParser::parse(Params& params)
       if (read_buffer.substr(0, 14) == "Content-Type: ")
       {
         size_t end = read_buffer.find("\r\n");
-        
+
         if (end != string::npos)
         {
           mimetype = read_buffer.substr(14, end - 14);
@@ -111,16 +109,16 @@ void MultipartParser::parse(Params& params)
 
         if (!(file.is_open()))
         {
-          file.open("/tmp/" + content_data["filename"].Value());
+          file.open("/tmp/" + content_data["filename"].as<std::string>());
         }
         if (pos != string::npos)
         {
           Params::File to_push;
 
-          to_push.key            = content_data["name"].Value();
-          to_push.name           = content_data["filename"].Value();
+          to_push.key            = content_data["name"].as<std::string>();
+          to_push.name           = content_data["filename"].as<std::string>();
           to_push.mimetype       = mimetype;
-          to_push.temporary_path = "/tmp/" + content_data["filename"].Value();
+          to_push.temporary_path = "/tmp/" + content_data["filename"].as<std::string>();
           params.files.push_back(to_push);
           to_erase               = pos;
           to_copy                = pos - 2;
@@ -145,7 +143,7 @@ void MultipartParser::parse(Params& params)
 
 void MultipartParser::initialize(Params& params)
 {
-  string             type     = params["header"]["Content-Type"].Value();
+  string             type     = params["header"]["Content-Type"].as<std::string>();
   Regex              get_boundary("boundary=(.*)", REG_EXTENDED);
   regmatch_t         matches[2];
 

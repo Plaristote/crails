@@ -10,7 +10,7 @@ RequestParser::Status RequestMultipartParser::operator()(const HttpServer::reque
 {
   static const Regex is_multipart("^multipart/form-data", REG_EXTENDED);
 
-  if (params["method"].Value() != "GET" && content_type_matches(params, is_multipart))
+  if (params["method"].as<string>() != "GET" && content_type_matches(params, is_multipart))
   {
     parse_multipart(request, response, params);
     return RequestParser::Stop;

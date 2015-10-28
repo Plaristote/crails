@@ -27,8 +27,8 @@ namespace Crails
 
       void run();
 
-      Params    params;
-      DynStruct response;
+      Params   params;
+      DataTree response;
     private:
     };
   }

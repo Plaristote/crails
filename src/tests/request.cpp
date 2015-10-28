@@ -1,9 +1,10 @@
 #include "crails/tests/request.hpp"
 
+using namespace std;
 using namespace Crails;
 using namespace Crails::Tests;
 
-Request::Request(const std::string& method, const std::string& uri)
+Request::Request(const string& method, const std::string& uri)
 {
   params["method"] = method;
   params["uri"]    = uri;
@@ -15,13 +16,13 @@ void Request::run()
 
   if (router)
   {
-    const Router::Action* action = router->get_action(params["method"].Value(), params["uri"].Value(), params);
+    const Router::Action* action = router->get_action(params["method"].as<string>(), params["uri"].as<string>(), params);
 
     if (action != 0)
-      response.Duplicate((*action)(params));
+      response = (*action)(params);
     else
-      throw RouteNotFound(params["method"].Value() + '#' + params["uri"].Value());
-    if (response["status"].Nil())
+      throw RouteNotFound(params["method"].as<string>() + '#' + params["uri"].as<string>());
+    if (!response["status"].exists())
       response["status"] = 200;
   }
   else

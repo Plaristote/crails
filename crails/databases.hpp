@@ -1,8 +1,8 @@
 #ifndef  DATABASES_HPP
 # define DATABASES_HPP
 
-# include <Boots/Utils/datatree.hpp>
 # include <vector>
+# include "datatree.hpp"
 # include "environment.hpp"
 
 # define CRAILS_DATABASE(type,database) \
@@ -41,16 +41,14 @@ namespace Crails
 
     Databases()
     {
-      config_file = DataTree::Factory::JSON("config/db.json");
-      if (!(config_file))
-        throw Databases::Exception("Couldn't load databases configuration file.");
+      //config_file = DataTree::Factory::JSON("config/db.json");
+      //if (!(config_file))
+      //  throw Databases::Exception("Couldn't load databases configuration file.");
     }
 
     ~Databases()
     {
       cleanup_databases();
-      if (config_file)
-        delete config_file;
     }
 
     void cleanup_databases();
@@ -60,10 +58,9 @@ namespace Crails
     template<typename TYPE>
     Db* initialize_database(const std::string& key)
     {
-      Data  settings(config_file);
       Data  environment_settings = settings[Crails::environment];
-      TYPE* database       = new TYPE(environment_settings[key]);
-      Db*   database_as_db = database;
+      TYPE* database             = new TYPE(environment_settings[key]);
+      Db*   database_as_db       = database;
 
       database_as_db->name = key;
       databases.push_back(database);
@@ -84,8 +81,8 @@ namespace Crails
     }
 
   private:
-    DataTree*              config_file;
-    Dbs                    databases;
+    DataTree settings;
+    Dbs      databases;
   };
 
   extern thread_local Databases databases;

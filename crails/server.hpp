@@ -2,11 +2,11 @@
 # define SERVER_HPP
 
 # include "file_cache.hpp"
-# include <Boots/Utils/dynstruct.hpp>
 # include "http_server.hpp"
 # include "request_parser.hpp"
 # include "request_handler.hpp"
 # include "exception_catcher.hpp"
+# include "datatree.hpp"
 
 namespace Crails
 {
@@ -15,7 +15,7 @@ namespace Crails
   struct Server : public ServerTraits
   {
     friend class ExceptionCatcher;
-  
+
     Server();
     ~Server();
 
@@ -61,7 +61,7 @@ namespace Crails
 }
 
 // Helpers
-void        cgi2params(DynStruct& params, const std::string& encoded_str);
+void        cgi2params(Data params, const std::string& encoded_str);
 std::string get_mimetype(const std::string& filename);
 
 #endif

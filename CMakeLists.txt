@@ -111,9 +111,9 @@ if (USE_MEMCACHED)
 endif()
 
 if (USE_MONGODB)
-  add_subdirectory(modules/mongodb)
+#  add_subdirectory(modules/mongodb)
 endif()
 
 if (USE_SOCI)
-  add_subdirectory(modules/sql)
+#  add_subdirectory(modules/sql)
 endif()

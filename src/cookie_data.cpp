@@ -2,9 +2,11 @@
 #include <crails/http.hpp>
 #include <crails/cipher.h>
 #include <Boots/Utils/regex.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 using namespace std;
 using namespace Crails;
+using namespace boost::property_tree;
 
 static std::string charToHex(char c)
 {
@@ -18,14 +20,14 @@ static std::string charToHex(char c)
 
   result.append(1, first);
   result.append(1, second);
-  
+
   return result;
 }
 
 static char hexToChar(char first, char second)
 {
   int digit;
-  
+
   digit = (first >= 'A' ? ((first & 0xDF) - 'A') + 10 : (first - '0'));
   digit *= 16;
   digit += (second >= 'A' ? ((second & 0xDF) - 'A') + 10 : (second - '0'));
@@ -95,7 +97,7 @@ std::string Http::Url::Decode(const std::string& src)
         result.append(1, '%');
       }
       break;
-    
+
     default:
       result.append(1, *iter);
       break;
@@ -110,9 +112,8 @@ string CookieData::serialize(void)
   {
     Cipher cipher;
     string cookie_string;
-    string value;
-
-    DataTree::Writers::StringJSON(*this, value);
+    string value   = this->as_data().to_json();
+ 
     value          = cipher.encrypt(value, password, salt);
     cookie_string += Http::Url::Encode("crails") + '=' + Http::Url::Encode(value);
     cookie_string += ";path=/";
@@ -146,9 +147,7 @@ void CookieData::unserialize(const string& str)
       {
         val = cipher.decrypt(val, password, salt);
         {
-          DataTree* datatree = DataTree::Factory::StringJSON(val);
-
-          Duplicate(datatree);
+          this->from_json(val);
           break ;
         }
       }

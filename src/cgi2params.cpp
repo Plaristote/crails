@@ -1,7 +1,7 @@
 #include <vector>
-#include <Boots/Utils/dynstruct.hpp>
 #include <Boots/Utils/regex.hpp>
 #include "crails/http.hpp"
+#include "crails/datatree.hpp"
 
 using namespace std;
 using namespace Crails;
@@ -19,7 +19,7 @@ static void recursively_set_value(Data param, std::vector<std::string> key_stack
   }
 }
 
-void cgi2params(DynStruct& params, const std::string& encoded_str)
+void cgi2params(Data params, const std::string& encoded_str)
 {
   const std::string        opening_bracket = "%5B";
   const std::string        closing_bracket = "%5D";

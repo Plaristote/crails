@@ -12,8 +12,8 @@ namespace Crails
   public:
     void             load(Data request_headers);
     void             finalize(BuildingResponse& response);
-    DynStruct&       to_data(void);
-    const DynStruct& to_data(void) const;
+    Data             to_data(void);
+    const Data       to_data(void) const;
 
   private:
     CookieData       cookies;

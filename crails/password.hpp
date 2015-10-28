@@ -2,7 +2,6 @@
 # define PASSWORD_HPP
 
 # include <openssl/md5.h>
-# include <Boots/Utils/datatree.hpp>
 # include <string>
 
 namespace Crails
@@ -10,10 +9,6 @@ namespace Crails
   struct Password : public std::string
   {
     Password(void)
-    {
-    }
-    
-    Password(const Data data) : std::string(md5(data.Value()))
     {
     }
     

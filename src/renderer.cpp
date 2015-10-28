@@ -14,7 +14,7 @@ void Renderer::finalize()
 
 void Renderer::render(const std::string& view, Data params, Data response, SharedVars& vars)
 {
-  std::string format   = params["headers"]["Accept"].Value();
+  std::string format   = params["headers"]["Accept"];
   Renderer*   renderer = NULL;
 
   for (auto it = renderers.begin() ; it != renderers.end() ; ++it)
