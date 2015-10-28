@@ -5,6 +5,7 @@
 # include <crails/smtp.hpp>
 # include <crails/datatree.hpp>
 # include <crails/smtp.hpp>
+# include <crails/datatree.hpp>
 # include <map>
 
 namespace Crails
