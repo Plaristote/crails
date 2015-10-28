@@ -65,9 +65,9 @@ MailServers::Conf::Conf(Data server_data)
 void MailServers::Conf::ConnectServer(Smtp::Server& server) const
 {
   if (use_tls)
-    server.StartTls();
+    server.start_tls();
   if (use_authentication)
-    server.Connect(hostname, port, username, password, authentication_protocol);
+    server.connect(hostname, port, username, password, authentication_protocol);
   else
-    server.Connect(hostname, port);
+    server.connect(hostname, port);
 }

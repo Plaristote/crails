@@ -25,5 +25,5 @@ void Mailer::send(void)
     MailServers::singleton::Get()->ConfigureMailServer(configuration, smtp_server);
     is_connected = true;
   }
-  smtp_server.Send(mail);
+  smtp_server.send(mail);
 }

@@ -1,9 +1,9 @@
 #ifndef  MAIL_SERVERS_HPP
 # define MAIL_SERVERS_HPP
 
-# include <Boots/Network/smtp.hpp>
 # include <Boots/Utils/singleton.hpp>
 # include <Boots/Utils/datatree.hpp>
+# include <crails/smtp.hpp>
 # include <map>
 
 namespace Crails

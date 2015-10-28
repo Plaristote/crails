@@ -1,9 +1,10 @@
 #ifndef  BOOTS_SMTP_HPP
 # define BOOTS_SMTP_HPP
 
-# include "socket.hpp"
-# include "../Utils/helpers.hpp"
+# include <boost/asio.hpp>
+# include <Boots/Utils/helpers.hpp>
 # include <map>
+# include <sstream>
 
 namespace Smtp
 {
@@ -53,7 +54,7 @@ namespace Smtp
     std::string reply_to;
   };
   
-  class Server : private Network::Socket
+  class Server
   {
   public:
     enum AuthenticationProtocol
@@ -64,42 +65,46 @@ namespace Smtp
       MD5,
       CRAM_MD5
     };
-    
+
     Server();
 
-    void StartTls(void);
-    void Connect(const std::string& hostname, unsigned short port);
-    void Connect(const std::string& hostname, unsigned short port, const std::string& username, const std::string& password, AuthenticationProtocol auth = PLAIN);
-    void Disconnect(void);
-    void Send(const Mail& mail);
+    void start_tls();
+    void connect(const std::string& hostname, unsigned short port);
+    void connect(const std::string& hostname, unsigned short port, const std::string& username, const std::string& password, AuthenticationProtocol auth = PLAIN);
+    void disconnect();
+    void send(const Mail& mail);
     const_attr_getter(std::string&, ServerId, server_id)
 
   private:
     // SMTP Protocol Implementation
-    std::string SmtpReadAnswer(unsigned short expected_return = 250);
-    void        SmtpBody(const Mail& mail);
-    void        SmtpRecipients(const Mail& mail);
-    void        SmtpNewMail(const Mail& mail);
-    void        SmtpHandshake();
-    void        SmtpQuit();
-    
-    void        SmtpDataAddress(const std::string& field, const std::string& address, const std::string& name);
-    void        SmtpDataAddresses(const std::string& field, const Mail& mail, int flag);
-    
-    std::string server_id;
+    std::string smtp_read_answer(unsigned short expected_return = 250);
+    void        smtp_write_message();
+    void        smtp_body(const Mail& mail);
+    void        smtp_recipients(const Mail& mail);
+    void        smtp_new_mail(const Mail& mail);
+    void        smtp_handshake();
+    void        smtp_quit();
+
+    void        smtp_data_address(const std::string& field, const std::string& address, const std::string& name);
+    void        smtp_data_addresses(const std::string& field, const Mail& mail, int flag);
+
+    std::string                  server_id;
+    boost::asio::io_service      io_service;
+    boost::asio::ip::tcp::socket sock;
+    std::stringstream            server_message;
 
     // Authentication Extension as defined in RFC 2554
     typedef void (Server::*SmtpAuthMethod)(const std::string& user, const std::string& password);
-    void        SmtpAuthPlain    (const std::string&, const std::string&);
-    void        SmtpAuthLogin    (const std::string&, const std::string&);
-    void        SmtpAuthDigestMd5(const std::string&, const std::string&);
-    void        SmtpAuthMd5      (const std::string&, const std::string&);
-    void        SmtpAuthCramMd5  (const std::string&, const std::string&);
+    void        smtp_auth_plain     (const std::string&, const std::string&);
+    void        smtp_auth_login     (const std::string&, const std::string&);
+    void        smtp_auth_digest_md5(const std::string&, const std::string&);
+    void        smtp_auth_md5       (const std::string&, const std::string&);
+    void        smtp_auth_cram_md5  (const std::string&, const std::string&);
     
     static std::map<AuthenticationProtocol,SmtpAuthMethod> auth_methods;
 
     // StartTLS Extension as defined in RFC 2487
-    void        SmtpStartTls(void);
+    void        smtp_start_tls();
     bool        tls_enabled;
   };
 }

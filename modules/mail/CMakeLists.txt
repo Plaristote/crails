@@ -6,11 +6,13 @@ include_directories(.)
 
 file(GLOB crails_mail
      src/mailer.cpp
-     src/mail_servers.cpp)
+     src/mail_servers.cpp
+     src/smtp.cpp)
 
 file(GLOB headers_crails_mail
      crails/mailer.hpp
-     crails/mail_servers.hpp)
+     crails/mail_servers.hpp
+     crails/smtp.hpp)
 
 file(GLOB crails_mail_templates
      app/config/mailers.json)
