@@ -3,7 +3,6 @@
 
 using namespace std;
 
-void TestsSerializer(UnitTest&);
 void TestsDirectory(UnitTest&);
 void TestFlyweight(UnitTest&);
 void TestFunctorThread(UnitTest&);
@@ -18,7 +17,6 @@ int main(int ac, char **av)
   UnitTest tester;
 
   TestInitializers.push_back(TestsDirectory);
-  //TestInitializers.push_back(TestsSerializer);
   TestInitializers.push_back(TestFlyweight);
   TestInitializers.push_back(TestSemaphore);
   TestInitializers.push_back(TestSingleton);
