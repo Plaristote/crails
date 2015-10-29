@@ -9,7 +9,7 @@ using namespace Crails;
 void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
   Sync::Semaphore    sem(0);
-  unsigned int       to_read    = params["header"]["Content-Length"];
+  unsigned int       to_read    = params["headers"]["Content-Length"].defaults_to<unsigned int>(0);
   unsigned int       total_read = 0;
   std::string        read_buffer;
   Regex              get_boundary;

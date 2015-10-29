@@ -6,9 +6,9 @@ using namespace Crails;
 
 bool RequestParser::content_type_matches(Params& params, const Regex regex)
 {
-  if (params["header"]["Content-Type"].exists())
+  if (params["headers"]["Content-Type"].exists())
   {
-    string type = params["header"]["Content-Type"].as<string>();
+    string type = params["headers"]["Content-Type"].as<string>();
 
     return (regex.Match(type));
   }

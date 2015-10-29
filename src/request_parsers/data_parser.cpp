@@ -17,7 +17,7 @@ RequestParser::Status RequestDataParser::operator()(const HttpServer::request& r
     for (; it != end ; ++it)
     {
       boost::network::http::request_header_narrow header = *it;
-      params["header"][header.name] = header.value;
+      params["headers"][header.name] = header.value;
     }      
   }
 

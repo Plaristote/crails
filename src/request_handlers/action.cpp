@@ -10,15 +10,15 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
 
   if (router)
   {
-    string         method = (params["_method"].exists() ? params["_method"].as<string>() : request.method);
+    string                method = params["_method"].defaults_to<string>(request.method);
     const Router::Action* action = router->get_action(method, params["uri"].as<string>(), params);
 
     if (action == 0)
       return false;
-    params.session->load(params["header"]);
+    params.session->load(params["headers"]);
     {
       DataTree         data   = (*action)(params);
-      string           body   = data["body"].as<string>();
+      string           body   = data["body"].defaults_to<string>("");
       Server::HttpCode code   = Server::HttpCodes::ok;
 
       out.set_headers("Content-Type", "text/html");
@@ -30,8 +30,7 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
         });
       }
       params.session->finalize(out);
-      if (data["status"].exists())
-        code = (Server::HttpCode)(data["status"].as<int>());
+      code = (Server::HttpCode)(data["status"].defaults_to<int>(200));
       Server::SetResponse(params, out, code, body);
     }
     return true;

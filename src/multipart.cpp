@@ -143,12 +143,12 @@ void MultipartParser::parse(Params& params)
 
 void MultipartParser::initialize(Params& params)
 {
-  string             type     = params["header"]["Content-Type"].as<std::string>();
+  string             type     = params["headers"]["Content-Type"].as<std::string>();
   Regex              get_boundary("boundary=(.*)", REG_EXTENDED);
   regmatch_t         matches[2];
 
   get_boundary.Match(type, matches, 2);
-  to_read      = params["header"]["Content-Length"];
+  to_read      = params["headers"]["Content-Length"];
   total_read   = 0;
   boundary     = type.substr(matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
   parsed_state = 0;
