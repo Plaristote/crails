@@ -80,7 +80,7 @@ project.base_directory source, base_directory do
     end
   end
   project.directory :lib    do
-    project.file 'exception.html.ecpp'
+    project.file 'exception.ecpp'
   end
   project.directory :config do
     project.file 'db.json'

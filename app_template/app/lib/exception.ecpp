@@ -1,21 +1,25 @@
 // BEGIN LINKING
-#include <Boots/Utils/dynstruct.hpp>
 #include <Boots/Utils/directory.hpp>
 #include <crails/params.hpp>
 #include <algorithm>
 
 using namespace Crails;
+using namespace std;
 
 string  @exception_name;
 string  @exception_what;
 Params& @params;
 // END LINKING
-<% string     backtrace         = params["backtrace"].Value() -%>
-<% bool       has_controller    = params["controller-data"].NotNil() -%>
-<% string     controller_name   = params["controller-data"]["name"] -%>
-<% string     controller_method = params["controller-data"]["action"] -%>
-<% params["backtrace"].Remove() -%>
-<% params["controller-data"].Remove() -%>
+<% string     backtrace         = params["backtrace"].defaults_to<string>("No backtrace available") -%>
+<% bool       has_controller    = params["controller-data"].exists() -%>
+<% string     controller_name   = params["controller-data"]["name"].defaults_to<string>("") -%>
+<% string     controller_method = params["controller-data"]["action"].defaults_to<string>("") -%>
+<% if (params["backtrace"].exists()) do -%>
+  <% params["backtrace"].destroy() -%>
+<% end -%>
+<% if (has_controller) do -%>
+  <% params["controller-data"].destroy() -%>
+<% end -%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,17 +67,17 @@ Params& @params;
 <h2 id="request" style="margin-top: 30px">Request</h2>
 <p><b>Parameters</b>:
 <pre>
-<% if (params.Count() == 0) do -%>
+<% if (params.as_data().count() == 0) do -%>
   This request didn't contain any parameters.
 <% end else do -%>
-  <% params.Output(html_stream) %>
+  <% params.as_data().output(html_stream) %>
 <% end -%>
 </pre></p>
 
 <p><a href="#" onclick="document.getElementById('session_dump').style.display='block'; return false;">Show session dump</a></p>
 <div id="session_dump" style="display:none">
   <pre>
-    <% params.get_session().Output(html_stream) %>
+    <% params.get_session().output(html_stream) %>
   </pre>
 </div>
 
