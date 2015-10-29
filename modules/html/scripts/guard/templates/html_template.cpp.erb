@@ -27,9 +27,9 @@ private:
   <%= lines[:instance_variables].join "\n" %>
 };
 
-std::string <%= function_name %>(Crails::SharedVars& vars)
+std::string <%= function_name %>(const Crails::Renderer* renderer, Crails::SharedVars& vars)
 {
-  <%= class_name %> view(vars);
+  <%= class_name %> view(renderer, vars);
 
   return (view.render());
 }
