@@ -53,15 +53,18 @@ void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, 
     catch (MissingTemplate exception) {
       logger << Logger::Warning
         << "# Template lib/exception not found for format "
-        << params["headers"]["Accept"].as<string>()
+        << params["headers"]["Accept"].defaults_to<string>("")
         << Logger::endl;
+    }
+    catch(std::exception e) {
+      logger << Logger::Error << "# Template lib/exception crashed (" << e.what() << ')' << Logger::endl;
     }
     catch (...) {
       logger << Logger::Error << "# Template lib/exception crashed" << Logger::endl;
     }
     if (response["headers"]["Content-Type"].exists())
       out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
-    Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, response["body"].as<string>());
+    Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, response["body"].defaults_to<string>(""));
   }
 #else
   Server::ResponseHttpError(out, Server::HttpCodes::internal_server_error, params);
