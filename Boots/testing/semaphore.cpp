@@ -1,6 +1,5 @@
 #include <Boots/Utils/test.hpp>
 #include <Boots/Sync/semaphore.hpp>
-#include <Boots/Sync/functorthread.hpp>
 
 using namespace std;
 
