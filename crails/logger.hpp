@@ -35,7 +35,7 @@ namespace Crails
     template<typename T>
     Logger& operator<<(const T item)
     {
-      if (log_level >= buffer.level)
+      if (log_level <= buffer.level)
         buffer.stream << item;
       return *this;
     }
