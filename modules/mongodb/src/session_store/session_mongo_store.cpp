@@ -1,6 +1,6 @@
-# include <Boots/Utils/datetime.hpp>
 # include <crails/session_store/mongodb.hpp>
 # include <crails/logger.hpp>
+# include <ctime>
 
 using namespace Crails;
 using namespace MongoDB;
@@ -85,7 +85,7 @@ void MongoStore::SessionStore::set_fields(Data data)
   mongo::BSONObjBuilder builder;
   auto                  it         = data.begin();
   auto                  end        = data.end();
-  unsigned int          updated_at = DateTime::Now();
+  unsigned int          updated_at = std::time(nullptr);
 
   if (has_id)
     builder << "_id" << id;
@@ -100,7 +100,7 @@ void MongoStore::SessionStore::set_fields(Data data)
 void MongoStore::SessionStore::Cleanup(void)
 {
   Collection&                                   collection  = MONGODB_GET_COLLECTION(database_name, collection_name);
-  unsigned int                                  timestamp   = DateTime::Now();
+  unsigned int                                  timestamp   = std::time(nullptr);
   unsigned int                                  expiring_at = timestamp - session_expiration;
 
   collection.remove(BSON("_updated_at" << mongo::LT << expiring_at));

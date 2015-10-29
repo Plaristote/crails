@@ -144,7 +144,6 @@ void Server::log(const char* to_log)
 /*
  * Server Initialization
  */
-#include <Boots/Utils/cl_options.hpp>
 #include <boost/thread.hpp>
 
 using namespace boost::network::utils;
