@@ -37,7 +37,8 @@ namespace Crails
     static std::string partial(const std::string& view);
 
   protected:
-    Templates templates;
+    Templates                templates;
+    static const std::string default_format;
   };
 
   extern std::list<Renderer*> renderers;
