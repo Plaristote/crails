@@ -23,7 +23,7 @@ protected:
     tree(tree),
     context(context),
     key(key),
-    path(context + '.' + key)
+    path(context.size() > 0 ? (context + '.' + key) : key)
   {
   }
 
