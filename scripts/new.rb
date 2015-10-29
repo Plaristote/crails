@@ -75,12 +75,8 @@ project.base_directory source, base_directory do
     project.directory :models do end
     project.directory :views do
       project.directory :layouts do
-        project.file 'demo.html.ecpp'
       end
     end
-  end
-  project.directory :lib    do
-    project.file 'exception.ecpp'
   end
   project.directory :config do
     project.file 'db.json'

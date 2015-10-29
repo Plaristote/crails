@@ -19,6 +19,13 @@ project.base_directory source, base_directory do
   end
 end
 
+source         = "#{ENV['CRAILS_SHARED_DIR']}/app_template/html"
+project.base_directory source, base_directory do
+  project.directory :lib do
+    project.file 'exception.ecpp'
+  end
+end
+
 CMakeLists.add_crails_module 'html'
 
 renderers_cpp = RenderersCppEditor.new
