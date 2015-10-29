@@ -18,8 +18,11 @@ Controller::Controller(Params& params) : params(params), session(params.get_sess
   vars["flash"]      = &flash;
 
   // Initialize flash variable and reset corresponding cookie
-  flash.as_data().merge(session["flash"]);
-  session["flash"].destroy();
+  if (session["flash"].exists())
+  {
+    flash.as_data().merge(session["flash"]);
+    session["flash"].destroy();
+  }
 }
 
 Controller::~Controller()
