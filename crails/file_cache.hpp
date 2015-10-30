@@ -1,10 +1,10 @@
 #ifndef  FILE_CACHE_HPP
 # define FILE_CACHE_HPP
 
-# include <Boots/Sync/semaphore.hpp>
 # include <Boots/Utils/flyweight.hpp>
 # include <string>
 # include <fstream>
+# include <mutex>
 
 namespace Crails
 {
@@ -13,18 +13,18 @@ namespace Crails
   public:
     void         Lock(void)
     {
-      semaphore.Wait();
+      mutex.lock();
     }
 
     void         Unlock(void)
     {
-      semaphore.Post();
+      mutex.unlock();
     }
 
   private:
     std::string* CreateInstance(std::string key);
 
-    Sync::Semaphore semaphore;
+    std::mutex mutex;
   };
 }
 
