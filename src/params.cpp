@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Crails;
 
-Params::Params(void) : handle(1), response_parsed(0)
+Params::Params(void)
 {
   session = SessionStore::Factory();
 }

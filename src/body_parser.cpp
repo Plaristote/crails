@@ -1,6 +1,7 @@
 #include "crails/server.hpp"
 #include "crails/params.hpp"
 #include <crails/logger.hpp>
+#include <condition_variable>
 
 using namespace std;
 using namespace Crails;
@@ -8,7 +9,9 @@ using namespace Crails;
 #ifdef ASYNC_SERVER
 void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
-  Sync::Semaphore    sem(0);
+  mutex              sem_mutex;
+  unique_lock<mutex> sem_lock(sem_mutex);
+  condition_variable sem;
   unsigned int       to_read    = params["headers"]["Content-Length"].defaults_to<unsigned int>(0);
   unsigned int       total_read = 0;
   std::string        read_buffer;
@@ -26,15 +29,15 @@ void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits:
     if (total_read == to_read)
     {
       logger << Logger::Info << "Finished reading..." << Logger::endl;
-      sem.Post();
+      sem.notify_all();
     }
     else
       response->read(callback);
   };
   response->read(callback);
-  sem.Wait();
+  sem.wait(sem_lock);
   body_received(request, response, params);
-  params.response_parsed.Post();
+  params.response_parsed.notify_all();
 }
 #else
 void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits::Response response, Params& params)

@@ -22,7 +22,9 @@ RequestParser::Status RequestMultipartParser::operator()(const HttpServer::reque
 void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerTraits::Response response, Params& params)
 {
   logger << Logger::Debug << "Going for multipart/form-data parsing" << Logger::endl;
-  MultipartParser multipart_parser;
+  MultipartParser    multipart_parser;
+  mutex              multipart_mutex;
+  unique_lock<mutex> lock(multipart_mutex);
 
   multipart_parser.initialize(params);
   callback = [this, &multipart_parser, &params](boost::iterator_range<char const*> range,
@@ -30,7 +32,8 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerT
                       size_t size_read,
                       HttpServer::connection_ptr connection_ptr)
   {
-    multipart_parser.sem.Wait();
+    lock_guard<mutex> lock(multipart_parser.mutex);
+
     multipart_parser.total_read += size_read;
     for (unsigned int i = 0 ; i < size_read ; ++i)
       multipart_parser.read_buffer += range[i];
@@ -38,11 +41,10 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerT
     if (multipart_parser.total_read < multipart_parser.to_read)
       connection_ptr->read(callback);
     else
-      params.response_parsed.Post();
-    multipart_parser.sem.Post();
+      params.response_parsed.notify_all();
   };
   response->read(callback);
-  params.response_parsed.Wait();
+  params.response_parsed.wait(lock);
 }
 #else
 void RequestMultipartParser::parse_multipart(const HttpServer::request& request, ServerTraits::Response, Params& params)
@@ -53,6 +55,6 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request& request,
   multipart_parser.initialize(params);
   multipart_parser.read_buffer = request.body;
   multipart_parser.parse(params);
-  params.response_parsed.Post();
+  params.response_parsed.notify_all();
 }
 #endif

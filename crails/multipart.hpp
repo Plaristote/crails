@@ -1,8 +1,9 @@
 #ifndef  MULTIPART_HPP
 # define MULTIPART_HPP
 
-#include <Boots/Sync/semaphore.hpp>
-#include <crails/cookie_data.hpp>
+# include <crails/cookie_data.hpp>
+# include <mutex>
+# include <condition_variable>
 
 namespace Crails
 {
@@ -10,10 +11,6 @@ namespace Crails
 
   struct MultipartParser
   {
-    MultipartParser(void) : sem(1), end(0)
-    {
-    }
-
     void         initialize(Params&);
     void         parse(Params&);
 
@@ -22,8 +19,8 @@ namespace Crails
     unsigned int total_read;
     std::string  boundary;
 
-    Sync::Semaphore sem;
-    Sync::Semaphore end;
+    std::mutex              mutex;
+    std::condition_variable end;
 
     // Context-linked attributes
     short           parsed_state;
