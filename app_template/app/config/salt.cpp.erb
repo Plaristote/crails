@@ -1,6 +1,8 @@
 #include <crails/cookie_data.hpp>
 
 using namespace Crails;
+using namespace std;
 
-const std::string CookieData::password = "<%= (0...50).map { (65 + rand(26)).chr }.join %>";
-const std::string CookieData::salt     = "<%= (0...8).map  { (65 + rand(61)).chr }.join %>";
+const bool   CookieData::use_encryption = true;
+const string CookieData::password       = "<%= (0...50).map { (65 + rand(26)).chr }.join %>";
+const string CookieData::salt           = "<%= (0...8).map  { (65 + rand(61)).chr }.join %>";

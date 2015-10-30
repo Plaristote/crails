@@ -113,8 +113,9 @@ string CookieData::serialize(void)
     Cipher cipher;
     string cookie_string;
     string value   = this->as_data().to_json();
- 
-    value          = cipher.encrypt(value, password, salt);
+
+    if (use_encryption)
+      value        = cipher.encrypt(value, password, salt);
     cookie_string += Http::Url::Encode("crails") + '=' + Http::Url::Encode(value);
     cookie_string += ";path=/";
     return (cookie_string);
@@ -129,7 +130,6 @@ void CookieData::unserialize(const string& str)
 {
   try
   {
-    Cipher     cipher;
     string     cookie_string = str;
     Regex      regex;
     regmatch_t matches[3];
@@ -145,7 +145,11 @@ void CookieData::unserialize(const string& str)
       key            = Http::Url::Decode(key);
       if (key == "crails")
       {
-        val = cipher.decrypt(val, password, salt);
+        if (use_encryption)
+        {
+          Cipher cipher;
+          val = cipher.decrypt(val, password, salt);
+        }
         {
           this->from_json(val);
           break ;

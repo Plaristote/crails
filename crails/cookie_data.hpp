@@ -13,6 +13,7 @@ namespace Crails
 
     static const std::string password;
     static const std::string salt;
+    static const bool        use_encryption;
   };
 }
 
