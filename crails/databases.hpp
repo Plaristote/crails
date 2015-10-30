@@ -41,9 +41,6 @@ namespace Crails
 
     Databases()
     {
-      //config_file = DataTree::Factory::JSON("config/db.json");
-      //if (!(config_file))
-      //  throw Databases::Exception("Couldn't load databases configuration file.");
     }
 
     ~Databases()

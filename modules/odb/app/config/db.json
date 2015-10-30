@@ -1,0 +1,22 @@
+{
+  "production": {
+    "odb": {
+      "type": "postgresql",
+      "host": "127.0.0.1",
+      "database": "crails_db",
+      "user": "crails"
+    }
+  },
+  "development": {
+    "odb": {
+      "type": "sqlite3",
+      "database": "sqlite_development.db"
+    }
+  },
+  "test": {
+    "odb": {
+      "type": "sqlite3",
+      "database": "sqlite_test.db"
+    }
+  }
+}
