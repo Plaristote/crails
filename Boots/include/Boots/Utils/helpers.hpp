@@ -25,8 +25,6 @@ void Set##name(const type attr) { this->attr = attr; }
 const_attr_getter(type,name,attr) \
 attr_setter(type, name, attr)
 
-# define foreach(array, lambda) std::for_each(array.begin(), array.end(), lambda)
-
 # include <type_traits>
 
 #endif
