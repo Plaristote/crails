@@ -21,7 +21,6 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
       string           body   = data["body"].defaults_to<string>("");
       Server::HttpCode code   = Server::HttpCodes::ok;
 
-      out.set_headers("Content-Type", "text/html");
       if (data["headers"].exists())
       {
         data["headers"].each([&out](Data header)
