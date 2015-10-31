@@ -4,6 +4,10 @@ project(crails-odb)
 
 include_directories(.)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/odb/cmake/Modules/")
+
+find_package(ODB OPTIONAL_COMPONENTS mysql pgsql sqlite oracle)
+
 file(GLOB         crails_odb            src/*.cpp)
 file(GLOB         headers_crails_odb    crails/odb/*.hpp)
 file(GLOB         guard_odb_plugin      scripts/guard/*.rb)
