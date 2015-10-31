@@ -41,6 +41,7 @@ namespace Crails
 
     Databases()
     {
+      settings.from_json_file("config/db.json");
     }
 
     ~Databases()
