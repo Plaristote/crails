@@ -16,7 +16,7 @@ bool Runner::execute()
 
   passed_count = failed_count = pending_count = 0;
   cout << "Crails::Tests::Runner: Executing all tests" << endl;
-  for_each(helpers.begin(), helpers.end(), [&passed_count, &failed_count, &pending_count](SP(Helper) helper)
+  for_each(helpers.begin(), helpers.end(), [&passed_count, &failed_count, &pending_count](shared_ptr<Helper> helper)
   {
     helper->run();
     passed_count  += helper->passed_count;

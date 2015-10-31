@@ -2,6 +2,7 @@
 # define CRAILS_TESTS_RUNNER_HPP
 
 # include "helper.hpp"
+# include <memory>
 
 namespace Crails
 {
@@ -14,7 +15,7 @@ namespace Crails
       bool execute();
 
     private:
-      std::list<SP(Helper)> helpers;
+      std::list<std::shared_ptr<Helper> > helpers;
     };
   }
 }
