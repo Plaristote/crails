@@ -50,7 +50,7 @@ module ::Guard
       compiler_path.split('/').last
     end
 
-    def developer_mode
+    def developer_mode?
       (get_cmake_variable 'DEVELOPER_MODE:BOOL') == "ON"
     end
 

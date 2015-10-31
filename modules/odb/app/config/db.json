@@ -9,13 +9,13 @@
   },
   "development": {
     "odb": {
-      "type": "sqlite3",
+      "type": "sqlite",
       "database": "sqlite_development.db"
     }
   },
   "test": {
     "odb": {
-      "type": "sqlite3",
+      "type": "sqlite",
       "database": "sqlite_test.db"
     }
   }
