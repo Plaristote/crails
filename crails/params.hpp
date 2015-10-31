@@ -1,8 +1,6 @@
 #ifndef  PARAMS_HPP
 # define PARAMS_HPP
 
-# include <Boots/Utils/smart_pointer.hpp>
-# include <Boots/Sync/semaphore.hpp>
 # include "datatree.hpp"
 # include "session_store.hpp"
 # include <condition_variable>
