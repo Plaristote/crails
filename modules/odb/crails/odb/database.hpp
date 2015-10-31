@@ -10,7 +10,7 @@ namespace ODB
   class Database : public Crails::Databases::Db
   {
   public:
-    static const std::string ClassType { return ("odb"); }
+    static const std::string ClassType() { return ("odb"); }
 
     Database(Data settings);
 
@@ -23,8 +23,8 @@ namespace ODB
     void initialize_for_sqlite(Data);
     void initialize_for_oracle(Data);
 
-    std::auto_ptr<odb::core::database> db;
-    std::string                        backend;
+    std::unique_ptr<odb::database> db;
+    std::string                    backend;
   };
 }
 

@@ -2,11 +2,27 @@ cmake_minimum_required(VERSION 3.0)
 
 project(crails-odb)
 
-include_directories(.)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/odb/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 find_package(ODB OPTIONAL_COMPONENTS mysql pgsql sqlite oracle)
+
+if (${ODB_mysql_FOUND})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DODB_WITH_MYSQL")
+endif()
+
+if (${ODB_sqlite_FOUND})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DODB_WITH_SQLITE")
+endif()
+
+if (${ODB_pgsql_FOUND})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DODB_WITH_PGSQL")
+endif()
+
+if (${ODB_oracle_FOUND})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DODB_WITH_ORACLE")
+endif()
+
+include_directories(. ${ODB_INCLUDE_DIRS})
 
 file(GLOB         crails_odb            src/*.cpp)
 file(GLOB         headers_crails_odb    crails/odb/*.hpp)
