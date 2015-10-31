@@ -25,6 +25,8 @@ void ODB::Database::initialize_for_mysql(Data data)
     0, // std::string* socket
     data["charset"].defaults_to<std::string>("")
   ));
+#else
+  throw boost_ext::runtime_error("ODB was compiled without support for `mysql`");
 #endif
 }
 
@@ -39,6 +41,8 @@ void ODB::Database::initialize_for_postgresql(Data data)
     data["port"].defaults_to<unsigned int>(0),
     data["extra"].defaults_to<std::string>("")
   ));
+#else
+  throw boost_ext::runtime_error("ODB was compiled without support for `pgsql`");
 #endif
 }
 
@@ -49,6 +53,8 @@ void ODB::Database::initialize_for_sqlite(Data data)
     data["name"].as<std::string>(),
     SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
   ));
+#else
+  throw boost_ext::runtime_error("ODB was compiled without support for `sqlite`");
 #endif
 }
 
@@ -62,6 +68,8 @@ void ODB::Database::initialize_for_oracle(Data data)
     data["host"].defaults_to<std::string>(""),
     data["port"].defaults_to<unsigned int>(0)
   ));
+#else
+  throw boost_ext::runtime_error("ODB was compiled without support for `oracle`");
 #endif
 }
 
@@ -75,7 +83,7 @@ Database::Database(Data settings) : Db(ClassType())
 
   if (backend == "mysql")
     initialize_for_mysql(settings);
-  else if (backend == "postgresql")
+  else if (backend == "pgsql")
     initialize_for_postgresql(settings);
   else if (backend == "oracle")
     initialize_for_oracle(settings);
@@ -87,4 +95,10 @@ void Database::connect()
 {
   if (db == NULL)
     throw boost_ext::runtime_error("Could not create a database object");
+}
+
+odb::database& Database::get_database()
+{
+  connect();
+  return *db;
 }

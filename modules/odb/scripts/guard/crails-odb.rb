@@ -3,6 +3,11 @@ require 'json'
 
 module ::Guard
   class CrailsOdb < CrailsPlugin
+    def initialize arg
+      super
+      @output_dir     = "app/models"
+    end
+
     def run_all
       run_on_modifications watched_files
     end
@@ -33,11 +38,12 @@ module ::Guard
       databases   = databases[environment]
       db_types    = []
       databases.each do |key, options|
-        next if key != 'odb'
-        db_type   = options['type'] || 'sqlite'
-        db_types += [ db_type ]
+        next unless ['mysql', 'pgsql', 'sqlite', 'oracle'].include? options['type']
+        db_types += [ options['type'] ]
       end
-      options = "--multi-database dynamic -d common " if db_types.count > 1
+      options  = "--multi-database dynamic -d common " if db_types.count > 1
+      options += "--output-dir \"#{@output_dir}\" "
+#       options += "--default-pointer std::shared_ptr "
       options + "-d " + (db_types.uniq.join " -d ") + " --generate-query --generate-schema"
     end
 

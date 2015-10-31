@@ -8,7 +8,7 @@ cmake_policy(SET CMP0042 OLD)
 
 <% cxx_options  = ''
    cxx_options += " -DUSE_SEGVCATCH" unless options[:segvcatch] != true -%>
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-deprecated-declarations -pedantic <%= cxx_options %>")
+set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -pedantic <%= cxx_options %>")
 
 find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system REQUIRED)
@@ -29,6 +29,7 @@ endif()
 file(GLOB_RECURSE crails_app
      app/controllers/*.cpp
      app/models/*.cpp
+     app/models/*.cxx
      app/views/*.cpp
      app/routes.cpp
      config/*.cpp

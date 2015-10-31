@@ -15,6 +15,7 @@ namespace ODB
     Database(Data settings);
 
     const std::string& get_backend_name() const { return backend; }
+    odb::database&     get_database();
 
     void connect(void);
   private:

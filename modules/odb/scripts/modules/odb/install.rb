@@ -9,7 +9,7 @@ require 'maincpp'
 project         = ProjectModel.new
 base_directory  = Dir.pwd
 source          = ENV['CRAILS_SHARED_DIR'] + '/app_template/odb'
-backends        = ['mysql', 'postgresql', 'sqlite', 'oracle']
+backends        = ['mysql', 'pgsql', 'sqlite', 'oracle']
 picked_backends = []
 
 project.base_directory source, base_directory do
@@ -26,10 +26,10 @@ until (picked_backends - backends).empty? && picked_backends.count > 0
   picked_backends = gets.chomp.split /\s*,\s*/
 end
 
+CMakeLists.add_dependency 'odb'
 picked_backends.each do |backend|
   CMakeLists.add_dependency "odb-#{backend}"
 end
-CMakeLists.add_dependency 'odb'
 CMakeLists.add_crails_module 'odb'
 
 guardfile = GuardfileEditor.new
