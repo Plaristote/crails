@@ -4,7 +4,8 @@ using namespace Crails;
 
 bool JsonRenderer::can_render(const std::string& accept_header, const std::string& view) const
 {
-  if (accept_header.find("/json") != std::string::npos)
+  if (accept_header.find("/json") != std::string::npos
+   || accept_header.find("*/*")   != std::string::npos)
     return templates.find(view) != templates.end();
   return false;
 }
