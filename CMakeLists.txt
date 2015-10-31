@@ -4,10 +4,11 @@ add_subdirectory(Boots)
 
 project(crails_project)
 
-option(USE_MULTITHREAD "Asynchronous Server" OFF)
+option(USE_MULTITHREAD "Asynchronous Server" ON)
 option(USE_MEMCACHED   "Memcached"           ON)
 option(USE_MONGODB     "MongoDB"             ON)
 option(USE_SOCI        "Soci"                ON)
+option(USE_ODB         "ODB ORM"             OFF)
 option(DEVELOPER_MODE  "Developer mode"      ON)
 
 cmake_policy(SET CMP0042 OLD)
@@ -15,7 +16,7 @@ cmake_policy(SET CMP0042 OLD)
 ##
 ## Compiler Options
 ##
-set(CMAKE_CXX_FLAGS "-Wall -Wno-deprecated-declarations -pedantic")
+set(CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -pedantic")
 
 if (USE_MULTITHREAD)
   if (APPLE)
@@ -116,4 +117,8 @@ endif()
 
 if (USE_SOCI)
 #  add_subdirectory(modules/sql)
+endif()
+
+if (USE_ODB)
+  add_subdirectory(modules/odb)
 endif()
