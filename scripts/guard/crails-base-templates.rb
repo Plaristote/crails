@@ -98,10 +98,10 @@ module ::Guard
       variables_initialization = []
       tmp_lines.each do | line |
         if line.match /@[a-zA-Z_]+/
-          type = line.scan /^([a-zA-Z0-9_]+(<[a-zA-Z_0-9]+[*&]*>){0,1}[*&]*)/
+          type = line.scan /^(unsigned\s+)?([a-zA-Z0-9_:]+(<[a-zA-Z_0-9:]+[*&]*>){0,1}[*&]*)/
           name = line.scan /@[a-zA-Z_]+/
           if not type.nil? and not type[0].nil? and not name.nil? and not name[0].nil?
-            type = type.first.first
+            type = type.flatten[0...-1].join ''
             name = name.first[1..name.first.size]
             instance_variables << "#{type} #{name};"
             line = if is_type_a_reference? type
