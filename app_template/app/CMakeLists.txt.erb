@@ -55,9 +55,9 @@ elseif(USE_MULTITHREAD)
   set(crails-suffix -multithread)
 endif()
 
-set(dependencies      crails-app
-                      crails-core${crails-suffix}
+set(dependencies      crails-core${crails-suffix}
                       crails-html${crails-suffix}
+                      crails-app
                       ${Boost_LIBRARIES}
                       pthread dl crypto ssl
                       Boots
@@ -67,4 +67,4 @@ set(dependencies      crails-app
 <%= CMAKE_CUSTOM_DEPENDENCIES_HEADER %>
 
 target_link_libraries(server ${dependencies})
-target_link_libraries(tests  ${dependencies} crails-tests${crails-suffix})
+target_link_libraries(tests  crails-tests${crails-suffix} ${dependencies})
