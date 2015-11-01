@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
-command = ARGV[0]
+command   = ARGV[0]
+task_name = ARGV[1]
 
 if command.nil?
   puts "Usage: `crails task [command] [task_name]"
@@ -8,8 +9,6 @@ if command.nil?
 end
 
 if command == 'add'
-  task_name = ARGV[1]
-
   $: << "#{ENV['CRAILS_SHARED_DIR']}/scripts/lib"
   require 'project_model'
   require 'cmakelists'
@@ -28,7 +27,11 @@ if command == 'add'
     end
   end
 elsif command == 'run'
-  system "build/tasks/#{task_name}/task"
+  command = "build/tasks/#{task_name}/task "
+  ARGV[2..-1].each do |argv|
+    command += "\"#{argv}\" "
+  end
+  system command
 else
   puts "command #{command} not found"
 end

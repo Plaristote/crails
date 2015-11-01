@@ -16,6 +16,13 @@ project.base_directory source, base_directory do
   project.directory :config do
     project.file 'db.json'
   end
+
+  project.directory :tasks do
+    project.directory :odb_migrate do
+      project.file 'CMakeLists.txt'
+      project.file 'main.cpp'
+    end
+  end
 end
 
 until (picked_backends - backends).empty? && picked_backends.count > 0
@@ -31,6 +38,7 @@ picked_backends.each do |backend|
   CMakeLists.add_dependency "odb-#{backend}"
 end
 CMakeLists.add_crails_module 'odb'
+CMakeLists.add_crails_task 'odb_migrate'
 
 guardfile = GuardfileEditor.new
 guardfile.add_task 'before_compile', <<RUBY
