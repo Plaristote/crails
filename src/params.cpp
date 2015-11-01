@@ -1,7 +1,6 @@
 #include <crails/params.hpp>
-#include <Boots/Utils/directory.hpp>
-#include <crails/cookie_data.hpp>
 #include <crails/session_store.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace Crails;
@@ -13,16 +12,14 @@ Params::Params(void)
 
 Params::~Params(void)
 {
-  std::for_each(files.begin(), files.end(), [](const File& file)
-  {
-    Filesystem::FileRemove(file.temporary_path);
-  });
+  for (const File& file : files)
+    boost::filesystem::remove(file.temporary_path);
 }
 
-const Params::File* Params::get_upload(const std::string& key) const
+const Params::File* Params::get_upload(const string& key) const
 {
-  Files::const_iterator it = std::find(files.begin(), files.end(), key);
-  
+  Files::const_iterator it = find(files.begin(), files.end(), key);
+
   if (it != files.end())
     return (&(*it));
   return (0);

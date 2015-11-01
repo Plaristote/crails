@@ -2,7 +2,7 @@
 #include "crails/server.hpp"
 #include "crails/params.hpp"
 #include "crails/logger.hpp"
-#include <Boots/Utils/directory.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace Crails;
@@ -18,12 +18,8 @@ bool FileRequestHandler::operator()(const HttpServer::request& request, Building
       fullpath.erase(pos_get_params);
     fullpath = "public" + fullpath;
 
-    { // Is a directory ?
-      Directory dir;
-  
-      if (dir.OpenDir(fullpath))
-        fullpath += "/index.htm";
-    }
+    if (boost::filesystem::is_directory(fullpath))
+      fullpath += "/index.html";
     if (send_file(fullpath, response, Server::HttpCodes::ok))
     {
       params["response-data"]["code"] = (int)Server::HttpCodes::ok;
@@ -37,10 +33,8 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
 {
   file_cache.Lock();
   {
-#ifndef SERVER_DEBUG
-    bool               cached = file_cache.Contains(fullpath);
-#endif
-    const std::string& str = *(file_cache.Require(fullpath));
+    bool               cached = cache_enabled && file_cache.Contains(fullpath);
+    const std::string& str    = *(file_cache.Require(fullpath));
 
     if (&str != 0)
     {
@@ -52,10 +46,6 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
       response.set_status_code(code);
       response.set_body(str.c_str() + first_bit, str.size() - first_bit);
       logger << Logger::Info << "# Delivering asset `" << fullpath << "` ";
-#ifdef SERVER_DEBUG
-      file_cache.GarbageCollect();
-      logger << Logger::Info << "(cache disabled)" << Logger::endl;
-#else
       if (cache_enabled)
         logger << (cached ? "(was cached)" : "(was not cached)") << Logger::endl;
       else
@@ -63,7 +53,6 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
         file_cache.GarbageCollect();
         logger << "(cache disabled)" << Logger::endl;
       }
-#endif
       file_cache.Unlock();
       return (true);
     }

@@ -3,7 +3,6 @@
 
 using namespace std;
 
-void TestsDirectory(UnitTest&);
 void TestFlyweight(UnitTest&);
 void TestFunctorThread(UnitTest&);
 void TestSingleton(UnitTest&);
@@ -15,7 +14,6 @@ int main(int ac, char **av)
   std::list<FuncInitializer> TestInitializers;
   UnitTest tester;
 
-  TestInitializers.push_back(TestsDirectory);
   TestInitializers.push_back(TestFlyweight);
   TestInitializers.push_back(TestSingleton);
 

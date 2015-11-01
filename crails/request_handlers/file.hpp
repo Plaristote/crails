@@ -11,7 +11,11 @@ namespace Crails
   public:
     FileRequestHandler() : RequestHandler("file")
     {
+#ifdef SERVER_DEBUG
+      cache_enabled = false;
+#else
       cache_enabled = true;
+#endif
     }
 
     bool operator()(const HttpServer::request& request, BuildingResponse& response, Params& params);

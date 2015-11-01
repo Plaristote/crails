@@ -6,7 +6,7 @@ using namespace Crails;
 std::string* FileCache::CreateInstance(std::string key)
 {
   ifstream file(key.c_str(), std::ios::binary);
-  
+
   if (file.is_open())
   {
     long           size, begin, end;
