@@ -105,6 +105,8 @@ public:
    * Destructor.
    */
   ~Cipher();
+
+  static void initialize();
 public:
   /**
    * Encrypt buffer using AES 256 CBC (SHA1).

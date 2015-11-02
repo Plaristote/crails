@@ -36,6 +36,8 @@
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 #include <Boots/Utils/backtrace.hpp>
+#include <mutex>
+#include <thread>
 using namespace std;
 
 // ================================================================
@@ -52,6 +54,37 @@ using namespace std;
 #define PKV(v)         vdump(__FILE__,__LINE__,#v,v)
 
 #define SALTED_PREFIX      "Salted__"
+
+//
+// Protects OpenSSL against concurrency
+//
+#ifdef ASYNC_SERVER
+static void locking_function(int mode, int n, const char*, int)
+{
+  static std::mutex* mutexes = new std::mutex[CRYPTO_num_locks()];
+
+  if (mode & CRYPTO_LOCK)
+    mutexes[n].lock();
+  else
+    mutexes[n].unlock();
+}
+
+static unsigned long id_function(void)
+{
+  return (unsigned long)std::hash<std::thread::id>() (std::this_thread::get_id());
+}
+#endif
+
+void Cipher::initialize()
+{
+#ifdef ASYNC_SERVER
+  CRYPTO_set_id_callback(id_function);
+  CRYPTO_set_locking_callback(locking_function);
+#endif
+}
+//
+// END protects OpenSSL against concurrency
+//
 
 namespace
 {
@@ -417,6 +450,7 @@ void Cipher::set_salt(const string& salt)
 // ================================================================
 // init()
 // ================================================================
+
 void Cipher::init(const string& pass)
 {
   DBG_FCT("init");
