@@ -2,6 +2,7 @@
 # define BOOTS_SMTP_HPP
 
 # include <boost/asio.hpp>
+# include <boost/asio/ssl.hpp>
 # include <Boots/Utils/helpers.hpp>
 # include <map>
 # include <sstream>
@@ -57,6 +58,8 @@ namespace Smtp
   class Server
   {
   public:
+    typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> SslSocket;
+
     enum AuthenticationProtocol
     {
       PLAIN,
@@ -89,9 +92,12 @@ namespace Smtp
     void        smtp_data_addresses(const std::string& field, const Mail& mail, int flag);
 
     std::string                  server_id;
+    std::stringstream            server_message;
     boost::asio::io_service      io_service;
     boost::asio::ip::tcp::socket sock;
-    std::stringstream            server_message;
+    boost::asio::ssl::context    ssl_context;
+    SslSocket                    ssl_sock;
+    bool                         tls_enabled;
 
     // Authentication Extension as defined in RFC 2554
     typedef void (Server::*SmtpAuthMethod)(const std::string& user, const std::string& password);
@@ -102,10 +108,6 @@ namespace Smtp
     void        smtp_auth_cram_md5  (const std::string&, const std::string&);
     
     static std::map<AuthenticationProtocol,SmtpAuthMethod> auth_methods;
-
-    // StartTLS Extension as defined in RFC 2487
-    void        smtp_start_tls();
-    bool        tls_enabled;
   };
 }
 

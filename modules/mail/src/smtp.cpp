@@ -37,19 +37,24 @@ void        Smtp::Mail::DelRecipient(const std::string& address)
  */
 using namespace boost::asio::ip;
 
-Smtp::Server::Server() : sock(io_service)
+Smtp::Server::Server() :
+  sock(io_service),
+  ssl_context(io_service, boost::asio::ssl::context::sslv23),
+  ssl_sock(io_service, ssl_context),
+  tls_enabled(false)
 {
 }
 
 void Smtp::Server::connect(const std::string& hostname, unsigned short port)
 {
-  tcp::resolver        resolver(io_service);
-  tcp::resolver::query query(hostname, std::to_string(port));
+  boost::system::error_code error = boost::asio::error::host_not_found;
+  tcp::resolver             resolver(io_service);
+  tcp::resolver::query      query(hostname, std::to_string(port));
+  auto&                     sock = tls_enabled ? ssl_sock.next_layer() : this->sock;
 
   tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
   tcp::resolver::iterator end;
 
-  boost::system::error_code error = boost::asio::error::host_not_found;
   while (error && endpoint_iterator != end)
   {
     sock.close();
@@ -57,10 +62,9 @@ void Smtp::Server::connect(const std::string& hostname, unsigned short port)
   }
   if (error)
     Exception<Smtp::Server>::Raise("Cannot connect to " + hostname);
-
-  smtp_handshake();
   if (tls_enabled)
-    smtp_start_tls();
+    ssl_sock.handshake(SslSocket::client, error);
+  smtp_handshake();
 }
 
 void Smtp::Server::connect(const std::string& hostname, unsigned short port, const std::string& username, const std::string& password, AuthenticationProtocol protocol)
@@ -71,6 +75,8 @@ void Smtp::Server::connect(const std::string& hostname, unsigned short port, con
 
 void Smtp::Server::disconnect(void)
 {
+  auto& sock = tls_enabled ? ssl_sock.next_layer() : this->sock;
+
   smtp_quit();
   sock.close();
 }
@@ -93,7 +99,12 @@ std::string Smtp::Server::smtp_read_answer(unsigned short expected_return)
   // NetworkRead
   {
     boost::array<char,256> buffer;
-    std::size_t    bytes_received = sock.receive(boost::asio::buffer(buffer));
+    std::size_t bytes_received;
+
+    if (tls_enabled)
+      bytes_received = ssl_sock.read_some(boost::asio::buffer(buffer));
+    else
+      bytes_received = sock.receive(boost::asio::buffer(buffer));
 
     if (bytes_received == 0)
       Exception<Smtp::Server>::Raise("The server closed the connection");
@@ -114,8 +125,12 @@ std::string Smtp::Server::smtp_read_answer(unsigned short expected_return)
 void Smtp::Server::smtp_write_message()
 {
   boost::system::error_code error;
+  auto                      buffer = boost::asio::buffer(server_message.str());
 
-  boost::asio::write(sock, boost::asio::buffer(server_message.str()), error);
+  if (tls_enabled)
+    boost::asio::write(ssl_sock, buffer, error);
+  else
+    boost::asio::write(sock, buffer, error);
   server_message.str(std::string());
 }
 
@@ -194,6 +209,8 @@ void Smtp::Server::smtp_new_mail(const Smtp::Mail& mail)
 
 void Smtp::Server::smtp_handshake()
 {
+  auto& sock = tls_enabled ? ssl_sock.next_layer() : this->sock;
+
   // Receiving the server identification
   server_id = smtp_read_answer(220);
   // Sending handshake
@@ -215,13 +232,6 @@ void Smtp::Server::smtp_quit()
 void Smtp::Server::start_tls(void)
 {
   tls_enabled = true;
-}
-
-void Smtp::Server::smtp_start_tls(void)
-{
-  server_message << "STARTTLS\r\n";
-  smtp_write_message();
-  smtp_read_answer(220);
 }
 
 /*
