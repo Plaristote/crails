@@ -10,7 +10,7 @@
 namespace Smtp
 {
   class Server;
-  
+
   class Mail
   {
     friend class Server;
@@ -24,7 +24,7 @@ namespace Smtp
       std::string   name;
       unsigned char type;
     };
-    
+
     struct Sender
     {
       std::string address;
@@ -32,7 +32,7 @@ namespace Smtp
     };
 
     typedef std::vector<Recipient> Recipients;
-    
+
     enum RecipientType
     {
       CarbonCopy = 1,
@@ -46,6 +46,7 @@ namespace Smtp
     const_attr_accessor(std::string&, Subject, subject)
     const_attr_accessor(std::string&, Body,    body)
     const_attr_accessor(std::string&, ReplyTo, reply_to)
+    const_attr_accessor(std::string&, ContentType, content_type)
 
   private:
     Recipients  recipients;
@@ -53,6 +54,7 @@ namespace Smtp
     std::string subject;
     std::string body;
     std::string reply_to;
+    std::string content_type;
   };
   
   class Server
@@ -91,7 +93,7 @@ namespace Smtp
     void        smtp_data_address(const std::string& field, const std::string& address, const std::string& name);
     void        smtp_data_addresses(const std::string& field, const Mail& mail, int flag);
 
-    std::string                  server_id;
+    std::string                  server_id, hostname;
     std::stringstream            server_message;
     boost::asio::io_service      io_service;
     boost::asio::ip::tcp::socket sock;
@@ -106,7 +108,7 @@ namespace Smtp
     void        smtp_auth_digest_md5(const std::string&, const std::string&);
     void        smtp_auth_md5       (const std::string&, const std::string&);
     void        smtp_auth_cram_md5  (const std::string&, const std::string&);
-    
+
     static std::map<AuthenticationProtocol,SmtpAuthMethod> auth_methods;
   };
 }

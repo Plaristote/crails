@@ -4,17 +4,22 @@
 using namespace std;
 using namespace Crails;
 
-Mailer::Mailer(Controller& controller, const std::string& configuration) : vars(controller.vars), params(controller.params), controller(controller), configuration(configuration)
+Mailer::Mailer(Controller& controller, const std::string& configuration) : controller(&controller), configuration(configuration), is_connected(false)
 {
-  is_connected = false;
+}
+
+Mailer::Mailer(const std::string& configuration) : controller(0), configuration(configuration), is_connected(false)
+{
 }
 
 void Mailer::render(const std::string& view)
 {
   DataTree mail_params, mail_response;
+  SharedVars& vars = controller ? controller->vars : this->vars;
 
   mail_params["headers"]["Accept"] = "text/html text/plain";
-  Renderer::render(view, mail_params.as_data(), mail_response.as_data(), controller.vars);
+  Renderer::render(view, mail_params.as_data(), mail_response.as_data(), vars);
+  mail.SetContentType(mail_response["headers"]["Content-Type"].defaults_to<string>(""));
   mail.SetBody(mail_response["body"].as<string>());
 }
 

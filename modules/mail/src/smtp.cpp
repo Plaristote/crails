@@ -2,6 +2,7 @@
 #include <Boots/Utils/string.hpp>
 #include <boost/array.hpp>
 #include <crails/smtp.hpp>
+#include <iostream>
 
 using namespace std;
 
@@ -27,7 +28,7 @@ void        Smtp::Mail::AddRecipient(const std::string& address, const std::stri
 void        Smtp::Mail::DelRecipient(const std::string& address)
 {
   auto it = std::find(recipients.begin(), recipients.end(), address);
-  
+
   if (it != recipients.end())
     recipients.erase(it);
 }
@@ -51,10 +52,10 @@ void Smtp::Server::connect(const std::string& hostname, unsigned short port)
   tcp::resolver             resolver(io_service);
   tcp::resolver::query      query(hostname, std::to_string(port));
   auto&                     sock = tls_enabled ? ssl_sock.next_layer() : this->sock;
+  tcp::resolver::iterator   endpoint_iterator = resolver.resolve(query);
+  tcp::resolver::iterator   end;
 
-  tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-  tcp::resolver::iterator end;
-
+  this->hostname = hostname;
   while (error && endpoint_iterator != end)
   {
     sock.close();
@@ -144,8 +145,15 @@ void Smtp::Server::smtp_body(const Smtp::Mail& mail)
   smtp_data_addresses("To",       mail, 0);
   smtp_data_addresses("Cc",       mail, Smtp::Mail::CarbonCopy);
   smtp_data_addresses("Bcc",      mail, Smtp::Mail::CarbonCopy | Smtp::Mail::Blind);
-  smtp_data_address  ("Reply-To", mail.GetReplyTo(),        "");
+  if (mail.GetReplyTo() != "")
+    smtp_data_address("Reply-To", mail.GetReplyTo(),        "");
   smtp_data_address  ("From",     mail.GetSender().address, mail.GetSender().name);
+  // Send the content type if necessary
+  if (mail.GetContentType() != "")
+  {
+    server_message << "MIME-Version: 1.0\r\n";
+    server_message << "Content-Type: " << mail.GetContentType() << "\r\n";
+  }
   // Send the subject
   server_message << "Subject: " << mail.GetSubject() << "\r\n";
   // Send the body and finish the DATA stream
@@ -159,7 +167,7 @@ void Smtp::Server::smtp_data_addresses(const std::string& field, const Smtp::Mai
   auto it  = mail.recipients.begin();
   auto end = mail.recipients.end();
   int  i   = 0;
-  
+
   for (; it != end ; ++it)
   {
     if (it->type == flag)
@@ -172,6 +180,7 @@ void Smtp::Server::smtp_data_addresses(const std::string& field, const Smtp::Mai
         server_message << it->name << " <" << it->address << ">";
       else
         server_message << it->address;
+      server_message << "\r\n";
       ++i;
     }
   }
@@ -179,9 +188,9 @@ void Smtp::Server::smtp_data_addresses(const std::string& field, const Smtp::Mai
 
 void Smtp::Server::smtp_data_address(const std::string& field, const std::string& address, const std::string& name)
 {
-  server_message << field << ": " << address;
+  server_message << field << ": " << name;
   if (name.size() > 0)
-    server_message << " <" << name << ">";
+    server_message << " <" << address << ">";
   server_message << "\r\n";
 }
 
@@ -192,7 +201,7 @@ void Smtp::Server::smtp_recipients(const Smtp::Mail& mail)
   
   for (; it != end ; ++it)
   {
-    server_message << "RCPT TO: " << it->address << "\r\n";
+    server_message << "RCPT TO: <" << it->address << ">\r\n";
     smtp_write_message();
     smtp_read_answer();
   }
@@ -202,7 +211,7 @@ void Smtp::Server::smtp_new_mail(const Smtp::Mail& mail)
 {
   const Smtp::Mail::Sender& sender = mail.GetSender();
 
-  server_message << "MAIL FROM: " << sender.address << "\r\n";
+  server_message << "MAIL FROM: <" << sender.address << ">\r\n";
   smtp_write_message();
   smtp_read_answer();
 }

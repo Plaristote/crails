@@ -1,8 +1,9 @@
 #ifndef  MAILER_HPP
 # define MAILER_HPP
 
-# include "mail_servers.hpp"
 # include <crails/controller.hpp>
+# include <memory>
+# include "mail_servers.hpp"
 
 namespace Crails
 {
@@ -10,20 +11,20 @@ namespace Crails
   {
   public:
     Mailer(Controller& controller, const std::string& configuration);
-
-  protected:
-    Smtp::Mail   mail;
-    SharedVars&  vars;
-    Params&      params;
+    Mailer(const std::string& configuration);
 
     void render(const std::string& view);
     void send(void);
-    
+
+  protected:
+    Smtp::Mail   mail;
+    SharedVars   vars;
+
   private:
-    Controller&  controller;
-    std::string  configuration;
-    Smtp::Server smtp_server;
-    bool         is_connected;
+    Controller*   controller;
+    std::string   configuration;
+    Smtp::Server  smtp_server;
+    bool          is_connected;
   };
 }
 

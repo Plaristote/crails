@@ -38,6 +38,7 @@ namespace Crails
     void LoadMailServers(Data data);
 
     ServerConfs server_confs;
+    DataTree    data_tree;
   };
 }
 

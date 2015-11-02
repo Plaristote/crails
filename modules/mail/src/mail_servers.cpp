@@ -7,8 +7,6 @@ using namespace Crails;
 
 MailServers::MailServers(void)
 {
-  DataTree data_tree;
-
   data_tree.from_json_file("config/mailers.json");
   LoadMailServers(data_tree.as_data());
 }
@@ -45,7 +43,7 @@ MailServers::Conf::Conf(Data server_data)
   hostname           = server_data["hostname"].as<string>();
   port               = server_data["port"];
   use_tls            = server_data["tls"].as<string>() == "true";
-  use_authentication = server_data["authentication"].exists();
+  use_authentication = server_data["authentication"]["username"].defaults_to<string>("") != "";
   if (use_authentication)
   {
     auto auth_protocol_it = auth_protocols.find(server_data["authentication"]["protocol"].as<string>());
