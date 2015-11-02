@@ -93,13 +93,13 @@ namespace Smtp
     void        smtp_data_address(const std::string& field, const std::string& address, const std::string& name);
     void        smtp_data_addresses(const std::string& field, const Mail& mail, int flag);
 
-    std::string                  server_id, hostname;
-    std::stringstream            server_message;
-    boost::asio::io_service      io_service;
-    boost::asio::ip::tcp::socket sock;
-    boost::asio::ssl::context    ssl_context;
-    SslSocket                    ssl_sock;
-    bool                         tls_enabled;
+    std::string                   server_id;
+    std::stringstream             server_message;
+    boost::asio::io_service       io_service;
+    boost::asio::ssl::context     ssl_context;
+    SslSocket                     ssl_sock;
+    boost::asio::ip::tcp::socket& sock;
+    bool                          tls_enabled;
 
     // Authentication Extension as defined in RFC 2554
     typedef void (Server::*SmtpAuthMethod)(const std::string& user, const std::string& password);

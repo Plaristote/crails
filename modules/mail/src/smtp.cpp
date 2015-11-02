@@ -39,9 +39,9 @@ void        Smtp::Mail::DelRecipient(const std::string& address)
 using namespace boost::asio::ip;
 
 Smtp::Server::Server() :
-  sock(io_service),
   ssl_context(io_service, boost::asio::ssl::context::sslv23),
   ssl_sock(io_service, ssl_context),
+  sock(ssl_sock.next_layer()),
   tls_enabled(false)
 {
 }
@@ -51,7 +51,6 @@ void Smtp::Server::connect(const std::string& hostname, unsigned short port)
   boost::system::error_code error = boost::asio::error::host_not_found;
   tcp::resolver             resolver(io_service);
   tcp::resolver::query      query(hostname, std::to_string(port));
-  auto&                     sock = tls_enabled ? ssl_sock.next_layer() : this->sock;
   tcp::resolver::iterator   endpoint_iterator = resolver.resolve(query);
   tcp::resolver::iterator   end;
 
@@ -76,8 +75,6 @@ void Smtp::Server::connect(const std::string& hostname, unsigned short port, con
 
 void Smtp::Server::disconnect(void)
 {
-  auto& sock = tls_enabled ? ssl_sock.next_layer() : this->sock;
-
   smtp_quit();
   sock.close();
 }
@@ -218,8 +215,6 @@ void Smtp::Server::smtp_new_mail(const Smtp::Mail& mail)
 
 void Smtp::Server::smtp_handshake()
 {
-  auto& sock = tls_enabled ? ssl_sock.next_layer() : this->sock;
-
   // Receiving the server identification
   server_id = smtp_read_answer(220);
   // Sending handshake
