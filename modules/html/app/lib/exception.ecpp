@@ -1,5 +1,5 @@
 // BEGIN LINKING
-#include <Boots/Utils/directory.hpp>
+#include <boost/filesystem.hpp>
 #include <crails/params.hpp>
 #include <algorithm>
 
@@ -55,7 +55,7 @@ Params& @params;
 <pre><%= exception_what %></pre>
 
 
-<p><code>Crails directory: <%= Directory::Current() %></code></p>
+<p><code>Crails directory: <%= boost::filesystem::current_path().string() %></code></p>
 
 <div id="traces">
     <div id="trace" style="display: block;">
