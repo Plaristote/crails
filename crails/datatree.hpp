@@ -10,6 +10,8 @@ class DataTree;
 class Data
 {
   friend class DataTree;
+
+  void overload_path(const std::string& path) { this->path = path; }
 protected:
   Data(boost::property_tree::ptree& tree, const std::string& key) :
     tree(tree),
@@ -103,7 +105,8 @@ public:
 
 private:
   boost::property_tree::ptree& tree;
-  const std::string            context, key, path;
+  const std::string            context, key;
+  std::string                  path;
   bool                         _each_break;
 };
 

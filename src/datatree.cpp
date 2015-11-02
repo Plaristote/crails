@@ -29,10 +29,15 @@ DataTree& DataTree::from_json_file(const string& json_file)
 
 void Data::each(std::function<void (Data)> functor)
 {
+  auto& tree = (path == "") ? this->tree : this->tree.get_child(path);
+
   _each_break = false;
-  for (boost::property_tree::ptree::value_type& v : tree.get_child(path))
+  for (boost::property_tree::ptree::value_type& v : tree)
   {
-    functor(Data(v.second, v.first));
+    Data data(v.second, v.first);
+
+    data.overload_path("");
+    functor(data);
     if (_each_break)
       break ;
   }
