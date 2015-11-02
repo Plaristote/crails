@@ -21,7 +21,7 @@ if command == 'add'
   task.base_directory source, Dir.pwd do
     task.directory :tasks do
       task.directory task_name do
-        task.file 'CMakeLists.txt'
+        task.generate_erb 'CMakeLists.txt', 'CMakeLists.txt.erb', task_name: task_name
         task.file 'main.cpp'
       end
     end

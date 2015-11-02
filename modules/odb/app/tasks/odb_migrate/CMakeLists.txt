@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.0)
 file(GLOB task_files
      *.cpp)
 
-add_executable(task ${task_files})
+add_executable(odb_migrate ${task_files})
 
-target_link_libraries(task ${dependencies})
+target_link_libraries(odb_migrate ${dependencies})
+
+set_target_properties(odb_migrate PROPERTIES OUTPUT_NAME "task")
