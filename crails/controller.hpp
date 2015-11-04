@@ -26,6 +26,7 @@ namespace Crails
     virtual ~Controller();
 
     void initialize(void);
+    void finalize(void) {}
     
     enum RenderType
     {

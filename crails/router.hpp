@@ -61,17 +61,18 @@ namespace Crails
     controller.initialize(); \
     if (!controller.response["status"].exists()) \
       controller.function(); \
+    controller.finalize(); \
     return (controller.response); \
   });
 
 # define Crudify(resource_name, controller) \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \
   SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,show);   \
   SetRoute("POST",   '/' + SYM2STRING(resource_name),               controller,create); \
   SetRoute("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,update); \
   SetRoute("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,destroy);
 
 # define SetResource(resource_name, controller) \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \
   SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,new);    \
   SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,edit);   \
   Crudify(resource_name, controller)
