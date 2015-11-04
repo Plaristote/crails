@@ -1,7 +1,7 @@
 #ifndef  CRAILS_IMAGE_HPP
 # define CRAILS_IMAGE_HPP
 
-# include <ImageMagick-6/Magick++.h>
+# include <Magick++.h>
 # include <crails/params.hpp>
 # include <boost/filesystem.hpp>
 

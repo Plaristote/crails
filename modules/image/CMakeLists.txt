@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(crails-image)
 
-include_directories(.)
+include_directories(. ${ImageMagick_Magick++_INCLUDE_DIRS})
 
 file(GLOB         crails_image          src/*.cpp)
 file(GLOB         headers_crails_image  crails/*.hpp)

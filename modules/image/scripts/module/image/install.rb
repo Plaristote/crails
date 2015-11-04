@@ -17,5 +17,9 @@ project.base_directory source, base_directory do
   end
 end
 
-CMakeLists.add_dependency 'Magick++'
-CMakeLists.add_crails_module 'image'
+cmake = CMakeLists.new
+cmake.add_find_package        'ImageMagick COMPONENTS Magick++ REQUIRED'
+cmake.add_include_directories '${ImageMagick_Magick++_INCLUDE_DIRS}'
+cmake.add_dependency          '${ImageMagick_Magick++_LIBRARY}'
+cmake.add_crails_module       'image'
+cmake.write
