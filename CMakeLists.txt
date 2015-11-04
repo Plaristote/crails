@@ -45,6 +45,7 @@ endif()
 ##
 find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system REQUIRED)
+find_package(ImageMagick COMPONENTS Magick++)
 
 include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
@@ -106,6 +107,10 @@ install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)
 add_subdirectory(modules/html)
 add_subdirectory(modules/json)
 add_subdirectory(modules/mail)
+
+if (ImageMagick_Magick++_FOUND)
+  add_subdirectory(modules/image)
+endif()
 
 if (USE_MEMCACHED)
   add_subdirectory(modules/cache)

@@ -16,9 +16,13 @@ project.base_directory source, base_directory do
   end
 end
 
-CMakeLists.add_crails_module 'mail'
+cmake = CMakeLists.new
+cmake.add_crails_module 'mail'
+
 main_cpp = MainCppEditor.new
 main_cpp.add_include     "crails/mail_servers.hpp"
 main_cpp.add_initializer "MailServers::singleton::Initialize();"
 main_cpp.add_finalizer   "MailServers::singleton::Finalize();"
+
+cmake.write
 main_cpp.write

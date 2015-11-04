@@ -15,5 +15,7 @@ project.base_directory source, base_directory do
   end
 end
 
-CMakeLists.add_dependency 'mongoclient'
-CMakeLists.add_crails_module 'mongodb'
+cmake = CMakeLists.new
+cmake.add_dependency 'mongoclient'
+cmake.add_crails_module 'mongodb'
+cmake.write
