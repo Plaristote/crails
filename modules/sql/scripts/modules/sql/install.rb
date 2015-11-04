@@ -24,17 +24,21 @@ project.base_directory source, base_directory do
   end
 end
 
-CMakeLists.add_dependency 'soci_core'
+cmake = CMakeLists.new
+
+cmake.add_dependency 'soci_core'
 backends.each do |backend|
-  CMakeLists.add_dependency "soci_#{backend}"
+  cmake.add_dependency "soci_#{backend}"
 end
-CMakeLists.add_crails_module 'sql'
-CMakeLists.add_crails_task 'sql_migrate'
+cmake.add_crails_module 'sql'
+cmake.add_crails_task 'sql_migrate'
 
 guardfile = GuardfileEditor.new
 guardfile.add_task 'before_compile', <<RUBY
-  guard 'crails-sql-models' do
+guard 'crails-sql-models' do
     watch(%r{app/models/.+\.h(pp)?$})
   end
 RUBY
+
+cmake.write
 guardfile.write

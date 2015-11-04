@@ -33,17 +33,20 @@ until (picked_backends - backends).empty? && picked_backends.count > 0
   picked_backends = gets.chomp.split /\s*,\s*/
 end
 
-CMakeLists.add_dependency 'odb'
+cmake = CMakeLists.new
+cmake.add_dependency 'odb'
 picked_backends.each do |backend|
-  CMakeLists.add_dependency "odb-#{backend}"
+  cmake.add_dependency "odb-#{backend}"
 end
-CMakeLists.add_crails_module 'odb'
-CMakeLists.add_crails_task 'odb_migrate'
+cmake.add_crails_module 'odb'
+cmake.add_crails_task 'odb_migrate'
 
 guardfile = GuardfileEditor.new
 guardfile.add_task 'before_compile', <<RUBY
-  guard 'crails-odb' do
+guard 'crails-odb' do
     watch(%r{app/models/.+\.h(pp)?$})
   end
 RUBY
+
+cmake.write
 guardfile.write

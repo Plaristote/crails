@@ -15,4 +15,6 @@ project.base_directory source, base_directory do
   end
 end
 
-CMakeLists.add_crails_module 'cache'
+cmake = CMakeLists.new
+cmake.add_crails_module 'cache'
+cmake.write
