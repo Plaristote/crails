@@ -54,7 +54,6 @@ void Smtp::Server::connect(const std::string& hostname, unsigned short port)
   tcp::resolver::iterator   endpoint_iterator = resolver.resolve(query);
   tcp::resolver::iterator   end;
 
-  this->hostname = hostname;
   while (error && endpoint_iterator != end)
   {
     sock.close();
