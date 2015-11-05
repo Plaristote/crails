@@ -23,7 +23,7 @@ Here's a list of the dependecies:
 - ruby >= 1.9 (development only)
 - cpp-netlib
 - segvcatch (optional)
-- [soci](http://soci.sourceforge.net) (optional, used by crails-sql)
+- [ODB](http://www.codesynthesis.com/products/odb/) (optional, used by crails-odb)
 - [mongo-cxx-driver](https://github.com/mongodb/mongo-cxx-driver/tree/legacy) (optional, used by crail-mongodb)
 - [libmemcached](http://libmemcached.org) (optional, used by crails-cache)
 - [Magick++](http://www.imagemagick.org/Magick++/) (optional, used by crails-image)
