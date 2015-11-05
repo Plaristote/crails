@@ -7,8 +7,7 @@ project(crails_project)
 option(USE_MULTITHREAD "Asynchronous Server" ON)
 option(USE_MEMCACHED   "Memcached"           ON)
 option(USE_MONGODB     "MongoDB"             ON)
-option(USE_SOCI        "Soci"                ON)
-option(USE_ODB         "ODB ORM"             OFF)
+option(USE_ODB         "ODB ORM"             ON)
 option(DEVELOPER_MODE  "Developer mode"      ON)
 
 cmake_policy(SET CMP0042 OLD)
@@ -108,7 +107,8 @@ add_subdirectory(modules/html)
 add_subdirectory(modules/json)
 add_subdirectory(modules/mail)
 
-if (ImageMagick_Magick++_FOUND)
+
+if (${ImageMagick_Magick++_FOUND})
   add_subdirectory(modules/image)
 endif()
 
@@ -118,10 +118,6 @@ endif()
 
 if (USE_MONGODB)
 #  add_subdirectory(modules/mongodb)
-endif()
-
-if (USE_SOCI)
-#  add_subdirectory(modules/sql)
 endif()
 
 if (USE_ODB)
