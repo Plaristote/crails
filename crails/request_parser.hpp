@@ -37,7 +37,7 @@ namespace Crails
   public:
     void wait_for_body(const HttpServer::request&, ServerTraits::Response, Params&);
   protected:
-    virtual void body_received(const HttpServer::request&, ServerTraits::Response, Params&) = 0;
+    virtual void body_received(const HttpServer::request&, ServerTraits::Response, Params&, const std::string& body) = 0;
   };
 
   class RequestDataParser : public RequestParser
@@ -52,7 +52,7 @@ namespace Crails
   public:
     RequestParser::Status operator()(const HttpServer::request&, ServerTraits::Response, Params&);
   private:
-    void body_received(const HttpServer::request&, ServerTraits::Response, Params&);
+    void body_received(const HttpServer::request&, ServerTraits::Response, Params&, const std::string& body);
   };
 
   class RequestMultipartParser : public RequestParser
@@ -76,7 +76,7 @@ namespace Crails
   public:
     RequestParser::Status operator()(const HttpServer::request&, ServerTraits::Response, Params&);
   private:
-    void body_received(const HttpServer::request&, ServerTraits::Response, Params&);
+    void body_received(const HttpServer::request&, ServerTraits::Response, Params&, const std::string& body);
   };
 }
 

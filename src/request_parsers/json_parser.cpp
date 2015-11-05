@@ -18,8 +18,8 @@ RequestParser::Status RequestJsonParser::operator()(const HttpServer::request& r
   return RequestParser::Continue;
 }
 
-void RequestJsonParser::body_received(const HttpServer::request& request, ServerTraits::Response, Params& params)
+void RequestJsonParser::body_received(const HttpServer::request& request, ServerTraits::Response, Params& params, const string& body)
 {
-  if (request.body.size() > 0)
-    params.as_data().merge(DataTree().from_json(request.body));
+  if (body.size() > 0)
+    params.as_data().merge(DataTree().from_json(body));
 }

@@ -22,7 +22,7 @@ void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits:
                         size_t size_read,
                         HttpServer::connection_ptr connection_ptr)
   {
-    logger << Logger::Info << "Reading buffer..." << Logger::endl;
+    logger << Logger::Info << "Reading buffer (" << size_read << " bytes)..." << Logger::endl;
     for (unsigned int i = 0 ; i < size_read ; ++i)
       read_buffer += range[i];
     total_read += size_read;
@@ -36,12 +36,12 @@ void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits:
   };
   response->read(callback);
   sem.wait(sem_lock);
-  body_received(request, response, params);
+  body_received(request, response, params, read_buffer);
   params.response_parsed.notify_all();
 }
 #else
 void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
-  body_received(request, response, params);
+  body_received(request, response, params, request.body);
 }
 #endif
