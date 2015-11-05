@@ -4,6 +4,9 @@ project(crails-image)
 
 include_directories(. ${ImageMagick_Magick++_INCLUDE_DIRS})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAGICKCORE_QUANTUM_DEPTH=16")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMAGICKCORE_HDRI_ENABLE=0")
+
 file(GLOB         crails_image          src/*.cpp)
 file(GLOB         headers_crails_image  crails/*.hpp)
 file(GLOB         scripts_image_module  scripts/modules/image/*.rb)

@@ -1,15 +1,24 @@
 #include <crails/image.hpp>
+#include <Magick++.h>
 
 using namespace std;
 using namespace Crails;
 
-void BasicImage::load_original_image()
+void BasicImage::use_uploaded_file(const Crails::Params::File* file)
 {
-  if (original_image_loaded == false && std::string::length() > 0)
+  if (file)
   {
-    original_image = Magick::Image(get_filepath());
-    original_image_loaded = true;
+    cleanup_files();
+    generate_filename();
+    boost::filesystem::rename(file->temporary_path, get_filepath());
   }
+  else
+    std::string::operator=("");
+}
+
+void BasicImage::cleanup_files()
+{
+  boost::filesystem::remove(get_filepath());
 }
 
 void BasicImage::generate_filename()
