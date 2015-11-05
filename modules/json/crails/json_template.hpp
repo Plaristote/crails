@@ -72,6 +72,9 @@ namespace Crails
 
     bool first_item_in_object;
   };
+  template<> void JsonTemplate::json<std::function<void()> >(const std::string& key, const std::function<void()> func);
+  template<> void JsonTemplate::add_value<const char*>(const char* val);
+  template<> void JsonTemplate::add_value<std::string>(const std::string val);
 }
 
 #endif
