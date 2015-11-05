@@ -33,8 +33,8 @@ const Router::Action* Router::get_action(const string& method, const string& uri
 void Router::match(const std::string& route, Router::Action callback)
 {
   Item item;
-  
-  item_initialize_regex(item, route);
+
+  item_initialize_regex(item, '^' + route + '$');
   item.run = callback;
   routes.push_back(item);
 }
@@ -42,7 +42,7 @@ void Router::match(const std::string& route, Router::Action callback)
 void Router::match(const std::string& method, const std::string& route, Router::Action callback)
 {
   Item item;
-  
+
   item_initialize_regex(item, '^' + route + '$');
   item.method = method;
   item.run    = callback;
