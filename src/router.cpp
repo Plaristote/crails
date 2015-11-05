@@ -1,37 +1,31 @@
 #include "crails/router.hpp"
 #include "crails/session_store.hpp"
 #include "crails/http.hpp"
+#include <memory>
 
 using namespace std;
 using namespace Crails;
 
 const Router::Action* Router::get_action(const string& method, const string& uri, Params& query_params) const
 {
-  auto it  = routes.begin();
-  auto end = routes.end();
-
-  // Searching and executing the first matching route
-  for (; it != end ; ++it)
+  for (const Item& item : routes)
   {
-    const Item&    item     = *it;
-    unsigned short n_params = item.param_names.size();
-    regmatch_t*    params   = new regmatch_t[n_params + 1];
+    unsigned short         n_params = item.param_names.size();
+    unique_ptr<regmatch_t> params(new regmatch_t[n_params + 1]);
 
     if ((item.method == "" || item.method == method) &&
-        !(item.regex.Match(uri, params, n_params + 1)))
+        !(item.regex.Match(uri, params.get(), n_params + 1)))
     {
       for (unsigned short i = 1 ; i <= n_params ; ++i)
       {
-        regmatch_t  match       = params[i];
+        regmatch_t  match       = params.get()[i];
         std::string param_name  = item.param_names[i -1];
         std::string param_value = uri.substr(match.rm_so, match.rm_eo - match.rm_so);
 
         query_params[param_name] = param_value;
       }
-      delete[] params;
       return &(item.run);
     }
-    delete[] params;
   }
   return 0;
 }
