@@ -7,7 +7,7 @@ include_directories(. ${ImageMagick_Magick++_INCLUDE_DIRS})
 file(GLOB         crails_image          src/*.cpp)
 file(GLOB         headers_crails_image  crails/*.hpp)
 file(GLOB         scripts_image_module  scripts/modules/image/*.rb)
-file(GLOB_RECURSE sql_app_template      app/*)
+file(GLOB_RECURSE image_app_template    app/*)
 
 add_library(crails-image${crails-suffix} SHARED ${crails_image})
 install(FILES    ${headers_crails_image}      DESTINATION include/crails)

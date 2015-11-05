@@ -8,7 +8,7 @@ require 'maincpp'
 
 project        = ProjectModel.new
 base_directory = Dir.pwd
-source         = ENV['CRAILS_SHARED_DIR'] + '/app_template/sql'
+source         = ENV['CRAILS_SHARED_DIR'] + '/app_template/image'
 backends       = ['mysql', 'postgresql', 'sqlite3']
 
 project.base_directory source, base_directory do
