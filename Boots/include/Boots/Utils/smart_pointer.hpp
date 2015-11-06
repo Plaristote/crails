@@ -32,7 +32,7 @@ namespace Crails
     {
     }
 
-    safe_ptr& operator=(std::shared_ptr<T>& cpy)
+    safe_ptr& operator=(const std::shared_ptr<T>& cpy)
     {
       std::shared_ptr<T>::operator=(cpy);
       return *this;
