@@ -1,4 +1,5 @@
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/optional/optional.hpp>
 #include <crails/datatree.hpp>
 #include <sstream>
 #include <fstream>
@@ -45,14 +46,10 @@ void Data::each(std::function<void (Data)> functor)
 
 bool Data::exists() const
 {
-  if (tree.count(context) > 0)
-  {
-    for (boost::property_tree::ptree::value_type& v : tree.get_child(context))
-    {
-      if (v.first == key)
-        return true;
-    }
-  }
+  boost::optional< boost::property_tree::ptree& > child = tree.get_child_optional(path);
+
+  if (child)
+    return true;
   return false;
 }
 
