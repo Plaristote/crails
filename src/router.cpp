@@ -10,8 +10,8 @@ const Router::Action* Router::get_action(const string& method, const string& uri
 {
   for (const Item& item : routes)
   {
-    unsigned short         n_params = item.param_names.size();
-    unique_ptr<regmatch_t> params(new regmatch_t[n_params + 1]);
+    unsigned short           n_params = item.param_names.size();
+    unique_ptr<regmatch_t[]> params(new regmatch_t[n_params + 1]);
 
     if ((item.method == "" || item.method == method) &&
         !(item.regex.Match(uri, params.get(), n_params + 1)))
