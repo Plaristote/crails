@@ -51,30 +51,48 @@ std::string BasicImage::get_filename(const std::string& transformation_name) con
   return (*this) + '.' + format;
 }
 
-void BasicImage::perform_crop(const std::string& transformation_name, unsigned int max_x, unsigned int max_y)
+void BasicImage::perform_crop(const std::string& transformation_name, unsigned int max_x, unsigned int max_y, int options)
 {
   Magick::Image image(get_filepath());
-  float width_ratio, height_ratio, new_width, new_height, resize_ratio;
-  float long_side_max  = std::max(max_x, max_y);
-  float short_side_max = std::min(max_x, max_y);
 
   if (image.columns() > max_x || image.rows() > max_y)
   {
-    if (image.columns() > image.rows())
-    {
-      width_ratio  = long_side_max / image.columns();
-      height_ratio = short_side_max / image.rows();
-    }
-    else
-    {
-      width_ratio  = short_side_max / image.columns();
-      height_ratio = long_side_max / image.rows();
-    }
-    resize_ratio = std::min(width_ratio, height_ratio);
-    new_height   = image.rows()    * resize_ratio;
-    new_width    = image.columns() * resize_ratio;
-    image.zoom(Magick::Geometry(new_width, new_height));
+    if (options & PreserveAspectRatio)
+      get_geometry_for_crop_preserving_aspect_ratio(image.columns(), image.rows(), max_x, max_y);
+    image.zoom(Magick::Geometry(max_x, max_y));
   }
+  image.magick(format);
+  image.write(get_filepath(transformation_name));
+}
+
+void BasicImage::get_geometry_for_crop_preserving_aspect_ratio(unsigned int width, unsigned int height, unsigned int& max_x, unsigned int& max_y)
+{
+  float width_ratio, height_ratio, resize_ratio;
+  float long_side_max  = std::max(max_x, max_y);
+  float short_side_max = std::min(max_x, max_y);
+
+  if (width > height)
+  {
+    width_ratio  = long_side_max / width;
+    height_ratio = short_side_max / height;
+  }
+  else
+  {
+    width_ratio  = short_side_max / height;
+    height_ratio = long_side_max / width;
+  }
+  resize_ratio = std::min(width_ratio, height_ratio);
+  max_x        = height * resize_ratio;
+  max_y        = width  * resize_ratio;
+}
+
+void BasicImage::perform_resize(const std::string& transformation_name, unsigned int width, unsigned int height, int options)
+{
+  Magick::Image    image(get_filepath());
+  Magick::Geometry size(width, height);
+
+  size.aspect(options & PreserveAspectRatio);
+  image.resize(size);
   image.magick(format);
   image.write(get_filepath(transformation_name));
 }

@@ -9,6 +9,11 @@ namespace Crails
   class BasicImage : public std::string
   {
   public:
+    enum Option
+    {
+      PreserveAspectRatio
+    };
+
     BasicImage() : format("png")
     {
     }
@@ -30,7 +35,8 @@ namespace Crails
     }
 
   protected:
-    void perform_crop(const std::string& transformation_name, unsigned int max_x, unsigned int max_y);
+    void perform_resize(const std::string& transformation_name, unsigned int x, unsigned int y, int options = 0);
+    void perform_crop(const std::string& transformation_name, unsigned int max_x, unsigned int max_y, int options = 0);
 
     std::string get_filepath(const std::string& transformation_name = "") const;
     std::string get_filename(const std::string& transformation_name = "") const;
@@ -38,6 +44,9 @@ namespace Crails
 
     static std::string store_path, default_image_path;
     std::string        format;
+
+  private:
+    void get_geometry_for_crop_preserving_aspect_ratio(unsigned int width, unsigned int height, unsigned int& max_x, unsigned int& max_y);
   };
 }
 
