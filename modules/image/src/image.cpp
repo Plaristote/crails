@@ -61,6 +61,7 @@ void BasicImage::perform_crop(const std::string& transformation_name, unsigned i
       get_geometry_for_crop_preserving_aspect_ratio(image.columns(), image.rows(), max_x, max_y);
     image.zoom(Magick::Geometry(max_x, max_y));
   }
+  image.quality(get_default_image_quality());
   image.magick(format);
   image.write(get_filepath(transformation_name));
 }
@@ -92,6 +93,7 @@ void BasicImage::perform_resize(const std::string& transformation_name, unsigned
   Magick::Geometry size(width, height);
 
   size.aspect(options & PreserveAspectRatio);
+  image.quality(get_default_image_quality());
   image.resize(size);
   image.magick(format);
   image.write(get_filepath(transformation_name));

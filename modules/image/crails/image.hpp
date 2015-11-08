@@ -34,6 +34,11 @@ namespace Crails
       return BasicImage::default_image_path;
     }
 
+    virtual unsigned short get_default_image_quality() const
+    {
+      return BasicImage::default_image_quality;
+    }
+
   protected:
     void perform_resize(const std::string& transformation_name, unsigned int x, unsigned int y, int options = 0);
     void perform_crop(const std::string& transformation_name, unsigned int max_x, unsigned int max_y, int options = 0);
@@ -42,8 +47,9 @@ namespace Crails
     std::string get_filename(const std::string& transformation_name = "") const;
     void        generate_filename();
 
-    static std::string store_path, default_image_path;
-    std::string        format;
+    const static std::string    store_path, default_image_path;
+    const static unsigned short default_image_quality;
+    std::string                 format;
 
   private:
     void get_geometry_for_crop_preserving_aspect_ratio(unsigned int width, unsigned int height, unsigned int& max_x, unsigned int& max_y);
