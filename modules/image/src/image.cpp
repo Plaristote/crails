@@ -1,4 +1,5 @@
 #include <crails/image.hpp>
+#include <crails/utils/string.hpp>
 #include <Magick++.h>
 
 using namespace std;
@@ -23,12 +24,11 @@ void BasicImage::cleanup_files()
 
 void BasicImage::generate_filename()
 {
-  std::string       chars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
+  std::string       charset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
   std::stringstream stream;
 
   stream << std::time(0) << '_';
-  for (short i = 0 ; i < 5 ; ++i)
-    stream << chars[std::rand() % chars.length()];
+  stream << generate_random_string(charset, 5);
   std::string::operator=(stream.str());
 }
 
