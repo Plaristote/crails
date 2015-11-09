@@ -43,7 +43,7 @@ module ::Guard
           file_content += line + "\n"
         else
           required_filename = current_dir + '/' + matches[2]
-          file_content     += (compile_file required_filename) + "\n"
+          file_content     += (compile_file required_filename.strip) + "\n"
         end
       end
       file_content
