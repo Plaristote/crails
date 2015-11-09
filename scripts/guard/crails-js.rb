@@ -1,4 +1,5 @@
 require 'coffee-script'
+require 'fileutils'
 
 module ::Guard
   class CrailsJs < Plugin
@@ -12,6 +13,7 @@ module ::Guard
         text        = compile_file target
         target      = extension_to_js target
         output_file = options[:output] + '/' + target
+        FileUtils.mkdir_p options[:output]
         File.open(output_file, 'w') do |f|
           f.write "(function() {\n#{text}\n})();"
         end
@@ -31,7 +33,7 @@ module ::Guard
     def compile_file file
       current_dir       = file.split('/')[0...-1].join('/')
       full_path         = (options[:input] + '/' + file).gsub(/\/+/, '/')
-      source            = File.read full_path
+      source            = File.read full_path, encoding: 'BINARY'
       source            = CoffeeScript.compile source, bare: true if file.match(/\.coffee$/) != nil
       comment_character = "//"
       file_content      = ''
@@ -41,7 +43,7 @@ module ::Guard
           file_content += line + "\n"
         else
           required_filename = current_dir + '/' + matches[2]
-          file_content     += (compile_file required_filename) + "\n"
+          file_content     += (compile_file required_filename.strip) + "\n"
         end
       end
       file_content
