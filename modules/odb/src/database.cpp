@@ -96,9 +96,3 @@ void Database::connect()
   if (db == NULL)
     throw boost_ext::runtime_error("Could not create a database object");
 }
-
-odb::database& Database::get_database()
-{
-  connect();
-  return *db;
-}

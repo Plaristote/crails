@@ -15,7 +15,13 @@ namespace ODB
     Database(Data settings);
 
     const std::string& get_backend_name() const { return backend; }
-    odb::database&     get_database();
+
+    template<class T>
+    T& get_database()
+    {
+      connect();
+      return *(reinterpret_cast<T*>(db.get()));
+    }
 
     void connect(void);
   private:
