@@ -1,3 +1,4 @@
+#include <crails/utils/string.hpp>
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
