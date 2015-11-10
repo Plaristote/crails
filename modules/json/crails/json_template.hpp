@@ -30,9 +30,11 @@ namespace Crails
     {
       add_separator();
       add_key(key);
+      first_item_in_object = true;
       stream << '[';
       while (beg != end)
       {
+        add_separator();
         add_value(*beg);
         ++beg;
       }
@@ -47,9 +49,11 @@ namespace Crails
     {
       add_separator();
       add_key(key);
+      first_item_in_object = true;
       stream << '[';
       while (beg != end)
       {
+        add_separator();
         add_object([this, func, beg]() { func(*beg); });
         ++beg;
       }
