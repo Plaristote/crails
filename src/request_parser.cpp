@@ -10,7 +10,7 @@ bool RequestParser::content_type_matches(Params& params, const Regex regex)
   {
     string type = params["headers"]["Content-Type"].as<string>();
 
-    return (regex.Match(type));
+    return (!(regex.Match(type)));
   }
   return false;
 }

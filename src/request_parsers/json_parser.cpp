@@ -8,7 +8,7 @@ using namespace boost::property_tree;
 
 RequestParser::Status RequestJsonParser::operator()(const HttpServer::request& request, ServerTraits::Response response, Params& params)
 {
-  static const Regex is_json("^application/json", REG_EXTENDED);
+  static const Regex is_json("application/json", REG_EXTENDED);
 
   if (params["method"].as<string>() != "GET" && content_type_matches(params, is_json))
   {

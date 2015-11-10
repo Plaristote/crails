@@ -22,13 +22,13 @@ void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits:
                         size_t size_read,
                         HttpServer::connection_ptr connection_ptr)
   {
-    logger << Logger::Info << "Reading buffer (" << size_read << " bytes)..." << Logger::endl;
+    logger << Logger::Debug << "Reading buffer (" << size_read << " bytes)..." << Logger::endl;
     for (unsigned int i = 0 ; i < size_read ; ++i)
       read_buffer += range[i];
     total_read += size_read;
     if (total_read == to_read)
     {
-      logger << Logger::Info << "Finished reading..." << Logger::endl;
+      logger << Logger::Debug << "Finished reading..." << Logger::endl;
       sem.notify_all();
     }
     else
