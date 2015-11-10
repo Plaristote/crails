@@ -3,6 +3,7 @@
 #include "crails/cookie_data.hpp"
 #include "crails/params.hpp"
 #include "crails/multipart.hpp"
+#include "crails/utils/parse_cookie_values.hpp"
 #include <fstream>
 
 using namespace std;
@@ -29,7 +30,6 @@ void MultipartParser::parse(Params& params)
         content_disposition = read_buffer.substr(disp_so, disp_len);
         read_buffer.erase(0, form_end);
         parsed_state++;
-        cout << "Parsed state 1" << endl;
       }
     }
     if (parsed_state == 1)
@@ -43,7 +43,11 @@ void MultipartParser::parse(Params& params)
         unsigned int form_len = matches[1].rm_eo - form_so;
         unsigned int form_end = matches[0].rm_eo;
 
-        content_data.unserialize(read_buffer.substr(form_so, form_len));
+        parse_cookie_values(read_buffer.substr(form_so, form_len), [this](const string& key, const string& val) -> bool
+        {
+          content_data[key] = val;
+          return true;
+        });
         content_data.as_data().each([this](Data data)
         {
           string str = data.as<std::string>();
@@ -56,7 +60,6 @@ void MultipartParser::parse(Params& params)
         });
         read_buffer.erase(0, form_end);
         parsed_state++;
-          cout << "Parsed state 2" << endl;
       }
     }
     if (parsed_state == 2)
@@ -68,18 +71,14 @@ void MultipartParser::parse(Params& params)
         if (end != string::npos)
         {
           mimetype = read_buffer.substr(14, end - 14);
-          cout << "Found mimetype: " << mimetype << endl;
           read_buffer.erase(0, end + 4);
           parsed_state ++;
-          cout << "Parsed state 3 (file)" << endl;
         }
       }
       else if (read_buffer.substr(0, 2) == "\r\n")
       {
-        cout << '\'' << read_buffer.substr(0, 14) << '\'' << endl;
         read_buffer.erase(0, 2);
         parsed_state++;
-        cout << "Parsed state 3 (form)" << endl;
       }
     }
     if (parsed_state == 3)
@@ -90,6 +89,7 @@ void MultipartParser::parse(Params& params)
       {
         if (pos != string::npos)
         {
+          content_data.as_data().output();
           string field = content_data["name"];
 
           params.lock();
@@ -98,7 +98,6 @@ void MultipartParser::parse(Params& params)
           read_buffer.erase(0, pos);
           parsed_state = 0;
           blocked = false;
-          cout << "Done" << endl;
         }
       }
       else
@@ -125,13 +124,10 @@ void MultipartParser::parse(Params& params)
           blocked                = read_buffer.size() <= pos + boundary.size();
           mimetype               = "";
           to_close               = true;
-          cout << "Done" << endl;
         }
         else
           to_copy = to_erase = read_buffer.size();
         file.write(read_buffer.c_str(), to_copy - 2);
-        //cout << "Reading: " << endl;
-        //cout << read_buffer << endl;
         read_buffer.erase(0, to_erase - 2);
         if (to_close)
           file.close();

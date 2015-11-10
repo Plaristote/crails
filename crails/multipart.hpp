@@ -26,7 +26,7 @@ namespace Crails
     short           parsed_state;
     std::ofstream   file;
     std::string     mimetype;
-    CookieData      content_data;
+    DataTree        content_data;
     std::string     content_disposition;
   };
 }
