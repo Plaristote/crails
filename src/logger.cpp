@@ -6,7 +6,7 @@ using namespace std;
 using namespace Crails;
 
 #ifdef ASYNC_SERVER
-# define log_prefix << '[' << std::this_thread::get_id() << "] "
+# define log_prefix << '[' << std::hex << std::this_thread::get_id() << "] "
 #else
 # define log_prefix
 #endif
