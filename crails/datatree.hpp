@@ -3,6 +3,8 @@
 
 # include <boost/property_tree/ptree.hpp>
 # include <functional>
+# include <vector>
+# include <string>
 # include <iostream>
 
 class DataTree;
@@ -40,6 +42,9 @@ public:
   {
     return tree.get<T>(path + '.' + key);
   }
+  
+  std::vector<std::string> find_missing_keys(const std::vector<std::string>& keys) const;
+  bool                     require(const std::vector<std::string>& keys) const;
 
   const std::string& get_path() const { return path; }
   const std::string& get_key()  const { return key; }
@@ -72,6 +77,20 @@ public:
   }
 
   template<typename T>
+  bool operator!=(const T value) const { return !(Data::operator==(value)); }
+
+  Data operator||(Data value) const
+  {
+    return exists() ? *this : value;
+  }
+  
+  template<typename T>
+  T operator||(const T value) const
+  {
+    return defaults_to<T>(value);
+  }
+
+  template<typename T>
   void push_back(const T value)
   {
     boost::property_tree::ptree child;
@@ -88,6 +107,7 @@ public:
       get_ptree().push_back(std::make_pair("", child));
   }
 
+  bool is_blank() const;
   bool exists() const;
   void destroy() { tree.erase(path); }
 

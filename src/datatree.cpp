@@ -53,6 +53,30 @@ bool Data::exists() const
   return false;
 }
 
+bool Data::is_blank() const
+{
+  return !exists();
+}
+
+std::vector<std::string> Data::find_missing_keys(const std::vector<std::string>& keys) const
+{
+  vector<string> missing_keys;
+
+  for (string key : keys)
+  {
+    auto child = tree.get_child_optional(path + '.' + key);
+
+    if (!child)
+      missing_keys.push_back(key);
+  }
+  return missing_keys;
+}
+
+bool Data::require(const std::vector<std::string>& keys) const
+{
+  return find_missing_keys(keys).size() == 0;
+}
+
 void Data::merge(Data data)
 {
   boost::property_tree::ptree& local_tree = get_ptree();
