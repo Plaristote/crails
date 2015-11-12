@@ -89,7 +89,6 @@ void MultipartParser::parse(Params& params)
       {
         if (pos != string::npos)
         {
-          content_data.as_data().output();
           string field = content_data["name"];
 
           params.lock();
