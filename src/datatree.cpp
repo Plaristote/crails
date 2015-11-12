@@ -30,7 +30,7 @@ DataTree& DataTree::from_json_file(const string& json_file)
 
 void Data::each(std::function<void (Data)> functor)
 {
-  auto& tree = (path == "") ? this->tree : this->tree.get_child(path);
+  auto& tree = (path == "") ? *(this->tree) : this->tree->get_child(path);
 
   _each_break = false;
   for (boost::property_tree::ptree::value_type& v : tree)
@@ -46,7 +46,7 @@ void Data::each(std::function<void (Data)> functor)
 
 bool Data::exists() const
 {
-  boost::optional< boost::property_tree::ptree& > child = tree.get_child_optional(path);
+  boost::optional< boost::property_tree::ptree& > child = tree->get_child_optional(path);
 
   if (child)
     return true;
@@ -67,7 +67,7 @@ std::vector<std::string> Data::find_missing_keys(const std::vector<std::string>&
     path_prefix = path + '.';
   for (string key : keys)
   {
-    auto child = tree.get_child_optional(path_prefix + key);
+    auto child = tree->get_child_optional(path_prefix + key);
 
     if (!child)
       missing_keys.push_back(key);

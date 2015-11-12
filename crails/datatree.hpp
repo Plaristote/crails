@@ -16,7 +16,7 @@ class Data
   void overload_path(const std::string& path) { this->path = path; }
 protected:
   Data(boost::property_tree::ptree& tree, const std::string& key) :
-    tree(tree),
+    tree(&tree),
     context(""),
     key(key),
     path(key)
@@ -24,7 +24,7 @@ protected:
   }
 
   Data(boost::property_tree::ptree& tree, const std::string& context, const std::string& key) :
-    tree(tree),
+    tree(&tree),
     context(context),
     key(key),
     path(context.size() > 0 ? (context + '.' + key) : key)
@@ -32,17 +32,17 @@ protected:
   }
 
 public:
-  Data operator[](const std::string& key)
-  {
-    return Data(tree, path, key);
-  }
-
   template<typename T>
   T operator[](const std::string& key) const
   {
-    return tree.get<T>(path + '.' + key);
+    return tree->get<T>(path + '.' + key);
   }
-  
+
+  Data operator[](const std::string& key) const
+  {
+    return Data(*tree, path, key);
+  }
+
   std::vector<std::string> find_missing_keys(const std::vector<std::string>& keys) const;
   bool                     require(const std::vector<std::string>& keys) const;
 
@@ -51,29 +51,38 @@ public:
 
   std::size_t count() const
   {
-    return tree.get_child(path).size();
+    return tree->get_child(path).size();
   }
 
   template<typename T>
-  T as() const { return tree.get<T>(path); }
+  T as() const { return tree->get<T>(path); }
 
   template<typename T>
-  T defaults_to(const T def) { return tree.get(path, def); }
+  T defaults_to(const T def) const { return tree->get(path, def); }
 
   template<typename T>
-  operator T() const { return tree.get<T>(path); }
+  operator T() const { return tree->get<T>(path); }
 
   template<typename T>
   Data& operator=(const T value)
   {
-    tree.put(path, value);
+    tree->put(path, value);
+    return *this;
+  }
+
+  Data& operator=(const Data& copy)
+  {
+    tree    = copy.tree;
+    key     = copy.key;
+    context = copy.context;
+    path    = copy.path;
     return *this;
   }
 
   template<typename T>
   bool operator==(const T value) const
   {
-    return tree.get<T>(path) == value;
+    return tree->get<T>(path) == value;
   }
 
   template<typename T>
@@ -101,7 +110,7 @@ public:
       boost::property_tree::ptree array;
 
       array.push_back(std::make_pair("", child));
-      tree.add_child(path, array);
+      tree->add_child(path, array);
     }
     else
       get_ptree().push_back(std::make_pair("", child));
@@ -109,7 +118,7 @@ public:
 
   bool is_blank() const;
   bool exists() const;
-  void destroy() { tree.erase(path); }
+  void destroy() { tree->erase(path); }
 
   void each(std::function<void (Data)> functor);
   void _break() { _each_break = true; }
@@ -120,14 +129,13 @@ public:
   void merge(Data data);
   void merge(DataTree data_tree);
 
-  boost::property_tree::ptree& get_ptree() { return tree.get_child(path); }
-  const boost::property_tree::ptree& get_ptree() const { return tree.get_child(path); }
+  boost::property_tree::ptree& get_ptree() { return tree->get_child(path); }
+  const boost::property_tree::ptree& get_ptree() const { return tree->get_child(path); }
 
 private:
-  boost::property_tree::ptree& tree;
-  const std::string            context, key;
-  std::string                  path;
-  bool                         _each_break;
+  boost::property_tree::ptree* tree;
+  std::string context, key, path;
+  bool        _each_break;
 };
 
 class DataTree
