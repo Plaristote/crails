@@ -40,6 +40,11 @@ namespace Crails
     }
 
   protected:
+    virtual std::string get_default_store_path() const
+    {
+      return BasicImage::default_store_path;
+    }
+
     void perform_resize(const std::string& transformation_name, unsigned int x, unsigned int y, int options = 0);
     void perform_crop(const std::string& transformation_name, unsigned int max_x, unsigned int max_y, int options = 0);
 
@@ -47,7 +52,7 @@ namespace Crails
     std::string get_filename(const std::string& transformation_name = "") const;
     void        generate_filename();
 
-    const static std::string    store_path, default_image_path;
+    const static std::string    default_store_path, default_image_path;
     const static unsigned short default_image_quality;
     std::string                 format;
 

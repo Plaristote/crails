@@ -11,7 +11,7 @@ void BasicImage::use_uploaded_file(const Crails::Params::File* file)
   {
     cleanup_files();
     generate_filename();
-    boost::filesystem::rename(file->temporary_path, get_filepath());
+    boost::filesystem::copy_file(file->temporary_path, get_filepath());
   }
   else
     std::string::operator=("");
@@ -36,12 +36,12 @@ std::string BasicImage::get_path(const std::string& transformation_name) const
 {
   if (length() == 0)
     return get_default_image_path();
-  return '/' + store_path + '/' + get_filename(transformation_name);
+  return '/' + get_default_store_path() + '/' + get_filename(transformation_name);
 }
 
 std::string BasicImage::get_filepath(const std::string& transformation_name) const
 {
-  return "public/" + store_path + '/' + get_filename(transformation_name);
+  return boost::filesystem::initial_path().string() + "/public/" + get_default_store_path() + '/' + get_filename(transformation_name);
 }
 
 std::string BasicImage::get_filename(const std::string& transformation_name) const
