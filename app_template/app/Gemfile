@@ -5,3 +5,4 @@ gem 'guard-compat'
 gem 'guard-sass'
 
 gem 'coffee-script'
+gem 'uglifier'

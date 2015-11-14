@@ -1,11 +1,14 @@
+require 'guard/crails-base'
 require 'coffee-script'
 require 'fileutils'
 require 'pathname'
+require 'uglifier'
 
 module ::Guard
-  class CrailsJs < Plugin
+  class CrailsJs < CrailsPlugin
     def initialize options = {}
       options[:watchers] << ::Guard::Watcher.new(%r{^#{options[:input]}/(.+\.(js|coffee))$})
+      @uglifier_options = options[:uglifier] || {}
       super options
     end
 
@@ -17,7 +20,9 @@ module ::Guard
         output_file = options[:output] + '/' + target
         FileUtils.mkdir_p options[:output]
         File.open(output_file, 'w') do |f|
-          f.write "(function() {\n#{text}\n})();"
+          js = "(function() {\n#{text}\n})();".force_encoding('UTF-8')
+          js = Uglifier.compile(js, @uglifier_options) unless developer_mode?
+          f.write js
         end
         puts ">> Generated #{output_file}"
       end
@@ -49,11 +54,9 @@ module ::Guard
           file_content += line + "\n"
         else
           required_path = Pathname.new(current_dir + '/' + matches[2].strip).cleanpath.to_s
-          puts "Required path: #{required_path}"
           if matches[1] == 'require_tree'
             path = "#{options[:input]}/#{required_path}/**/*"
             files = Dir.glob("#{path}.coffee") + Dir.glob("#{path}.js")
-            puts files.inspect
             files.each do |filepath|
               filepath = filepath[options[:input].size..-1]
               unless @included_files.include? filepath
