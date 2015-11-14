@@ -11,6 +11,10 @@ namespace Crails
     Password(void)
     {
     }
+
+    Password(const Password& str) : std::string(str.c_str())
+    {
+    }
     
     Password(const std::string& str) : std::string(md5(str))
     {
@@ -25,7 +29,18 @@ namespace Crails
       std::string::operator=(md5(str));
       return (*this);
     }
-    
+
+    Password& operator=(const Password& str)
+    {
+      std::string::operator=(str.c_str());
+      return (*this);
+    }
+
+    bool      operator==(const Password& str) const
+    {
+      return std::string(str.c_str()) == c_str();
+    }
+
     bool      operator==(const std::string& str) const
     {
       return (md5(str) == c_str());
