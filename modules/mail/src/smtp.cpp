@@ -1,4 +1,4 @@
-#include <Boots/Utils/exception.hpp>
+#include <Boots/Utils/backtrace.hpp>
 #include <Boots/Utils/string.hpp>
 #include <boost/array.hpp>
 #include <crails/smtp.hpp>
@@ -60,7 +60,7 @@ void Smtp::Server::connect(const std::string& hostname, unsigned short port)
     sock.connect(*endpoint_iterator++, error);
   }
   if (error)
-    Exception<Smtp::Server>::Raise("Cannot connect to " + hostname);
+    throw boost_ext::runtime_error("Cannot connect to " + hostname);
   if (tls_enabled)
     ssl_sock.handshake(SslSocket::client, error);
   smtp_handshake();
@@ -104,7 +104,7 @@ std::string Smtp::Server::smtp_read_answer(unsigned short expected_return)
       bytes_received = sock.receive(boost::asio::buffer(buffer));
 
     if (bytes_received == 0)
-      Exception<Smtp::Server>::Raise("The server closed the connection");
+      throw boost_ext::runtime_error("The server closed the connection");
     std::copy(buffer.begin(), buffer.begin() + bytes_received, std::back_inserter(answer));
   }
   //
@@ -114,7 +114,7 @@ std::string Smtp::Server::smtp_read_answer(unsigned short expected_return)
     std::stringstream error_message;
 
     error_message << "Expected answer status to be " << expected_return << ", received `" << answer << '`';
-    Exception<Smtp::Server>::Raise(error_message.str());
+    throw boost_ext::runtime_error(error_message.str());
   }
   return (answer);
 }

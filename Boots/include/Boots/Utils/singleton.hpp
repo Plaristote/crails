@@ -1,7 +1,7 @@
 #ifndef  SINGLETON_HPP
 # define SINGLETON_HPP
 
-# include "exception.hpp"
+# include "backtrace.hpp"
 
 # define SINGLETON(type) \
 public:\
@@ -18,7 +18,7 @@ public:
     if (!(ptr))
       ptr = new TYPE(args...);
     else
-      Exception<Singleton>::Raise("Was already initialized");
+      throw boost_ext::runtime_error("Was already initialized");
   }
 
   static void Finalize(void)
