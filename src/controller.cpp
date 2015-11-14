@@ -85,7 +85,7 @@ void Controller::render(RenderType type, Data value)
       break ;
     }
     default:
-      throw boost_ext::invalid_argument("ControllerBase::render(RenderType,DynStruct) only supports JSON type");
+      throw boost_ext::invalid_argument("ControllerBase::render(RenderType,Data) only supports JSON type");
   }
   response["body"] = body.str();
   set_content_type(type);
