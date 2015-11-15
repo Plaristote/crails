@@ -19,15 +19,15 @@ void Mailer::render(const std::string& view)
 
   mail_params["headers"]["Accept"] = "text/html text/plain";
   Renderer::render(view, mail_params.as_data(), mail_response.as_data(), vars);
-  mail.SetContentType(mail_response["headers"]["Content-Type"].defaults_to<string>(""));
-  mail.SetBody(mail_response["body"].as<string>());
+  mail.set_content_type(mail_response["headers"]["Content-Type"].defaults_to<string>(""));
+  mail.set_body(mail_response["body"].as<string>());
 }
 
 void Mailer::send(void)
 {
   if (!is_connected)
   {
-    MailServers::singleton::Get()->ConfigureMailServer(configuration, smtp_server);
+    MailServers::singleton::Get()->configure_mail_server(configuration, smtp_server);
     is_connected = true;
   }
   smtp_server.send(mail);

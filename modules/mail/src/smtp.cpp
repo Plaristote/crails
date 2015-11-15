@@ -1,21 +1,22 @@
 #include <Boots/Utils/backtrace.hpp>
-#include <Boots/Utils/string.hpp>
-#include <boost/array.hpp>
+#include <crails/utils/string.hpp>
 #include <crails/smtp.hpp>
+#include <boost/array.hpp>
 #include <iostream>
 
 using namespace std;
+using namespace Crails;
 
 /*
  * Smtp::Mail
  */
-void        Smtp::Mail::SetSender(const std::string& address, const std::string& name)
+void        Smtp::Mail::set_sender(const std::string& address, const std::string& name)
 {
   sender.address = address;
   sender.name    = name;
 }
 
-void        Smtp::Mail::AddRecipient(const std::string& address, const std::string& name, unsigned char flags)
+void        Smtp::Mail::add_recipient(const std::string& address, const std::string& name, unsigned char flags)
 {
   Recipient recipient;
 
@@ -25,7 +26,7 @@ void        Smtp::Mail::AddRecipient(const std::string& address, const std::stri
   recipients.push_back(recipient);
 }
 
-void        Smtp::Mail::DelRecipient(const std::string& address)
+void        Smtp::Mail::del_recipient(const std::string& address)
 {
   auto it = std::find(recipients.begin(), recipients.end(), address);
 
@@ -141,17 +142,17 @@ void Smtp::Server::smtp_body(const Smtp::Mail& mail)
   smtp_data_addresses("To",       mail, 0);
   smtp_data_addresses("Cc",       mail, Smtp::Mail::CarbonCopy);
   smtp_data_addresses("Bcc",      mail, Smtp::Mail::CarbonCopy | Smtp::Mail::Blind);
-  if (mail.GetReplyTo() != "")
-    smtp_data_address("Reply-To", mail.GetReplyTo(),        "");
-  smtp_data_address  ("From",     mail.GetSender().address, mail.GetSender().name);
+  if (mail.get_reply_to() != "")
+    smtp_data_address("Reply-To", mail.get_reply_to(),       "");
+  smtp_data_address  ("From",     mail.get_sender().address, mail.get_sender().name);
   // Send the content type if necessary
-  if (mail.GetContentType() != "")
+  if (mail.get_content_type() != "")
   {
     server_message << "MIME-Version: 1.0\r\n";
-    server_message << "Content-Type: " << mail.GetContentType() << "\r\n";
+    server_message << "Content-Type: " << mail.get_content_type() << "\r\n";
   }
   // Send the subject
-  server_message << "Subject: " << mail.GetSubject() << "\r\n";
+  server_message << "Subject: " << mail.get_subject() << "\r\n";
   // Send the body and finish the DATA stream
   server_message << mail.body   << "\r\n.\r\n";
   smtp_write_message();
@@ -205,7 +206,7 @@ void Smtp::Server::smtp_recipients(const Smtp::Mail& mail)
 
 void Smtp::Server::smtp_new_mail(const Smtp::Mail& mail)
 {
-  const Smtp::Mail::Sender& sender = mail.GetSender();
+  const Smtp::Mail::Sender& sender = mail.get_sender();
 
   server_message << "MAIL FROM: <" << sender.address << ">\r\n";
   smtp_write_message();
@@ -250,7 +251,7 @@ std::map<Smtp::Server::AuthenticationProtocol,Smtp::Server::SmtpAuthMethod> Smtp
 
 void Smtp::Server::smtp_auth_plain(const std::string& user, const std::string& password)
 {
-  string auth_hash = String::base64_encode('\000' + user + '\000' + password);
+  string auth_hash = base64_encode('\000' + user + '\000' + password);
 
   server_message << "AUTH PLAIN " << auth_hash << "\r\n";
   smtp_write_message();
@@ -259,8 +260,8 @@ void Smtp::Server::smtp_auth_plain(const std::string& user, const std::string& p
 
 void Smtp::Server::smtp_auth_login(const std::string& user, const std::string& password)
 {
-  string user_hash = String::base64_encode(user);
-  string pswd_hash = String::base64_encode(password);
+  string user_hash = base64_encode(user);
+  string pswd_hash = base64_encode(password);
 
   server_message << "AUTH LOGIN\r\n";
   smtp_write_message();

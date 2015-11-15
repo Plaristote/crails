@@ -3,7 +3,7 @@
 
 # include <boost/asio.hpp>
 # include <boost/asio/ssl.hpp>
-# include <Boots/Utils/helpers.hpp>
+# include <crails/utils/helpers.hpp>
 # include <map>
 # include <sstream>
 
@@ -39,14 +39,14 @@ namespace Smtp
       Blind      = 2
     };
 
-    void        SetSender(const std::string& address, const std::string& name = "");
-    void        AddRecipient(const std::string& address, const std::string& name = "", unsigned char flags = 0);
-    void        DelRecipient(const std::string& address);
-    const_attr_accessor(Sender&,      Sender,  sender)
-    const_attr_accessor(std::string&, Subject, subject)
-    const_attr_accessor(std::string&, Body,    body)
-    const_attr_accessor(std::string&, ReplyTo, reply_to)
-    const_attr_accessor(std::string&, ContentType, content_type)
+    void        set_sender(const std::string& address, const std::string& name = "");
+    void        add_recipient(const std::string& address, const std::string& name = "", unsigned char flags = 0);
+    void        del_recipient(const std::string& address);
+    const_attr_accessor(Sender&,      sender)
+    const_attr_accessor(std::string&, subject)
+    const_attr_accessor(std::string&, body)
+    const_attr_accessor(std::string&, reply_to)
+    const_attr_accessor(std::string&, content_type)
 
   private:
     Recipients  recipients;
@@ -56,7 +56,7 @@ namespace Smtp
     std::string reply_to;
     std::string content_type;
   };
-  
+
   class Server
   {
   public:
@@ -78,7 +78,7 @@ namespace Smtp
     void connect(const std::string& hostname, unsigned short port, const std::string& username, const std::string& password, AuthenticationProtocol auth = PLAIN);
     void disconnect();
     void send(const Mail& mail);
-    const_attr_getter(std::string&, ServerId, server_id)
+    const_attr_getter(std::string&, server_id)
 
   private:
     // SMTP Protocol Implementation

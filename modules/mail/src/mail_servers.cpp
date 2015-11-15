@@ -8,10 +8,10 @@ using namespace Crails;
 MailServers::MailServers(void)
 {
   data_tree.from_json_file("config/mailers.json");
-  LoadMailServers(data_tree.as_data());
+  load_mail_servers(data_tree.as_data());
 }
 
-void MailServers::LoadMailServers(Data data)
+void MailServers::load_mail_servers(Data data)
 {
   data.each([this](Data server_data)
   {
@@ -19,12 +19,12 @@ void MailServers::LoadMailServers(Data data)
   });
 }
 
-void MailServers::ConfigureMailServer(const string& conf_name, Smtp::Server& server) const
+void MailServers::configure_mail_server(const string& conf_name, Smtp::Server& server) const
 {
   auto iterator = server_confs.find(conf_name);
 
   if (iterator != server_confs.end())
-    iterator->second.ConnectServer(server);
+    iterator->second.connect_server(server);
 }
 
 //
@@ -57,7 +57,7 @@ MailServers::Conf::Conf(Data server_data)
   }
 }
 
-void MailServers::Conf::ConnectServer(Smtp::Server& server) const
+void MailServers::Conf::connect_server(Smtp::Server& server) const
 {
   if (use_tls)
     server.start_tls();
