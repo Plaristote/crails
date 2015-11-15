@@ -11,7 +11,7 @@
 #ifdef ODB_WITH_ORACLE
 # include <odb/oracle/database.hxx>
 #endif
-#include <Boots/Utils/backtrace.hpp>
+#include <crails/utils/backtrace.hpp>
 
 void ODB::Database::initialize_for_mysql(Data data)
 {

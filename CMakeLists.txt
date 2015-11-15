@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_subdirectory(Boots)
-
 project(crails_project)
 
 option(USE_MULTITHREAD "Asynchronous Server" ON)

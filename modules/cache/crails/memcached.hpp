@@ -5,7 +5,8 @@
 # include <functional>
 # include <libmemcached-1.0/memcached.h>
 # include <crails/logger.hpp>
-# include <Boots/Utils/backtrace.hpp>
+# include <crails/utils/backtrace.hpp>
+# include <boost/thread/tss.hpp>
 
 namespace Crails
 {
@@ -18,7 +19,7 @@ namespace Crails
       const char* what() const throw() { return message.c_str(); }
       const std::string message;
     };
-    
+
     struct Buffer
     {
       Buffer() : data(0), size(0)
@@ -27,8 +28,8 @@ namespace Crails
 
       ~Buffer()
       {
-	if (data)
-	  free(data);
+        if (data)
+          free(data);
       }
 
       char*  data;
@@ -59,11 +60,11 @@ namespace Crails
 
       serialize<TYPE>(result, (const char**)(&buffer.data), buffer.size);
       if (memcached_add(memc, key.c_str(), key.size(), buffer.data, buffer.size, expiration, 0) != MEMCACHED_SUCCESS)
-	Crails::logger << Crails::Logger::Warning << "memcached failed to store value for " << key;
+        Crails::logger << Crails::Logger::Warning << "memcached failed to store value for " << key;
       buffer.data = 0;
       return (result);
     }
-    
+
     template<typename TYPE>
     TYPE existing_record(const std::string& key, std::function<TYPE ()> func)
     {
@@ -74,20 +75,20 @@ namespace Crails
 
       if (memcached_return != MEMCACHED_SUCCESS)
       {
-	Crails::logger << Crails::Logger::Warning << "memcached failed to retrieve value for " << key;
-	return new_record<TYPE>(key, func);
+        Crails::logger << Crails::Logger::Warning << "memcached failed to retrieve value for " << key;
+        return new_record<TYPE>(key, func);
       }
       return unserialize<TYPE>(buffer.data, buffer.size);
     }
-    
+
     template<typename TYPE>
     TYPE unserialize(const char* buffer, size_t size)
     {
       if (size != sizeof(TYPE))
-	throw Cache::Exception("Value stored did not contain the expected type of object");
+        throw Cache::Exception("Value stored did not contain the expected type of object");
       return TYPE(*(reinterpret_cast<const TYPE*>(buffer)));
     }
-    
+
     template<typename TYPE>
     void serialize(TYPE source, const char** buffer, size_t& size)
     {

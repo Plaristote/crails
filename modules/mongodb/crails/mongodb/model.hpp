@@ -2,8 +2,8 @@
 # define MONGODB_MODEL_HPP
 
 # include <mongo/client/dbclient.h>
-# include <Boots/Utils/smart_pointer.hpp>
-# include <Boots/Utils/dynstruct.hpp>
+# include <crails/utils/smart_pointer.hpp>
+# include <crails/utils/dynstruct.hpp>
 # include "exception.hpp"
 # include "array.hpp"
 # include "collection.hpp"
