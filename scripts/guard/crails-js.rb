@@ -37,6 +37,10 @@ module ::Guard
       filename.split('.')[0...-1].join('.') + '.js'
     end
 
+    def clean_required_path filepath
+      Pathname.new(filepath).cleanpath.to_s
+    end
+
     def compile_file file
       @included_files << file
       current_dir       = file.split('/')[0...-1].join('/')
@@ -53,12 +57,12 @@ module ::Guard
         if matches.nil?
           file_content += line + "\n"
         else
-          required_path = Pathname.new(current_dir + '/' + matches[2].strip).cleanpath.to_s
+          required_path = clean_required_path current_dir + '/' + matches[2].strip
           if matches[1] == 'require_tree'
             path = "#{options[:input]}/#{required_path}/**/*"
             files = Dir.glob("#{path}.coffee") + Dir.glob("#{path}.js")
             files.each do |filepath|
-              filepath = filepath[options[:input].size..-1]
+              filepath = clean_required_path filepath[options[:input].size..-1]
               unless @included_files.include? filepath
                 file_content += (compile_file filepath) + "\n"
               end
