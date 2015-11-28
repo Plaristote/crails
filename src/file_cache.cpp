@@ -18,12 +18,13 @@ std::string* FileCache::CreateInstance(std::string key)
     end         = file.tellg();
     file.seekg(0, std::ios::beg);
     size        = end - begin;
-    raw        = new char[size + 1];
+    raw         = new char[size + 1];
     file.read(raw, size);
     file.close();
     instance = new std::string;
     instance->resize(size);
     std::copy(raw, raw + size, instance->begin());
+    delete[] raw;
     return (instance);
   }
   return (0);
