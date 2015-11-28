@@ -39,6 +39,7 @@ namespace Crails
         ++beg;
       }
       stream << ']';
+      first_item_in_object = false;
     }
 
     template<typename ITERATOR, typename T>
@@ -58,6 +59,7 @@ namespace Crails
         ++beg;
       }
       stream << ']';
+      first_item_in_object = false;
     }
 
   protected:
