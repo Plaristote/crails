@@ -25,7 +25,7 @@ int run_sql_file(string command, const string& filepath)
   return std::system(command.c_str());
 }
 
-int odb_migrate(const std::string& database_key)
+int odb_migrate(const std::string& database_key, const vector<string>& sql_files)
 {
   DataTree         config;
   Data             database_config = config[Crails::environment][database_key];
@@ -40,8 +40,10 @@ int odb_migrate(const std::string& database_key)
   for (auto it : recursive_directory_range("./app/models"))
   {
     filesystem::path filepath = it.path();
+    bool should_run_file = filepath.extension().string() == ".sql";
 
-    if (filepath.extension().string() == ".sql")
+    should_run_file = should_run_file && (sql_files.size() == 0 || find(sql_files.begin(), sql_files.end(), filepath.string()) != sql_files.end());
+    if (should_run_file)
     {
       int code = run_sql_file(command, filepath.string());
 
@@ -54,9 +56,15 @@ int odb_migrate(const std::string& database_key)
 
 int main(int argc, char** argv)
 {
-  if (argc != 2)
+  if (argc < 2)
     cout << "Usage: crails task run odb_migrate [database_key]" << endl;
   else
-    return odb_migrate(argv[1]);
+  {
+    vector<string> sql_files;
+
+    for (int i = 2 ; i < argc ; ++i)
+      sql_files.push_back(string("./app/models/") + argv[i] + ".sql");
+    return odb_migrate(argv[1], sql_files);
+  }
   return 1;
 }
