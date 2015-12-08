@@ -33,6 +33,9 @@ namespace Crails
     
     void bundle(void);
 
+    Server::Response& get_response() { return response; }
+    const Server::Response& get_response() const { return response; }
+
   private:
     Server::Response response;
     Headers          headers;

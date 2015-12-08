@@ -63,7 +63,7 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   }
 }
 
-void Server::run_request_parsers(const HttpServer::request& request, Response response, Params& params)
+bool Server::run_request_parsers(const HttpServer::request& request, BuildingResponse& out, Params& params)
 {
   RequestParsers::const_iterator handler_iterator = request_parsers.begin();
 
@@ -71,10 +71,13 @@ void Server::run_request_parsers(const HttpServer::request& request, Response re
   {
     RequestParser::Status status;
 
-    status = (**handler_iterator)(request, response, params);
+    status = (**handler_iterator)(request, out, params);
     if (status == RequestParser::Stop)
       break ;
+    else if (status == RequestParser::Abort)
+      return false;
   }
+  return true;
 }
 
 void Server::run_request_handlers(const HttpServer::request& request, BuildingResponse& response, Params& params)
@@ -115,8 +118,8 @@ void Server::operator()(const HttpServer::request& request, Response response)
 
   exception_catcher.run(out, params, [this, &request, &response, &out, &params]()
   {
-    run_request_parsers(request, response, params);
-    run_request_handlers(request, out, params);
+    if (run_request_parsers(request, out, params))
+      run_request_handlers(request, out, params);
   });
   params["response-time"]["crails"] = timer.GetElapsedSeconds();
   post_request_log(params);
@@ -125,9 +128,9 @@ void Server::operator()(const HttpServer::request& request, Response response)
 void Server::post_request_log(Params& params) const
 {
   float crails_time     = params["response-time"]["crails"];
-  unsigned short code   = params["response-data"]["code"];
+  unsigned short code   = params["response-data"]["code"].defaults_to(200);
 
-  logger << Logger::Info << "# Responded to " << params["method"].as<string>() << " '" << params["uri"].as<string>();
+  logger << Logger::Info << "# Responded to " << params["method"].defaults_to<string>("GET") << " '" << params["uri"].defaults_to<string>("");
   logger << "' with " << code;
   logger << " in " << crails_time << 's';
   if (params["response-time"]["controller"].exists())

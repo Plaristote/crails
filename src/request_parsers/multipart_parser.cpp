@@ -6,13 +6,13 @@
 using namespace std;
 using namespace Crails;
 
-RequestParser::Status RequestMultipartParser::operator()(const HttpServer::request& request, ServerTraits::Response response, Params& params)
+RequestParser::Status RequestMultipartParser::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params)
 {
   static const Regex is_multipart("^multipart/form-data", REG_EXTENDED);
 
   if (params["method"].as<string>() != "GET" && content_type_matches(params, is_multipart))
   {
-    parse_multipart(request, response, params);
+    parse_multipart(request, out.get_response(), params);
     return RequestParser::Stop;
   }
   return RequestParser::Continue;

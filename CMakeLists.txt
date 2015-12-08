@@ -107,7 +107,7 @@ install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)
 add_subdirectory(modules/html)
 add_subdirectory(modules/json)
 add_subdirectory(modules/mail)
-
+add_subdirectory(modules/proxy)
 
 if (${ImageMagick_Magick++_FOUND})
   add_subdirectory(modules/image)

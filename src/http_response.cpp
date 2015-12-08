@@ -24,7 +24,6 @@ static void SetHeaderParameter(Server::Response response, const std::string& key
 }
 #endif
 
-
 void BuildingResponse::set_response(Server::HttpCode code, const string& body)
 {
   set_status_code(code);

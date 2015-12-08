@@ -49,7 +49,7 @@ namespace Crails
 
     void initialize_request_pipe();
     void initialize_exception_catcher();
-    void run_request_parsers (const HttpServer::request&, Response, Params&);
+    bool run_request_parsers (const HttpServer::request&, BuildingResponse&, Params&);
     void run_request_handlers(const HttpServer::request&, BuildingResponse&, Params&);
 
     static void ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Params& params);

@@ -7,6 +7,7 @@
 namespace Crails
 {
   class Params;
+  class BuildingResponse;
 
   class RequestParser
   {
@@ -14,12 +15,13 @@ namespace Crails
     enum Status
     {
       Continue,
-      Stop
+      Stop,
+      Abort
     };
     
     virtual ~RequestParser() {}
     
-    virtual Status operator()(const HttpServer::request&, ServerTraits::Response, Params&) = 0;
+    virtual Status operator()(const HttpServer::request&, BuildingResponse&, Params&) = 0;
   protected:
     bool content_type_matches(Params&, const Regex);
   };
@@ -35,24 +37,24 @@ namespace Crails
     ReadCallback    callback;
   #endif
   public:
-    void wait_for_body(const HttpServer::request&, ServerTraits::Response, Params&);
+    void wait_for_body(const HttpServer::request&, BuildingResponse&, Params&);
   protected:
-    virtual void body_received(const HttpServer::request&, ServerTraits::Response, Params&, const std::string& body) = 0;
+    virtual void body_received(const HttpServer::request&, BuildingResponse&, Params&, const std::string& body) = 0;
   };
 
   class RequestDataParser : public RequestParser
   {
   public:
-    RequestParser::Status operator()(const HttpServer::request&, ServerTraits::Response, Params&);
+    RequestParser::Status operator()(const HttpServer::request&, BuildingResponse&, Params&);
   private:
   };
 
   class RequestFormParser : public BodyParser
   {
   public:
-    RequestParser::Status operator()(const HttpServer::request&, ServerTraits::Response, Params&);
+    RequestParser::Status operator()(const HttpServer::request&, BuildingResponse&, Params&);
   private:
-    void body_received(const HttpServer::request&, ServerTraits::Response, Params&, const std::string& body);
+    void body_received(const HttpServer::request&, BuildingResponse&, Params&, const std::string& body);
   };
 
   class RequestMultipartParser : public RequestParser
@@ -66,7 +68,7 @@ namespace Crails
     ReadCallback    callback;
   #endif
   public:
-    RequestParser::Status operator()(const HttpServer::request&, ServerTraits::Response, Params&);
+    RequestParser::Status operator()(const HttpServer::request&, BuildingResponse&, Params&);
   private:
     void parse_multipart(const HttpServer::request&, ServerTraits::Response, Params&);
   };
@@ -74,9 +76,9 @@ namespace Crails
   class RequestJsonParser : public BodyParser
   {
   public:
-    RequestParser::Status operator()(const HttpServer::request&, ServerTraits::Response, Params&);
+    RequestParser::Status operator()(const HttpServer::request&, BuildingResponse&, Params&);
   private:
-    void body_received(const HttpServer::request&, ServerTraits::Response, Params&, const std::string& body);
+    void body_received(const HttpServer::request&, BuildingResponse&, Params&, const std::string& body);
   };
 }
 

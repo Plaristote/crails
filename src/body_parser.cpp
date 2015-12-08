@@ -7,11 +7,12 @@ using namespace std;
 using namespace Crails;
 
 #ifdef ASYNC_SERVER
-void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits::Response response, Params& params)
+void BodyParser::wait_for_body(const HttpServer::request& request, BuildingResponse& out, Params& params)
 {
   mutex              sem_mutex;
   unique_lock<mutex> sem_lock(sem_mutex);
   condition_variable sem;
+  auto&              response   = out.get_response();
   unsigned int       to_read    = params["headers"]["Content-Length"].defaults_to<unsigned int>(0);
   unsigned int       total_read = 0;
   std::string        read_buffer;
@@ -36,12 +37,12 @@ void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits:
   };
   response->read(callback);
   sem.wait(sem_lock);
-  body_received(request, response, params, read_buffer);
+  body_received(request, out, params, read_buffer);
   params.response_parsed.notify_all();
 }
 #else
-void BodyParser::wait_for_body(const HttpServer::request& request, ServerTraits::Response response, Params& params)
+void BodyParser::wait_for_body(const HttpServer::request& request, BuildingResponse& out, Params& params)
 {
-  body_received(request, response, params, request.body);
+  body_received(request, out, params, request.body);
 }
 #endif
