@@ -38,10 +38,7 @@ module ::Guard
       code = template.result(instance_eval { binding })
       filename = "lib/renderers/#{@template_type}.cpp"
       FileUtils.mkdir_p "lib/renderers"
-      File.open filename, 'w' do |file|
-        file.write code
-        puts ">> Generated file #{filename}"
-      end
+      write_file_if_changed filename, code
     end
 
     def get_names filename
@@ -54,15 +51,21 @@ module ::Guard
       [view_name, class_name, function_name]
     end
 
+    def write_file_if_changed filename, content
+      if (not File.exists? filename) || (File.read(filename) != content)
+        File.open filename, 'w' do |file|
+          file.write content
+          puts ">> Generated file #{filename}"
+        end
+      else
+        puts ">> No changes to file #{filename}"
+      end
+    end
+
     def write_template_to_file filename, binding_context
       template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/#{@template_type}_template.cpp.erb").read, nil, '-'
       code = template.result(binding_context)
-
-      # Write source file
-      File.open "#{filename}.cpp", 'w' do |file|
-        file.write code
-        puts ">> Generated file #{filename}.cpp"
-      end
+      write_file_if_changed "#{filename}.cpp", code
     end
 
     def process_lines lines
