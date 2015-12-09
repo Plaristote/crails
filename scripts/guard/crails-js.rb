@@ -14,8 +14,8 @@ module ::Guard
 
     def run_all
       begin
-        @included_files = []
         options[:targets].each do |target|
+          @included_files = []
           text        = compile_file target
           target      = extension_to_js target
           output_file = options[:output] + '/' + target
