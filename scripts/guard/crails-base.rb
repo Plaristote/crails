@@ -1,7 +1,7 @@
 module ::Guard
   class CrailsPlugin < Plugin
     def watched_files
-      files          = Dir['**/*']
+      files          = Dir["#{@base_path}**/*"]
       selected_files = []
       @watchers.each do |watcher|
         selected_files += files.select {|x| x =~ watcher.pattern}

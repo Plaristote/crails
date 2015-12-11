@@ -29,7 +29,7 @@ renderers_cpp.add_initializer 'renderers.push_back(new JsonRenderer);'
 guardfile = GuardfileEditor.new
 guardfile.add_task 'before_compile', <<RUBY
 guard 'crails-cjson' do
-    watch(%r{.+\.cjson$})
+    watch(%r{app/views/.+\.cjson$})
   end
 RUBY
 

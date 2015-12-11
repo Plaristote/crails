@@ -36,7 +36,7 @@ renderers_cpp.add_initializer 'renderers.push_back(new HtmlRenderer);'
 guardfile = GuardfileEditor.new
 guardfile.add_task 'before_compile', <<RUBY
 guard 'crails-ecpp' do
-    watch(%r{.+\.ecpp$})
+    watch(%r{app/views/.+\.ecpp$})
   end
 RUBY
 

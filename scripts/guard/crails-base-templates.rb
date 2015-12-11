@@ -65,7 +65,8 @@ module ::Guard
     def write_template_to_file filename, binding_context
       template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/#{@template_type}_template.cpp.erb").read, nil, '-'
       code = template.result(binding_context)
-      write_file_if_changed "#{filename}.cpp", code
+      FileUtils.mkdir_p "lib/#{filename}"
+      write_file_if_changed "lib/#{filename}/source.cpp", code
     end
 
     def process_lines lines

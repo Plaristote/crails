@@ -5,6 +5,7 @@ module ::Guard
   class CrailsEcpp < CrailsTemplatePlugin
     def initialize arg
       super arg
+      @base_path     = "app/views/"
       @template_type = "html"
       @extension     = "ecpp"
     end

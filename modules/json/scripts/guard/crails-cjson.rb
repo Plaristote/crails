@@ -5,6 +5,7 @@ module ::Guard
   class CrailsCjson < CrailsTemplatePlugin
     def initialize arg
       super arg
+      @base_path     = "app/views/"
       @template_type = "json"
       @extension     = "cjson"
     end
