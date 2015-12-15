@@ -91,9 +91,7 @@ void MultipartParser::parse(Params& params)
         {
           string field = content_data["name"];
 
-          params.lock();
           params[field] = read_buffer.substr(0, pos - 4);
-          params.unlock();
           read_buffer.erase(0, pos);
           parsed_state = 0;
           blocked = false;

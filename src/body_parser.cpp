@@ -37,8 +37,8 @@ void BodyParser::wait_for_body(const HttpServer::request& request, BuildingRespo
   };
   response->read(callback);
   sem.wait(sem_lock);
+  logger << Logger::Debug << "Parser's job goes on" << Logger::endl;
   body_received(request, out, params, read_buffer);
-  params.response_parsed.notify_all();
 }
 #else
 void BodyParser::wait_for_body(const HttpServer::request& request, BuildingResponse& out, Params& params)

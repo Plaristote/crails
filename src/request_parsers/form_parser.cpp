@@ -22,5 +22,9 @@ void RequestFormParser::body_received(const HttpServer::request& request, Buildi
 {
   logger << Logger::Debug << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << Logger::endl;
   if (body.size() > 0)
+  {
+    std::cout << "Has body size" << std::endl;
     cgi2params(params.as_data(), body);
+    std::cout << "Done cgi2paramsing" << std::endl;
+  }
 }

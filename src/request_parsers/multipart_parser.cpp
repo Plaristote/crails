@@ -25,9 +25,10 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerT
   MultipartParser    multipart_parser;
   mutex              multipart_mutex;
   unique_lock<mutex> lock(multipart_mutex);
+  condition_variable sem;
 
   multipart_parser.initialize(params);
-  callback = [this, &multipart_parser, &params](boost::iterator_range<char const*> range,
+  callback = [this, &sem, &multipart_parser, &params](boost::iterator_range<char const*> range,
                       boost::system::error_code error_code,
                       size_t size_read,
                       HttpServer::connection_ptr connection_ptr)
@@ -41,10 +42,10 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerT
     if (multipart_parser.total_read < multipart_parser.to_read)
       connection_ptr->read(callback);
     else
-      params.response_parsed.notify_all();
+      sem.notify_all();
   };
   response->read(callback);
-  params.response_parsed.wait(lock);
+  sem.wait(lock);
 }
 #else
 void RequestMultipartParser::parse_multipart(const HttpServer::request& request, ServerTraits::Response, Params& params)
@@ -55,6 +56,5 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request& request,
   multipart_parser.initialize(params);
   multipart_parser.read_buffer = request.body;
   multipart_parser.parse(params);
-  params.response_parsed.notify_all();
 }
 #endif

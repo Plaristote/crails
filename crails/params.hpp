@@ -46,15 +46,10 @@ namespace Crails
   #endif
     const File*     get_upload(const std::string& key) const;
 
-    void lock(void)   { mutex.lock(); }
-    void unlock(void) { mutex.unlock(); }
-
     Data            get_session(void) { return (session->to_data()); }
 
   private:
     std::unique_ptr<SessionStore> session;
-    std::mutex                    mutex;
-    std::condition_variable       response_parsed;
     Files                         files;
   };
 }
