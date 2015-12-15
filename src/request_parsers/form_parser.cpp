@@ -12,9 +12,7 @@ RequestParser::Status RequestFormParser::operator()(const HttpServer::request& r
 
   if (params["method"].as<string>() != "GET" && content_type_matches(params, is_form))
   {
-    logger << Logger::Debug << "Wait for body" << Logger::endl;
     wait_for_body(request, out, params);
-    logger << Logger::Debug << "Done parsing" << Logger::endl;
     return RequestParser::Stop;
   }
   return RequestParser::Continue;
@@ -24,8 +22,5 @@ void RequestFormParser::body_received(const HttpServer::request& request, Buildi
 {
   logger << Logger::Debug << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << Logger::endl;
   if (body.size() > 0)
-  {
-    logger << Logger::Debug << "Has body size" << Logger::endl;
     cgi2params(params.as_data(), body);
-  }
 }
