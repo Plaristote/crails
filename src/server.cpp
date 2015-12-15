@@ -67,6 +67,7 @@ bool Server::run_request_parsers(const HttpServer::request& request, BuildingRes
 {
   RequestParsers::const_iterator handler_iterator = request_parsers.begin();
 
+  logger << Logger::Debug << "running request parsers" << Logger::endl;
   for (; handler_iterator != request_parsers.end() ; ++ handler_iterator)
   {
     RequestParser::Status status;
@@ -75,8 +76,12 @@ bool Server::run_request_parsers(const HttpServer::request& request, BuildingRes
     if (status == RequestParser::Stop)
       break ;
     else if (status == RequestParser::Abort)
+    {
+      logger << Logger::Debug << "done running request parsers (abort)" << Logger::endl;
       return false;
+    }
   }
+  logger << Logger::Debug << "done running request parsers" << Logger::endl;
   return true;
 }
 
@@ -85,6 +90,7 @@ void Server::run_request_handlers(const HttpServer::request& request, BuildingRe
   RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
   bool                            request_handled  = false;
 
+  logger << Logger::Debug << "running request handlers" << Logger::endl;
   for (; handler_iterator != request_handlers.end() ; ++handler_iterator)
   {
     request_handled = (**handler_iterator)(request, response, params);
@@ -93,6 +99,7 @@ void Server::run_request_handlers(const HttpServer::request& request, BuildingRe
   }
   if (!request_handled)
     ResponseHttpError(response, HttpCodes::not_found, params);
+  logger << Logger::Debug << "done running request handlers" << Logger::endl;
 }
 
 void Server::add_request_handler(RequestHandler* request_handler)
