@@ -20,7 +20,7 @@ ProgramOptions::ProgramOptions(int argc, char** argv)
   desc.add_options()
     ("port,p",     program_options::value<std::string>(),    "listened port")
     ("hostname,h", program_options::value<std::string>(),    "listened host")
-    ("thread,t",   program_options::value<unsigned short>(), "amount of threads")
+    ("threads,t",  program_options::value<unsigned short>(), "amount of threads")
 #ifdef ASYNC_SERVER
     ("ssl",        "enable SSL")
     ("ssl-cert",   program_options::value<std::string>(), "path to the ssl certificate file")
@@ -58,7 +58,7 @@ void ProgramOptions::initialize_interface(HttpServer::options& options) const
 #ifdef ASYNC_SERVER
 void ProgramOptions::initialize_thread_pool(HttpServer::options& options) const
 {
-  unsigned short threads = get_value("threads", std::thread::hardware_concurrency());
+  unsigned short threads = get_value("threads", (unsigned short)(std::thread::hardware_concurrency()));
 
   logger << ">> Pool Thread Size: " << threads << Logger::endl;
   options.thread_pool(
