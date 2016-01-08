@@ -11,9 +11,13 @@ namespace Crails
 {
   struct MissingTemplate : public boost_ext::exception
   {
-    MissingTemplate(const std::string& name) : name(name) {}
-    const char* what() const throw() { return std::string("Template not found: '" + name + "'").c_str(); }
-    std::string name;
+    MissingTemplate(const std::string& name) : name(name)
+    {
+      message = "Template not found: '" + name + "'";
+    }
+
+    const char* what() const throw() { return message.c_str(); }
+    std::string name, message;
   };
 
   class Template;
