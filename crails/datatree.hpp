@@ -6,6 +6,7 @@
 # include <vector>
 # include <string>
 # include <iostream>
+# include <crails/utils/backtrace.hpp>
 
 class DataTree;
 
@@ -35,11 +36,15 @@ public:
   template<typename T>
   T operator[](const std::string& key) const
   {
+    if (key.length() == 0)
+      throw boost_ext::invalid_argument("Data::operator[] cannot take an empty string");
     return tree->get<T>(path + '.' + key);
   }
 
   Data operator[](const std::string& key) const
   {
+    if (key.length() == 0)
+      throw boost_ext::invalid_argument("Data::operator[] cannot take an empty string");
     return Data(*tree, path, key);
   }
 
@@ -110,21 +115,26 @@ public:
     return defaults_to<T>(value);
   }
 
+  void push_back(Data data)
+  {
+    if (!(exists()))
+    {
+      boost::property_tree::ptree array;
+
+      array.push_back(std::make_pair("", data.get_ptree()));
+      tree->add_child(path, array);
+    }
+    else
+      get_ptree().push_back(std::make_pair("", data.get_ptree()));
+  }
+
   template<typename T>
   void push_back(const T value)
   {
     boost::property_tree::ptree child;
 
     child.put("", value);
-    if (!(exists()))
-    {
-      boost::property_tree::ptree array;
-
-      array.push_back(std::make_pair("", child));
-      tree->add_child(path, array);
-    }
-    else
-      get_ptree().push_back(std::make_pair("", child));
+    push_back(Data(child, ""));
   }
 
   bool is_blank() const;

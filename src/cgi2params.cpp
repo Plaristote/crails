@@ -12,10 +12,22 @@ static void recursively_set_value(Data param, std::vector<std::string> key_stack
     param = Http::Url::Decode(value);
   else
   {
-    Data next = param[Http::Url::Decode(key_stack.front())];
+    string key = Http::Url::Decode(key_stack.front());
 
     key_stack.erase(key_stack.begin());
-    recursively_set_value(next, key_stack, value);
+    if (key.length() == 0)
+    {
+      DataTree sub_object;
+
+      recursively_set_value(sub_object.as_data(), key_stack, value);
+      param.push_back(sub_object.as_data());
+    }
+    else
+    {
+      Data next = param[key];
+
+      recursively_set_value(next, key_stack, value);
+    }
   }
 }
 
