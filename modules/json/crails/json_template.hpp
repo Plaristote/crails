@@ -25,6 +25,12 @@ namespace Crails
       add_value(val);
     }
 
+    template<typename ARRAY>
+    void json_array(const std::string& key, ARRAY& array) { json_array(key, array.begin(), array.end()); }
+
+    template<typename ARRAY, typename T>
+    void json_array(const std::string& key, ARRAY& array, std::function<void (T)> func) { json_array(key, array.begin(), array.end(), func); }
+
     template<typename ITERATOR>
     void json_array(const std::string& key, ITERATOR beg, ITERATOR end)
     {
