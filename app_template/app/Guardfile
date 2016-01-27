@@ -15,6 +15,7 @@ group :compile do
     watch(%r{^config/.+\.[hc](pp|xx)?$})
     watch(%r{^app/.+\.[hc](pp|xx)?$})
     watch(%r{^lib/.+\.[hc](pp|xx)?$})
+    watch(%r{^tasks/.+\.[hc](pp|xx)?$})
     watch(%r{^spec/.+\.[hc](pp|xx)?$})
   end
 end
