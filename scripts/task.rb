@@ -13,7 +13,9 @@ if command == 'add'
   require 'project_model'
   require 'cmakelists'
 
-  CMakeLists.add_crails_task task_name
+  cmakelists = CMakeLists.new
+  cmakelists.add_crails_task task_name
+  cmakelists.write
 
   task = ProjectModel.new
   source = ENV['CRAILS_SHARED_DIR'] + '/app_template/task'
