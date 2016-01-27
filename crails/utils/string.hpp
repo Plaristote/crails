@@ -11,7 +11,7 @@ namespace Crails
   std::string            underscore(const std::string&);
   std::string            humanize(const std::string&);
   std::string            strip(const std::string&);  
-  std::list<std::string> split(const std::string& str, char separator = ' ');
+  std::list<std::string> split(const std::string& str, char separator = ' ', bool count_repetitions = false);
 
   std::string            base64_encode(unsigned char const* str, unsigned int len);
   std::string            base64_encode(std::string str_to_encode);

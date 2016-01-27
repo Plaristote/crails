@@ -19,7 +19,7 @@ namespace Crails
     return result;
   }
 
-  list<string> split(const std::string& str, char c)
+  list<string> split(const std::string& str, char c, bool count_repetitions)
   {
     list<string> ret;
     short        last_sep = -1;
@@ -29,7 +29,7 @@ namespace Crails
     {
       if (str[i] == c)
       {
-        if (i != 0 && str[i - 1] != c)
+        if (i != 0 && (count_repetitions || str[i - 1] != c))
           ret.push_back(str.substr(last_sep + 1, i - (last_sep + 1)));
         last_sep = i;
       }
