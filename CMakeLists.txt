@@ -104,6 +104,7 @@ install(FILES      ${headers_crails_tst}  DESTINATION include/crails/tests)
 install(TARGETS    crails-core${crails-suffix}    LIBRARY DESTINATION lib)
 install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)
 
+add_subdirectory(modules/docker)
 add_subdirectory(modules/html)
 add_subdirectory(modules/json)
 add_subdirectory(modules/mail)

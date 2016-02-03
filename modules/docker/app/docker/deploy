@@ -1,0 +1,41 @@
+#!/bin/sh -ex
+
+##
+## Set environment variables
+##
+heroku config $* | grep LD_LIBRARY_PATH
+if [[ $? != 0 ]] ; then
+  heroku config:set LD_LIBRARY_PATH=/app/lib:/app/bin $*
+  heroku config:set BUILDPACK_URL=https://github.com/Plaristote/heroku-buildpack-crails $*
+fi
+
+##
+## Initialize repository
+##
+mkdir -p docker/crails-build
+cd docker/crails-build
+
+if [[ -f .git ]] ; then
+  echo 'found git'
+else
+  git init .
+  heroku git:remote $*
+  git pull heroku master
+fi
+
+
+##
+## Build the package
+##
+cd ../..
+
+docker/build
+
+cd docker/crails-build
+
+##
+## Deploy
+##
+git add .
+git commit --amend -m "crails heroku deployer was here"
+git push -f heroku master

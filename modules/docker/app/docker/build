@@ -1,0 +1,10 @@
+#!/bin/sh -ex
+
+docker build -t crails/docker docker/base
+
+mkdir -p docker/crails-build
+
+docker run -it --rm \
+  -v "`pwd`:/home/crails/crails-app" \
+  -v "`pwd`/docker/crails-build:/home/crails/package" \
+  crails/docker /usr/local/bin/make-application-package.sh
