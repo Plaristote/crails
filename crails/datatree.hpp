@@ -69,7 +69,7 @@ public:
   operator T() const { return tree->get<T>(path); }
 
   template<typename T>
-  operator std::vector<T>() const
+  std::vector<T> to_vector() const
   {
     std::vector<T> array;
     auto& tree = (path == "") ? *(this->tree) : this->tree->get_child(path);
@@ -77,6 +77,12 @@ public:
     for (boost::property_tree::ptree::value_type& v : tree)
       array.push_back(v.second.get<T>(v.first));
     return array;
+  }
+
+  template<typename T>
+  operator std::vector<T>() const
+  {
+    return to_vector<T>();
   }
 
   template<typename T>
