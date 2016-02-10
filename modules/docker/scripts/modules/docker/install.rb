@@ -2,8 +2,16 @@
 
 $: << "#{ENV['CRAILS_SHARED_DIR']}/scripts/lib"
 
-require 'project_model'
+# Dummy Guard::Plugin implementation to include Guard::CrailsPlugin
+module ::Guard
+  class Plugin
+  end
+end
 
+require 'project_model'
+require "#{ENV['CRAILS_SHARED_DIR']}/guard/crails-base"
+
+project_name   = Guard::CrailsPlugin.new.get_cmake_variable 'CMAKE_PROJECT_NAME:STATIC'
 project        = ProjectModel.new
 base_directory = "#{Dir.pwd}/docker"
 source         = "#{ENV['CRAILS_SHARED_DIR']}/app_template/docker"
@@ -11,8 +19,8 @@ source         = "#{ENV['CRAILS_SHARED_DIR']}/app_template/docker"
 project.base_directory source, Dir.pwd do
   project.directory :docker do
     project.file '.gitignore', 'gitignore'
-    project.file 'build'
-    project.file 'shell'
+    project.generate_erb 'build', 'build.erb', binding: binding
+    project.generate_erb 'shell', 'shell.erb', binding: binding
     project.directory :base do
       project.file 'Dockerfile'
       project.file 'compile-crails.sh'
