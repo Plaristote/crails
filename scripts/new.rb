@@ -79,7 +79,7 @@ project.base_directory source, base_directory do
     end
   end
   project.directory :config do
-    project.file 'db.json'
+    project.file 'databases.cpp'
     project.file 'logger.cpp'
     project.file 'request_pipe.cpp'
     project.file 'renderers.cpp'

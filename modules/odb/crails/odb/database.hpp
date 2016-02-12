@@ -12,7 +12,7 @@ namespace ODB
   public:
     static const std::string ClassType() { return ("odb"); }
 
-    Database(Data settings);
+    Database(const Crails::Databases::DatabaseSettings&);
 
     const std::string& get_backend_name() const { return backend; }
 
@@ -25,10 +25,10 @@ namespace ODB
 
     void connect(void);
   private:
-    void initialize_for_mysql(Data);
-    void initialize_for_postgresql(Data);
-    void initialize_for_sqlite(Data);
-    void initialize_for_oracle(Data);
+    void initialize_for_mysql(const Crails::Databases::DatabaseSettings&);
+    void initialize_for_postgresql(const Crails::Databases::DatabaseSettings&);
+    void initialize_for_sqlite(const Crails::Databases::DatabaseSettings&);
+    void initialize_for_oracle(const Crails::Databases::DatabaseSettings&);
 
     std::unique_ptr<odb::database> db;
     std::string                    backend;

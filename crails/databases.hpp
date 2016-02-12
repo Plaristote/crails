@@ -1,6 +1,7 @@
 #ifndef  DATABASES_HPP
 # define DATABASES_HPP
 
+# include <map>
 # include <vector>
 # include "datatree.hpp"
 # include "environment.hpp"
@@ -13,6 +14,11 @@ namespace Crails
   class Databases
   {
   public:
+    typedef std::map<std::string, boost::any> DatabaseSettings;
+    typedef std::map<std::string, std::map<std::string, DatabaseSettings> > Settings;
+
+    static const Settings settings;
+
     class Db
     {
       friend class Databases;
@@ -41,7 +47,6 @@ namespace Crails
 
     Databases()
     {
-      settings.from_json_file("config/db.json");
     }
 
     ~Databases()
@@ -56,7 +61,7 @@ namespace Crails
     template<typename TYPE>
     Db* initialize_database(const std::string& key)
     {
-      Data  environment_settings = settings[Crails::environment];
+      auto  environment_settings = settings.at(Crails::environment);
       TYPE* database             = new TYPE(environment_settings[key]);
       Db*   database_as_db       = database;
 
@@ -79,7 +84,6 @@ namespace Crails
     }
 
   private:
-    DataTree settings;
     Dbs      databases;
   };
 
