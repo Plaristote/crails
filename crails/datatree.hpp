@@ -80,6 +80,24 @@ public:
   }
 
   template<typename T>
+  void from_vector(const std::vector<T>& array)
+  {
+    if (!(exists()))
+      tree->add_child(path, boost::property_tree::ptree());
+    {
+      auto& tree_array = get_ptree();
+
+      for (const T& v : array)
+      {
+        boost::property_tree::ptree child;
+
+        child.put("", v);
+        tree_array.push_back(std::make_pair("", child));
+      }
+    }
+  }
+
+  template<typename T>
   operator std::vector<T>() const
   {
     return to_vector<T>();
@@ -89,6 +107,13 @@ public:
   Data& operator=(const T value)
   {
     tree->put(path, value);
+    return *this;
+  }
+
+  template<typename T>
+  Data& operator=(const std::vector<T>& value)
+  {
+    from_vector(value);
     return *this;
   }
 
@@ -161,14 +186,15 @@ public:
 
 private:
   boost::property_tree::ptree* tree;
-  std::string context, key, path;
-  bool        _each_break;
+  std::string                  context, key, path;
+  bool                         _each_break;
 };
 
 class DataTree
 {
 public:
-  Data as_data()       { return Data(tree, "");  }
+  operator Data()                         { return as_data();       }
+  Data as_data()                          { return Data(tree, "");  }
   Data operator[](const std::string& key) { return Data(tree, key); }
 
   DataTree& from_json(std::stringstream&);
