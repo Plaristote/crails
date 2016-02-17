@@ -32,19 +32,14 @@ module ::Guard
     end
 
     def odb_options
-      databases   = JSON.parse File.read 'config/db.json'
-      environment = if developer_mode? then 'development' else 'production' end
-      databases   = databases[environment]
-      db_types    = []
-      databases.each do |key, options|
-        next unless ['mysql', 'pgsql', 'sqlite', 'oracle'].include? options['type']
-        db_types += [ options['type'] ]
-      end
+      db_types = []
+      backend  = get_cmake_variable('SQL_BACKEND')
+      db_types.push backend unless backend.nil?
       options  = "-I. "
       options += "--std c++11 "
-      options += "--multi-database dynamic -d common " if db_types.count > 1
+#     options += "--multi-database dynamic -d common " if db_types.count > 1
       options += "--output-dir \"#{@output_dir}\" "
-#       options += "--default-pointer std::shared_ptr "
+#     options += "--default-pointer std::shared_ptr "
       options + "-d " + (db_types.uniq.join " -d ") + " --generate-query --generate-schema"
     end
 

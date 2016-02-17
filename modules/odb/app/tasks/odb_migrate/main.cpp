@@ -1,8 +1,10 @@
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <crails/datatree.hpp>
 #include <crails/environment.hpp>
+#include <crails/databases.hpp>
 
 using namespace std;
 using namespace boost;
@@ -27,16 +29,16 @@ int run_sql_file(string command, const string& filepath)
 
 int odb_migrate(const std::string& database_key, const vector<string>& sql_files)
 {
-  DataTree         config;
-  Data             database_config = config[Crails::environment][database_key];
-  string           command("psql");
+  const auto& config          = Crails::Databases::settings.at(Crails::environment);
+  const auto& database_config = config.at(database_key);
+  string      command("psql");
 
-  config.from_json_file("config/db.json");
-  command += " -h " + database_config["host"].as<string>();
-  command += " -p " + database_config["port"].defaults_to<string>("5432");
-  command += " -d " + database_config["name"].as<string>();
-  command += " -U " + database_config["user"].as<string>();
-  command  = "PGPASSWORD=\"" + database_config["password"].as<string>() + "\" " + command;
+  command += " -h " + string(any_cast<const char*>(database_config.at("host")));
+  if (database_config.count("port"))
+    command += " -p " + lexical_cast<string>(any_cast<unsigned int>(database_config.at("port")));
+  command += " -d " + string(any_cast<const char*>(database_config.at("name")));
+  command += " -U " + string(any_cast<const char*>(database_config.at("user")));
+  command  = "PGPASSWORD=\"" + string(any_cast<const char*>(database_config.at("password"))) + "\" " + command;
   for (auto it : recursive_directory_range("./app/models"))
   {
     filesystem::path filepath = it.path();
