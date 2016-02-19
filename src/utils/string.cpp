@@ -104,6 +104,24 @@ namespace Crails
     return (ret);
   }
 
+  string singularize(const string& tmp)
+  {
+    if (tmp.length() > 3)
+    {
+      string suffix = tmp.substr(tmp.length() - 3);
+
+      if (suffix == "ies")
+        return tmp.substr(0, tmp.length() - 3) + 'y';
+      else if (suffix[1] == 'e' && suffix[2] == 's')
+      {
+        if (suffix[0] == 's')
+          return tmp.substr(0, tmp.length() - 1);
+        return tmp.substr(0, tmp.length() - 2);
+      }
+    }
+    return tmp.substr(0, tmp.length() - 1);
+  }
+
   string pluralize(const string& tmp)
   {
     if (tmp.length() > 2)
