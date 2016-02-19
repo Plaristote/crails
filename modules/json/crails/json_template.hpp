@@ -5,13 +5,14 @@
 # include <sstream>
 # include <string>
 # include <crails/template.hpp>
+# include <crails/utils/string.hpp>
 
 namespace Crails
 {
   class JsonTemplate : public Template
   {
   public:
-    JsonTemplate(const Renderer* renderer, SharedVars& vars) : 
+    JsonTemplate(const Renderer* renderer, SharedVars& vars) :
       Template(renderer, vars),
       first_item_in_object(true)
     {
@@ -66,6 +67,41 @@ namespace Crails
       }
       stream << ']';
       first_item_in_object = false;
+    }
+
+    template<typename ITERATOR>
+    void json_array(const std::string& key,
+                    ITERATOR beg,
+                    ITERATOR end,
+                    const std::string& partial_view,
+                    std::string var_key = "")
+    {
+      if (var_key == "")
+        var_key = singularize(key);
+      add_separator();
+      add_key(key);
+      first_item_in_object = true;
+      stream << '[';
+      while (beg != end)
+      {
+        add_separator();
+        partial(partial_view, { {var_key, &(*beg)} });
+        ++beg;
+      }
+      stream << ']';
+      first_item_in_object = false;
+    }
+
+    void partial(const std::string& view, SharedVars vars = {})
+    {
+      stream << Template::partial(view, vars);
+    }
+
+    void partial(const std::string& key, const std::string& view, SharedVars vars = {})
+    {
+      add_separator();
+      add_key(key);
+      partial(view, vars);
     }
 
   protected:
