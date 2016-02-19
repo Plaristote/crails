@@ -12,6 +12,7 @@ namespace Crails
   std::string            humanize(const std::string&);
   std::string            strip(const std::string&);  
   std::list<std::string> split(const std::string& str, char separator = ' ', bool count_repetitions = false);
+  std::string            pluralize(const std::string&);
 
   std::string            base64_encode(unsigned char const* str, unsigned int len);
   std::string            base64_encode(std::string str_to_encode);
