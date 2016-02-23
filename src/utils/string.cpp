@@ -63,7 +63,7 @@ namespace Crails
   {
     string str = str_strip(tmp);
     string ret;
-    
+
     for (unsigned short i = 0 ;  i < str.size() ; ++i)
     {
       if (i == 0 || str[i - 1] == '_' || str[i - 1] == ' ')
@@ -88,7 +88,7 @@ namespace Crails
   {
     string         str = str_strip(tmp);
     string         ret;
-  
+
     for (unsigned short i = 0 ;  i < str.size() ; ++i)
     {
       if      (str[i] >= 'A' && str[i] <= 'Z')
@@ -115,8 +115,8 @@ namespace Crails
       else if (suffix[1] == 'e' && suffix[2] == 's')
       {
         if (suffix[0] == 's')
-          return tmp.substr(0, tmp.length() - 1);
-        return tmp.substr(0, tmp.length() - 2);
+          return tmp.substr(0, tmp.length() - 2);
+        return tmp.substr(0, tmp.length() - 1);
       }
     }
     return tmp.substr(0, tmp.length() - 1);
@@ -127,7 +127,7 @@ namespace Crails
     if (tmp.length() > 2)
     {
       string suffix = tmp.substr(tmp.length() - 2);
- 
+
       if (suffix[1] == 's' || suffix[1] == 'x' || suffix[1] == 'z' || suffix == "ch" || suffix == "sh")
         return tmp + "es";
       else if (suffix[1] == 'y')
@@ -140,7 +140,7 @@ namespace Crails
   {
     return (base64_encode((unsigned char const*)str_to_encode.c_str(), str_to_encode.size()));
   }
-  
+
   string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len)
   {
     static const string  charset         =  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
