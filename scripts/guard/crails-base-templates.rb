@@ -111,9 +111,9 @@ module ::Guard
             name = name.first[1..name.first.size]
             instance_variables << "#{type} #{name};"
             line = if is_type_a_reference? type
-              "#{name}(*(boost::any_cast<#{type[0...-1]}*>(vars[\"#{name}\"])))"
+              "#{name}(*(Crails::cast<#{type[0...-1]}*>(vars, \"#{name}\")))"
             else
-              "#{name}(boost::any_cast<#{type} >(vars[\"#{name}\"]))"
+              "#{name}(Crails::cast<#{type} >(vars, \"#{name}\"))"
             end
             variables_initialization << line
             next
