@@ -44,7 +44,7 @@ find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system random REQUIRED)
 find_package(ImageMagick COMPONENTS Magick++)
 
-include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ImageMagick_INCLUDE_DIRS})
 
 ##
 ## Source files
