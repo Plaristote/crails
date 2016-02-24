@@ -1,6 +1,7 @@
 #include <crails/utils/string.hpp>
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <iostream>
 
 using namespace Crails;
 using namespace std;
@@ -21,11 +22,11 @@ namespace Crails
 
   list<string> split(const std::string& str, char c, bool count_repetitions)
   {
-    list<string> ret;
-    short        last_sep = -1;
-    short        i;
+    list<string>   ret;
+    int            last_sep = -1;
+    unsigned int   i;
 
-    for (i = 0 ; str[i] ; ++i)
+    for (i = 0 ; i < str.size() ; ++i)
     {
       if (str[i] == c)
       {
