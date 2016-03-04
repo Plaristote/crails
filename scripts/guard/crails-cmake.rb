@@ -4,7 +4,7 @@ require 'guard/crails-server'
 require 'pty'
 
 module ::Guard
-  class CrailsCmake < Plugin
+  class CrailsCmake < CrailsPlugin
     def run_all
       compile
     end
@@ -25,24 +25,30 @@ module ::Guard
     end
 
     def compile
-      Crails::Notifier.notify 'Crails Guard', 'Your crails server is recompiling right now'
+      message = {
+        console: 'Your crails server is recompiling right now',
+        html: "<h4>crails-cmake: #{get_project_name}</h4><div>Recompiling right now...</div>"
+      }
+      Crails::Notifier.notify 'crails-cmake', message
+      success = false
       Dir.chdir 'build' do
         puts ">> Make server"
         run_command 'cmake ..'
         run_command 'make'  if $?.success?
-        if $?.success?
-          puts ">> Run tests"
-          Dir.chdir '..' do
-            run_command 'build/tests'
-            if $?.success?
-              restart_server if File.exists?('server.pid')
-            else
-              Crails::Notifier.notify 'Crails Guard', 'Tests are broken'
-            end
-          end
-        else
-          Crails::Notifier.notify 'Crails Guard', 'Your crails server failed to build'
-        end
+        success = $?.success?
+      end
+      if success
+        message = {
+          console: 'Your crails server built successfully',
+          html: "<h4>crails-cmake success</h4><div>All targets for <b>#{get_project_name}</b> built successfully.</div>"
+        }
+        Crails::Notifier.notify 'crails-cmake', message, :success
+      else
+        message = {
+          console: 'Your crails server failed to build',
+          html: "<h4>crails-cmake failure</h4><div>Failed to build some targets for <b>#{get_project_name}</b></div>"
+        }
+        Crails::Notifier.notify 'crails-cmake', message, :failure
       end
     end
 

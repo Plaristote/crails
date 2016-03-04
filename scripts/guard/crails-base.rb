@@ -35,6 +35,10 @@ module ::Guard
       end
     end
 
+    def get_project_name
+      get_cmake_variable 'CMAKE_PROJECT_NAME:STATIC'
+    end
+
     def get_cmake_variable variable
       `cat #{cmakecache_path} | grep #{variable} | cut -d= -f2`.strip!
     end

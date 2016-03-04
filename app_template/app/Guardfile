@@ -19,3 +19,9 @@ group :compile do
     watch(%r{^spec/.+\.[hc](pp|xx)?$})
   end
 end
+
+group :tests do
+  guard 'crails-tests' do
+    watch(%r{^build/tests$})
+  end
+end
