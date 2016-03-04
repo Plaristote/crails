@@ -23,10 +23,12 @@ module ::Guard
     end
 
     def run_tests
+       starts_at = Time.now.to_f
        last_line = run_command 'build/tests'
+       ends_at   = Time.now.to_f
        html  = "<h4>crails-tests #{$?.success? ? 'passed' : 'failed'}</h4>"
        last_line.uncolorize
-       html += "<div>#{last_line}</div>"
+       html += "<div>#{last_line}<br/>In #{(ends_at - starts_at).round 2}s</div>"
        if $?.success?
          Crails::Notifier.notify 'crails-tests passed', { html: html }, :success
        else

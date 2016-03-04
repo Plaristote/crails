@@ -31,22 +31,26 @@ module ::Guard
       }
       Crails::Notifier.notify 'crails-cmake', message
       success = false
+      duration = nil
       Dir.chdir 'build' do
         puts ">> Make server"
+        starts_at = Time.now.to_f
         run_command 'cmake ..'
         run_command 'make'  if $?.success?
+        ends_at = Time.now.to_f
+        duration = (ends_at - starts_at).round 2
         success = $?.success?
       end
       if success
         message = {
           console: 'Your crails server built successfully',
-          html: "<h4>crails-cmake success</h4><div>All targets for <b>#{get_project_name}</b> built successfully.</div>"
+          html: "<h4>crails-cmake success</h4><div>All targets for <b>#{get_project_name}</b> built successfully.<br/>In #{duration}s.</div>"
         }
         Crails::Notifier.notify 'crails-cmake', message, :success
       else
         message = {
           console: 'Your crails server failed to build',
-          html: "<h4>crails-cmake failure</h4><div>Failed to build some targets for <b>#{get_project_name}</b></div>"
+          html: "<h4>crails-cmake failure</h4><div>Failed to build some targets for <b>#{get_project_name}</b>.</div>"
         }
         Crails::Notifier.notify 'crails-cmake', message, :failure
       end
