@@ -1,14 +1,18 @@
+HAS_COFFEESCRIPT = Gem::Specification::find_all_by_name('coffee-script').any?
+HAS_TYPESCRIPT   = Gem::Specification::find_all_by_name('typescript-node').any?
+
 require 'guard/crails-base'
 require 'guard/crails-notifier'
-require 'coffee-script'
 require 'fileutils'
 require 'pathname'
 require 'uglifier'
+require 'coffee-script'   if HAS_COFFEESCRIPT
+require 'typescript-node' if HAS_TYPESCRIPT
 
 module ::Guard
   class CrailsJs < CrailsPlugin
     def initialize options = {}
-      options[:watchers] << ::Guard::Watcher.new(%r{^#{options[:input]}/(.+\.(js|coffee))$})
+      options[:watchers] << ::Guard::Watcher.new(%r{^#{options[:input]}/(.+\.(js|coffee|ts))$})
       @uglifier_options = options[:uglifier] || {}
       super options
     end
@@ -68,16 +72,34 @@ module ::Guard
       current_dir       = file.split('/')[0...-1].join('/')
       full_path         = (options[:input] + '/' + file).gsub(/\/+/, '/')
       source            = File.read full_path, encoding: 'BINARY'
-      if file.match(/\.coffee$/) != nil
-        source          = source.gsub /^#=([^\n]+)/, '`//=\1`'
-        begin
-          source        = CoffeeScript.compile source, bare: true
-        rescue ExecJS::RuntimeError => e
-          puts_error "CoffeeScript compilation failed for `#{file}`: #{e.message}"
-          raise "compilation error"
-        end
+      if HAS_COFFEESCRIPT && file.match(/\.coffee$/) != nil
+        source = compile_coffeescript source
+      elsif HAS_TYPESCRIPT && file.match(/\.ts$/) != nil
+        source = compile_typescript source, current_dir
       end
       resolve_linking source, current_dir
+    end
+
+    def compile_coffeescript source
+      source          = source.gsub /^#=([^\n]+)/, '`//=\1`'
+      begin
+        source        = CoffeeScript.compile source, bare: true
+      rescue ExecJS::RuntimeError => e
+        puts_error "CoffeeScript compilation failed for `#{file}`: #{e.message}"
+        raise "compilation error"
+      end
+      source
+    end
+
+    def compile_typescript source, current_dir
+      begin
+        source        = resolve_linking source, current_dir # TypeScript needs the linking to be done before compilation
+        source        = TypeScript::Node.compile source
+      rescue ExecJS::RuntimeError => e
+        puts_error "TypeScript compilation failed for `#{file}`: #{e.message}"
+        raise "compilation error"
+      end
+      source
     end
 
     def resolve_linking source, current_dir
