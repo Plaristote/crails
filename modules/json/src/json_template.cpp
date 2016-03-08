@@ -69,4 +69,13 @@ namespace Crails
     add_key(key);
     add_object(func);
   }
+
+  template<>
+  void JsonTemplate::add_value<bool>(bool value)
+  {
+    if (value)
+      stream << "true";
+    else
+      stream << "false";
+  }
 }
