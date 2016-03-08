@@ -1,4 +1,5 @@
 require 'guard/crails-base'
+require 'guard/crails-notifier'
 require 'coffee-script'
 require 'fileutils'
 require 'pathname'
@@ -14,7 +15,10 @@ module ::Guard
 
     def run_all
       begin
+        @file_cache = {}
+        starts_at = Time.now.to_f
         options[:targets].each do |target|
+          file_starts_at = Time.now.to_f
           @included_files = []
           text        = compile_file target
           target      = extension_to_js target
@@ -25,11 +29,19 @@ module ::Guard
             js = Uglifier.compile(js, @uglifier_options) unless developer_mode?
             f.write js
           end
-          puts ">> Generated #{output_file}"
+          puts ">> Generated #{output_file} in #{(Time.now.to_f - file_starts_at).round 2}s"
         end
+        message = {
+          console: "Finished crailsjs job in #{(Time.now.to_f - starts_at).round 2} seconds.",
+          html: "<h4>crails-js success</h4><div>Finished crails-js job in #{(Time.now.to_f - starts_at).round 2} seconds."
+        }
+        Crails::Notifier.notify 'crails-js', message, :success
       rescue Exception => e
-        puts_error "Catched exception: #{e.message}"
-        puts_error "!! crailsjs couldn't perform its duties"
+        message = {
+          console: "Catched exception: #{e.message}\n!! crailsjs couldn't perform its duties",
+          html: "<h4>crails-js failure</h4><div>Catched exception: #{e.message}"
+        }
+        Crails::Notifier.notify 'crails-js', message, :failure
       end
     end
 
@@ -46,12 +58,13 @@ module ::Guard
       Pathname.new(filepath).cleanpath.to_s
     end
 
-    def puts_error str
-      puts "\033[31m#{str}\033[0m"
+    def include_file file
+      @included_files << file
+      @file_cache[file] = compile_file file if @file_cache[file].nil?
+      @file_cache[file]
     end
 
     def compile_file file
-      @included_files << file
       current_dir       = file.split('/')[0...-1].join('/')
       full_path         = (options[:input] + '/' + file).gsub(/\/+/, '/')
       source            = File.read full_path, encoding: 'BINARY'
@@ -64,7 +77,11 @@ module ::Guard
           raise "compilation error"
         end
       end
-      comment_character = "//"
+      resolve_linking source, current_dir
+    end
+
+    def resolve_linking source, current_dir
+      comment_character = '//'
       file_content      = ''
       source.split("\n").each do |line|
         matches = line.match(/^\s*#{comment_character}=\s+(require|require_tree|include)\s+([^;]+)/)
@@ -78,11 +95,11 @@ module ::Guard
             files.each do |filepath|
               filepath = clean_required_path filepath[options[:input].size..-1]
               unless @included_files.include? filepath
-                file_content += (compile_file filepath) + "\n"
+                file_content += (include_file filepath) + "\n"
               end
             end
           elsif not @included_files.include? required_path
-            file_content     += (compile_file required_path) + "\n"
+            file_content     += (include_file required_path) + "\n"
           end
         end
       end
