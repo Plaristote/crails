@@ -55,7 +55,12 @@ bool Data::exists() const
 
 bool Data::is_blank() const
 {
-  return !exists();
+  return !exists() || as<string>() == "";
+}
+
+bool Data::is_null() const
+{
+  return !exists() || as<string>() == "null";
 }
 
 std::vector<std::string> Data::find_missing_keys(const std::vector<std::string>& keys) const

@@ -168,6 +168,7 @@ public:
     push_back(Data(child, ""));
   }
 
+  bool is_null() const;
   bool is_blank() const;
   bool exists() const;
   void destroy() { tree->erase(path); }
