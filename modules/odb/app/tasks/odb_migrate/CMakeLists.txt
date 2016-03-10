@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 file(GLOB task_files
      *.cpp
-     ../../lib/odb/*-schema.cxx)
+     *.cxx)
 
 add_executable(odb_migrate ${task_files})
 

@@ -74,7 +74,11 @@ module ::Guard
       end
     end
 
-    def odb_options prefix_path
+    def odb_options_schema
+      odb_options("tasks/odb_migrate", nil) + " --generate-schema-only --at-once --input-name application "
+    end
+
+    def odb_options output_dir, prefix_path
       db_types = []
       backend  = get_cmake_variable('SQL_BACKEND')
       db_types.push backend unless backend.nil?
@@ -85,11 +89,11 @@ module ::Guard
       options += "--cxx-prologue '#{@cxx_prologue}'" unless @cxx_prologue.nil?
       options += "--ixx-prologue '#{@ixx_prologue}'" unless @ixx_prologue.nil?
       options += "--schema-prologue '#{@schema_prologue}'" unless @schema_prologue.nil?
-      options += "--output-dir \"#{@output_dir}\" "
-      options += "--include-prefix \"#{prefix_path}\" "
+      options += "--output-dir \"#{output_dir}\" "
+      options += "--include-prefix \"#{prefix_path}\" " unless prefix_path.nil?
       options += "--table-prefix \"#{@table_prefix}\" " unless @table_prefix.nil?
       options += "--default-pointer \"#{@default_pointer}\" " unless @default_pointer.nil?
-      options + "-d " + (db_types.uniq.join " -d ") + " --generate-query --generate-schema"
+      options + "-d " + (db_types.uniq.join " -d ") + " --generate-query "
 #     options += "--multi-database dynamic -d common " if db_types.count > 1
     end
 
@@ -99,12 +103,17 @@ module ::Guard
         paths_by_prefix[generate_include_prefix path] ||= []
         paths_by_prefix[generate_include_prefix path] << path
       end
+
       paths_by_prefix.each do |key,value|
-        cmd = "odb #{odb_options key} #{value.join ' '}"
+        cmd = "odb #{odb_options @output_dir, key} #{value.join ' '}"
         puts "+ #{cmd}"
         `#{cmd}`
       end
       fix_ixx_includes
+
+      cmd = "odb #{odb_options_schema} #{paths.join ' '}"
+      puts "+ #{cmd}"
+      `#{cmd}`
     end
   end
 end

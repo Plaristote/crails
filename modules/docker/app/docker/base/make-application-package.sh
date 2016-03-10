@@ -15,7 +15,8 @@ mkdir -p "$target_libs" "$target_builds" "$target_public"
 # Builds the application
 mkdir -p "$build_path"
 cd "$build_path"
-ruby /usr/local/share/crails compile assets before_compile
+bundle install
+bundle exec /usr/local/share/crails compile assets before_compile
 cmake .. -DDEVELOPER_MODE=OFF && make
 
 # Copy the dependencies to the lib directory
