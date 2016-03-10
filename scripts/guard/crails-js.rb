@@ -120,7 +120,7 @@ module ::Guard
                 file_content += (include_file filepath) + "\n"
               end
             end
-          elsif not @included_files.include? required_path
+          elsif (matches[1] == 'include') || (not @included_files.include? required_path) 
             file_content     += (include_file required_path) + "\n"
           end
         end
