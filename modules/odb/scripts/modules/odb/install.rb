@@ -23,10 +23,16 @@ project.base_directory source, base_directory do
       project.file 'main.cpp'
     end
   end
+
+  project.directory :lib do
+    project.directory :odb do
+      project.file '.gitignore'
+    end
+  end
 end
 
 until (picked_backends - backends).empty? && picked_backends.count > 0
-  puts "/?\\ What backends do you wish to use ? (ex: mysql, sqlite)"
+  puts "/?\\ What backends do you wish to use ? (separate with commas)"
   puts "Available backends are #{backends.join ','}."
   print "$> "
   STDOUT.flush
