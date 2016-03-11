@@ -5,6 +5,7 @@ module ::Guard
   class CrailsOdb < CrailsPlugin
     def initialize options = {}
       super
+      @backends        = options[:backends] || get_cmake_variable('SQL_BACKEND')
       @output_dir      = options[:output] || "lib/odb"
       @include_prefix  = options[:include_prefix] || "app/models"
       @table_prefix    = options[:table_prefix]
@@ -26,6 +27,8 @@ module ::Guard
       files = fetch_odb_files_in paths
       if files.count > 0
         compile_models files
+        fix_ixx_includes
+        generate_schema
       else
         puts "[crails-odb] Nothing to compile"
       end
@@ -79,9 +82,6 @@ module ::Guard
     end
 
     def odb_options output_dir, prefix_path
-      db_types = []
-      backend  = get_cmake_variable('SQL_BACKEND')
-      db_types.push backend unless backend.nil?
       options  = "-I. "
       options += "--std #{@cpp_version} "
       options += "--schema-format separate " 
@@ -93,8 +93,9 @@ module ::Guard
       options += "--include-prefix \"#{prefix_path}\" " unless prefix_path.nil?
       options += "--table-prefix \"#{@table_prefix}\" " unless @table_prefix.nil?
       options += "--default-pointer \"#{@default_pointer}\" " unless @default_pointer.nil?
-      options + "-d " + (db_types.uniq.join " -d ") + " --generate-query "
-#     options += "--multi-database dynamic -d common " if db_types.count > 1
+      options += "-d " + (@backends.uniq.join " -d ") + " "
+      options += "--multi-database dynamic -d common " if @backends.count > 1
+      options + "--generate-query "
     end
 
     def compile_models paths
@@ -109,9 +110,11 @@ module ::Guard
         puts "+ #{cmd}"
         `#{cmd}`
       end
-      fix_ixx_includes
+    end
 
-      cmd = "odb #{odb_options_schema} #{paths.join ' '}"
+    def generate_schema
+      paths = fetch_odb_files_in watched_files
+      cmd   = "odb #{odb_options_schema} #{paths.join ' '}"
       puts "+ #{cmd}"
       `#{cmd}`
     end

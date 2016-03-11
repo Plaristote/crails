@@ -17,6 +17,20 @@ using namespace std;
 using namespace ODB;
 using namespace Crails;
 
+std::map<std::string, DatabaseType> database_types_to_string = {
+  { "sqlite", sqlite },
+  { "pgsql",  pgsql },
+  { "mysql",  mysql },
+  { "oracle", oracle }
+};
+
+const Database::Initializers Database::initializers = {
+  { sqlite, &Database::initialize_for_sqlite },
+  { pgsql,  &Database::initialize_for_postgresql },
+  { mysql,  &Database::initialize_for_mysql },
+  { oracle, &Database::initialize_for_oracle }
+};
+
 template<typename V>
 static V defaults_to(const std::map<std::string, boost::any>& a, const std::string& k, const V def)
 {
@@ -25,6 +39,21 @@ static V defaults_to(const std::map<std::string, boost::any>& a, const std::stri
   if (it == a.end())
     return def;
   return boost::any_cast<V>(it->second);
+}
+
+Database::Database(const Databases::DatabaseSettings& settings) : Db(ClassType())
+{
+  const string backend_str = defaults_to<const char*>(settings, "type", "sqlite");
+  auto         backend_it  = database_types_to_string.find(backend_str);
+
+  if (backend_it == database_types_to_string.end())
+    throw UnknownBackend(backend_str);
+  else
+  {
+    auto initializer = initializers.at(backend_it->second);
+
+    (this->*initializer)(settings);
+  }
 }
 
 void ODB::Database::initialize_for_mysql(const Databases::DatabaseSettings& settings)
@@ -85,20 +114,6 @@ void ODB::Database::initialize_for_oracle(const Databases::DatabaseSettings& set
 #else
   throw boost_ext::runtime_error("ODB was compiled without support for `oracle`");
 #endif
-}
-
-Database::Database(const Databases::DatabaseSettings& settings) : Db(ClassType())
-{
-  backend = defaults_to<const char*>(settings, "type", "sqlite");
-
-  if (backend == "mysql")
-    initialize_for_mysql(settings);
-  else if (backend == "pgsql" || backend == "postgres")
-    initialize_for_postgresql(settings);
-  else if (backend == "oracle")
-    initialize_for_oracle(settings);
-  else
-    initialize_for_sqlite(settings);
 }
 
 void Database::connect()

@@ -4,24 +4,50 @@
 # include <memory>
 # include <odb/database.hxx>
 # include <crails/databases.hpp>
+# include <map>
 
 namespace ODB
 {
+  enum DatabaseType
+  {
+    sqlite,
+    pgsql,
+    mysql,
+    oracle
+  };
+
+  class UnknownBackend : public std::exception
+  {
+    const std::string message;
+  public:
+    UnknownBackend(const std::string& backend) : message("ODB::Database does not know any '" + backend +"' sql backend") {}
+
+    const char* what() const throw() { return message.c_str(); }
+  };
+
   class Database : public Crails::Databases::Db
   {
   public:
+    typedef void (Database::*Initializer)(const Crails::Databases::DatabaseSettings&);
+    typedef std::map<DatabaseType, Initializer> Initializers;
+
     static const std::string ClassType() { return ("odb"); }
 
     Database(const Crails::Databases::DatabaseSettings&);
 
-    const std::string& get_backend_name() const { return backend; }
-
-    template<class T>
-    T& get_database()
+    odb::database& get_agnostic_database()
     {
       connect();
-      return *(reinterpret_cast<T*>(db.get()));
+      return *(db.get());
     }
+
+    template<class T>
+    inline T& get_database()
+    {
+      return reinterpret_cast<T&>(get_agnostic_database());
+    }
+
+    DatabaseType get_type() const { return backend; }
 
     void connect(void);
   private:
@@ -31,7 +57,8 @@ namespace ODB
     void initialize_for_oracle(const Crails::Databases::DatabaseSettings&);
 
     std::unique_ptr<odb::database> db;
-    std::string                    backend;
+    DatabaseType                   backend;
+    static const Initializers      initializers;
   };
 }
 
