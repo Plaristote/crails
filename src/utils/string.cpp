@@ -35,7 +35,7 @@ namespace Crails
         last_sep = i;
       }
     }
-    if (last_sep != i && i > 0 && str[i - 1] != c)
+    if ((unsigned int)last_sep != i && i > 0 && str[i - 1] != c)
       ret.push_back(str.substr(last_sep + 1));
     return (ret);
   }
