@@ -50,8 +50,8 @@ Database::Database(const Databases::DatabaseSettings& settings) : Db(ClassType()
     throw UnknownBackend(backend_str);
   else
   {
-    auto initializer = initializers.at(backend_it->second);
-
+    backend = backend_it->second;
+    auto initializer = initializers.at(backend);
     (this->*initializer)(settings);
   }
 }
