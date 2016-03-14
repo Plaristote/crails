@@ -24,6 +24,13 @@ class CMakeLists
 
   def add_crails_task name
     @content += "\nadd_subdirectory(tasks/#{name})"
+    puts "\033[32m[CMAKE]\033[0m Adding task #{name}"
+  end
+
+  def add_option opt
+    option_pos = @content.index /option\([^)]+\)/n
+    @content.insert option_pos, "option(#{opt})\n"
+    puts "\033[32m[CMAKE]\033[0m Adding option #{opt.split(' ').first}"
   end
 
   def add_find_package command
@@ -36,6 +43,10 @@ class CMakeLists
     @content.insert include_dir_pos, "include_directories(#{include_dirs})\n"
   end
 
+  def add_code code
+    @content += "\n#{code}"
+  end
+
 private
   def append str
     @content.gsub!(
@@ -44,5 +55,4 @@ private
     )
   end
 end
-
 

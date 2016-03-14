@@ -6,6 +6,22 @@
 # include <crails/databases.hpp>
 # include <map>
 
+# ifdef ODB_WITH_MYSQL
+#  include <odb/mysql/database.hxx>
+# endif
+
+# ifdef ODB_WITH_PGSQL
+#  include <odb/pgsql/database.hxx>
+# endif
+
+# ifdef ODB_WITH_SQLITE
+#  include <odb/sqlite/database.hxx>
+# endif
+
+# ifdef ODB_WITH_ORACLE
+#  include <odb/oracle/database.hxx>
+# endif
+
 namespace ODB
 {
   enum DatabaseType
@@ -28,7 +44,7 @@ namespace ODB
   class Database : public Crails::Databases::Db
   {
   public:
-    typedef void (Database::*Initializer)(const Crails::Databases::DatabaseSettings&);
+    typedef odb::database* (*Initializer)(const Crails::Databases::DatabaseSettings&);
     typedef std::map<DatabaseType, Initializer> Initializers;
 
     static const std::string ClassType() { return ("odb"); }
@@ -51,10 +67,6 @@ namespace ODB
 
     void connect(void);
   private:
-    void initialize_for_mysql(const Crails::Databases::DatabaseSettings&);
-    void initialize_for_postgresql(const Crails::Databases::DatabaseSettings&);
-    void initialize_for_sqlite(const Crails::Databases::DatabaseSettings&);
-    void initialize_for_oracle(const Crails::Databases::DatabaseSettings&);
 
     std::unique_ptr<odb::database> db;
     DatabaseType                   backend;

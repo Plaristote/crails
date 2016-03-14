@@ -14,7 +14,8 @@ picked_backends = []
 
 project.base_directory source, base_directory do
   project.directory :config do
-    project.file 'db.json'
+    project.file 'odb.cpp'
+    project.file 'odb.hpp'
   end
 
   project.directory :tasks do
@@ -42,15 +43,21 @@ end
 cmake = CMakeLists.new
 cmake.add_dependency 'odb'
 picked_backends.each do |backend|
-  cmake.add_dependency "odb-#{backend}"
+  cmake.add_option("ODB_WITH_#{backend.upcase} \"enables #{backend} support for crails-odb\" ON")
+  cmake.add_code <<CMAKE
+if (ODB_WITH_#{backend.upcase})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DODB_WITH_#{backend.upcase}")
+  set(dependencies "${dependencies} odb-#{backend})
+endif()
+CMAKE
 end
 cmake.add_crails_module 'odb'
 cmake.add_crails_task 'odb_migrate'
 
 guardfile = GuardfileEditor.new
 guardfile.add_task 'before_compile', <<RUBY
-guard 'crails-odb' do
-    watch(%r{app/models/.+\.h(pp)?$})
+guard 'crails-odb', backends: [#{(picked_backends.map {|b| ":#{b}"}).join ','}] do
+    watch(%r{app/models/.+\.h(pp|xx)?$})
   end
 RUBY
 
