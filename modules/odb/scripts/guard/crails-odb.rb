@@ -5,7 +5,6 @@ module ::Guard
   class CrailsOdb < CrailsPlugin
     def initialize options = {}
       super
-      @backends        = options[:backends] || get_cmake_variable('SQL_BACKEND')
       @output_dir      = options[:output] || "lib/odb"
       @include_prefix  = options[:include_prefix] || "app/models"
       @table_prefix    = options[:table_prefix]
@@ -15,11 +14,13 @@ module ::Guard
       @ixx_prologue    = options[:ixx_prologue]
       @cxx_prologue    = options[:cxx_prologue]
       @schema_prologue = options[:schema_prologue]
+      @defines         = options[:defines]
       @requires        = ['crails/safe_ptr.hpp']
       @requires       += options[:requires] unless options[:requires].nil?
     end
 
     def run_all
+      remove_generated_files
       run_on_modifications watched_files
     end
 
@@ -35,6 +36,24 @@ module ::Guard
     end
 
   private
+    def get_active_backends
+      backends        = [:pgsql, :mysql, :oracle, :sqlite]
+      active_backends = []
+      backends.each do |backend|
+        value = get_cmake_variable("ODB_WITH_#{backend.to_s.upcase}")
+        active_backends << backend if value == "ON"
+      end
+      active_backends
+    end
+
+    def remove_generated_files
+      generated_files  = Dir["lib/odb/**/*"]
+      generated_files += Dir["tasks/odb_migrate/*.cxx"]
+      generated_files.each do |filename|
+        File.delete filename
+      end
+    end
+
     def fetch_odb_files_in paths
       odb_files = []
       paths.each do |path|
@@ -82,6 +101,7 @@ module ::Guard
     end
 
     def odb_options output_dir, prefix_path
+      backends = get_active_backends
       options  = "-I. "
       options += "--std #{@cpp_version} "
       options += "--schema-format separate " 
@@ -93,8 +113,15 @@ module ::Guard
       options += "--include-prefix \"#{prefix_path}\" " unless prefix_path.nil?
       options += "--table-prefix \"#{@table_prefix}\" " unless @table_prefix.nil?
       options += "--default-pointer \"#{@default_pointer}\" " unless @default_pointer.nil?
-      options += "-d " + (@backends.uniq.join " -d ") + " "
-      options += "--multi-database dynamic -d common " if @backends.count > 1
+      options += "-d " + (backends.uniq.join " -d ") + " "
+      options += "--multi-database dynamic -d common " if backends.count > 1
+      if @defines.class == Array
+        options += (@defines.map {|d| "-D#{d}"}).join ' '
+        options += ' '
+      elsif @defines.class == Hash
+        options += (@defines.map {|k,v| "-D#{k}=#{v}"}).join ' '
+        options += ' '
+      end
       options + "--generate-query "
     end
 
