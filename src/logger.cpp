@@ -44,9 +44,11 @@ void Logger::flush()
   {
     case Info:
       *stdout log_prefix << buffer.stream.str();
+      stdout->flush();
       break ;
     default:
       *stderr log_prefix << buffer.stream.str();
+      stderr->flush();
       break ;
   }
   mutex.unlock();
