@@ -3,50 +3,23 @@
 
 using namespace std;
 
-void migrate_database(odb::database& database)
-{
-  odb::schema_version v(database.schema_version());
-  odb::schema_version cv(odb::schema_catalog::current_version(database));
- 
-  if (v == 0)
-  {
-    odb::transaction t(database.begin());
-    cout << ":: No schema version found." << endl;
-    cout << ":: Initializing database from scratch" << endl;
-    odb::schema_catalog::create_schema(database);
-    t.commit();
-  }
-  else if (v < cv)
-  {
-    cout << ":: Migration" << endl;
-    for (v = odb::schema_catalog::next_version(database, v) ;
-         v <= cv ;
-         v = odb::schema_catalog::next_version(database, v))
-    {
-      odb::transaction t(database.begin());
-
-      cout << ":: Running migration to version " << v << endl;
-      odb::schema_catalog::migrate_schema_pre(database, v);
-      // TODO run migrations here
-      odb::schema_catalog::migrate_schema_post(database, v);
-      t.commit();
-    }
-  }
-  else
-    cout << ":: Nothing to do" << endl;
-}
-
-odb::database& get_database(char* name)
-{
-  auto& crails_database = CRAILS_DATABASE(ODB, name);
-
-  return crails_database.get_agnostic_database();
-}
-
 int help(char* arg_command)
 {
-  cout << "Usage: " << arg_command << " [database_key]" << endl;
+  cout << "Usage: " << arg_command << " [options] database_key" << endl;
+  cout << "Options:" << endl;
+  cout << "\t-c: create the database before performing the migration" << endl;
+  cout << "\t-d: drop the schema instead of performing a migration" << endl;
   return -1;
+}
+
+void create_database(const std::string& database_name)
+{
+  const auto& settings = Crails::Databases::settings.at(Crails::environment).at(database_name);
+
+  // The second and third parameters are the user and password for the database,
+  // If left empty, it uses the identity specified in the database settings.
+  // Make sure to use the credentials of a user which can create users and databases.
+  ODB::Database::create_from_settings(settings, "", "");
 }
 
 int main(int argc, char** argv)
@@ -54,6 +27,20 @@ int main(int argc, char** argv)
   if (argc < 2)
     return help(argv[0]);
   else
-    migrate_database(get_database(argv[1]));
+  {
+    string database_name = argv[argc - 1];
+    string option        = argc > 2 ? string(argv[1]) : string("");
+
+    if (option == "-c")
+      create_database(database_name);
+    {
+      ODB::Database& database = CRAILS_DATABASE(ODB, database_name);
+
+      if (option == "-d")
+        database.drop();
+      else
+        database.migrate();
+    }
+  }
   return 0;
 }

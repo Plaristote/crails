@@ -22,6 +22,8 @@
 #  include <odb/oracle/database.hxx>
 # endif
 
+# include "migrate.hpp"
+
 namespace ODB
 {
   enum DatabaseType
@@ -51,6 +53,8 @@ namespace ODB
 
     Database(const Crails::Databases::DatabaseSettings&);
 
+    static bool create_from_settings(const Crails::Databases::DatabaseSettings&, std::string user = "", std::string password = "");
+
     odb::database& get_agnostic_database()
     {
       connect();
@@ -65,9 +69,75 @@ namespace ODB
 
     DatabaseType get_type() const { return backend; }
 
-    void connect(void);
-  private:
+    void connect();
 
+    inline void migrate(std::function<bool (ODB::Database&, odb::schema_version)> callback = [](ODB::Database&, odb::schema_version) { return true; })
+    {
+      switch (backend)
+      {
+#ifdef ODB_WITH_PGSQL
+      case pgsql:
+        database_migrate<odb::pgsql::database>(*this, get_database<odb::pgsql::database>(), callback);
+        break ;
+#endif
+
+#ifdef ODB_WITH_MYSQL
+      case mysql:
+        database_migrate<odb::mysql::database>(*this, get_database<odb::mysql::database>(), callback);
+        break ;
+#endif
+
+#ifdef ODB_WITH_SQLITE
+      case sqlite:
+        database_migrate<odb::sqlite::database>(*this, get_database<odb::sqlite::database>(), callback);
+        break ;
+#endif
+
+#ifdef ODB_WITH_ORACLE
+      case oracle:
+        database_migrate<odb::oracle::database>(*this, get_database<odb::oracle::database>(), callback);
+        break ;
+#endif
+
+      default:
+        throw std::logic_error("trying to manipulate database types that aren\'t supported by the application");
+      }
+    }
+
+    inline void drop()
+    {
+      switch (backend)
+      {
+#ifdef ODB_WITH_PGSQL
+      case pgsql:
+        database_drop<odb::pgsql::database>(get_database<odb::pgsql::database>());
+        break ;
+#endif
+
+#ifdef ODB_WITH_MYSQL
+      case mysql:
+        database_drop<odb::mysql::database>(get_database<odb::mysql::database>());
+        break ;
+#endif
+
+#ifdef ODB_WITH_SQLITE
+      case sqlite:
+        database_drop<odb::sqlite::database>(get_database<odb::sqlite::database>());
+        break ;
+#endif
+
+#ifdef ODB_WITH_ORACLE
+      case oracle:
+        database_drop<odb::oracle::database>(get_database<odb::oracle::database>());
+        break ;
+#endif
+
+      default:
+        throw std::logic_error("trying to drop database types that aren\'t supported by the application");
+      }
+    }
+
+  private:
     std::unique_ptr<odb::database> db;
     DatabaseType                   backend;
     static const Initializers      initializers;

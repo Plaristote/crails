@@ -5,6 +5,8 @@ module ::Guard
   class CrailsOdb < CrailsPlugin
     def initialize options = {}
       super
+      @input_name      = "application"
+      @embed_schema    = options[:embed_schema]
       @output_dir      = options[:output] || "lib/odb"
       @include_prefix  = options[:include_prefix] || "app/models"
       @table_prefix    = options[:table_prefix]
@@ -97,7 +99,8 @@ module ::Guard
     end
 
     def odb_options_schema
-      odb_options("tasks/odb_migrate", nil) + " --generate-schema-only --at-once --input-name application "
+      schema_path = if @embed_schema then "lib/odb" else "tasks/odb_migrate" end
+      odb_options(schema_path, nil) + " --generate-schema-only --at-once --input-name #{@input_name} "
     end
 
     def odb_options output_dir, prefix_path
@@ -140,6 +143,9 @@ module ::Guard
     end
 
     def generate_schema
+      Dir["{tasks/odb_migrate,lib/odb}/#{@input_name}-schema*.cxx"].each do |schema_file|
+        File.delete schema_file
+      end
       paths = fetch_odb_files_in watched_files
       cmd   = "odb #{odb_options_schema} #{paths.join ' '}"
       puts "+ #{cmd}"
