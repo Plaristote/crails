@@ -59,28 +59,35 @@ namespace Crails
     Db* get_database_from_name(const std::string& key);
 
     template<typename TYPE>
-    Db* initialize_database(const std::string& key)
+    Db* initialize_database(const std::string& key, const Crails::Databases::DatabaseSettings& settings)
     {
-      auto  environment_settings = settings.at(Crails::environment);
-      TYPE* database             = new TYPE(environment_settings[key]);
-      Db*   database_as_db       = database;
+      TYPE* database = new TYPE(settings);
+      Db*   database_as_db = database;
 
       database_as_db->name = key;
       databases.push_back(database);
-      return (database);
+      return database;
+    }
+
+    template<typename TYPE>
+    TYPE& get_database(const std::string& key, const Crails::Databases::DatabaseSettings& settings)
+    {
+      Db* db = get_database_from_name(key);
+
+      if (!db)
+        db = initialize_database<TYPE>(key, settings);
+      if (db->get_type() != TYPE::ClassType())
+        throw Databases::Exception("Expected type '" + TYPE::ClassType() + "', got '" + db->get_type() + '\'');
+      db->connect();
+      return (*(reinterpret_cast<TYPE*>(db)));
     }
 
     template<typename TYPE>
     TYPE& get_database(const std::string& key)
     {
-      Db* db = get_database_from_name(key);
+      auto environment_settings = settings.at(Crails::environment);
 
-      if (!db)
-        db = initialize_database<TYPE>(key);
-      if (db->get_type() != TYPE::ClassType())
-        throw Databases::Exception("Expected type '" + TYPE::ClassType() + "', got '" + db->get_type() + '\'');
-      db->connect();
-      return (*(reinterpret_cast<TYPE*>(db)));
+      return get_database<TYPE>(key, environment_settings[key]);
     }
 
   private:
