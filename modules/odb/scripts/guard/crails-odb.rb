@@ -22,8 +22,10 @@ module ::Guard
     end
 
     def run_all
-      remove_generated_files
-      run_on_modifications watched_files
+      if run_cmake
+        remove_generated_files
+        run_on_modifications watched_files
+      end
     end
 
     def run_on_modifications(paths)

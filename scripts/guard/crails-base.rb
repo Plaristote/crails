@@ -43,6 +43,23 @@ module ::Guard
       `cat #{cmakecache_path} | grep #{variable} | cut -d= -f2`.strip!
     end
 
+    def run_command command
+      PTY.spawn(command) do |stdout, stdin, pid|
+        begin
+          stdout.each { |line| print line }
+        rescue Errno::EIO
+        end
+        Process.wait(pid)
+      end
+    end
+
+    def run_cmake
+      Dir.chdir 'build' do
+        run_command 'cmake ..'
+      end
+      $?.success?
+    end
+
     def compiler
       compiler_path = get_cmake_variable 'CMAKE_CXX_COMPILER:FILEPATH'
       compiler_path = '/usr/bin/g++' if compiler_path.nil?

@@ -14,16 +14,6 @@ module ::Guard
     end
 
   private
-    def run_command command
-      PTY.spawn(command) do |stdout, stdin, pid|
-        begin
-          stdout.each { |line| print line }
-        rescue Errno::EIO
-        end
-        Process.wait(pid)
-      end
-    end
-
     def compile
       message = {
         console: 'Your crails server is recompiling right now',
@@ -32,14 +22,16 @@ module ::Guard
       Crails::Notifier.notify 'crails-cmake', message
       success = false
       duration = nil
-      Dir.chdir 'build' do
-        puts ">> Make server"
-        starts_at = Time.now.to_f
-        run_command 'cmake ..'
-        run_command 'make'  if $?.success?
-        ends_at = Time.now.to_f
-        duration = (ends_at - starts_at).round 2
-        success = $?.success?
+      success = run_cmake
+      if success
+        Dir.chdir 'build' do
+          puts ">> Make server"
+          starts_at = Time.now.to_f
+          run_command 'make'
+          ends_at = Time.now.to_f
+          duration = (ends_at - starts_at).round 2
+          success = $?.success?
+        end
       end
       if success
         message = {
