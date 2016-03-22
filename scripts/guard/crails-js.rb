@@ -10,7 +10,59 @@ require 'coffee-script'   if HAS_COFFEESCRIPT
 require 'typescript-node' if HAS_TYPESCRIPT
 
 module ::Guard
+  class JavascriptSource
+    attr_reader :source, :compiled
+
+    def initialize crailsjs, filepath
+      @crailsjs  = crailsjs
+      @filepath  = filepath
+      @filename  = filepath.split('/').last
+      @directory = Pathname.new(filepath + "/..").cleanpath.to_s
+    end
+
+    def dependencies
+      array = []
+      @crailsjs.linker @source, @directory do |type, data|
+        array << data if type == :include
+      end
+      array
+    end
+
+    def current_dir
+      @filepath.split('/')[0...-1].join('/')
+    end
+
+    def full_path
+      (@crailsjs.options[:input] + '/' + @filepath).gsub(/\/+/, '/')
+    end
+
+    def compile
+      @source           = File.read full_path, encoding: 'BINARY'
+      @last_compilation = File.mtime(full_path)
+      puts "[crailsjs] Compiling #{full_path}..."
+      if HAS_COFFEESCRIPT && @filename.match(/\.coffee$/) != nil
+        @source = @crailsjs.compile_coffeescript @source
+      elsif HAS_TYPESCRIPT && @filename.match(/\.ts$/) != nil
+        @source = @crailsjs.compile_typescript @source, current_dir
+      end
+      @compiled = @crailsjs.resolve_linking @source, current_dir
+    end
+
+    def should_compile?
+      if @source.nil? || @last_compilation < File.mtime(full_path)
+        return true
+      end
+      dependencies.each do |dependency|
+        javascript_cache = @crailsjs.file_cache[dependency]
+        return true if javascript_cache.nil? || javascript_cache.should_compile?
+      end
+      return false
+    end
+  end
+
   class CrailsJs < CrailsPlugin
+    attr_accessor :file_cache
+
     def initialize options = {}
       options[:watchers] << ::Guard::Watcher.new(%r{^#{options[:input]}/(.+\.(js|coffee|ts))$})
       @uglifier_options = options[:uglifier] || {}
@@ -19,12 +71,12 @@ module ::Guard
 
     def run_all
       begin
-        @file_cache = {}
+        @file_cache ||= {}
         starts_at = Time.now.to_f
         options[:targets].each do |target|
           file_starts_at = Time.now.to_f
           @included_files = []
-          text        = compile_file target
+          text        = include_file target
           target      = extension_to_js target
           output_file = options[:output] + '/' + target
           FileUtils.mkdir_p options[:output]
@@ -53,7 +105,6 @@ module ::Guard
       run_all
     end
 
-  private
     def extension_to_js filename
       filename.split('.')[0...-1].join('.') + '.js'
     end
@@ -64,26 +115,15 @@ module ::Guard
 
     def include_file file
       @included_files << file
-      @file_cache[file] = compile_file file if @file_cache[file].nil?
-      @file_cache[file]
-    end
-
-    def compile_file file
-      current_dir       = file.split('/')[0...-1].join('/')
-      full_path         = (options[:input] + '/' + file).gsub(/\/+/, '/')
-      source            = File.read full_path, encoding: 'BINARY'
-      if HAS_COFFEESCRIPT && file.match(/\.coffee$/) != nil
-        source = compile_coffeescript source
-      elsif HAS_TYPESCRIPT && file.match(/\.ts$/) != nil
-        source = compile_typescript source, current_dir
-      end
-      resolve_linking source, current_dir
+      @file_cache[file] = JavascriptSource.new self, file if @file_cache[file].nil?
+      @file_cache[file].compile if @file_cache[file].should_compile?
+      @file_cache[file].compiled
     end
 
     def compile_coffeescript source
-      source          = source.gsub /^#=([^\n]+)/, '`//=\1`'
+      source   = source.gsub /^#=([^\n]+)/, '`//=\1`'
       begin
-        source        = CoffeeScript.compile source, bare: true
+        source = CoffeeScript.compile source, bare: true
       rescue ExecJS::RuntimeError => e
         puts_error "CoffeeScript compilation failed for `#{file}`: #{e.message}"
         raise "compilation error"
@@ -93,8 +133,7 @@ module ::Guard
 
     def compile_typescript source, current_dir
       begin
-        source        = resolve_linking source, current_dir # TypeScript needs the linking to be done before compilation
-        source        = TypeScript::Node.compile source
+        source = TypeScript::Node.compile source
       rescue ExecJS::RuntimeError => e
         puts_error "TypeScript compilation failed for `#{file}`: #{e.message}"
         raise "compilation error"
@@ -102,13 +141,13 @@ module ::Guard
       source
     end
 
-    def resolve_linking source, current_dir
+    def linker source, current_dir, &block
       comment_character = '//'
       file_content      = ''
       source.split("\n").each do |line|
         matches = line.match(/^\s*#{comment_character}=\s+(require|require_tree|include)\s+([^;]+)/)
         if matches.nil?
-          file_content += line + "\n"
+          block.call :line, line
         else
           required_path = clean_required_path current_dir + '/' + matches[2].strip
           if matches[1] == 'require_tree'
@@ -117,12 +156,24 @@ module ::Guard
             files.each do |filepath|
               filepath = clean_required_path filepath[options[:input].size..-1]
               unless @included_files.include? filepath
-                file_content += (include_file filepath) + "\n"
+                block.call :include, filepath
               end
             end
-          elsif (matches[1] == 'include') || (not @included_files.include? required_path) 
-            file_content     += (include_file required_path) + "\n"
+          elsif (matches[1] == 'include') || (not @included_files.include? required_path)
+            block.call :include, required_path
           end
+        end
+      end
+      file_content
+    end
+
+    def resolve_linking source, current_dir
+      file_content = ''
+      linker source, current_dir do |type, data|
+        if type == :line
+          file_content += data + "\n"
+        elsif type == :include
+          file_content += include_file data
         end
       end
       file_content
