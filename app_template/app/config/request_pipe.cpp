@@ -4,6 +4,11 @@
 
 using namespace Crails;
 
+namespace Crails
+{
+  const std::string temporary_path = "/tmp";
+}
+
 void Server::initialize_request_pipe()
 {
   add_request_parser(new RequestDataParser);
