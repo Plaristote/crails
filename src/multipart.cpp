@@ -3,6 +3,7 @@
 #include "crails/utils/string.hpp"
 #include "crails/cookie_data.hpp"
 #include "crails/params.hpp"
+#include "crails/logger.hpp"
 #include "crails/multipart.hpp"
 #include "crails/utils/parse_cookie_values.hpp"
 #include <fstream>
@@ -107,6 +108,8 @@ void MultipartParser::parse(Params& params)
         {
           content_data["filepath"] = Server::temporary_path + '/' + Crails::generate_random_string("ABCDEF012345556789", 12);
           file.open(content_data["filepath"].as<std::string>());
+          if (!(file.is_open()))
+            logger << Logger::Info << "/!\\ Cannot open file " << content_data["filepath"].as<string>() << Logger::endl;
         }
         if (pos != string::npos)
         {
