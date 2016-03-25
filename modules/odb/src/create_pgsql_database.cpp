@@ -37,7 +37,7 @@ static void initialize_credentials(const Crails::Databases::DatabaseSettings& da
   }
 }
 
-static bool pgsql_run_queries(const Crails::Databases::DatabaseSettings& database_config, std::string user, std::string password, std::list<std::string> queries)
+static bool pgsql_run_queries(const Crails::Databases::DatabaseSettings& database_config, std::string user, std::string password, std::list<std::string> queries, bool ignore_failure = false)
 {
   string db_user, db_password;
   string db_name = any_cast<const char*>(database_config.at("name"));
@@ -54,25 +54,28 @@ static bool pgsql_run_queries(const Crails::Databases::DatabaseSettings& databas
     logger << Logger::Info << ":: running query " << query << Logger::endl;
     logger << Logger::Debug << ":: command " << full_command << Logger::endl;
     status = std::system(full_command.c_str());
-    if (status < 0)
+    if (ignore_failure == false)
     {
-      logger << Logger::Debug << ":: failed to run command" << Logger::endl;
-      return false;
-    }
-    else
-    {
-      if (WIFEXITED(status))
+      if (status < 0)
       {
-        if (WEXITSTATUS(status) != 0)
-        {
-          logger << Logger::Debug << ":: command returned with exit status " << WEXITSTATUS(status) << Logger::endl;
-          return false;
-        }
+        logger << Logger::Debug << ":: failed to run command" << Logger::endl;
+        return false;
       }
       else
       {
-        logger << Logger::Debug << ":: command didn't return" << Logger::endl;
-        return false;
+        if (WIFEXITED(status))
+        {
+          if (WEXITSTATUS(status) != 0)
+          {
+            logger << Logger::Debug << ":: command returned with exit status " << WEXITSTATUS(status) << Logger::endl;
+            return false;
+          }
+        }
+        else
+        {
+          logger << Logger::Debug << ":: command didn't return" << Logger::endl;
+         return false;
+        }
       }
     }
   }
@@ -87,7 +90,11 @@ bool pgsql_create_from_settings(const Crails::Databases::DatabaseSettings& datab
 
   initialize_credentials(database_config, db_user, db_password, user, password);
   if (db_user != user)
+  {
     queries.push_back("CREATE USER " + db_user + " WITH PASSWORD '" + db_password + "';");
+    psql_run_queries(database_config, user, password, queries, true);
+    queries.clear();
+  }
   queries.push_back("CREATE DATABASE " + db_name + " WITH OWNER=\\\"" + db_user + "\\\";");
   return pgsql_run_queries(database_config, user, password, queries);
 }
