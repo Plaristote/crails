@@ -54,6 +54,7 @@ namespace ODB
     Database(const Crails::Databases::DatabaseSettings&);
 
     static bool create_from_settings(const Crails::Databases::DatabaseSettings&, std::string user = "", std::string password = "");
+    static bool drop_with_settings(const Crails::Databases::DatabaseSettings&, std::string user = "", std::string password = "");
 
     odb::database& get_agnostic_database()
     {

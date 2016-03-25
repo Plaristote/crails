@@ -37,7 +37,33 @@ void Database::connect()
 
 #ifdef ODB_WITH_PGSQL
 bool pgsql_create_from_settings(const Crails::Databases::DatabaseSettings&, std::string, std::string);
+bool pgsql_drop_from_settings(const Crails::Databases::DatabaseSettings&, std::string, std::string);
 #endif
+
+bool Database::drop_with_settings(const Crails::Databases::DatabaseSettings& settings, std::string user, std::string password)
+{
+  const string backend_str = defaults_to<const char*>(settings, "type", "sqlite");
+  auto         backend_it  = database_types_to_string.find(backend_str);
+
+  if (backend_it == database_types_to_string.end())
+    throw UnknownBackend(backend_str);
+  else
+  {
+    switch (backend_it->second)
+    {
+#ifdef ODB_WITH_PGSQL
+    case pgsql:
+      return pgsql_drop_from_settings(settings, user, password);
+#endif
+
+    default:
+      logger << Logger::Error << ":: Database::drop_from_settings not available for backend " << backend_str << Logger::endl;
+      break ;
+    }
+  }
+  return false;
+  
+}
 
 bool Database::create_from_settings(const Crails::Databases::DatabaseSettings& settings, std::string user, std::string password)
 {

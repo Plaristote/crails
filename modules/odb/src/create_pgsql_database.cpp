@@ -24,11 +24,8 @@ static string pgsql_command_prefix(const Crails::Databases::DatabaseSettings& da
   return command;
 }
 
-bool pgsql_create_from_settings(const Crails::Databases::DatabaseSettings& database_config, std::string user, std::string password)
+static void initialize_credentials(const Crails::Databases::DatabaseSettings& database_config, std::string& db_user, std::string& db_password, std::string& user, std::string& password)
 {
-  string db_user, db_password;
-  string db_name = any_cast<const char*>(database_config.at("name"));
-
   if (database_config.count("user"))
     db_user = any_cast<const char*>(database_config.at("user"));
   if (database_config.count("password"))
@@ -38,25 +35,72 @@ bool pgsql_create_from_settings(const Crails::Databases::DatabaseSettings& datab
     user     = db_user;
     password = db_password;
   }
+}
 
+static bool pgsql_run_queries(const Crails::Databases::DatabaseSettings& database_config, std::string user, std::string password, std::list<std::string> queries)
+{
+  string db_user, db_password;
+  string db_name = any_cast<const char*>(database_config.at("name"));
+  string command;
+
+  initialize_credentials(database_config, db_user, db_password, user, password);
+  command = pgsql_command_prefix(database_config, user, password);
+  for (string query : queries)
   {
-    string command = pgsql_command_prefix(database_config, user, password);
-    list<string> queries;
+    string full_command(command);
+    int    status;
 
-    if (db_user != user)
-      queries.push_back("CREATE USER " + db_user + " WITH PASSWORD '" + db_password + "';");
-    queries.push_back("CREATE DATABASE " + db_name + " WITH OWNER=\\\"" + db_user + "\\\";");
-    for (string query : queries)
+    full_command += '"' + query + '"';
+    logger << Logger::Info << ":: running query " << query << Logger::endl;
+    logger << Logger::Debug << ":: command " << full_command << Logger::endl;
+    status = std::system(full_command.c_str());
+    if (status < 0)
     {
-      string full_command(command);
-
-      full_command += '"' + query + '"';
-      logger << Logger::Info << ":: running query " << query << Logger::endl;
-      logger << Logger::Debug << ":: command " << full_command << Logger::endl;
-      std::system(full_command.c_str());
+      logger << Logger::Debug << ":: failed to run command" << Logger::endl;
+      return false;
+    }
+    else
+    {
+      if (WIFEXITED(status))
+      {
+        if (WEXITSTATUS(status) != 0)
+        {
+          logger << Logger::Debug << ":: command returned with exit status " << WEXITSTATUS(status) << Logger::endl;
+          return false;
+        }
+      }
+      else
+      {
+        logger << Logger::Debug << ":: command didn't return" << Logger::endl;
+        return false;
+      }
     }
   }
   return true;
+}
+
+bool pgsql_create_from_settings(const Crails::Databases::DatabaseSettings& database_config, std::string user, std::string password)
+{
+  string db_user, db_password;
+  string db_name = any_cast<const char*>(database_config.at("name"));
+  list<string> queries;
+
+  initialize_credentials(database_config, db_user, db_password, user, password);
+  if (db_user != user)
+    queries.push_back("CREATE USER " + db_user + " WITH PASSWORD '" + db_password + "';");
+  queries.push_back("CREATE DATABASE " + db_name + " WITH OWNER=\\\"" + db_user + "\\\";");
+  return pgsql_run_queries(database_config, user, password, queries);
+}
+
+bool pgsql_drop_from_settings(const Crails::Databases::DatabaseSettings& database_config, std::string user, std::string password)
+{
+  string       db_name = any_cast<const char*>(database_config.at("name"));
+  list<string> queries;
+
+  queries.push_back("update pg_database set datallowconn = 'false' where datname = '" + db_name + "';");
+  queries.push_back("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '" + db_name + "';");
+  queries.push_back("DROP DATABASE " + db_name);
+  return pgsql_run_queries(database_config, user, password, queries);
 }
 
 #endif
