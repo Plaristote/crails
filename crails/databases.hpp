@@ -9,6 +9,9 @@
 # define CRAILS_DATABASE(type,database) \
   Crails::databases.get_database<type::Database>(database)
 
+# define CRAILS_DATABASE_FROM_SETTINGS(type,database,settings) \
+  Crails::databases.get_database<type::Database>(database,settings)
+
 namespace Crails
 {
   class Databases
