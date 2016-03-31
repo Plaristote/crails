@@ -1,5 +1,6 @@
 #include "crails/request_handlers/action.hpp"
 #include "crails/router.hpp"
+#include "crails/logger.hpp"
 
 using namespace std;
 using namespace Crails;
@@ -15,6 +16,7 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
 
     if (action == 0)
       return false;
+    logger << Logger::Info << "# Responding to " << method << ' ' << params["uri"].as<string>() << Logger::endl;
     params.session->load(params["headers"]);
     {
       DataTree         data   = (*action)(params);
