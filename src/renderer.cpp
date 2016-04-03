@@ -14,18 +14,26 @@ void Renderer::finalize()
 
 void Renderer::render(const std::string& view, Data params, Data response, SharedVars& vars)
 {
-  std::string format   = params["headers"]["Accept"].defaults_to<string>(default_format);
-  Renderer*   renderer = NULL;
+  Renderer* renderer = pick_renderer(view, params);
+
+  if (renderer == NULL)
+    throw MissingTemplate(view);
+  renderer->render_template(view, params, response, vars);
+}
+
+Renderer* Renderer::pick_renderer(const std::string& view, Data params)
+{
+  string format = params["headers"]["Accept"].defaults_to<string>(default_format);
 
   for (auto it = renderers.begin() ; it != renderers.end() ; ++it)
   {
     if ((*it)->can_render(format, view))
-    {
-      renderer = *it;
-      break ;
-    }
+      return *it;
   }
-  if (renderer == NULL)
-    throw MissingTemplate(view);
-  renderer->render_template(view, params, response, vars);
+  return NULL;
+}
+
+bool Renderer::can_render(const std::string& view, Data params)
+{
+  return pick_renderer(view, params) != NULL;
 }

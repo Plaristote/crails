@@ -46,20 +46,24 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   std::stringstream view_name;
 
   file_name << (unsigned int)(code);
+  view_name << "errors/" << file_name.str();
   if (file_handler &&
       file_handler->send_file("public/" + file_name.str() + ".html", out, code, 0))
     params["response-data"]["code"] = (int)code;
   else
   {
-    SharedVars  vars;
-    Data        response = params["response-data"];
-    std::string content_type;
+    Data         response = params["response-data"];
 
-    view_name << "errors/" << file_name.str();
-    Renderer::render(view_name.str(), params.as_data(), response, vars);
-    if (response["headers"]["Content-Type"].exists())
-      out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
-    Server::SetResponse(params, out, code, response["body"].as<string>());
+    if (Renderer::can_render(view_name.str(), params.as_data()))
+    {
+      SharedVars vars;
+      string     content_type;
+
+      Renderer::render(view_name.str(), params.as_data(), response, vars);
+      if (response["headers"]["Content-Type"].exists())
+        out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
+    }
+    Server::SetResponse(params, out, code, response["body"].defaults_to<string>(""));
   }
 }
 
@@ -92,7 +96,13 @@ void Server::run_request_handlers(const HttpServer::request& request, BuildingRe
       break ;
   }
   if (!request_handled)
-    ResponseHttpError(response, HttpCodes::not_found, params);
+  {
+    Server::HttpCode code = HttpCodes::not_found;
+
+    if (params["response-data"]["code"].exists())
+      code = (Server::HttpCode)(params["response-data"]["code"].as<int>());
+    ResponseHttpError(response, code, params);
+  }
 }
 
 void Server::add_request_handler(RequestHandler* request_handler)
