@@ -7,23 +7,31 @@
 using namespace std;
 using namespace Crails;
 
+static const string pwd         = boost::filesystem::current_path().string();
+static const string public_path = boost::filesystem::canonical(pwd + "/public").string();
+
 bool FileRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& response, Params& params)
 {
   if (request.method == "GET")
   {
-    std::string fullpath       = params["uri"].as<string>();
-    size_t      pos_get_params = fullpath.find('?');
+    string fullpath = params["uri"].as<string>();
+    size_t pos      = fullpath.find('?');
 
-    if (pos_get_params != std::string::npos)
-      fullpath.erase(pos_get_params);
-    fullpath = "public" + fullpath;
-
-    if (boost::filesystem::is_directory(fullpath))
-      fullpath += "/index.html";
-    if (send_file(fullpath, response, Server::HttpCodes::ok))
+    if (pos != std::string::npos)
+      fullpath.erase(pos);
+    fullpath = boost::filesystem::canonical(public_path + fullpath).string();
+    pos      = fullpath.find(public_path);
+    if (pos == string::npos)
+      params["response-data"]["code"] = (int)Server::HttpCodes::bad_request;
+    else
     {
-      params["response-data"]["code"] = (int)Server::HttpCodes::ok;
-      return true;
+      if (boost::filesystem::is_directory(fullpath))
+        fullpath += "/index.html";
+      if (send_file(fullpath, response, Server::HttpCodes::ok))
+      {
+        params["response-data"]["code"] = (int)Server::HttpCodes::ok;
+        return true;
+      }
     }
   }
   return false;
