@@ -14,14 +14,16 @@ bool FileRequestHandler::operator()(const HttpServer::request& request, Building
 {
   if (request.method == "GET")
   {
-    string fullpath = params["uri"].as<string>();
-    size_t pos      = fullpath.find('?');
+    boost::system::error_code ec;
+    string                    fullpath = params["uri"].as<string>();
+    size_t                    pos      = fullpath.find('?');
 
     if (pos != std::string::npos)
       fullpath.erase(pos);
-    fullpath = boost::filesystem::canonical(public_path + fullpath).string();
-    pos      = fullpath.find(public_path);
-    if (pos == string::npos)
+    fullpath = boost::filesystem::canonical(public_path + fullpath, ec).string();
+    if (ec != boost::system::errc::success)
+      params["response-data"]["code"] = (int)Server::HttpCodes::not_found;
+    else if (fullpath.find(public_path) == string::npos)
       params["response-data"]["code"] = (int)Server::HttpCodes::bad_request;
     else
     {
