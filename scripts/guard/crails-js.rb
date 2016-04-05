@@ -37,7 +37,7 @@ module ::Guard
     end
 
     def compile
-      @source           = File.read full_path, encoding: 'BINARY'
+      @source           = File.read full_path, encoding: @crailsjs.encoding
       @last_compilation = File.mtime(full_path)
       puts "[crailsjs] Compiling #{full_path}..."
       if HAS_COFFEESCRIPT && @filename.match(/\.coffee$/) != nil
@@ -61,11 +61,12 @@ module ::Guard
   end
 
   class CrailsJs < CrailsPlugin
-    attr_accessor :file_cache
+    attr_accessor :file_cache, :encoding
 
     def initialize options = {}
       options[:watchers] << ::Guard::Watcher.new(%r{^#{options[:input]}/(.+\.(js|coffee|ts))$})
       @uglifier_options = options[:uglifier] || {}
+      @encoding         = options[:encoding] || 'UTF-8'
       super options
     end
 
@@ -80,8 +81,8 @@ module ::Guard
           target      = extension_to_js target
           output_file = options[:output] + '/' + target
           FileUtils.mkdir_p options[:output]
-          File.open(output_file, 'w') do |f|
-            js = "(function() {\n#{text}\n})();".force_encoding('UTF-8')
+          File.open(output_file, "w:#{@encoding}") do |f|
+            js = "(function() {\n#{text}\n})();".force_encoding(@encoding)
             js = Uglifier.compile(js, @uglifier_options) unless developer_mode?
             f.write js
           end
