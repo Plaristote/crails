@@ -29,8 +29,9 @@ namespace Crails
       Db(const std::string& type) : type(type) {}
       virtual ~Db();
 
-      bool              operator==(const std::string& name) const { return (this->name == name); }
-      const std::string get_type(void) { return (type); }
+      bool              operator==(const std::string& name) const { return this->name == name; }
+      const std::string& get_type() const { return type; }
+      const std::string& get_name() const { return name; }
       virtual void      connect(void) = 0;
 
     protected:
