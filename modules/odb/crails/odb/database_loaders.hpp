@@ -2,6 +2,7 @@
 # define ODB_DATABASE_LOADERS_HPP
 
 # include "database.hpp"
+# include "crails/any_cast.hpp"
 
 namespace ODB
 {
@@ -19,9 +20,9 @@ namespace ODB
   {
 #ifdef ODB_WITH_MYSQL
     return new odb::mysql::database(
-      boost::any_cast<cosnt char*>(settings.at("user")),
-      boost::any_cast<const char*>(settings.at("password")),
-      boost::any_cast<const char*>(settings.at("name")),
+      Crails::any_cast(settings.at("user")),
+      Crails::any_cast(settings.at("password")),
+      Crails::any_cast(settings.at("name")),
       defaults_to<const char*> (settings, "host", ""),
       defaults_to<unsigned int>(settings, "port", 0)
       0,
@@ -37,9 +38,9 @@ namespace ODB
   {
 #ifdef ODB_WITH_PGSQL
     return new odb::pgsql::database(
-      boost::any_cast<const char*>(settings.at("user")),
-      boost::any_cast<const char*>(settings.at("password")),
-      boost::any_cast<const char*>(settings.at("name")),
+      Crails::any_cast(settings.at("user")),
+      Crails::any_cast(settings.at("password")),
+      Crails::any_cast(settings.at("name")),
       defaults_to<const char*> (settings, "host",  ""),
       defaults_to<unsigned int>(settings, "port",  0),
       defaults_to<const char*> (settings, "extra", "")
@@ -54,7 +55,7 @@ namespace ODB
   {
 #ifdef ODB_WITH_SQLITE
     return new odb::sqlite::database(
-      boost::any_cast<const char*>(settings.at("name")),
+      Crails::any_cast(settings.at("name")),
       SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
     );
 #else
@@ -67,9 +68,9 @@ namespace ODB
   {
 #ifdef ODB_WITH_ORACLE
     return new odb::oracle::database(
-      boost::any_cast<const char*>(settings.at("user")),
-      boost::any_cast<const char*>(settings.at("password")),
-      boost::any_cast<const char*>(settings.at("name")),
+      Crails::any_cast(settings.at("user")),
+      Crails::any_cast(settings.at("password")),
+      Crails::any_cast(settings.at("name")),
       defaults_to<const char*> (settings, "host", ""),
       defaults_to<unsigned int>(settings, "port", 0)
     );
