@@ -68,7 +68,8 @@ namespace ODB
       return reinterpret_cast<T&>(get_agnostic_database());
     }
 
-    DatabaseType get_type() const { return backend; }
+    const std::string& get_database_name() const { return database_name; }
+    DatabaseType       get_type()          const { return backend; }
 
     void connect();
 
@@ -141,6 +142,7 @@ namespace ODB
   private:
     std::unique_ptr<odb::database> db;
     DatabaseType                   backend;
+    std::string                    database_name;
     static const Initializers      initializers;
   };
 }

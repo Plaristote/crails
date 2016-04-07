@@ -28,6 +28,7 @@ Database::Database(const Databases::DatabaseSettings& settings) : Db(ClassType()
     if (db == NULL)
       throw boost_ext::runtime_error("could not initialize database " + name);
   }
+  database_name = defaults_to<const char*>(settings, "name", "");
 }
 
 void Database::connect()
