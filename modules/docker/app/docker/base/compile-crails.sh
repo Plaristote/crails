@@ -2,6 +2,7 @@
 
 git clone https://github.com/Plaristote/crails.git
 cd crails
+git checkout gcc4-compat
 
 # Production/Synchronous
 cmake -DDEVELOPER_MODE=OFF \
