@@ -8,8 +8,6 @@ option(USE_MONGODB     "MongoDB"             ON)
 option(USE_ODB         "ODB ORM"             ON)
 option(DEVELOPER_MODE  "Developer mode"      ON)
 
-cmake_policy(SET CMP0042 OLD)
-
 ##
 ## Compiler Options
 ##
