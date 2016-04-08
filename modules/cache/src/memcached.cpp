@@ -2,6 +2,8 @@
 
 using namespace Crails;
 
+boost::thread_specific_ptr<Cache> Cache::instance;
+
 Cache::Cache() : memc(0)
 {
 }
@@ -12,6 +14,13 @@ Cache::~Cache()
     memcached_free(memc);
 }
 
+Cache& Cache::singleton()
+{
+  if (instance.get() == 0)
+    instance.reset(new Cache);
+  return *instance;
+}
+
 void Cache::ensure_initialization()
 {
   if (memc == 0)
@@ -20,6 +29,8 @@ void Cache::ensure_initialization()
 
 void Cache::discard(const std::string& key)
 {
+  auto& instance = singleton();
+
   instance.ensure_initialization();
   if (instance.memc)
     memcached_delete(instance.memc, key.c_str(), key.size(), 0);

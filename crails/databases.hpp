@@ -3,14 +3,15 @@
 
 # include <map>
 # include <vector>
+# include <boost/thread/tss.hpp>
 # include "datatree.hpp"
 # include "environment.hpp"
 
 # define CRAILS_DATABASE(type,database) \
-  Crails::databases.get_database<type::Database>(database)
+  Crails::Databases::singleton().get_database<type::Database>(database)
 
 # define CRAILS_DATABASE_FROM_SETTINGS(type,database,settings) \
-  Crails::databases.get_database<type::Database>(database,settings)
+  Crails::Databases::singleton().get_database<type::Database>(database,settings)
 
 namespace Crails
 {
@@ -58,6 +59,8 @@ namespace Crails
       cleanup_databases();
     }
 
+    static Databases& singleton();
+
     void cleanup_databases();
 
     Db* get_database_from_name(const std::string& key);
@@ -98,7 +101,7 @@ namespace Crails
     Dbs      databases;
   };
 
-  extern thread_local Databases databases;
+  extern boost::thread_specific_ptr<Databases> databases;
 }
 
 #endif

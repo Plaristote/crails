@@ -4,6 +4,7 @@
 # include <sstream>
 # include <thread>
 # include <mutex>
+# include <boost/thread/tss.hpp>
 
 namespace Crails
 {
@@ -29,6 +30,8 @@ namespace Crails
 
     Logger();
 
+    static Buffer& get_buffer();
+
     void set_stdout(std::ostream& stream);
     void set_stderr(std::ostream& stream);
 
@@ -37,15 +40,15 @@ namespace Crails
     template<typename T>
     Logger& operator<<(const T item)
     {
-      if (log_level <= buffer.level)
-        buffer.stream << item;
+      if (log_level <= get_buffer().level)
+        get_buffer().stream << item;
       return *this;
     }
 
     void flush();
   private:
     static const Symbol log_level;
-    static thread_local Buffer buffer;
+    static boost::thread_specific_ptr<Buffer> buffer;
     std::mutex    mutex;
     std::ostream* stdout;
     std::ostream* stderr;

@@ -14,13 +14,20 @@ using namespace Crails;
 namespace Crails
 {
   Logger logger;
-  thread_local Logger::Buffer Logger::buffer;
+  boost::thread_specific_ptr<Logger::Buffer> Logger::buffer;
 }
 
 Logger::Logger()
 {
   stdout = &cout;
   stderr = &cerr;
+}
+
+Logger::Buffer& Logger::get_buffer()
+{
+  if (buffer.get() == 0)
+    buffer.reset(new Buffer);
+  return *buffer;
 }
 
 void Logger::set_stderr(ostream& stream)
@@ -40,32 +47,32 @@ void Logger::set_stdout(ostream& stream)
 void Logger::flush()
 {
   mutex.lock();
-  switch (buffer.level)
+  switch (get_buffer().level)
   {
     case Info:
-      *stdout log_prefix << buffer.stream.str();
+      *stdout log_prefix << get_buffer().stream.str();
       stdout->flush();
       break ;
     default:
-      *stderr log_prefix << buffer.stream.str();
+      *stderr log_prefix << get_buffer().stream.str();
       stderr->flush();
       break ;
   }
   mutex.unlock();
-  buffer.stream.str("");
-  buffer.stream.clear();
+  get_buffer().stream.str("");
+  get_buffer().stream.clear();
 }
 
 Logger& Logger::operator<<(Symbol level)
 {
-  if (log_level <= buffer.level)
+  if (log_level <= get_buffer().level)
   {
     if (level == Logger::endl)
       *this << "\n\r";
-    if (buffer.level != level)
+    if (get_buffer().level != level)
       flush();
     if (level != Logger::endl)
-      buffer.level = level;
+      get_buffer().level = level;
   }
   return (*this);
 }

@@ -3,7 +3,14 @@
 using namespace std;
 using namespace Crails;
 
-thread_local Crails::Databases Crails::databases;
+boost::thread_specific_ptr<Crails::Databases> Crails::databases;
+
+Databases& Databases::singleton()
+{
+  if (Crails::databases.get() == 0)
+    Crails::databases.reset(new Databases);
+  return *Crails::databases;
+}
 
 Databases::Db::~Db()
 {

@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Crails;
 
-thread_local http::client ProxyRequestHandler::client;
+boost::thread_specific_ptr<http::client> ProxyRequestHandler::client;
 
 ProxyRequestHandler::ProxyRequestHandler()
 {
@@ -25,6 +25,13 @@ ProxyRequestHandler::ProxyRequestHandler()
     rule.mode        = get_mode_from_data(rule_data["mode"]);
     rules.push_back(rule);
   });
+}
+
+http::client& ProxyRequestHandler::get_client()
+{
+  if (client.get() == 0)
+    client.reset(new http::client);
+  return *client;
 }
 
 ProxyRequestHandler::Mode ProxyRequestHandler::get_mode_from_data(Data mode) const
@@ -96,15 +103,15 @@ void ProxyRequestHandler::execute_rule(const Rule& rule, const HttpServer::reque
     http::client::response remote_response;
 
     if (request.method == "GET")
-      remote_response = client.get(proxy_request);
+      remote_response = get_client().get(proxy_request);
     else if (request.method == "POST")
-      remote_response = client.post(proxy_request);
+      remote_response = get_client().post(proxy_request);
     else if (request.method == "PUT")
-      remote_response = client.put(proxy_request);
+      remote_response = get_client().put(proxy_request);
     else if (request.method == "DELETE")
-      remote_response = client.delete_(proxy_request);
+      remote_response = get_client().delete_(proxy_request);
     else if (request.method == "HEAD")
-      remote_response = client.head(proxy_request);
+      remote_response = get_client().head(proxy_request);
 
     for (auto header : remote_response.headers())
       out.set_headers(header.first, header.second);

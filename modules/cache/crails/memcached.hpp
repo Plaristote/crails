@@ -39,11 +39,15 @@ namespace Crails
     Cache();
     ~Cache();
 
+    static Cache& singleton();
+
     static void discard(const std::string& key);
 
     template<typename TYPE>
     static TYPE record(const std::string& key, std::function<TYPE ()> func)
     {
+      auto& instance = singleton();
+
       instance.ensure_initialization();
       if (memcached_exist(instance.memc, key.c_str(), key.size()) == MEMCACHED_SUCCESS)
 	return instance.existing_record<TYPE>(key, func);
@@ -99,7 +103,7 @@ namespace Crails
     void ensure_initialization();
 
     static const std::string config;
-    static thread_local Cache instance;
+    static boost::thread_specific_ptr<Cache> instance;
     memcached_st* memc;
   };
 }
