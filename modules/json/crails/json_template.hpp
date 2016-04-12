@@ -26,6 +26,9 @@ namespace Crails
       add_value(val);
     }
 
+    //
+    // BEGIN ARRAYS
+    //
     template<typename ARRAY>
     void json_array(const std::string& key, ARRAY& array) { json_array(key, array.begin(), array.end()); }
 
@@ -91,6 +94,71 @@ namespace Crails
       stream << ']';
       first_item_in_object = false;
     }
+    //
+    // END ARRAYS
+    //
+
+    //
+    // BEGIN MAPS
+    //
+    template<typename MAP>
+    void json_map(const std::string& key, const MAP& map)
+    {
+      add_separator();
+      add_key(key);
+      first_item_in_object = true;
+      stream << '{';
+      for (auto item : map)
+      {
+        add_separator();
+        add_key(item.first);
+        add_value(item.second);
+      }
+      stream << '}';
+      first_item_in_object = false;
+    }
+
+    template<typename MAP>
+    void json_map(const std::string& key, const MAP& map, std::function<void (typename MAP::mapped_type)> functor, bool use_braces = true)
+    {
+      add_separator();
+      add_key(key);
+      first_item_in_object = true;
+      stream << '{';
+      for (auto item : map)
+      {
+        add_separator();
+        add_key(item.first);
+        if (use_braces)
+          add_object([this, functor, item]() { functor(item.second); });
+        else
+          functor(item.second);
+      }
+      stream << '}';
+      first_item_in_object = false;
+    }
+
+    template<typename MAP>
+    void json_map(const std::string& key, const MAP& map, const std::string& partial_view, std::string& var_key)
+    {
+      if (var_key == "")
+        var_key = singularize(key);
+      add_separator();
+      add_key(key);
+      first_item_in_object = true;
+      stream << '{';
+      for (auto item : map)
+      {
+        add_separator();
+        add_key(item.first);
+        partial(partial_view, { {var_key, &(item.second)} });
+      }
+      stream << '}';
+      first_item_in_object = false;
+    }
+    //
+    // END MAPS
+    //
 
     void partial(const std::string& view, SharedVars vars = {})
     {
@@ -115,6 +183,7 @@ namespace Crails
 
     void        add_separator();
     void        add_key(const std::string& key);
+    void        add_key(unsigned long number);
     void        add_object(std::function<void()> func);
     std::string javascript_escape(const std::string& val) const;
 

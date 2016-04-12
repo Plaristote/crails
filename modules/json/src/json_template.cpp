@@ -1,4 +1,4 @@
-#include <crails/json_template.hpp>
+#include "crails/json_template.hpp"
 
 using namespace Crails;
 
@@ -37,6 +37,11 @@ void JsonTemplate::add_separator()
 void JsonTemplate::add_key(const std::string& key)
 {
   stream << '"' << javascript_escape(key) << "\":";
+}
+
+void JsonTemplate::add_key(unsigned long number)
+{
+  stream << '"' << number << "\":";
 }
 
 void JsonTemplate::add_object(std::function<void()> func)
