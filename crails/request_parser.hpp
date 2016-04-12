@@ -28,14 +28,6 @@ namespace Crails
 
   class BodyParser : public RequestParser
   {
-  #ifdef ASYNC_SERVER  
-    typedef std::function<void (boost::iterator_range<char const*>,
-                              boost::system::error_code,
-                              size_t,
-                              HttpServer::connection_ptr)> ReadCallback;  
-    
-    ReadCallback    callback;
-  #endif
   public:
     void wait_for_body(const HttpServer::request&, BuildingResponse&, Params&);
   protected:

@@ -7,8 +7,17 @@ using namespace std;
 using namespace Crails;
 
 #ifdef ASYNC_SERVER
+using namespace std::chrono;
+
+typedef std::function<void (boost::iterator_range<char const*>,
+                            boost::system::error_code,
+                            size_t,
+                            HttpServer::connection_ptr)> ReadCallback;
+
 void BodyParser::wait_for_body(const HttpServer::request& request, BuildingResponse& out, Params& params)
 {
+  shared_ptr<int>    state = make_shared<int>(0);
+  ReadCallback       callback;
   mutex              sem_mutex;
   unique_lock<mutex> sem_lock(sem_mutex);
   condition_variable sem;
@@ -18,26 +27,30 @@ void BodyParser::wait_for_body(const HttpServer::request& request, BuildingRespo
   std::string        read_buffer;
   Regex              get_boundary;
   
-  callback = [this, &sem, &to_read, &total_read, &read_buffer, &response](boost::iterator_range<char const*> range,
+  callback = [this, state, &callback, &sem, &to_read, &total_read, &read_buffer, &response](boost::iterator_range<char const*> range,
                         boost::system::error_code error_code,
                         size_t size_read,
                         HttpServer::connection_ptr connection_ptr)
   {
-    logger << Logger::Debug << "Reading buffer (" << size_read << " bytes)..." << Logger::endl;
-    for (unsigned int i = 0 ; i < size_read ; ++i)
-      read_buffer += range[i];
-    total_read += size_read;
-    if (total_read == to_read)
+    if (*state == -1)
     {
-      logger << Logger::Debug << "Finished reading..." << Logger::endl;
-      sem.notify_all();
+      *state = 1;
+      for (unsigned int i = 0 ; i < size_read ; ++i)
+        read_buffer += range[i];
+      total_read += size_read;
+      if (total_read == to_read)
+        sem.notify_all();
+      else
+        response->read(callback);
     }
-    else
-      response->read(callback);
   };
   response->read(callback);
-  sem.wait(sem_lock);
-  logger << Logger::Debug << "Parser's job goes on" << Logger::endl;
+  if (sem.wait_until(sem_lock, system_clock::now() + seconds(10)) == cv_status::timeout)
+  {
+    const char* error = *state == 1 ? "client request timed out" : "no threads available to take care of the request";
+
+    throw std::runtime_error(error);
+  }
   body_received(request, out, params, read_buffer);
 }
 #else
