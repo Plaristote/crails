@@ -104,7 +104,7 @@ module ::Guard
       variables_initialization = []
       tmp_lines.each do | line |
         if line.match /@[a-zA-Z_]+/
-          type = line.scan /^(unsigned\s+)?([a-zA-Z0-9_:]+(<[a-zA-Z_0-9:]+[*&]*>){0,1}[*&]*)/
+          type = line.scan /^(unsigned\s+)?([a-zA-Z0-9_:]+(<[a-zA-Z_0-9:\s<>*&]+>){0,1}[*&]*)/
           name = line.scan /@[a-zA-Z_]+/
           dflt = line.scan /\=(.*);/
           if not type.nil? and not type[0].nil? and not name.nil? and not name[0].nil?
