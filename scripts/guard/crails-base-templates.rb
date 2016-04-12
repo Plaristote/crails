@@ -77,7 +77,7 @@ module ::Guard
 
       lines.each do | line |
         if part == 0
-          if line[0] == '#' || /^\s*using\s+namespace\s+/.match(line) != nil
+          if line[0] == '#' || /^\s*using\s+namespace\s+/.match(line) != nil || /^\s*typedef\s+/.match(line)
             include_lines << line
           else
             linking_lines << line
