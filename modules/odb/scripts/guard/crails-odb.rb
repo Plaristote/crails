@@ -6,6 +6,7 @@ module ::Guard
     def initialize options = {}
       super
       @input_name      = "application"
+      @at_once         = options[:at_once]
       @embed_schema    = options[:embed_schema]
       @output_dir      = options[:output] || "lib/odb"
       @include_prefix  = options[:include_prefix] || "app/models"
@@ -109,11 +110,15 @@ module ::Guard
       backends = get_active_backends
       options  = "-I. "
       options += "--std #{@cpp_version} "
-      options += "--schema-format separate " 
+      options += "--schema-format separate "
       options += "--hxx-prologue \"#{generate_hxx_prologue}\" "
-      options += "--cxx-prologue '#{@cxx_prologue}'" unless @cxx_prologue.nil?
-      options += "--ixx-prologue '#{@ixx_prologue}'" unless @ixx_prologue.nil?
-      options += "--schema-prologue '#{@schema_prologue}'" unless @schema_prologue.nil?
+      if @at_once == true
+        options += "--at-once "
+        options += "--input-name #{@input_name} "
+      end
+      options += "--cxx-prologue '#{@cxx_prologue}' " unless @cxx_prologue.nil?
+      options += "--ixx-prologue '#{@ixx_prologue}' " unless @ixx_prologue.nil?
+      options += "--schema-prologue '#{@schema_prologue}' " unless @schema_prologue.nil?
       options += "--output-dir \"#{output_dir}\" "
       options += "--include-prefix \"#{prefix_path}\" " unless prefix_path.nil?
       options += "--table-prefix \"#{@table_prefix}\" " unless @table_prefix.nil?
