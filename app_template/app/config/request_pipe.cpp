@@ -4,10 +4,7 @@
 
 using namespace Crails;
 
-namespace Crails
-{
-  const std::string temporary_path = "/tmp";
-}
+const std::string Server::temporary_path = "/tmp";
 
 void Server::initialize_request_pipe()
 {
