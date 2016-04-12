@@ -30,6 +30,14 @@ namespace Crails
       throw boost_ext::runtime_error("could not cast `" + name + "` from " + var.type().name() + " to " + typeid(T).name());
     }
   }
+
+  template<typename T>
+  T cast(const SharedVars& vars, const std::string& name, T default_value)
+  {
+    if (vars.find(name) != vars.end())
+      return cast<T>(vars, name);
+    return default_value;
+  }
 }
 
 #endif

@@ -106,14 +106,20 @@ module ::Guard
         if line.match /@[a-zA-Z_]+/
           type = line.scan /^(unsigned\s+)?([a-zA-Z0-9_:]+(<[a-zA-Z_0-9:]+[*&]*>){0,1}[*&]*)/
           name = line.scan /@[a-zA-Z_]+/
+          dflt = line.scan /\=(.*);/
           if not type.nil? and not type[0].nil? and not name.nil? and not name[0].nil?
             type = type.flatten[0...-1].join ''
             name = name.first[1..name.first.size]
             instance_variables << "#{type} #{name};"
-            line = if is_type_a_reference? type
-              "#{name}(*(Crails::cast<#{type[0...-1]}*>(vars, \"#{name}\")))"
+            cast_params = if dflt.count == 0 then
+              "(vars, \"#{name}\")"
             else
-              "#{name}(Crails::cast<#{type} >(vars, \"#{name}\"))"
+              "(vars, \"#{name}\", #{dflt.flatten.last})"
+            end
+            line = if is_type_a_reference? type
+              "#{name}(*(Crails::cast<#{type[0...-1]}*>#{cast_params}))"
+            else
+              "#{name}(Crails::cast<#{type} >#{cast_params})"
             end
             variables_initialization << line
             next
