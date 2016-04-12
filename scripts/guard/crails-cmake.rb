@@ -1,7 +1,6 @@
 require 'guard/crails-base'
 require 'guard/crails-notifier'
 require 'guard/crails-server'
-require 'pty'
 
 module ::Guard
   class CrailsCmake < CrailsPlugin

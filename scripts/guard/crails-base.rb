@@ -1,3 +1,5 @@
+require 'pty'
+
 module ::Guard
   class CrailsPlugin < Plugin
     def watched_files
