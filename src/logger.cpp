@@ -17,6 +17,10 @@ namespace Crails
   thread_local Logger::Buffer Logger::buffer;
 }
 
+Logger::Buffer::Buffer() : level(Logger::endl)
+{
+}
+
 Logger::Logger()
 {
   stdout = &cout;

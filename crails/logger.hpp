@@ -21,7 +21,7 @@ namespace Crails
 
     struct Buffer
     {
-      Buffer() : level(Logger::endl) {}
+      Buffer();
 
       std::stringstream stream;
       Symbol            level;
