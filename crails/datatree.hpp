@@ -197,6 +197,7 @@ public:
   operator Data()                         { return as_data();       }
   Data as_data()                          { return Data(tree, "");  }
   Data operator[](const std::string& key) { return Data(tree, key); }
+  void clear()                            { tree.clear(); }
 
   DataTree& from_json(std::stringstream&);
   DataTree& from_json(const std::string&);
