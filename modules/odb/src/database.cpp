@@ -80,12 +80,16 @@ bool Database::create_from_settings(const Crails::Databases::DatabaseSettings& s
 #ifdef ODB_WITH_PGSQL
     case pgsql:
       return pgsql_create_from_settings(settings, user, password);
+#else
+# pragma message "compiling crails-odb without pgsql support: create and drop databases will be disabled"
 #endif
 
 #ifdef ODB_WITH_SQLITE
     case sqlite:
       logger << Logger::Info << ":: Database::create_from_settings not needed for sqlite backend" << Logger::endl;
       return true;
+#else
+# pragma message "compiling crails-odb without sqlite support: create and drop databases will be disabled"
 #endif
 
     default:
