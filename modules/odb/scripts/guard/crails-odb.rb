@@ -31,6 +31,7 @@ module ::Guard
 
     def run_on_modifications(paths)
       files = fetch_odb_files_in paths
+      files = watched_files if @at_once == true
       if files.count > 0
         compile_models files
         fix_ixx_includes
