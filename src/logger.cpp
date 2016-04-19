@@ -1,6 +1,8 @@
 #include <crails/logger.hpp>
 #include <thread>
 #include <iostream>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/conversion.hpp>
 
 using namespace std;
 using namespace Crails;
@@ -43,21 +45,30 @@ void Logger::set_stdout(ostream& stream)
 
 void Logger::flush()
 {
-  mutex.lock();
-  switch (buffer.level)
+  using namespace boost::posix_time;
+  struct tm    t = to_tm(second_clock::local_time());
+  stringstream time_stream;
+
+  time_stream << '[' << t.tm_mday << '/' << (t.tm_mon + 1) << ' ' << t.tm_hour << ':' << t.tm_min << ':' << t.tm_sec << "] ";
+  buffer.stream.seekg(0, ios::end);
+  if (buffer.stream.tellg() > 0)
   {
-    case Info:
-      *stdout log_prefix << buffer.stream.str();
-      stdout->flush();
-      break ;
-    default:
-      *stderr log_prefix << buffer.stream.str();
-      stderr->flush();
-      break ;
+    mutex.lock();
+    switch (buffer.level)
+    {
+      case Info:
+        *stdout log_prefix << time_stream.str() << buffer.stream.str();
+        stdout->flush();
+        break ;
+      default:
+        *stderr log_prefix << time_stream.str() << buffer.stream.str();
+        stderr->flush();
+        break ;
+    }
+    mutex.unlock();
+    buffer.stream.str("");
+    buffer.stream.clear();
   }
-  mutex.unlock();
-  buffer.stream.str("");
-  buffer.stream.clear();
 }
 
 Logger& Logger::operator<<(Symbol level)
