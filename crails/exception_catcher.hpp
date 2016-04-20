@@ -26,7 +26,7 @@ namespace Crails
   public:
     ExceptionCatcher();
 
-    void run(BuildingResponse& out, Params& params, std::function<void()> callback);
+    void run(BuildingResponse& out, Params& params, std::function<void()> callback) const;
 
     template<typename EXCEPTION>
     void add_exception_catcher(const std::string exception_name)
@@ -40,7 +40,7 @@ namespace Crails
           params, exception_name, e.what(), stream.str());
       });
     }
-    
+
     template<typename EXCEPTION>
     void add_exception_catcher(std::function<void (BuildingResponse&, Params&, const EXCEPTION)> handler)
     {
@@ -62,7 +62,7 @@ namespace Crails
     }
 
   private:
-    void response_exception(BuildingResponse& out, std::string exception_name, std::string message, Params&);
+    void response_exception(BuildingResponse& out, std::string exception_name, std::string message, Params&) const;
     void default_exception_handler(BuildingResponse& out, Params& params, const std::string exception_name, const std::string message, const std::string& trace);
 
     Functions     functions;

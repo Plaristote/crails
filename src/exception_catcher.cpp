@@ -13,7 +13,7 @@ using namespace Crails;
 ExceptionCatcher::ExceptionCatcher()
 {}
 
-void ExceptionCatcher::run(BuildingResponse& out, Params& params, std::function<void()> callback)
+void ExceptionCatcher::run(BuildingResponse& out, Params& params, std::function<void()> callback) const
 {
   Context context(out, params);
   
@@ -32,7 +32,7 @@ void ExceptionCatcher::run(BuildingResponse& out, Params& params, std::function<
   }
 }
 
-void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, string e_what, Params& params)
+void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, string e_what, Params& params) const
 {
   logger << Logger::Error << "# Catched exception " << e_name << ": " << e_what;
   if (params["backtrace"].exists())
