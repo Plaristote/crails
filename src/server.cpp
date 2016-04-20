@@ -133,16 +133,29 @@ void Server::operator()(const HttpServer::request& _request, Response response)
   std::shared_ptr<BuildingResponse>    out     = std::make_shared<BuildingResponse>(response);
   std::shared_ptr<Params>              params  = std::make_shared<Params>();
 
-  exception_catcher.run(*out, *params, [this,timer,request,out,params]()
+  try
   {
     run_request_parsers(*request,*out,*params, [this,timer,request,out,params](bool parsed)
     {
-      if (parsed)
-        run_request_handlers(*request, *out, *params);
-      (*params)["response-time"]["crails"] = timer->GetElapsedSeconds();
-      post_request_log(*params);
+      exception_catcher.run(*out, *params, [this,timer,request,out,params,parsed]()
+      {
+        if (parsed)
+        {
+          run_request_handlers(*request, *out, *params);
+          (*params)["response-time"]["crails"] = timer->GetElapsedSeconds();
+          post_request_log(*params);
+        }
+      });
     });
-  });
+  }
+  catch (std::exception& e)
+  {
+    logger << Logger::Error << "!! an exception was thrown while parsing the query: " << e.what() << Logger::endl;
+  }
+  catch (...)
+  {
+    logger << Logger::Error << "!! an exception was thrown while parsing the query" << Logger::endl;
+  }
 }
 
 void Server::post_request_log(Params& params) const
