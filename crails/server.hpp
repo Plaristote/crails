@@ -51,10 +51,10 @@ namespace Crails
 
     void initialize_request_pipe();
     void initialize_exception_catcher();
-    void run_request_parsers (const HttpServer::request&, BuildingResponse&, Params&, std::function<void(bool)>);
-    void run_request_handlers(const HttpServer::request&, BuildingResponse&, Params&);
+    void run_request_parsers (const HttpServer::request&, BuildingResponse&, Params&, std::function<void(bool)>) const;
+    void run_request_handlers(const HttpServer::request&, BuildingResponse&, Params&) const;
 
-    void recursive_request_parser_run(const HttpServer::request&, BuildingResponse&, Params&, RequestParsers::const_iterator, std::function<void(bool)>);
+    void recursive_request_parser_run(const HttpServer::request&, BuildingResponse&, Params&, RequestParsers::const_iterator, std::function<void(bool)>) const;
 
     static void ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Params& params);
 

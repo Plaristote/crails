@@ -67,7 +67,7 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   }
 }
 
-void Server::recursive_request_parser_run(const HttpServer::request& request, BuildingResponse& out, Params& params, RequestParsers::const_iterator hi, std::function<void(bool)> callback)
+void Server::recursive_request_parser_run(const HttpServer::request& request, BuildingResponse& out, Params& params, RequestParsers::const_iterator hi, std::function<void(bool)> callback) const
 {
   (**hi)(request, out, params, [this,request,&out,&params,hi,callback](RequestParser::Status status)
   {
@@ -83,14 +83,14 @@ void Server::recursive_request_parser_run(const HttpServer::request& request, Bu
   });
 }
 
-void Server::run_request_parsers(const HttpServer::request& request, BuildingResponse& out, Params& params, std::function<void(bool)> callback)
+void Server::run_request_parsers(const HttpServer::request& request, BuildingResponse& out, Params& params, std::function<void(bool)> callback) const
 {
   RequestParsers::const_iterator handler_iterator = request_parsers.begin();
 
   recursive_request_parser_run(request, out, params, handler_iterator, callback);
 }
 
-void Server::run_request_handlers(const HttpServer::request& request, BuildingResponse& response, Params& params)
+void Server::run_request_handlers(const HttpServer::request& request, BuildingResponse& response, Params& params) const
 {
   RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
   bool                            request_handled  = false;
