@@ -6,21 +6,23 @@
 using namespace std;
 using namespace Crails;
 
-RequestParser::Status RequestFormParser::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params)
+void RequestFormParser::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback)
 {
   static const Regex is_form("application/x-www-form-urlencoded", REG_EXTENDED);
 
   if (params["method"].as<string>() != "GET" && content_type_matches(params, is_form))
   {
-    wait_for_body(request, out, params);
-    return RequestParser::Stop;
+    wait_for_body(request, out, params, [callback]()
+    {
+      callback(RequestParser::Stop);
+    });
   }
-  return RequestParser::Continue;
+  else
+    callback(RequestParser::Continue);
 }
 
 void RequestFormParser::body_received(const HttpServer::request& request, BuildingResponse&, Params& params, const string& body)
 {
-  logger << Logger::Debug << "[" << request.method << " " << request.destination << "] Going for form-data parsing" << Logger::endl;
   if (body.size() > 0)
     cgi2params(params.as_data(), body);
 }

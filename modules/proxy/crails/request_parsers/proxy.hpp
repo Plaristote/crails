@@ -29,7 +29,7 @@ namespace Crails
 
     ProxyRequestHandler();
 
-    RequestParser::Status operator()(const HttpServer::request& request, BuildingResponse& out, Params& params);
+    void operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, std::function<void(RequestParser::Status)>);
 
   private:
     void body_received(const HttpServer::request& request, BuildingResponse& out, Params& params, const std::string& body);

@@ -67,21 +67,27 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   }
 }
 
-bool Server::run_request_parsers(const HttpServer::request& request, BuildingResponse& out, Params& params)
+void Server::recursive_request_parser_run(const HttpServer::request& request, BuildingResponse& out, Params& params, RequestParsers::const_iterator hi, std::function<void(bool)> callback)
+{
+  (**hi)(request, out, params, [this,request,&out,&params,hi,callback](RequestParser::Status status)
+  {
+    RequestParsers::const_iterator handler_iterator = hi;
+
+    if (status == RequestParser::Abort)
+      callback(false);
+    else if (status != RequestParser::Stop &&
+             ++handler_iterator != request_parsers.end())
+      recursive_request_parser_run(request, out, params, handler_iterator, callback);
+    else
+      callback(true);
+  });
+}
+
+void Server::run_request_parsers(const HttpServer::request& request, BuildingResponse& out, Params& params, std::function<void(bool)> callback)
 {
   RequestParsers::const_iterator handler_iterator = request_parsers.begin();
 
-  for (; handler_iterator != request_parsers.end() ; ++ handler_iterator)
-  {
-    RequestParser::Status status;
-
-    status = (**handler_iterator)(request, out, params);
-    if (status == RequestParser::Stop)
-      break ;
-    else if (status == RequestParser::Abort)
-      return false;
-  }
-  return true;
+  recursive_request_parser_run(request, out, params, handler_iterator, callback);
 }
 
 void Server::run_request_handlers(const HttpServer::request& request, BuildingResponse& response, Params& params)
@@ -120,19 +126,23 @@ void Server::initialize_exception_catcher()
   exception_catcher.add_exception_catcher<std::exception&>("std::exception");
 }
 
-void Server::operator()(const HttpServer::request& request, Response response)
+void Server::operator()(const HttpServer::request& _request, Response response)
 {
-  Utils::Timer     timer;
-  BuildingResponse out(response);
-  Params           params;
+  std::shared_ptr<HttpServer::request> request = std::make_shared<HttpServer::request>(_request);
+  std::shared_ptr<Utils::Timer>        timer   = std::make_shared<Utils::Timer>();
+  std::shared_ptr<BuildingResponse>    out     = std::make_shared<BuildingResponse>(response);
+  std::shared_ptr<Params>              params  = std::make_shared<Params>();
 
-  exception_catcher.run(out, params, [this, &request, &response, &out, &params]()
+  exception_catcher.run(*out, *params, [this,timer,request,out,params]()
   {
-    if (run_request_parsers(request, out, params))
-      run_request_handlers(request, out, params);
+    run_request_parsers(*request,*out,*params, [this,timer,request,out,params](bool parsed)
+    {
+      if (parsed)
+        run_request_handlers(*request, *out, *params);
+      (*params)["response-time"]["crails"] = timer->GetElapsedSeconds();
+      post_request_log(*params);
+    });
   });
-  params["response-time"]["crails"] = timer.GetElapsedSeconds();
-  post_request_log(params);
 }
 
 void Server::post_request_log(Params& params) const

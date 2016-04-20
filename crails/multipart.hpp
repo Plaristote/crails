@@ -2,8 +2,7 @@
 # define MULTIPART_HPP
 
 # include <crails/cookie_data.hpp>
-# include <mutex>
-# include <condition_variable>
+# include <fstream>
 
 namespace Crails
 {
@@ -18,9 +17,6 @@ namespace Crails
     unsigned int to_read;
     unsigned int total_read;
     std::string  boundary;
-
-    std::mutex              mutex;
-    std::condition_variable end;
 
     // Context-linked attributes
     short           parsed_state;

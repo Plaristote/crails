@@ -40,19 +40,27 @@ ProxyRequestHandler::Mode ProxyRequestHandler::get_mode_from_data(Data mode) con
   return default_mode;
 }
 
-RequestParser::Status ProxyRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params)
+void ProxyRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, function<void (RequestParser::Status)> callback)
 {
   auto rule = find(rules.begin(), rules.end(), request.destination);
 
   if (rule != rules.end())
   {
     if (request.method != "GET" && request.method != "HEAD")
-      wait_for_body(request, out, params);
+    {
+      wait_for_body(request, out, params, [callback]()
+      {
+        callback(RequestParser::Abort);
+      });
+    }
     else
+    {
       body_received(request, out, params, "");
-    return RequestParser::Abort;
+      callback(RequestParser::Abort);
+    }
   }
-  return RequestParser::Continue;
+  else
+    callback(RequestParser::Continue);
 }
 
 void ProxyRequestHandler::body_received(const HttpServer::request& request, BuildingResponse& out, Params& params, const string& body)

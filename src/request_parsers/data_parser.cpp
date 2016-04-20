@@ -4,35 +4,37 @@
 using namespace std;
 using namespace Crails;
 
-RequestParser::Status RequestDataParser::operator()(const HttpServer::request& request, BuildingResponse&, Params& params)
+void RequestDataParser::operator()(const HttpServer::request& request, BuildingResponse&, Params& params, function<void(RequestParser::Status)> callback)
 {
-  const char*  get_params = strrchr(request.destination.c_str(), '?');
-  std::string  uri        = request.destination;
-
-  // Setting Headers parameters
   {
-    auto it  = request.headers.begin();
-    auto end = request.headers.end();
+    const char*  get_params = strrchr(request.destination.c_str(), '?');
+    std::string  uri        = request.destination;
 
-    for (; it != end ; ++it)
+    // Setting Headers parameters
     {
-      boost::network::http::request_header_narrow header = *it;
-      params["headers"][header.name] = header.value;
-    }      
-  }
+      auto it  = request.headers.begin();
+      auto end = request.headers.end();
 
-  // Getting get parameters
-  if (get_params != 0)
-  {
-    std::string str_params(get_params);
+      for (; it != end ; ++it)
+      {
+        boost::network::http::request_header_narrow header = *it;
+        params["headers"][header.name] = header.value;
+      }      
+    }
 
-    uri.erase(uri.size() - str_params.size());
-    str_params.erase(0, 1);
-    cgi2params(params.as_data(), str_params);
-  }
+    // Getting get parameters
+    if (get_params != 0)
+    {
+      std::string str_params(get_params);
+
+      uri.erase(uri.size() - str_params.size());
+      str_params.erase(0, 1);
+      cgi2params(params.as_data(), str_params);
+    }
   
-  // Set URI and method for the posterity (is that even a word ?)
-  params["uri"]    = uri;
-  params["method"] = request.method;
-  return RequestParser::Continue;
+    // Set URI and method for the posterity (is that even a word ?)
+    params["uri"]    = uri;
+    params["method"] = request.method;
+  }
+  callback(RequestParser::Continue);
 }
