@@ -1,14 +1,17 @@
 #include <crails/logger.hpp>
-#include <thread>
 #include <iostream>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/conversion.hpp>
+#ifdef ASYNC_SERVER
+# include "crails/thread_id.hpp"
+static thread_local ThreadId thread_id;
+#endif
 
 using namespace std;
 using namespace Crails;
 
 #ifdef ASYNC_SERVER
-# define log_prefix << '[' << std::hex << std::this_thread::get_id() << "] "
+# define log_prefix << "[T" << (unsigned long)thread_id << "] "
 #else
 # define log_prefix
 #endif
