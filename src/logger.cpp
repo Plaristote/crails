@@ -1,5 +1,6 @@
 #include <crails/logger.hpp>
 #include <iostream>
+#include <iomanip>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/conversion.hpp>
 #ifdef ASYNC_SERVER
@@ -52,7 +53,9 @@ void Logger::flush()
   struct tm    t = to_tm(second_clock::local_time());
   stringstream time_stream;
 
-  time_stream << '[' << t.tm_mday << '/' << (t.tm_mon + 1) << ' ' << t.tm_hour << ':' << t.tm_min << ':' << t.tm_sec << "] ";
+  time_stream << setfill('0');
+  time_stream << '[' << setw(2) << t.tm_mday << '/' << setw(2) << (t.tm_mon + 1) << ' ';
+  time_stream << setw(2) << t.tm_hour << ':' << setw(2) << t.tm_min << ':' << setw(2) << t.tm_sec << "] ";
   buffer.stream.seekg(0, ios::end);
   if (buffer.stream.tellg() > 0)
   {
