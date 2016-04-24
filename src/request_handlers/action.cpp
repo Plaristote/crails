@@ -5,7 +5,7 @@
 using namespace std;
 using namespace Crails;
 
-bool ActionRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params)
+void ActionRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, function<void(bool)> callback)
 {
   const Router* router = Router::singleton::Get();
 
@@ -15,27 +15,31 @@ bool ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
     const Router::Action* action = router->get_action(method, params["uri"].as<string>(), params);
 
     if (action == 0)
-      return false;
-    logger << Logger::Info << "# Responding to " << method << ' ' << params["uri"].as<string>() << Logger::endl;
-    params.session->load(params["headers"]);
+      callback(false);
+    else
     {
-      DataTree         data   = (*action)(params);
-      string           body   = data["body"].defaults_to<string>("");
-      Server::HttpCode code   = Server::HttpCodes::ok;
-
-      if (data["headers"].exists())
+      logger << Logger::Info << "# Responding to " << method << ' ' << params["uri"].as<string>() << Logger::endl;
+      params.session->load(params["headers"]);
+      (*action)(params, [callback,&params,&out](DataTree data)
       {
-        data["headers"].each([&out](Data header)
+        string           body = data["body"].defaults_to<string>("");
+        Server::HttpCode code;
+
+        if (data["headers"].exists())
         {
-          out.set_headers(header.get_key(), header.as<string>());
-        });
-      }
-      params.session->finalize(out);
-      code = (Server::HttpCode)(data["status"].defaults_to<int>(200));
-      Server::SetResponse(params, out, code, body);
+          data["headers"].each([&out](Data header)
+          {
+            out.set_headers(header.get_key(), header.as<string>());
+          });
+        }
+        params.session->finalize(out);
+        code = (Server::HttpCode)(data["status"].defaults_to<int>(200));
+        Server::SetResponse(params, out, code, body);
+        callback(true);
+      });
     }
-    return true;
   }
-  return false;
+  else
+    callback(false);
 }
 

@@ -87,28 +87,35 @@ void Server::run_request_parsers(const HttpServer::request& request, BuildingRes
 {
   RequestParsers::const_iterator handler_iterator = request_parsers.begin();
 
-  recursive_request_parser_run(request, out, params, handler_iterator, callback);
+  if (handler_iterator != request_parsers.end())
+    recursive_request_parser_run(request, out, params, handler_iterator, callback);
+  else
+    logger << Logger::Warning << "## /!\\ No request parsers registered." << Logger::endl;
 }
 
-void Server::run_request_handlers(const HttpServer::request& request, BuildingResponse& response, Params& params) const
+void Server::recursive_request_handler_run(const HttpServer::request& request, BuildingResponse& response, Params& params, RequestHandlers::const_iterator hi, std::function<void(bool)> callback) const
+{
+  (**hi)(request, response, params, [this,request,&response,&params,hi,callback](bool request_handled)
+  {
+    RequestHandlers::const_iterator hi_ = hi;
+
+    if (request_handled)
+      callback(true);
+    else if (++hi_ != request_handlers.end())
+      recursive_request_handler_run(request, response, params, hi_, callback);
+    else
+      callback(false);
+  });
+}
+
+void Server::run_request_handlers(const HttpServer::request& request, BuildingResponse& out, Params& params, std::function<void(bool)> callback) const
 {
   RequestHandlers::const_iterator handler_iterator = request_handlers.begin();
-  bool                            request_handled  = false;
 
-  for (; handler_iterator != request_handlers.end() ; ++handler_iterator)
-  {
-    request_handled = (**handler_iterator)(request, response, params);
-    if (request_handled)
-      break ;
-  }
-  if (!request_handled)
-  {
-    Server::HttpCode code = HttpCodes::not_found;
-
-    if (params["response-data"]["code"].exists())
-      code = (Server::HttpCode)(params["response-data"]["code"].as<int>());
-    ResponseHttpError(response, code, params);
-  }
+  if (handler_iterator != request_handlers.end())
+    recursive_request_handler_run(request, out, params, handler_iterator, callback);
+  else
+    logger << Logger::Warning << "## /!\\ No request handler registered." << Logger::endl;
 }
 
 void Server::add_request_handler(RequestHandler* request_handler)
@@ -126,26 +133,41 @@ void Server::initialize_exception_catcher()
   exception_catcher.add_exception_catcher<std::exception&>("std::exception");
 }
 
+void Server::on_request_handled(std::shared_ptr<Params> params, std::shared_ptr<BuildingResponse> response, std::shared_ptr<Utils::Timer> timer, bool request_handled)
+{
+  if (!request_handled)
+  {
+    Server::HttpCode code = HttpCodes::not_found;
+
+    if ((*params)["response-data"]["code"].exists())
+      code = (Server::HttpCode)((*params)["response-data"]["code"].as<int>());
+    ResponseHttpError(*response, code, *params);
+  }
+  post_request_log(*params, *timer);
+}
+
 void Server::operator()(const HttpServer::request& _request, Response response)
 {
-  std::shared_ptr<HttpServer::request> request = std::make_shared<HttpServer::request>(_request);
-  std::shared_ptr<Utils::Timer>        timer   = std::make_shared<Utils::Timer>();
-  std::shared_ptr<BuildingResponse>    out     = std::make_shared<BuildingResponse>(response);
-  std::shared_ptr<Params>              params  = std::make_shared<Params>();
+  auto request = std::make_shared<HttpServer::request>(_request);
+  auto timer   = std::make_shared<Utils::Timer>();
+  auto out     = std::make_shared<BuildingResponse>(response);
+  auto params  = std::make_shared<Params>();
 
   try
   {
     run_request_parsers(*request,*out,*params, [this,timer,request,out,params](bool parsed)
     {
-      exception_catcher.run(*out, *params, [this,timer,request,out,params,parsed]()
+      if (parsed)
       {
-        if (parsed)
+        exception_catcher.run(*out, *params, [this,timer,request,out,params,parsed]()
         {
-          run_request_handlers(*request, *out, *params);
-          (*params)["response-time"]["crails"] = timer->GetElapsedSeconds();
-          post_request_log(*params);
-        }
-      });
+          auto callback = std::bind(&Server::on_request_handled, this, params, out, timer, std::placeholders::_1);
+
+          run_request_handlers(*request, *out, *params, callback);
+        });
+      }
+      else
+        post_request_log(*params, *timer);
     });
   }
   catch (std::exception& e)
@@ -158,9 +180,9 @@ void Server::operator()(const HttpServer::request& _request, Response response)
   }
 }
 
-void Server::post_request_log(Params& params) const
+void Server::post_request_log(Params& params, const Utils::Timer& timer) const
 {
-  float crails_time     = params["response-time"]["crails"];
+  float crails_time     = timer.GetElapsedSeconds();
   unsigned short code   = params["response-data"]["code"].defaults_to(200);
 
   logger << Logger::Info << "# Responded to " << params["method"].defaults_to<string>("GET") << " '" << params["uri"].defaults_to<string>("");

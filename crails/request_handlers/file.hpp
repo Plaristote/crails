@@ -18,7 +18,7 @@ namespace Crails
 #endif
     }
 
-    bool operator()(const HttpServer::request& request, BuildingResponse& response, Params& params);
+    void operator()(const HttpServer::request& request, BuildingResponse& response, Params& params, std::function<void(bool)> callback);
 
     void set_cache_enabled(bool enable) { cache_enabled = enable; }
     bool is_cache_enabled(void) const   { return cache_enabled;   }

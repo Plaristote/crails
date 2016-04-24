@@ -10,7 +10,7 @@ using namespace Crails;
 static const string pwd         = boost::filesystem::current_path().string();
 static const string public_path = boost::filesystem::canonical(pwd + "/public").string();
 
-bool FileRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& response, Params& params)
+void FileRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& response, Params& params, function<void(bool)> callback)
 {
   if (request.method == "GET")
   {
@@ -32,11 +32,12 @@ bool FileRequestHandler::operator()(const HttpServer::request& request, Building
       if (send_file(fullpath, response, Server::HttpCodes::ok))
       {
         params["response-data"]["code"] = (int)Server::HttpCodes::ok;
-        return true;
+        callback(true);
+        return ;
       }
     }
   }
-  return false;
+  callback(false);
 }
 
 bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit)

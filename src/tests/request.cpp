@@ -19,7 +19,7 @@ void Request::run()
     const Router::Action* action = router->get_action(params["method"].as<string>(), params["uri"].as<string>(), params);
 
     if (action != 0)
-      response = (*action)(params);
+      (*action)(params, [this](DataTree data) { response = data; });
     else
       throw RouteNotFound(params["method"].as<string>() + '#' + params["uri"].as<string>());
     if (!response["status"].exists())

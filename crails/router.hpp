@@ -23,7 +23,7 @@ namespace Crails
 
     SINGLETON(Router)
   public:
-    typedef std::function<DataTree (Params&)> Action;
+    typedef std::function<void (Params&,std::function<void(DataTree)>)> Action;
 
     struct Item
     {
@@ -49,20 +49,46 @@ namespace Crails
 
 # define SYM2STRING(sym) std::string(#sym)
 
-# define SetRoute(method, route, klass, function) \
-  match(method, route, [](Params& params) -> DataTree \
+# define SetAsyncRoute(method, route, klass, func) \
+  match(method, route, [](Params& params, std::function<void(DataTree)> callback) \
   { \
     params["controller-data"]["name"]   = #klass; \
-    params["controller-data"]["action"] = #function; \
+    params["controller-data"]["action"] = #func; \
+    std::shared_ptr<klass> controller = std::make_shared<klass>(params); \
+\
+    if (controller->response["status"].exists()) \
+      return (controller->response); \
+    controller->initialize([controller, callback]() \
+    { \
+      auto router_callback = [controller, callback](DataTree response) \
+      { \
+        controller->finalize([controller, callback]() { callback(controller->response); }); \
+      }; \
+\
+    if (!controller->response["status"].exists()) \
+      controller->func(router_callback); \
+    else \
+      router_callback(controller->response); \
+    }); \
+  });
+
+# define SetRoute(method, route, klass, func) \
+  match(method, route, [](Params& params, std::function<void(DataTree)> callback) \
+  { \
+    params["controller-data"]["name"]   = #klass; \
+    params["controller-data"]["action"] = #func; \
     klass controller(params); \
 \
     if (controller.response["status"].exists()) \
-      return (controller.response); \
-    controller.initialize(); \
-    if (!controller.response["status"].exists()) \
-      controller.function(); \
-    controller.finalize(); \
-    return (controller.response); \
+      callback(controller.response); \
+    else \
+    { \
+      controller.initialize(); \
+      if (!controller.response["status"].exists()) \
+        controller.func(); \
+      controller.finalize(); \
+      callback(controller.response); \
+    } \
   });
 
 # define Crudify(resource_name, controller) \
