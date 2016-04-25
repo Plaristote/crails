@@ -24,10 +24,8 @@ namespace Crails
 
   private:
     void initialize_interface(HttpServer::options&) const;
-#ifdef ASYNC_SERVER
     void initialize_thread_pool(HttpServer::options&) const;
     void initialize_ssl_context(HttpServer::options&) const;
-#endif
     
     boost::program_options::variables_map vm;
   };

@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(crails_project)
 
-option(USE_MULTITHREAD "Asynchronous Server" ON)
 option(USE_MEMCACHED   "Memcached"           ON)
 option(USE_MONGODB     "MongoDB"             ON)
 option(USE_ODB         "ODB ORM"             ON)
@@ -65,11 +64,7 @@ file(GLOB crails_tests
 ## Targets
 ##
 if(DEVELOPER_MODE)
-  if(USE_MULTITHREAD)
-    set(crails-suffix -multithread-debug)
-  else()
-    set(crails-suffix -debug)
-  endif()
+  set(crails-suffix -debug)
 elseif(USE_MULTITHREAD)
   set(crails-suffix -multithread)
 endif()

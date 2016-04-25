@@ -58,7 +58,6 @@ using namespace std;
 //
 // Protects OpenSSL against concurrency
 //
-#ifdef ASYNC_SERVER
 static void locking_function(int mode, int n, const char*, int)
 {
   static std::mutex* mutexes = new std::mutex[CRYPTO_num_locks()];
@@ -73,14 +72,11 @@ static unsigned long id_function(void)
 {
   return (unsigned long)std::hash<std::thread::id>() (std::this_thread::get_id());
 }
-#endif
 
 void Cipher::initialize()
 {
-#ifdef ASYNC_SERVER
   CRYPTO_set_id_callback(id_function);
   CRYPTO_set_locking_callback(locking_function);
-#endif
 }
 //
 // END protects OpenSSL against concurrency

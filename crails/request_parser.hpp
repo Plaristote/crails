@@ -4,9 +4,7 @@
 # include "http_server.hpp"
 # include <crails/utils/regex.hpp>
 # include <functional>
-# ifdef ASYNC_SERVER
-#  include "multipart.hpp"
-# endif
+# include "multipart.hpp"
 
 namespace Crails
 {
@@ -37,7 +35,6 @@ namespace Crails
   protected:
     virtual void body_received(const HttpServer::request&, BuildingResponse&, Params&, const std::string& body) = 0;
   private:
-#ifdef ASYNC_SERVER
     struct PendingBody
     {
       PendingBody(const HttpServer::request&, BuildingResponse&, Params&);
@@ -54,7 +51,6 @@ namespace Crails
     void on_receive(std::shared_ptr<PendingBody> pending_body,
                     boost::iterator_range<char const*> range,
                     size_t size_read);
-#endif
   };
 
   class RequestDataParser : public RequestParser
@@ -74,19 +70,10 @@ namespace Crails
 
   class RequestMultipartParser : public RequestParser
   {
-  #ifdef ASYNC_SERVER  
-    typedef std::function<void (boost::iterator_range<char const*>,
-                              boost::system::error_code,
-                              size_t,
-                              HttpServer::connection_ptr)> ReadCallback;  
-    
-    ReadCallback    callback;
-  #endif
   public:
     void operator()(const HttpServer::request&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>);
   private:
     void parse_multipart(const HttpServer::request&, ServerTraits::Response, Params&, std::function<void()>);
-#ifdef ASYNC_SERVER
     struct PendingBody
     {
       PendingBody(ServerTraits::Response r, Params& p);
@@ -101,7 +88,6 @@ namespace Crails
                     boost::iterator_range<char const*> range,
                     size_t size_read,
                     HttpServer::connection_ptr);
-#endif
   };
 
   class RequestJsonParser : public BodyParser

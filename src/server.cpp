@@ -11,6 +11,7 @@
 #include <crails/request_handlers/file.hpp>
 #include <crails/logger.hpp>
 #include <crails/program_options.hpp>
+#include <csignal>
 
 using namespace std;
 using namespace Crails;

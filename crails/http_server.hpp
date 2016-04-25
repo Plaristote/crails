@@ -10,8 +10,7 @@ namespace Crails
   class  BuildingResponse;
   struct Server;
 
-# ifdef ASYNC_SERVER
-  typedef http::async_server<Server>         HttpServer;
+  typedef http::server<Server>               HttpServer;
 
   struct ServerTraits
   {
@@ -19,16 +18,6 @@ namespace Crails
     typedef HttpServer::connection           HttpCodes;
     typedef HttpServer::connection_ptr       Response;
   };
-# else
-  typedef http::server<Server>                HttpServer;
-
-  struct ServerTraits
-  {
-    typedef HttpServer::response::status_type HttpCode;
-    typedef HttpServer::response              HttpCodes;
-    typedef HttpServer::response&             Response;
-  };
-# endif
 }
 
 #endif

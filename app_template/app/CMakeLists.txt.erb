@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(<%= options[:name] %>)
-option(USE_MULTITHREAD "enable multi-threaded server" <%= options[:server] == :async ? 'ON' : 'OFF' %>)
 option(DEVELOPER_MODE  "enable debugging tools"       ON)
 
 cmake_policy(SET CMP0042 OLD)
@@ -14,10 +13,6 @@ find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system random REQUIRED)
 
 include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} .)
-
-if (USE_MULTITHREAD)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASYNC_SERVER")
-endif()
 
 if (DEVELOPER_MODE)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -46,13 +41,7 @@ add_executable(server ${server_files})
 add_executable(tests  ${tests_files})
 
 if(DEVELOPER_MODE)
-  if(USE_MULTITHREAD)
-    set(crails-suffix -multithread-debug)
-  else()
-    set(crails-suffix -debug)
-  endif()
-elseif(USE_MULTITHREAD)
-  set(crails-suffix -multithread)
+  set(crails-suffix -debug)
 endif()
 
 set(dependencies      crails-core${crails-suffix}

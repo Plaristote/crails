@@ -21,7 +21,6 @@ void RequestMultipartParser::operator()(const HttpServer::request& request, Buil
     callback(RequestParser::Continue);
 }
 
-#ifdef ASYNC_SERVER
 RequestMultipartParser::PendingBody::PendingBody(ServerTraits::Response r, Params& p)
   : response(r), params(p)
 {
@@ -38,7 +37,7 @@ void RequestMultipartParser::on_receive(shared_ptr<PendingBody> pending_body, bo
   multipart_parser.parse(pending_body->params);
   if (multipart_parser.total_read < multipart_parser.to_read)
   {
-    connection_ptr->read([this, pending_body](boost::iterator_range<char const*> range, boost::system::error_code, size_t size_read, HttpServer::connection_ptr connection_ptr)
+    connection_ptr->read([this, pending_body](boost::iterator_range<char const*> range, std::error_code, size_t size_read, HttpServer::connection_ptr connection_ptr)
     {
       on_receive(pending_body, range, size_read, connection_ptr);
     });
@@ -52,19 +51,8 @@ void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerT
   std::shared_ptr<PendingBody> pending_body = std::make_shared<PendingBody>(response, params);
 
   pending_body->finished_callback = finished_callback;
-  response->read([this, pending_body](boost::iterator_range<char const*> range, boost::system::error_code, size_t size_read, HttpServer::connection_ptr connection_ptr)
+  response->read([this, pending_body](boost::iterator_range<char const*> range, std::error_code, size_t size_read, HttpServer::connection_ptr connection_ptr)
   {
     on_receive(pending_body, range, size_read, connection_ptr);
   });
 }
-#else
-void RequestMultipartParser::parse_multipart(const HttpServer::request& request, ServerTraits::Response, Params& params, function<void()> callback)
-{
-  MultipartParser multipart_parser;
-
-  multipart_parser.initialize(params);
-  multipart_parser.read_buffer = request.body;
-  multipart_parser.parse(params);
-  callback();
-}
-#endif

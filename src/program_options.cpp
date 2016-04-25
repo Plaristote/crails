@@ -1,15 +1,14 @@
 #include "crails/program_options.hpp"
 #include "crails/logger.hpp"
-#ifdef ASYNC_SERVER
-# include <boost/asio.hpp>
-# include <boost/asio/ssl.hpp>
-# include <boost/shared_ptr.hpp>
+#include <asio.hpp>
+#include <asio/ssl.hpp>
+#include <memory>
 
 namespace Crails {
-  std::string get_ssl_password(std::size_t max_length, boost::asio::ssl::context_base::password_purpose purpose);
+  std::string get_ssl_password(std::size_t max_length, asio::ssl::context_base::password_purpose purpose);
 }
-#endif
 
+using namespace std;
 using namespace boost;
 using namespace Crails;
 
@@ -21,12 +20,10 @@ ProgramOptions::ProgramOptions(int argc, char** argv)
     ("port,p",     program_options::value<std::string>(),    "listened port")
     ("hostname,h", program_options::value<std::string>(),    "listened host")
     ("threads,t",  program_options::value<unsigned short>(), "amount of threads")
-#ifdef ASYNC_SERVER
     ("ssl",        "enable SSL")
     ("ssl-cert",   program_options::value<std::string>(), "path to the ssl certificate file")
     ("ssl-key",    program_options::value<std::string>(), "path to the ssl key file")
     ("ssl-dh",     program_options::value<std::string>(), "path to a tmp_dh_file")
-#endif
     ;
   program_options::store(program_options::parse_command_line(argc, argv, desc), vm);
   program_options::notify(vm);
@@ -37,11 +34,9 @@ HttpServer::options ProgramOptions::get_server_options(Server& handler) const
   HttpServer::options server_options(handler);
 
   initialize_interface(server_options);
-#ifdef ASYNC_SERVER
   initialize_thread_pool(server_options);
   if (vm.count("ssl"))
     initialize_ssl_context(server_options);
-#endif
   return server_options;
 }
 
@@ -55,14 +50,13 @@ void ProgramOptions::initialize_interface(HttpServer::options& options) const
   options.address(address.c_str()).port(port.c_str());
 }
 
-#ifdef ASYNC_SERVER
 void ProgramOptions::initialize_thread_pool(HttpServer::options& options) const
 {
   unsigned short threads = get_value("threads", (unsigned short)(std::thread::hardware_concurrency()));
 
   logger << ">> Pool Thread Size: " << threads << Logger::endl;
   options.thread_pool(
-    boost::make_shared<boost::network::utils::thread_pool>(threads)
+    make_shared<boost::network::utils::thread_pool>(threads)
   );
 }
 
@@ -85,4 +79,3 @@ void ProgramOptions::initialize_ssl_context(HttpServer::options& options) const
     ctx->use_tmp_dh_file(vm["ssl-dh"].as<std::string>());
   options.context(ctx);
 }
-#endif
