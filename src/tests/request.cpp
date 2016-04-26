@@ -2,15 +2,14 @@
 
 using namespace std;
 using namespace Crails;
-using namespace Crails::Tests;
 
-Request::Request(const string& method, const std::string& uri)
+Tests::Request::Request(const string& method, const std::string& uri)
 {
   params["method"] = method;
   params["uri"]    = uri;
 }
 
-void Request::run()
+void Tests::Request::run()
 {
   const Router* router = Router::singleton::Get();
 

@@ -55,40 +55,49 @@ namespace Crails
     params["controller-data"]["name"]   = #klass; \
     params["controller-data"]["action"] = #func; \
     std::shared_ptr<klass> controller = std::make_shared<klass>(params); \
+    auto                   callback_2 = [controller, callback]() \
+    { \
+      DataTree response = controller->response; \
+\
+      controller.reset(0); \
+      callback(response); \
+    }; \
 \
     if (controller->response["status"].exists()) \
-      return (controller->response); \
-    controller->initialize([controller, callback]() \
+      callback_2(); \
+    controller->initialize([controller, callback_2]() \
     { \
-      auto router_callback = [controller, callback](DataTree response) \
-      { \
-        controller->finalize([controller, callback]() { callback(controller->response); }); \
-      }; \
+      auto callback_3 = [=](){ controller->finalize(callback_2);}; \
 \
-    if (!controller->response["status"].exists()) \
-      controller->func(router_callback); \
-    else \
-      router_callback(controller->response); \
+      if (!controller->response["status"].exists()) \
+        controller->func(callback_3); \
+      else \
+        callback_3(); \
     }); \
   });
 
 # define SetRoute(method, route, klass, func) \
   match(method, route, [](Params& params, std::function<void(DataTree)> callback) \
   { \
+    DataTree response; \
+\
     params["controller-data"]["name"]   = #klass; \
     params["controller-data"]["action"] = #func; \
-    klass controller(params); \
-\
-    if (controller.response["status"].exists()) \
-      callback(controller.response); \
-    else \
     { \
-      controller.initialize(); \
-      if (!controller.response["status"].exists()) \
-        controller.func(); \
-      controller.finalize(); \
-      callback(controller.response); \
+      klass controller(params); \
+\
+      if (controller.response["status"].exists()) \
+        response = controller.response; \
+      else \
+      { \
+        controller.initialize(); \
+        if (!controller.response["status"].exists()) \
+          controller.func(); \
+        controller.finalize(); \
+        response = controller.response; \
+      } \
     } \
+    callback(response); \
   });
 
 # define Crudify(resource_name, controller) \

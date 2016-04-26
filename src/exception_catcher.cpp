@@ -1,4 +1,5 @@
 #include "crails/exception_catcher.hpp"
+#include "crails/request.hpp"
 #include "crails/server.hpp"
 #include "crails/params.hpp"
 #include "crails/logger.hpp"
@@ -13,12 +14,15 @@ using namespace Crails;
 ExceptionCatcher::ExceptionCatcher()
 {}
 
-void ExceptionCatcher::run(BuildingResponse& out, Params& params, std::function<void()> callback) const
+void ExceptionCatcher::run_protected(Request& request, std::function<void()> callback) const
 {
-  Context context(out, params);
+  Context context(request);
   
-  context.iterator = 0;
-  context.callback = callback;
+  context.iterator          = 0;
+  context.callback          = callback;
+  context.thread_id         = std::this_thread::get_id();
+  request.exception_context = context;
+
   try
   {
     if (context.iterator < functions.size())
@@ -28,32 +32,44 @@ void ExceptionCatcher::run(BuildingResponse& out, Params& params, std::function<
   }
   catch (...)
   {
-    response_exception(out, "Unknown exception", "Unfortunately, no data about it was harvested", params);
+    response_exception(request, "Unknown exception", "Unfortunately, no data about it was harvested");
+    request.on_finished();
+    return ;
   }
 }
 
-void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, string e_what, Params& params) const
+void ExceptionCatcher::run(Request& request, std::function<void()> callback) const
+{
+  Context& current_context = request.exception_context;
+
+  if (current_context.thread_id != std::this_thread::get_id())
+    run_protected(request, callback);
+  else
+    callback();
+}
+
+void ExceptionCatcher::response_exception(Request& request, string e_name, string e_what) const
 {
   logger << Logger::Error << "# Catched exception " << e_name << ": " << e_what;
-  if (params["backtrace"].exists())
-    logger << "\n" << params["backtrace"].as<string>();
+  if (request.params["backtrace"].exists())
+    logger << "\n" << request.params["backtrace"].as<string>();
   logger << Logger::endl;
 #ifdef SERVER_DEBUG
   SharedVars vars;
 
   vars["exception_name"] = e_name;
   vars["exception_what"] = e_what;
-  vars["params"]         = &params;
+  vars["params"]         = &(request.params);
   {
-    Data response = params["response-data"];
+    Data response = request.params["response-data"];
 
     try {
-      Renderer::render("lib/exception", params.as_data(), response, vars);
+      Renderer::render("lib/exception", request.params.as_data(), response, vars);
     }
     catch (MissingTemplate exception) {
       logger << Logger::Warning
         << "# Template lib/exception not found for format "
-        << params["headers"]["Accept"].defaults_to<string>("")
+        << request.params["headers"]["Accept"].defaults_to<string>("")
         << Logger::endl;
     }
     catch(std::exception e) {
@@ -63,16 +79,16 @@ void ExceptionCatcher::response_exception(BuildingResponse& out, string e_name, 
       logger << Logger::Error << "# Template lib/exception crashed" << Logger::endl;
     }
     if (response["headers"]["Content-Type"].exists())
-      out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
-    Server::SetResponse(params, out, Server::HttpCodes::internal_server_error, response["body"].defaults_to<string>(""));
+      request.out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
+    Server::SetResponse(request.params, request.out, Server::HttpCodes::internal_server_error, response["body"].defaults_to<string>(""));
   }
 #else
-  Server::ResponseHttpError(out, Server::HttpCodes::internal_server_error, params);
+  Server::ResponseHttpError(request.out, Server::HttpCodes::internal_server_error, request.params);
 #endif
 }
 
-void ExceptionCatcher::default_exception_handler(BuildingResponse& out, Params& params, const string exception_name, const string message, const string& trace)
+void ExceptionCatcher::default_exception_handler(Request& request, const string exception_name, const string message, const string& trace)
 {
-  params["backtrace"] = trace;
-  response_exception(out, exception_name, message, params);
+  request.params["backtrace"] = trace;
+  response_exception(request, exception_name, message);
 }

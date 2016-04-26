@@ -12,12 +12,14 @@
 namespace Crails
 {
   class Params;
+  class Request;
 
   struct Server : public ServerTraits
   {
     static const std::string temporary_path;
 
     friend class ExceptionCatcher;
+    friend class Request;
 
     Server();
     ~Server();
@@ -37,8 +39,6 @@ namespace Crails
 
     void operator()(const HttpServer::request& request, Response response);
     void log(const char* to_log);
-    void on_request_handled(std::shared_ptr<Params>, std::shared_ptr<BuildingResponse>, std::shared_ptr<Utils::Timer>, bool request_handled);
-    void post_request_log(Params& params, const Utils::Timer&) const;
 
     void                   add_request_handler(RequestHandler* request_handler);
     void                   add_request_parser(RequestParser* request_parser);
@@ -53,11 +53,8 @@ namespace Crails
 
     void initialize_request_pipe();
     void initialize_exception_catcher();
-    void run_request_parsers (const HttpServer::request&, BuildingResponse&, Params&, std::function<void(bool)>) const;
-    void run_request_handlers(const HttpServer::request&, BuildingResponse&, Params&, std::function<void(bool)>) const;
-
-    void recursive_request_parser_run(const HttpServer::request&, BuildingResponse&, Params&, RequestParsers::const_iterator, std::function<void(bool)>) const;
-    void recursive_request_handler_run(const HttpServer::request&, BuildingResponse&, Params&, RequestHandlers::const_iterator, std::function<void(bool)>) const;
+    void run_request_parsers (RequestParsers::const_iterator, const HttpServer::request&, BuildingResponse&, Params&, std::function<void(bool)>) const;
+    void run_request_handlers(RequestHandlers::const_iterator, const HttpServer::request&, BuildingResponse&, Params&, std::function<void(bool)>) const;
 
     static void ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Params& params);
 
