@@ -40,10 +40,12 @@ void ExceptionCatcher::run_protected(Request& request, std::function<void()> cal
 
 void ExceptionCatcher::run(Request& request, std::function<void()> callback) const
 {
-  Context& current_context = request.exception_context;
-
-  if (current_context.thread_id != std::this_thread::get_id())
+  if (request.exception_context.thread_id != std::this_thread::get_id())
+  {
     run_protected(request, callback);
+    if (request.exception_context.thread_id == std::this_thread::get_id())
+      request.exception_context.thread_id = std::thread::id();
+  }
   else
     callback();
 }
