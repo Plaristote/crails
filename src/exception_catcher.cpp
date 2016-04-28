@@ -87,6 +87,8 @@ void ExceptionCatcher::response_exception(Request& request, string e_name, strin
 #else
   Server::ResponseHttpError(request.out, Server::HttpCodes::internal_server_error, request.params);
 #endif
+  request.params["response-data"]["code"] = Server::HttpCodes::internal_server_error;
+  request.on_finished();
 }
 
 void ExceptionCatcher::default_exception_handler(Request& request, const string exception_name, const string message, const string& trace)
