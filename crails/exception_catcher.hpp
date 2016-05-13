@@ -8,10 +8,12 @@
 namespace Crails
 {
   class Request;
-  
+  class Server;
+
   class ExceptionCatcher
   {
     friend class Request;
+    friend class Server;
 
     struct Context
     {
