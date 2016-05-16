@@ -65,7 +65,8 @@ module ::Guard
 
     def initialize options = {}
       options[:watchers] << ::Guard::Watcher.new(%r{^#{options[:input]}/(.+\.(js|coffee|ts))$})
-      @uglifier_options = options[:uglifier] || {}
+      @force_uglify     = options[:enable_uglify]
+      @uglifier_options = options[:uglifier] || { enclose: true }
       @encoding         = options[:encoding] || 'UTF-8'
       super options
     end
@@ -81,9 +82,19 @@ module ::Guard
           target      = extension_to_js target
           output_file = options[:output] + '/' + target
           FileUtils.mkdir_p options[:output]
+          must_uglify = @force_uglify == true || (not developer_mode?)
           File.open(output_file, "w:#{@encoding}") do |f|
-            js = "(function() {\n#{text}\n})();".force_encoding(@encoding)
-            js = Uglifier.compile(js, @uglifier_options) unless developer_mode?
+            js = text.force_encoding(@encoding)
+            if must_uglify
+              original_file = output_file + '.original'
+              File.open(original_file, "w:#{@encoding}") {|f| f.write js}
+              map_file      = output_file + '.map'
+              map_options   = @uglifier_options.dup
+              map_options[:source_url]      = original_file.gsub /^\/*public/, ''
+              map_options[:source_map_url]  = map_file.gsub /^\/*public/, ''
+              js, map = Uglifier.new(map_options).compile_with_map(js)
+              File.open(map_file, "w:#{@encoding}") {|f| f.write map }
+            end
             f.write js
           end
           puts ">> Generated #{output_file} in #{(Time.now.to_f - file_starts_at).round 2}s"
