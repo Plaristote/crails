@@ -98,6 +98,12 @@ void Data::merge(DataTree data_tree)
   merge(data_tree.as_data());
 }
 
+void Data::destroy()
+{
+  tree->erase(path);
+  tree->get_child(context).erase(key);
+}
+
 void Data::output(std::ostream& out) const
 {
   boost::property_tree::json_parser::write_json(out, get_ptree());

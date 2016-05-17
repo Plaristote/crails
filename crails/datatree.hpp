@@ -171,7 +171,7 @@ public:
   bool is_null() const;
   bool is_blank() const;
   bool exists() const;
-  void destroy() { tree->erase(path); }
+  void destroy();
 
   void each(std::function<void (Data)> functor);
   void _break() { _each_break = true; }
