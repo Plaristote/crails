@@ -6,8 +6,9 @@
 
 namespace Crails
 {
-  struct Request
+  class Request
   {
+  public:
     Request(const Server* server, const HttpServer::request&, Server::Response response);
     ~Request();
 

@@ -7,7 +7,7 @@ namespace Crails
 {
   class FileRequestHandler : public RequestHandler
   {
-    friend struct Server;
+    friend class Server;
   public:
     FileRequestHandler() : RequestHandler("file")
     {

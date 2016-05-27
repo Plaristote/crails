@@ -14,8 +14,9 @@ namespace Crails
   class Params;
   class Request;
 
-  struct Server : public ServerTraits
+  class Server : public ServerTraits
   {
+  public:
     static const std::string temporary_path;
 
     friend class ExceptionCatcher;

@@ -7,7 +7,7 @@
 
 namespace Crails
 {
-  struct Server;
+  class  Server;
   struct MultipartParser;
   class  ActionRequestHandler;
   class  BodyParser;
@@ -15,7 +15,7 @@ namespace Crails
 
   class Params : public DataTree
   {
-    friend struct Server;
+    friend class  Server;
     friend struct MultipartParser; 
     friend class  ActionRequestHandler;
     friend class  BodyParser;

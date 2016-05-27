@@ -7,8 +7,8 @@ namespace Crails
 {
   namespace http = boost::network::http;
 
-  class  BuildingResponse;
-  struct Server;
+  class BuildingResponse;
+  class Server;
 
   typedef http::server<Server>               HttpServer;
 
