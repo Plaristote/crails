@@ -14,13 +14,6 @@ cmake_policy(SET CMP0042 OLD)
 ##
 set(CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -pedantic")
 
-if (USE_MULTITHREAD)
-  if (APPLE)
-    message(FATAL_ERROR "Asynchronous server is not supported on your platform (APPLE)")
-  endif()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASYNC_SERVER")
-endif()
-
 if (DEVELOPER_MODE)
   message("-- Building development server")
   set(CMAKE_BUILD_TYPE "Debug")
@@ -65,8 +58,6 @@ file(GLOB crails_tests
 ##
 if(DEVELOPER_MODE)
   set(crails-suffix -debug)
-elseif(USE_MULTITHREAD)
-  set(crails-suffix -multithread)
 endif()
 
 add_library(crails-core${crails-suffix}      SHARED ${crails_core})
