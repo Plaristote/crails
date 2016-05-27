@@ -3,6 +3,7 @@
 #include <crails/any_cast.hpp>
 #include <boost/lexical_cast.hpp>
 #include <list>
+#include <sys/wait.h>
 
 using namespace std;
 using namespace ODB;
