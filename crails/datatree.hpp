@@ -48,6 +48,10 @@ public:
     return Data(*tree, path, key);
   }
 
+  template<typename T>
+  T operator[](const char* str) const { return operator[]<T>(std::string(str)); }
+  Data operator[](const char* str) const { return operator[](std::string(str)); }
+
   std::vector<std::string> find_missing_keys(const std::vector<std::string>& keys) const;
   bool                     require(const std::vector<std::string>& keys) const;
 
