@@ -41,9 +41,9 @@ module ::Guard
       @last_compilation = File.mtime(full_path)
       puts "[crailsjs] Compiling #{full_path}..."
       if HAS_COFFEESCRIPT && @filename.match(/\.coffee$/) != nil
-        @source = @crailsjs.compile_coffeescript @source
+        @source = @crailsjs.compile_coffeescript @source, @filepath
       elsif HAS_TYPESCRIPT && @filename.match(/\.ts$/) != nil
-        @source = @crailsjs.compile_typescript @source, current_dir
+        @source = @crailsjs.compile_typescript @source, @filepath, current_dir
       end
       @compiled = @crailsjs.resolve_linking @source, current_dir
     end
@@ -132,22 +132,22 @@ module ::Guard
       @file_cache[file].compiled
     end
 
-    def compile_coffeescript source
+    def compile_coffeescript source, filepath
       source   = source.gsub /^#=([^\n]+)/, '`//=\1`'
       begin
         source = CoffeeScript.compile source, bare: true
       rescue ExecJS::RuntimeError => e
-        puts_error "CoffeeScript compilation failed for `#{file}`: #{e.message}"
+        puts "CoffeeScript compilation failed for `#{filepath}`: #{e.message}"
         raise "compilation error"
       end
       source
     end
 
-    def compile_typescript source, current_dir
+    def compile_typescript source, filepath, current_dir
       begin
         source = TypeScript::Node.compile source
       rescue ExecJS::RuntimeError => e
-        puts_error "TypeScript compilation failed for `#{file}`: #{e.message}"
+        puts "TypeScript compilation failed for `#{filepath}`: #{e.message}"
         raise "compilation error"
       end
       source
