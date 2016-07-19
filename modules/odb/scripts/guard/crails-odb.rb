@@ -5,21 +5,22 @@ module ::Guard
   class CrailsOdb < CrailsPlugin
     def initialize options = {}
       super
-      @input_name      = "application"
-      @at_once         = options[:at_once]
-      @embed_schema    = options[:embed_schema]
-      @output_dir      = options[:output] || "lib/odb"
-      @include_prefix  = options[:include_prefix] || "app/models"
-      @table_prefix    = options[:table_prefix]
-      @cpp_version     = options[:std] || "c++11"
-      @default_pointer = options[:default_pointer]
-      @hxx_prologue    = options[:hxx_prologue]
-      @ixx_prologue    = options[:ixx_prologue]
-      @cxx_prologue    = options[:cxx_prologue]
-      @schema_prologue = options[:schema_prologue]
-      @defines         = options[:defines]
-      @requires        = ['crails/safe_ptr.hpp']
-      @requires       += options[:requires] unless options[:requires].nil?
+      @input_name       = "application"
+      @at_once          = options[:at_once]
+      @embed_schema     = options[:embed_schema]
+      @output_dir       = options[:output] || "lib/odb"
+      @include_prefix   = options[:include_prefix] || "app/models"
+      @table_prefix     = options[:table_prefix]
+      @cpp_version      = options[:std] || "c++11"
+      @default_pointer  = options[:default_pointer]
+      @hxx_prologue     = options[:hxx_prologue]
+      @ixx_prologue     = options[:ixx_prologue]
+      @cxx_prologue     = options[:cxx_prologue]
+      @schema_prologue  = options[:schema_prologue]
+      @generate_session = options[:generate_session]
+      @defines          = options[:defines]
+      @requires         = ['crails/safe_ptr.hpp']
+      @requires        += options[:requires] unless options[:requires].nil?
     end
 
     def run_all
@@ -133,6 +134,7 @@ module ::Guard
         options += (@defines.map {|k,v| "-D#{k}=#{v}"}).join ' '
         options += ' '
       end
+      options += "--generate-session " if @generate_session == true
       options + "--generate-query "
     end
 
