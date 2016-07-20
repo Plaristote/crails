@@ -2,6 +2,23 @@
 
 using namespace Crails;
 
+void JsonTemplate::json_array(const std::string& key, Data value)
+{
+  add_separator();
+  add_key(key);
+  stream << '[';
+  first_item_in_object = true;
+  value.each([this](Data item)
+  {
+    if (first_item_in_object == false)
+      stream << ',';
+    stream << item.to_json();
+    first_item_in_object = false;
+  });
+  stream << ']';
+  first_item_in_object = false;
+}
+
 std::string JsonTemplate::javascript_escape(const std::string& input) const
 {
   std::string output;
@@ -82,5 +99,11 @@ namespace Crails
       stream << "true";
     else
       stream << "false";
+  }
+
+  template<>
+  void JsonTemplate::add_value<Data>(const Data value)
+  {
+    value.output(stream);
   }
 }

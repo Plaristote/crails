@@ -6,6 +6,11 @@
 
 using namespace std;
 
+string DataTree::to_json() const
+{
+  return const_cast<DataTree*>(this)->as_data().to_json();
+}
+
 DataTree& DataTree::from_json(stringstream& stream)
 {
   boost::property_tree::read_json(stream, tree);

@@ -6,6 +6,7 @@
 # include <string>
 # include <crails/template.hpp>
 # include <crails/utils/string.hpp>
+# include <crails/datatree.hpp>
 
 namespace Crails
 {
@@ -94,6 +95,8 @@ namespace Crails
       stream << ']';
       first_item_in_object = false;
     }
+
+    void json_array(const std::string& key, Data value);
     //
     // END ARRAYS
     //
@@ -193,6 +196,7 @@ namespace Crails
   template<> void JsonTemplate::add_value<bool>(bool value);
   template<> void JsonTemplate::add_value<const char*>(const char* val);
   template<> void JsonTemplate::add_value<std::string>(const std::string val);
+  template<> void JsonTemplate::add_value<Data>(const Data value);
 }
 
 #endif
