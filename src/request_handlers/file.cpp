@@ -46,8 +46,9 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
   {
     bool               cached = cache_enabled && file_cache.Contains(fullpath);
     const std::string& str    = *(file_cache.Require(fullpath));
+    const std::string* ptr    = &str;
 
-    if (&str != 0)
+    if (ptr != 0)
     {
       std::stringstream str_length;
 
