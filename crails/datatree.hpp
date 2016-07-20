@@ -206,6 +206,7 @@ public:
   DataTree& from_json(std::stringstream&);
   DataTree& from_json(const std::string&);
   DataTree& from_json_file(const std::string&);
+  std::string to_json() const;
 
   boost::property_tree::ptree&       get_ptree()       { return tree; }
   const boost::property_tree::ptree& get_ptree() const { return tree; }
