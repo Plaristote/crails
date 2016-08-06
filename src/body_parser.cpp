@@ -25,7 +25,7 @@ void BodyParser::on_receive(shared_ptr<PendingBody> pending_body,
   }
   else
   {
-    pending_body->out.get_response()->read([this, pending_body](boost::iterator_range<char const*> range, std::error_code, size_t size_read, HttpServer::connection_ptr)
+    pending_body->out.get_response()->read([this, pending_body](boost::iterator_range<char const*> range, boost::system::error_code, size_t size_read, HttpServer::connection_ptr)
     {
       on_receive(pending_body, range, size_read);
     });
@@ -37,7 +37,7 @@ void BodyParser::wait_for_body(const HttpServer::request& request, BuildingRespo
   shared_ptr<PendingBody> pending_body = make_shared<PendingBody>(request, out, params);
 
   pending_body->finished_callback = finished_callback;
-  out.get_response()->read([this, pending_body](boost::iterator_range<char const*> range, std::error_code, size_t size_read, HttpServer::connection_ptr)
+  out.get_response()->read([this, pending_body](boost::iterator_range<char const*> range, boost::system::error_code, size_t size_read, HttpServer::connection_ptr)
   {
     on_receive(pending_body, range, size_read);
   });
