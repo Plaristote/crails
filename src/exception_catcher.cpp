@@ -42,9 +42,11 @@ void ExceptionCatcher::run(Request& request, std::function<void()> callback) con
 {
   if (request.exception_context.thread_id != std::this_thread::get_id())
   {
+    request.add_reference();
     run_protected(request, callback);
     if (request.exception_context.thread_id == std::this_thread::get_id())
       request.exception_context.thread_id = std::thread::id();
+    request.remove_reference();
   }
   else
     callback();

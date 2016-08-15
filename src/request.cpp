@@ -7,6 +7,7 @@ using namespace std;
 Request::Request(const Server* server, const HttpServer::request& request, Server::Response response)
   : server(*server), request(request), out(response)
 {
+  reference_count = 1;
 }
 
 Request::~Request()
@@ -99,5 +100,17 @@ void Request::on_finished()
   if (params["response-time"]["controller"].exists())
     logger << " (controller: " << params["response-time"]["controller"].as<float>() << "s)";
   logger << Logger::endl << Logger::endl;
-  delete this;
+  remove_reference();
+}
+
+void Request::add_reference()
+{
+  ++reference_count;
+}
+
+void Request::remove_reference()
+{
+  --reference_count;
+  if (reference_count == 0)
+    delete this;
 }

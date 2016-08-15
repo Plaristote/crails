@@ -28,6 +28,12 @@ namespace Crails
     void on_parsed(bool parsed);
     void on_handled(bool handled);
     void on_finished();
+
+    void add_reference();
+    void remove_reference();
+
+  private:
+    unsigned short             reference_count;
   };
 }
 
