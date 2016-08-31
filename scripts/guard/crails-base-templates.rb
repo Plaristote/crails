@@ -14,6 +14,11 @@ end
 
 module ::Guard
   class CrailsTemplatePlugin < CrailsPlugin
+    def initialize arg
+      @file_matcher = arg[:matcher]
+      super
+    end
+
     def run_all
       run_on_modifications watched_files
     end

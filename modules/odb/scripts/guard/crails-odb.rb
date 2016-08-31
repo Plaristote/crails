@@ -6,6 +6,8 @@ module ::Guard
     def initialize options = {}
       super
       @input_name       = "application"
+      @file_matcher     = options[:matcher]
+      @base_path        = options[:input] || "app/models/" 
       @at_once          = options[:at_once]
       @embed_schema     = options[:embed_schema]
       @output_dir       = options[:output] || "lib/odb"
