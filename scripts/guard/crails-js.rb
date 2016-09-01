@@ -86,14 +86,16 @@ module ::Guard
           File.open(output_file, "w:#{@encoding}") do |f|
             js = text.force_encoding(@encoding)
             if must_uglify
-              original_file = output_file + '.original'
+              original_file = output_file + '.original.js'
               File.open(original_file, "w:#{@encoding}") {|f| f.write js}
-              map_file      = output_file + '.map'
-              map_options   = @uglifier_options.dup
-              map_options[:source_url]      = original_file.gsub /^\/*public/, ''
-              map_options[:source_map_url]  = map_file.gsub /^\/*public/, ''
-              js, map = Uglifier.new(map_options).compile_with_map(js)
-              File.open(map_file, "w:#{@encoding}") {|f| f.write map }
+              map_file       = output_file + '.map'
+              map_options    = @uglifier_options.dup
+              source_url     = original_file.gsub /^\/*public/, ''
+              source_map_url = map_file.gsub /^\/*public/, ''
+              js, map   = Uglifier.new(map_options).compile_with_map(js)
+              map_hints = "//# sourceMappingURL=#{source_map_url}\n//# sourceURL=#{source_url}\n"
+	      js        = map_hints + js
+	      File.open(map_file, "w:#{@encoding}") {|f| f.write map }
             end
             f.write js
           end
