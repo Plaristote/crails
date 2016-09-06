@@ -11,7 +11,11 @@ begin
   ARGV.each do |arg|
     guards = Guard.state.session.plugins.all.select {|g| g.group.name == arg.to_sym}
     puts "Found #{guards.count} plugins"
-    guards.each(&:run_all)
+    guards.each do |item|
+      item.start if item.methods.include? :start
+      item.run_all
+      item.stop  if item.methods.include? :stop
+    end
   end
 rescue Exception => e
   puts "crails/compile: caught exception: #{e.message}"
