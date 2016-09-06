@@ -117,6 +117,7 @@ module ::Guard
           console: "Catched exception: #{e.message}\n!! crailsjs couldn't perform its duties",
           html: "<h4>crails-js failure</h4><div>Catched exception: #{e.message}"
         }
+        set_exit_success -2
         Crails::Notifier.notify 'crails-js', message, :failure
       end
     end
