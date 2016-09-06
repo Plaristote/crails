@@ -45,3 +45,4 @@ unless command == 'new'
 end
 
 system "ruby #{source}/scripts/#{command}.rb #{command_args}"
+exit $?.exitstatus

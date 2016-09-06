@@ -2,7 +2,7 @@ require 'guard/crails-base'
 require 'guard/crails-notifier'
 
 module ::Guard
-  class CrailsTests < Plugin
+  class CrailsTests < CrailsPlugin
     def run_all
       run_tests
     end
@@ -18,13 +18,15 @@ module ::Guard
         rescue Errno::EIO
         end
         Process.wait(pid)
+	set_exit_success $?.exitstatus
       end
       last_line.uncolorize
     end
 
     def run_tests
        starts_at = Time.now.to_f
-       last_line = run_command 'build/tests'
+       command   = find_test_binary
+       last_line = run_command command
        ends_at   = Time.now.to_f
        html  = "<h4>crails-tests #{$?.success? ? 'passed' : 'failed'}</h4>"
        last_line.uncolorize
@@ -34,6 +36,13 @@ module ::Guard
        else
          Crails::Notifier.notify 'crails-tests failed', { html: html }, :failure
        end
+    end
+
+    def find_test_binary
+      [ 'build/tests', 'bin/tests' ].each do |candidate|
+        return candidate if File.exists? candidate
+      end
+      throw "cannot find binary for crails-tests"
     end
   end
 end
