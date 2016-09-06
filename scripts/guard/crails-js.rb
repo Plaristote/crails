@@ -71,6 +71,11 @@ module ::Guard
       super options
     end
 
+    def js_header
+      value = if developer_mode? then 'production' else 'development' end
+      "var crailsEnv = '#{value}';"    
+    end
+
     def run_all
       begin
         @file_cache ||= {}
@@ -85,6 +90,7 @@ module ::Guard
           must_uglify = @force_uglify == true || (not developer_mode?)
           File.open(output_file, "w:#{@encoding}") do |f|
             js = text.force_encoding(@encoding)
+	    js = js_header + "\n" + js
             if must_uglify
               original_file = output_file + '.original.js'
               File.open(original_file, "w:#{@encoding}") {|f| f.write js}
