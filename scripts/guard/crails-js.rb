@@ -72,7 +72,7 @@ module ::Guard
     end
 
     def js_header
-      value = if developer_mode? then 'production' else 'development' end
+      value = if developer_mode? then 'development' else 'production' end
       "var crailsEnv = '#{value}';"    
     end
 
@@ -98,9 +98,9 @@ module ::Guard
               map_options    = @uglifier_options.dup
               source_url     = original_file.gsub /^\/*public/, ''
               source_map_url = map_file.gsub /^\/*public/, ''
+	      map_options[:source_filename] = source_url
+	      map_options[:source_map_url]  = source_map_url
               js, map   = Uglifier.new(map_options).compile_with_map(js)
-              map_hints = "//# sourceMappingURL=#{source_map_url}\n//# sourceURL=#{source_url}\n"
-	      js        = map_hints + js
 	      File.open(map_file, "w:#{@encoding}") {|f| f.write map }
             end
             f.write js
