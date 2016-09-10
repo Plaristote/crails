@@ -23,6 +23,9 @@ namespace Crails
     void set_cache_enabled(bool enable) { cache_enabled = enable; }
     bool is_cache_enabled(void) const   { return cache_enabled;   }
 
+  protected:
+    virtual void set_headers_for_file(BuildingResponse& response, const std::string& fullpath) {}
+
   private:
     bool send_file(const std::string& path, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit = 0);
 
