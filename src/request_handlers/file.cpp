@@ -3,6 +3,7 @@
 #include "crails/params.hpp"
 #include "crails/logger.hpp"
 #include <boost/filesystem.hpp>
+#include <time.h>
 
 using namespace std;
 using namespace Crails;
@@ -29,7 +30,14 @@ void FileRequestHandler::operator()(const HttpServer::request& request, Building
     {
       if (boost::filesystem::is_directory(fullpath))
         fullpath += "/index.html";
-      if (send_file(fullpath, response, Server::HttpCodes::ok))
+      if (params["headers"]["If-Modified-Since"].exists() &&
+          if_not_modified(params, response, fullpath))
+      {
+        params["response-data"]["code"] = (int)Server::HttpCodes::not_modified;
+        callback(true);
+	return ;
+      }
+      else if (send_file(fullpath, response, Server::HttpCodes::ok))
       {
         params["response-data"]["code"] = (int)Server::HttpCodes::ok;
         callback(true);
@@ -38,6 +46,30 @@ void FileRequestHandler::operator()(const HttpServer::request& request, Building
     }
   }
   callback(false);
+}
+
+static std::time_t http_date_to_timestamp(const std::string& str)
+{
+  static const char format[] = "%a, %d %b %Y %H:%M:%S %Z"; // rfc 1123
+  struct tm tm;
+  bzero(&tm, sizeof(tm));
+  if (strptime(str.c_str(), format, &tm))
+    return mktime(&tm);
+  return 0;
+}
+
+bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& response, const string& fullpath)
+{
+  const string str_time = params["headers"]["If-Modified-Since"].as<string>();
+  time_t condition_time = http_date_to_timestamp(str_time);
+  time_t modified_time  = boost::filesystem::last_write_time(fullpath);
+
+  if (modified_time <= condition_time)
+  {
+    response.set_status_code(Server::HttpCodes::not_modified);
+    return true;
+  }
+  return false;
 }
 
 bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit)

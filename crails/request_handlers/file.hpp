@@ -28,6 +28,7 @@ namespace Crails
 
   private:
     bool send_file(const std::string& path, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit = 0);
+    bool if_not_modified(Params&, BuildingResponse&, const std::string& path);
 
     bool      cache_enabled;
     FileCache file_cache;
