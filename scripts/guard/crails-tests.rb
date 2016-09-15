@@ -39,7 +39,7 @@ module ::Guard
     end
 
     def find_test_binary
-      [ 'build/tests', 'bin/tests' ].each do |candidate|
+      [ "#{build_path}/tests", 'bin/tests' ].each do |candidate|
         return candidate if File.exists? candidate
       end
       throw "cannot find binary for crails-tests"

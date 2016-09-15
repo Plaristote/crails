@@ -65,8 +65,9 @@ module ::Guard
     end
 
     def run_cmake
-      Dir.chdir 'build' do
-        run_command 'cmake ..'
+      cmakelists_path = Dir.pwd
+      Dir.chdir build_path do
+        run_command "cmake #{cmakelists_path}"
       end
       $?.success?
     end
@@ -86,8 +87,16 @@ module ::Guard
       (get_cmake_variable 'DEVELOPER_MODE:BOOL') == "ON"
     end
 
+    def build_path
+      if ENV['CRAILS_BUILD_PATH'].nil?
+        'build'
+      else
+        ENV['CRAILS_BUILD_PATH']
+      end
+    end
+
     def cmakecache_path
-      "build/CMakeCache.txt"
+      build_path + "/CMakeCache.txt"
     end
   end
 end

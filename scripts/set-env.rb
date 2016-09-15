@@ -14,7 +14,9 @@ else
   exit 1
 end
 
-cmakecache = 'build/CMakeCache.txt'
+build_path = if ENV['CRAILS_BUILD_PATH'].nil? then 'build' else ENV['CRAILS_BUILD_PATH'] end
+
+cmakecache = build_path + '/CMakeCache.txt'
 
 vars.each do |key,value|
   `sed -e s/#{key}=.*/#{key}=#{value}/ '#{cmakecache}' > .crails-set-env.tmp`
