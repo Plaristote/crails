@@ -11,7 +11,7 @@ namespace Crails
   public:
     void load(Data) {}
     void finalize(BuildingResponse&) {}
-    void Data to_data(void) { return stub.to_data(); }
+    Data to_data(void) { return stub.to_data(); }
   private:
     DataTree stub;
   };
