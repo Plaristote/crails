@@ -1,5 +1,6 @@
 require 'guard/crails-base'
 require 'json'
+require 'fileutils'
 
 module ::Guard
   class CrailsOdb < CrailsPlugin
@@ -11,6 +12,7 @@ module ::Guard
       @at_once          = options[:at_once]
       @embed_schema     = options[:embed_schema]
       @output_dir       = options[:output] || "lib/odb"
+      @temporary_output = options[:temporary_output] || "./.tmp/odb"
       @include_prefix   = options[:include_prefix] || "app/models"
       @table_prefix     = options[:table_prefix]
       @cpp_version      = options[:std] || "c++11"
@@ -27,24 +29,30 @@ module ::Guard
 
     def run_all
       if run_cmake
-        remove_generated_files
         run_on_modifications watched_files
       end
     end
 
     def run_on_modifications(paths)
-      files = fetch_odb_files_in paths
-      files = watched_files if @at_once == true
-      if files.count > 0
-        compile_models files
-        fix_ixx_includes
-        generate_schema
-      else
-        puts "[crails-odb] Nothing to compile"
+      with_tmp_dir do
+        files = fetch_odb_files_in paths
+        files = watched_files if @at_once == true
+        if files.count > 0
+          compile_models files
+          generate_schema
+        else
+          puts "[crails-odb] Nothing to compile"
+        end
       end
     end
 
   private
+    def with_tmp_dir &block
+      `mkdir -p '#{@temporary_output}'`
+      block.call
+      `rm -Rf '#{@temporary_output}'`
+    end
+
     def get_active_backends
       backends        = [:pgsql, :mysql, :oracle, :sqlite]
       active_backends = []
@@ -53,14 +61,6 @@ module ::Guard
         active_backends << backend if value == "ON"
       end
       active_backends
-    end
-
-    def remove_generated_files
-      generated_files  = Dir["lib/odb/**/*"]
-      generated_files += Dir["tasks/odb_migrate/*.cxx"]
-      generated_files.each do |filename|
-        File.delete filename
-      end
     end
 
     def fetch_odb_files_in paths
@@ -88,7 +88,7 @@ module ::Guard
 
     # TODO find how the ODB compiler can do this part for us
     def fix_ixx_includes
-     Dir["lib/odb/*"].each do |file_name|
+     Dir["#{@temporary_output}/*"].each do |file_name|
        text = File.read(file_name)
        new_contents = text.gsub /#include\s+["<][^">]*(hxx|ixx)[">]/ do |str|
          unless str.index(@include_prefix).nil?
@@ -103,11 +103,6 @@ module ::Guard
 
        File.open(file_name, "w") {|file| file.puts new_contents }
       end
-    end
-
-    def odb_options_schema
-      schema_path = if @embed_schema then "lib/odb" else "tasks/odb_migrate" end
-      odb_options(schema_path, nil) + " --generate-schema-only --at-once --input-name #{@input_name} "
     end
 
     def odb_options output_dir, prefix_path
@@ -148,20 +143,40 @@ module ::Guard
       end
 
       paths_by_prefix.each do |key,value|
-        cmd = "odb #{odb_options @output_dir, key} #{value.join ' '}"
+        cmd = "odb #{odb_options @temporary_output, key} #{value.join ' '}"
         puts "+ #{cmd}"
         `#{cmd}`
       end
+
+      fix_ixx_includes
+      apply_new_version @output_dir
     end
 
     def generate_schema
-      Dir["{tasks/odb_migrate,lib/odb}/#{@input_name}-schema*.cxx"].each do |schema_file|
-        File.delete schema_file
-      end
       paths = fetch_odb_files_in watched_files
+
+      schema_path = if @embed_schema then "lib/odb" else "tasks/odb_migrate" end
+      odb_options_schema = odb_options(@temporary_output, nil) + " --generate-schema-only --at-once --input-name #{@input_name} "
+
       cmd   = "odb #{odb_options_schema} #{paths.join ' '}"
       puts "+ #{cmd}"
       `#{cmd}`
+      apply_new_version schema_path
+    end
+
+    def apply_new_version target_dir
+      Dir["#{@temporary_output}/*"].each do |generated_file|
+        filename = generated_file.split('/').last
+        last_generated_file = "#{target_dir}/#{filename}"
+        if File.exists? last_generated_file
+          if File.read(generated_file) == File.read(last_generated_file)
+            FileUtils.rm generated_file
+            next
+          end
+        end
+        FileUtils.mv generated_file, last_generated_file
+        puts "[crailsodb] updated #{last_generated_file}"
+      end
     end
   end
 end
