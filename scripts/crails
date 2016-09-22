@@ -44,5 +44,37 @@ unless command == 'new'
   end
 end
 
-system "ruby #{source}/scripts/#{command}.rb #{command_args}"
-exit $?.exitstatus
+##
+## Run the command with the proper bundling environment
+##
+commands_without_bundler = ['new']
+
+def run_command cmd
+  system cmd
+  $?.exitstatus
+end
+
+def run_using_bundler cmd
+  bundler_gemspec = Gem::Specification::find_all_by_name('bundler')
+  unless bundler_gemspec.any?
+    puts "/!\\ Bundler gem not found. Please install it with `gem install bundler`."
+    exit 2
+  end
+  bundler_gem = bundler_gemspec.first
+  bundler_bin = "#{bundler_gem.bin_dir}/#{bundler_gem.executables.first}"
+
+  puts "[crails] Using ruby bundler #{bundler_bin}"
+
+  cmd = "#{bundler_bin} exec #{cmd}"
+
+  `#{bundler_bin} check`
+  cmd = "#{bundler_bin} && #{cmd}" unless $?.success?
+  run_command cmd
+end
+
+cmd = "ruby #{source}/scripts/#{command}.rb #{command_args}"
+if commands_without_bundler.include? command
+  exit run_command cmd
+else
+  exit run_using_bundler cmd
+end

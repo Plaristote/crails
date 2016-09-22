@@ -5,13 +5,17 @@ require 'guard/crails-base'
 
 Guard.setup
 
-puts "Running guard groups #{ARGV.join ', '}"
+groups = ARGV
+groups = ['compile'] if ARGV.length == 0
+
+puts "[guard] Running guard tasks: #{groups.join ', '}"
 
 begin
-  ARGV.each do |arg|
-    guards = Guard.state.session.plugins.all.select {|g| g.group.name == arg.to_sym}
-    puts "Found #{guards.count} plugins"
+  groups.each do |arg|
+    guards = Guard.state.session.plugins.all.select {|g| g.group.name == arg.to_sym || g.name == arg || g.name == arg.to_sym}
+    puts "[guard] Found #{guards.count} plugins"
     guards.each do |item|
+      puts "[guard] Running plugin #{item.name}"
       item.start if item.methods.include? :start
       item.run_all
       item.stop  if item.methods.include? :stop
