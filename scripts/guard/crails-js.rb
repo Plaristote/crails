@@ -96,8 +96,8 @@ module ::Guard
               File.open(original_file, "w:#{@encoding}") {|f| f.write js}
               map_file       = output_file + '.map'
               map_options    = @uglifier_options.dup
-              source_url     = original_file.gsub /^\/*public/, ''
-              source_map_url = map_file.gsub /^\/*public/, ''
+	      source_url     = original_file.gsub /.*\/public/, ''
+	      source_map_url = map_file.gsub /.*\/public/, ''
 	      map_options[:source_filename] = source_url
 	      map_options[:source_map_url]  = source_map_url
               js, map   = Uglifier.new(map_options).compile_with_map(js)
