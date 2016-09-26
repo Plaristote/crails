@@ -56,13 +56,13 @@ void ProgramOptions::initialize_thread_pool(HttpServer::options& options) const
 
   logger << ">> Pool Thread Size: " << threads << Logger::endl;
   options.thread_pool(
-    make_shared<boost::network::utils::thread_pool>(threads)
+    std::make_shared<boost::network::utils::thread_pool>(threads)
   );
 }
 
 void ProgramOptions::initialize_ssl_context(HttpServer::options& options) const
 {
-  auto ctx = make_shared<asio::ssl::context>(asio::ssl::context::sslv23);
+  auto ctx = std::make_shared<asio::ssl::context>(asio::ssl::context::sslv23);
   std::string certificate_chain_file = get_value("ssl-cert", std::string("server.pem"));
   std::string private_key_file       = get_value("ssl-key",  std::string("server.pem"));
 
