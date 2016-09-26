@@ -1,4 +1,5 @@
 require 'pty'
+require 'fileutils'
 
 module ::Guard
   class CrailsPlugin < Plugin
@@ -66,6 +67,7 @@ module ::Guard
 
     def run_cmake
       cmakelists_path = Dir.pwd
+      FileUtils.mkdir_p build_path
       Dir.chdir build_path do
         run_command "cmake #{cmakelists_path}"
       end
