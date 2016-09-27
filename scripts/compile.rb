@@ -12,7 +12,10 @@ puts "[guard] Running guard tasks: #{groups.join ', '}"
 
 begin
   groups.each do |arg|
-    guards = Guard.state.session.plugins.all.select {|g| g.group.name == arg.to_sym || g.name == arg || g.name == arg.to_sym}
+    guards = Guard.state.session.plugins.all.select do |g|
+      (not g.group.nil? and g.group.name.to_sym == arg.to_sym) ||
+      g.name.to_sym == arg.to_sym
+    end
     puts "[guard] Found #{guards.count} plugins"
     guards.each do |item|
       puts "[guard] Running plugin #{item.name}"
