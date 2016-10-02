@@ -59,14 +59,28 @@ namespace ODB
            v <= cv ;
            v = odb::schema_catalog::next_version(database, v))
       {
-        odb::transaction t(database.begin());
-  
-        logger << ":: Running migration to version " << v << '\n';
-        odb::schema_catalog::migrate_schema_pre(database, v);
-        if (callback && !(callback(self, v)))
-          throw boost_ext::runtime_error("database migration failed");
-        odb::schema_catalog::migrate_schema_post(database, v);
-        t.commit();
+        {
+          odb::transaction t(database.begin());
+
+          logger << ":: Running migration to version " << v << '\n';
+          odb::schema_catalog::migrate_schema_pre(database, v);
+          t.commit();
+        }
+
+        {
+          odb::transaction t(database.begin());
+
+          if (callback && !(callback(self, v)))
+            throw boost_ext::runtime_error("database migration failed");
+          t.commit();
+        }
+
+        {
+          odb::transaction t(database.begin());
+
+          odb::schema_catalog::migrate_schema_post(database, v);
+          t.commit();
+        }
       }
     }
     else
