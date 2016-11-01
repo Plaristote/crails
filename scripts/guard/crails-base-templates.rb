@@ -51,7 +51,6 @@ module ::Guard
       view_name     = (filename.scan /(app\/views\/)?(.*)([.][a-z0-9]+)?[.]#{@extension}$/).flatten[1]
       class_name    = (view_name.split /_|-|\b|\//).map {|w| w.strip.capitalize }.join
       class_name    = class_name.gsub /[.\/]/, ''
-      class_name   += @extension.capitalize
       function_name = "render_#{class_name.underscore}_#{@template_type}"
       [view_name, class_name, function_name]
     end

@@ -2,48 +2,25 @@
 # define ROUTER_HPP
 
 # include <exception>
-# include <functional>
-# include <vector>
-# include <string>
 # include <iostream>
 
 # include <crails/utils/singleton.hpp>
-# include <regex>
 
 # include "datatree.hpp"
 # include "server.hpp"
 # include "params.hpp"
+# include "router_base.hpp"
 
 namespace Crails
 {
-  class Router
+  class Router : public RouterBase<Crails::Params, std::function<void (Crails::Params&,std::function<void(DataTree)>)> >
   {
     Router() {}
     ~Router() {}
 
     SINGLETON(Router)
   public:
-    typedef std::function<void (Params&,std::function<void(DataTree)>)> Action;
-
-    struct Item
-    {
-      Action                   run;
-      std::string              method;
-      std::regex               regexp;
-      std::vector<std::string> param_names;
-    };
-
-    typedef std::vector<Item> Items;
-
     void          initialize(void);
-    const Action* get_action(const std::string& method, const std::string& uri, Params&) const;
-
-  private:
-    void      item_initialize_regex(Item& item, const std::string& route);
-    void      match(const std::string& route, Action callback);
-    void      match(const std::string& method, const std::string& route, Action callback);
-
-    Items routes;
   };
 }
 
