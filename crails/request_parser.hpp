@@ -2,7 +2,7 @@
 # define REQUEST_PARSER_HPP
 
 # include "http_server.hpp"
-# include <crails/utils/regex.hpp>
+# include <regex>
 # include <functional>
 # include "multipart.hpp"
 
@@ -25,7 +25,7 @@ namespace Crails
     
     virtual void operator()(const HttpServer::request&, BuildingResponse&, Params&, std::function<void(Status)>) = 0;
   protected:
-    bool content_type_matches(Params&, const Regex);
+    bool content_type_matches(Params&, const std::regex);
   };
 
   class BodyParser : public RequestParser

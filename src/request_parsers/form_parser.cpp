@@ -8,7 +8,7 @@ using namespace Crails;
 
 void RequestFormParser::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback)
 {
-  static const Regex is_form("application/x-www-form-urlencoded", REG_EXTENDED);
+  static const regex is_form("application/x-www-form-urlencoded", regex_constants::extended);
 
   if (params["method"].as<string>() != "GET" && content_type_matches(params, is_form))
   {

@@ -1,5 +1,5 @@
 #include <vector>
-#include "crails/utils/regex.hpp"
+#include <regex>
 #include "crails/http.hpp"
 #include "crails/datatree.hpp"
 
@@ -41,21 +41,22 @@ void cgi2params(Data params, const std::string& encoded_str)
 
   while (str.size())
   {
-    Regex      regex;
-    regmatch_t match;
-
     if (str == looping)
       return ;
+    regex regexp("[^=&]*", regex_constants::ECMAScript);
+    auto  matches = sregex_iterator(str.begin(), str.end(), regexp);
+
     looping = str;
-    regex.SetPattern("[^=&]*", REG_EXTENDED);
-    if (!(regex.Match(str, &match, 1)))
+    if (distance(matches, sregex_iterator()) > 0)
     {
       auto sub_key = str.find(opening_bracket);
+      smatch match = *matches;
+      auto   eo    = match.length(0);
 
-      if (sub_key != std::string::npos && (int)sub_key < match.rm_eo)
-        match.rm_eo = sub_key;
-      key_stacks.push_back(str.substr(match.rm_so, match.rm_eo));
-      str.erase(match.rm_so, match.rm_eo);
+      if (sub_key != std::string::npos && (int)sub_key < match.position(0) + eo)
+        eo = sub_key - match.position(0);
+      key_stacks.push_back(str.substr(match.position(0), eo));
+      str.erase(match.position(0), eo);
 
       while (str.find(opening_bracket) == 0)
       {
@@ -72,11 +73,13 @@ void cgi2params(Data params, const std::string& encoded_str)
       if (str[0] == '=')
       {
         str.erase(0, 1);
-        if (!(regex.Match(str, &match, 1)))
+        matches = sregex_iterator(str.begin(), str.end(), regexp);
+        if (distance(matches, sregex_iterator()) > 0)
         {
-          recursively_set_value(params, key_stacks, str.substr(match.rm_so, match.rm_eo));
+          match = *matches;
+          recursively_set_value(params, key_stacks, str.substr(match.position(0), match.length(0)));
           key_stacks.clear();
-          str.erase(match.rm_so, match.rm_eo);
+          str.erase(match.position(0), match.length(0));
         }
       }
       if (str[0] == '&')

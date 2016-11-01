@@ -8,7 +8,7 @@
 # include <iostream>
 
 # include <crails/utils/singleton.hpp>
-# include <crails/utils/regex.hpp>
+# include <regex>
 
 # include "datatree.hpp"
 # include "server.hpp"
@@ -29,7 +29,7 @@ namespace Crails
     {
       Action                   run;
       std::string              method;
-      Regex                    regex;
+      std::regex               regexp;
       std::vector<std::string> param_names;
     };
 
@@ -39,7 +39,7 @@ namespace Crails
     const Action* get_action(const std::string& method, const std::string& uri, Params&) const;
 
   private:
-    void      item_initialize_regex(Item& item, std::string route);
+    void      item_initialize_regex(Item& item, const std::string& route);
     void      match(const std::string& route, Action callback);
     void      match(const std::string& method, const std::string& route, Action callback);
 

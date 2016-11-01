@@ -1,4 +1,4 @@
-#include <crails/utils/regex.hpp>
+#include <regex>
 #include <string>
 
 using namespace std;
@@ -7,11 +7,11 @@ struct ExtensionMatch
 {
   ExtensionMatch(std::string extension, std::string mime) : pattern(extension), mime(mime)
   {
-    regex.SetPattern(extension + "$", REG_ICASE | REG_EXTENDED);
+    regexp = std::regex(extension + "$", std::regex_constants::ECMAScript | std::regex_constants::icase);
   }
 
   std::string pattern;
-  Regex       regex;
+  regex       regexp;
   std::string mime;
 };
 
@@ -29,8 +29,7 @@ std::string get_mimetype(const std::string& filename)
 
   for (unsigned short i = 0 ; i < 7 ; ++i)
   {
-    //if (('.' + extensions[i].pattern) == filename)
-    if (!(extensions[i].regex.Match(filename)))
+    if (regex_search(filename, extensions[i].regexp))
       return (extensions[i].mime);
   }
   return ("application/octet-stream");

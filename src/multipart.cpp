@@ -1,5 +1,4 @@
 #include "crails/server.hpp"
-#include "crails/utils/regex.hpp"
 #include "crails/utils/string.hpp"
 #include "crails/cookie_data.hpp"
 #include "crails/params.hpp"
@@ -7,6 +6,7 @@
 #include "crails/multipart.hpp"
 #include "crails/utils/parse_cookie_values.hpp"
 #include <fstream>
+#include <regex>
 
 using namespace std;
 using namespace Crails;
@@ -20,14 +20,15 @@ void MultipartParser::parse(Params& params)
     blocked = true;
     if (parsed_state == 0)
     {
-      const Regex reg_header(boundary + "\r\nContent-Disposition: ([^;]+);", REG_EXTENDED);
-      regmatch_t         matches[2];
+      regex reg_header(boundary + "\r\nContent-Disposition: ([^;]+);", regex_constants::ECMAScript);
+      auto  matches = sregex_iterator(read_buffer.begin(), read_buffer.end(), reg_header);
 
-      if (!(reg_header.Match(read_buffer, matches, 2)))
+      if (distance(matches, sregex_iterator()) > 0)
       {
-        unsigned int disp_so  = matches[1].rm_so;
-        unsigned int disp_len = matches[1].rm_eo - disp_so;
-        unsigned int form_end = matches[0].rm_eo;
+        smatch       match    = *matches;
+        unsigned int disp_so  = match.position(1);
+        unsigned int disp_len = match.length(1);
+        unsigned int form_end = match.length(0);
 
         content_disposition = read_buffer.substr(disp_so, disp_len);
         read_buffer.erase(0, form_end);
@@ -36,14 +37,15 @@ void MultipartParser::parse(Params& params)
     }
     if (parsed_state == 1)
     {
-      const Regex reg("([^\r]+)\r\n", REG_EXTENDED);
-      regmatch_t          matches[2];
+      regex reg("([^\r]+)\r\n", regex_constants::ECMAScript);
+      auto matches = sregex_iterator(read_buffer.begin(),  read_buffer.end(), reg);
 
-      if (!(reg.Match(read_buffer, matches, 2)))
+      if (distance(matches, sregex_iterator()) > 0)
       {
-        unsigned int form_so  = matches[1].rm_so;
-        unsigned int form_len = matches[1].rm_eo - form_so;
-        unsigned int form_end = matches[0].rm_eo;
+        smatch       match    = *matches;
+        unsigned int form_so  = match.position(1);
+        unsigned int form_len = match.length(1);
+        unsigned int form_end = match.length(0);
 
         parse_cookie_values(read_buffer.substr(form_so, form_len), [this](const string& key, const string& val) -> bool
         {
@@ -140,13 +142,13 @@ void MultipartParser::parse(Params& params)
 
 void MultipartParser::initialize(Params& params)
 {
-  string             type     = params["headers"]["Content-Type"].as<std::string>();
-  Regex              get_boundary("boundary=(.*)", REG_EXTENDED);
-  regmatch_t         matches[2];
+  string     type     = params["headers"]["Content-Type"].as<std::string>();
+  regex      get_boundary("boundary=(.*)", regex_constants::ECMAScript);
+  auto       matches  = sregex_iterator(type.begin(), type.end(), get_boundary);
+  smatch     match    = *matches;
 
-  get_boundary.Match(type, matches, 2);
   to_read      = params["headers"]["Content-Length"];
   total_read   = 0;
-  boundary     = type.substr(matches[1].rm_so, matches[1].rm_eo - matches[1].rm_so);
+  boundary     = type.substr(match.position(1), match.length(1));
   parsed_state = 0;
 }

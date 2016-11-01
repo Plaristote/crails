@@ -10,17 +10,17 @@ const Router::Action* Router::get_action(const string& method, const string& uri
 {
   for (const Item& item : routes)
   {
-    unsigned short           n_params = item.param_names.size();
-    unique_ptr<regmatch_t[]> params(new regmatch_t[n_params + 1]);
+    auto matches = sregex_iterator(uri.begin(), uri.end(), item.regexp);
 
     if ((item.method == "" || item.method == method) &&
-        !(item.regex.Match(uri, params.get(), n_params + 1)))
+         distance(matches, sregex_iterator()) > 0)
     {
-      for (unsigned short i = 1 ; i <= n_params ; ++i)
+      smatch match = *matches;
+
+      for (size_t i = 1 ; i < match.size() ; ++i)
       {
-        regmatch_t  match       = params.get()[i];
-        std::string param_name  = item.param_names[i -1];
-        std::string param_value = uri.substr(match.rm_so, match.rm_eo - match.rm_so);
+        std::string param_name  = item.param_names[i - 1];
+        std::string param_value = uri.substr(match.position(i), match.length(i));
 
         query_params[param_name] = param_value;
       }
@@ -49,23 +49,22 @@ void Router::match(const std::string& method, const std::string& route, Router::
   routes.push_back(item);
 }
 
-void Router::item_initialize_regex(Item& item, std::string route)
+void Router::item_initialize_regex(Item& item, const std::string& route)
 {
-  Regex       find_params;
+  regex find_params(":[a-zA-Z0-9_-]*", regex_constants::ECMAScript);
+  string regexified_route;
+  auto matches = sregex_iterator(route.begin(), route.end(), find_params);
+  size_t last_position = 0;
 
-  find_params.SetPattern(":[a-zA-Z0-9_-]*");
+  for (auto it = matches ; it != sregex_iterator() ; ++it)
   {
-    std::string regexified_route;
-    regmatch_t  match;
+    smatch match = *it;
 
-    while (!(find_params.Match(route, &match, 1)))
-    {
-      regexified_route += route.substr(0, match.rm_so);
-      regexified_route += "([a-zA-Z0-9_-]*)";
-      item.param_names.push_back(route.substr(match.rm_so + 1, match.rm_eo - match.rm_so - 1));
-      route             = route.substr(match.rm_eo);
-    }
-    regexified_route += route;
-    item.regex.SetPattern(regexified_route, REG_EXTENDED);
+    regexified_route += route.substr(last_position, match.position(0));
+    regexified_route += "([a-zA-Z0-9_-]*)";
+    item.param_names.push_back(route.substr(match.position(0) + 1, match.length(0) - 1));
+    last_position = match.position(0) + match.length(0);
   }
+  regexified_route += route.substr(last_position);
+  item.regexp = regex(regexified_route, regex_constants::ECMAScript);
 }
