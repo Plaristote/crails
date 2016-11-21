@@ -19,6 +19,7 @@ namespace Crails
   protected:
     Smtp::Mail   mail;
     SharedVars   vars;
+    DataTree     params, response;
 
   private:
     Controller*   controller;

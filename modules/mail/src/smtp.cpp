@@ -40,7 +40,7 @@ void        Smtp::Mail::del_recipient(const std::string& address)
 using namespace boost::asio::ip;
 
 Smtp::Server::Server() :
-  ssl_context(io_service, boost::asio::ssl::context::sslv23),
+  ssl_context(io_service, boost::asio::ssl::context::tlsv12),
   ssl_sock(io_service, ssl_context),
   sock(ssl_sock.next_layer()),
   tls_enabled(false)
@@ -62,8 +62,6 @@ void Smtp::Server::connect(const std::string& hostname, unsigned short port)
   }
   if (error)
     throw boost_ext::runtime_error("Cannot connect to " + hostname);
-  if (tls_enabled)
-    ssl_sock.handshake(SslSocket::client, error);
   smtp_handshake();
 }
 
@@ -102,7 +100,7 @@ std::string Smtp::Server::smtp_read_answer(unsigned short expected_return)
     if (tls_enabled)
       bytes_received = ssl_sock.read_some(boost::asio::buffer(buffer));
     else
-      bytes_received = sock.receive(boost::asio::buffer(buffer));
+    bytes_received = sock.receive(boost::asio::buffer(buffer));
 
     if (bytes_received == 0)
       throw boost_ext::runtime_error("The server closed the connection");
@@ -123,12 +121,13 @@ std::string Smtp::Server::smtp_read_answer(unsigned short expected_return)
 void Smtp::Server::smtp_write_message()
 {
   boost::system::error_code error;
-  auto                      buffer = boost::asio::buffer(server_message.str());
+  const string str    = server_message.str();
+  auto         buffer = boost::asio::buffer(str);
 
   if (tls_enabled)
-    boost::asio::write(ssl_sock, buffer, error);
+    ssl_sock.write_some(buffer, error);
   else
-    boost::asio::write(sock, buffer, error);
+    sock.write_some(buffer, error);
   server_message.str(std::string());
 }
 
@@ -216,8 +215,23 @@ void Smtp::Server::smtp_new_mail(const Smtp::Mail& mail)
 void Smtp::Server::smtp_handshake()
 {
   // Receiving the server identification
-  server_id = smtp_read_answer(220);
-  // Sending handshake
+  if (tls_enabled)
+  {
+    boost::system::error_code error;
+
+    tls_enabled = false;
+    server_id = smtp_read_answer(220);
+    server_message << "HELO " << sock.remote_endpoint().address().to_string() << "\r\n";
+    smtp_write_message();
+    smtp_read_answer(250);
+    server_message << "STARTTLS" << "\r\n";
+    smtp_write_message();
+    smtp_read_answer(220);
+    ssl_sock.handshake(SslSocket::client, error);
+    tls_enabled = true;
+  }
+  else
+    server_id = smtp_read_answer(220);
   server_message << "HELO " << sock.remote_endpoint().address().to_string() << "\r\n";
   smtp_write_message();
   smtp_read_answer(250);
@@ -253,7 +267,10 @@ void Smtp::Server::smtp_auth_plain(const std::string& user, const std::string& p
 {
   string auth_hash = base64_encode('\000' + user + '\000' + password);
 
-  server_message << "AUTH PLAIN " << auth_hash << "\r\n";
+  server_message << "AUTH PLAIN\r\n";
+  smtp_write_message();
+  smtp_read_answer(334);
+  server_message << auth_hash << "\r\n";
   smtp_write_message();
   smtp_read_answer(235);
 }
@@ -266,10 +283,10 @@ void Smtp::Server::smtp_auth_login(const std::string& user, const std::string& p
   server_message << "AUTH LOGIN\r\n";
   smtp_write_message();
   smtp_read_answer(334);
-  server_message << user_hash << "\r\n";
+  server_message << user_hash;
   smtp_write_message();
   smtp_read_answer(334);
-  server_message << pswd_hash << "\r\n";
+  server_message << pswd_hash;
   smtp_write_message();
   smtp_read_answer(235);
 }

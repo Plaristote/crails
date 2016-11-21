@@ -14,13 +14,13 @@ Mailer::Mailer(const std::string& configuration) : controller(0), configuration(
 
 void Mailer::render(const std::string& view)
 {
-  DataTree mail_params, mail_response;
   SharedVars& vars = controller ? controller->vars : this->vars;
 
-  mail_params["headers"]["Accept"] = "text/html text/plain";
-  Renderer::render(view, mail_params.as_data(), mail_response.as_data(), vars);
-  mail.set_content_type(mail_response["headers"]["Content-Type"].defaults_to<string>(""));
-  mail.set_body(mail_response["body"].as<string>());
+  if (!params["headers"]["Accept"].exists())
+    params["headers"]["Accept"] = "text/html text/plain";
+  Renderer::render(view, params.as_data(), response.as_data(), vars);
+  mail.set_content_type(response["headers"]["Content-Type"].defaults_to<string>(""));
+  mail.set_body(response["body"].as<string>());
 }
 
 void Mailer::send(void)
