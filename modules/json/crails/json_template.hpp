@@ -163,17 +163,9 @@ namespace Crails
     // END MAPS
     //
 
-    void partial(const std::string& view, SharedVars vars = {})
-    {
-      stream << Template::partial(view, vars);
-    }
-
-    void partial(const std::string& key, const std::string& view, SharedVars vars = {})
-    {
-      add_separator();
-      add_key(key);
-      partial(view, vars);
-    }
+    void partial(const std::string& view, SharedVars vars = {});
+    void partial(const std::string& key, const std::string& view, SharedVars vars = {});
+    void inline_partial(const std::string& view, SharedVars vars = {});
 
   protected:
     std::stringstream stream;

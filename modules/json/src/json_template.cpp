@@ -2,6 +2,29 @@
 
 using namespace Crails;
 
+void JsonTemplate::inline_partial(const std::string& view, SharedVars vars)
+{
+  std::string str = Template::partial(view, vars);
+
+  if (str.find('"') != std::string::npos)
+  {
+    stream << str.substr(1, str.size() - 2);
+    first_item_in_object = false;
+  }
+}
+
+void JsonTemplate::partial(const std::string& key, const std::string& view, SharedVars vars)
+{
+  add_separator();
+  add_key(key);
+  partial(view, vars);
+}
+
+void JsonTemplate::partial(const std::string& view, SharedVars vars)
+{
+  stream << Template::partial(view, vars);
+}
+
 void JsonTemplate::json_array(const std::string& key, Data value)
 {
   add_separator();
