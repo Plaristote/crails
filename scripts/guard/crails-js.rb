@@ -162,6 +162,27 @@ module ::Guard
       source
     end
 
+    def make_clean_required_path current_dir, required_path
+      required_path = clean_required_path options[:input] + '/' + current_dir + '/' + required_path
+      if required_path.start_with?(options[:input])
+        required_path = required_path[options[:input].size..required_path.size]
+      else
+       can_match = true
+        previous_parts = ""
+        result = ""
+        options[:input].split('/').each do |part|
+          if can_match && required_path.start_with?("#{previous_parts}#{part}")
+            previous_parts += "#{part}/"
+          else
+            can_match = false
+            result += "../"
+          end
+        end
+        required_path = '/' + result + required_path
+      end
+      required_path
+    end
+
     def linker source, current_dir, &block
       comment_character = '//'
       file_content      = ''
@@ -170,12 +191,13 @@ module ::Guard
         if matches.nil?
           block.call :line, line
         else
-          required_path = clean_required_path current_dir + '/' + matches[2].strip
+          required_path = make_clean_required_path current_dir, matches[2].strip
           if matches[1] == 'require_tree'
             path = "#{options[:input]}/#{required_path}/**/*"
+	    path = path.gsub /\/+/, '/'
             files = Dir.glob("#{path}.coffee") + Dir.glob("#{path}.js")
             files.each do |filepath|
-              filepath = clean_required_path filepath[options[:input].size..-1]
+              filepath = filepath[options[:input].size..-1]
               unless @included_files.include? filepath
                 block.call :include, filepath
               end
