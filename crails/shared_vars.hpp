@@ -10,6 +10,8 @@ namespace Crails
 {
   typedef std::map<std::string, boost::any> SharedVars;
 
+  void output_shared_vars(const SharedVars&);
+
   template<typename T>
   T cast(const SharedVars& vars, const std::string& name)
   {
@@ -23,7 +25,10 @@ namespace Crails
     }
     catch (std::out_of_range& e)
     {
-      throw boost_ext::out_of_range(e.what());
+      std::string message = "cannot find shared variable `" + name + '`';
+
+      output_shared_vars(vars);
+      throw boost_ext::out_of_range(message.c_str());
     }
     catch (boost::bad_any_cast& e)
     {
