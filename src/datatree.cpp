@@ -90,12 +90,30 @@ bool Data::require(const std::vector<std::string>& keys) const
   return find_missing_keys(keys).size() == 0;
 }
 
+bool Data::is_array() const
+{
+  for (const auto& value : get_ptree())
+  {
+    if (value.first != "")
+      return false;
+  }
+  return true;
+}
+
 void Data::merge(Data data)
 {
   boost::property_tree::ptree& local_tree = get_ptree();
 
-  for (auto value : data.get_ptree())
-    local_tree.put_child(value.first, value.second);
+  if (data.is_array())
+  {
+    for (auto value : data.get_ptree())
+      local_tree.push_back(std::make_pair("", value.second));
+  }
+  else
+  {
+    for (auto value : data.get_ptree())
+      local_tree.put_child(value.first, value.second);
+  }
 }
 
 void Data::merge(DataTree data_tree)

@@ -174,6 +174,7 @@ public:
 
   bool is_null() const;
   bool is_blank() const;
+  bool is_array() const;
   bool exists() const;
   void destroy();
 
