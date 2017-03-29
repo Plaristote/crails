@@ -49,6 +49,24 @@ void Data::each(std::function<void (Data)> functor)
   }
 }
 
+Data Data::at(unsigned int i) const
+{
+  if (count() <= i)
+    throw boost_ext::out_of_range("Data::operator[] out of range");
+  {
+    auto& tree = (path == "") ? *(this->tree) : this->tree->get_child(path);
+    auto  it   = tree.begin();
+
+    std::advance(it, i);
+    {
+      Data data(it->second, it->first);
+
+      data.overload_path("");
+      return data;
+    }
+  }
+}
+
 bool Data::exists() const
 {
   boost::optional< boost::property_tree::ptree& > child = tree->get_child_optional(path);

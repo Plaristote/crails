@@ -52,6 +52,8 @@ public:
   T operator[](const char* str) const { return operator[]<T>(std::string(str)); }
   Data operator[](const char* str) const { return operator[](std::string(str)); }
 
+  Data at(unsigned int i) const;
+
   std::vector<std::string> find_missing_keys(const std::vector<std::string>& keys) const;
   bool                     require(const std::vector<std::string>& keys) const;
 
