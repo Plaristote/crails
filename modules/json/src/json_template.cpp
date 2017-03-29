@@ -1,4 +1,5 @@
 #include "crails/json_template.hpp"
+#include <cmath>
 
 using namespace Crails;
 
@@ -105,6 +106,24 @@ namespace Crails
   void JsonTemplate::add_value<std::string>(const std::string val)
   {
     stream << '"' << javascript_escape(val) << '"';
+  }
+
+  template<>
+  void JsonTemplate::add_value<float>(float val)
+  {
+    if (std::isnan(val))
+      stream << "null";
+    else
+      stream << val;
+  }
+
+  template<>
+  void JsonTemplate::add_value<double>(double val)
+  {
+    if (std::isnan(val))
+      stream << "null";
+    else
+      stream << val;
   }
 
   template<>
