@@ -4,6 +4,9 @@
 # include "../router.hpp"
 # include "../params.hpp"
 
+# define EXPECT_STATUS(request, status) \
+  EXPECT(request.response["status"].as<short>(), ==, status)
+
 namespace Crails
 {
   namespace Tests

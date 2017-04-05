@@ -40,16 +40,30 @@ void Helper::run()
 
 void Helper::run_test(Group group, Test test)
 {
-  current_test_result = true;
-  if (before_all)
-    before_all();
-  if (group.before)
-    group.before();
-  test.callback();
-  if (group.after)
-    group.after();
-  if (after_all)
-    after_all();
+  try
+  {
+    current_test_result = true;
+    if (before_all)
+      before_all();
+    if (group.before)
+      group.before();
+    test.callback();
+  }
+  catch (...)
+  {
+    if (group.after)
+      group.after();
+    if (after_all)
+      after_all();
+    throw;
+  }
+
+  {
+    if (group.after)
+      group.after();
+    if (after_all)
+      after_all();
+  }
 }
 
 void Helper::run_protected_test(Group group, Test test)
