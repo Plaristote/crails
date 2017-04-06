@@ -38,7 +38,8 @@ public:
   {
     if (key.length() == 0)
       throw boost_ext::invalid_argument("Data::operator[] cannot take an empty string");
-    return tree->get<T>(path + '.' + key);
+    try { return tree->get<T>(path + '.' + key); }
+    catch (const std::exception& e) { throw boost_ext::runtime_error(e.what()); }
   }
 
   Data operator[](const std::string& key) const
@@ -66,13 +67,21 @@ public:
   }
 
   template<typename T>
-  T as() const { return tree->get<T>(path); }
+  T as() const
+  {
+    try { return tree->get<T>(path); }
+    catch (std::exception& e) { throw boost_ext::runtime_error(e.what()); }
+  }
 
   template<typename T>
   T defaults_to(const T def) const { return tree->get(path, def); }
 
   template<typename T>
-  operator T() const { return tree->get<T>(path); }
+  operator T() const
+  {
+    try { return tree->get<T>(path); }
+    catch (std::exception& e) { throw boost_ext::runtime_error(e.what()); }
+  }
 
   template<typename T>
   std::vector<T> to_vector() const
