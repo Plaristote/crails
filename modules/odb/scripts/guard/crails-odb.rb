@@ -155,7 +155,7 @@ module ::Guard
     def generate_schema
       paths = fetch_odb_files_in watched_files
 
-      schema_path = if @embed_schema then "lib/odb" else "tasks/odb_migrate" end
+      schema_path = if @embed_schema then @output_dir else "tasks/odb_migrate" end
       odb_options_schema = odb_options(@temporary_output, nil) + " --generate-schema-only --at-once --input-name #{@input_name} "
 
       cmd   = "odb #{odb_options_schema} #{paths.join ' '}"

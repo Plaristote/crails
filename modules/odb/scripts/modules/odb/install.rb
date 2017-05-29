@@ -27,7 +27,6 @@ project.base_directory source, base_directory do
 
   project.directory :lib do
     project.directory :odb do
-      project.file '.gitignore'
     end
   end
 end
