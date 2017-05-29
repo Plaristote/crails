@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 2.8)
 
 project(crails_project)
 
-option(USE_MEMCACHED   "Memcached"           ON)
-option(USE_MONGODB     "MongoDB"             ON)
-option(USE_ODB         "ODB ORM"             ON)
-option(DEVELOPER_MODE  "Developer mode"      ON)
+option(USE_MEMCACHED     "Memcached"             ON)
+option(USE_MONGODB       "MongoDB"               ON)
+option(USE_ODB           "ODB ORM"               ON)
+option(USE_COOKIE_CIPHER "Include cookie cipher" ON)
+option(USE_SSL           "Include ssl support"   ON)
+option(DEVELOPER_MODE    "Developer mode"        ON)
 
 cmake_policy(SET CMP0042 OLD)
 
@@ -22,6 +24,14 @@ if (DEVELOPER_MODE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSERVER_DEBUG")
 else()
   message("-- Building production server")
+endif()
+
+if (USE_COOKIE_CIPHER)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCRAILS_WITH_COOKIE_ENCRYPTION")
+endif()
+
+if (USE_SSL)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCRAILS_WITH_SSL -DBOOST_NETWORK_ENABLE_HTTPS")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC)

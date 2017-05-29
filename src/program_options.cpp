@@ -1,16 +1,20 @@
 #include "crails/program_options.hpp"
 #include "crails/logger.hpp"
 #include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
 #include <memory>
+#ifdef CRAILS_WITH_SSL
+# include <boost/asio/ssl.hpp>
+#endif
 
 using namespace std;
 using namespace boost;
 using namespace Crails;
 
+#ifdef CRAILS_WITH_SSL
 namespace Crails {
   std::string get_ssl_password(std::size_t max_length, asio::ssl::context_base::password_purpose purpose);
 }
+#endif
 
 ProgramOptions::ProgramOptions(int argc, char** argv)
 {
@@ -20,10 +24,12 @@ ProgramOptions::ProgramOptions(int argc, char** argv)
     ("port,p",     program_options::value<std::string>(),    "listened port")
     ("hostname,h", program_options::value<std::string>(),    "listened host")
     ("threads,t",  program_options::value<unsigned short>(), "amount of threads")
+#ifdef CRAILS_WITH_SSL
     ("ssl",        "enable SSL")
     ("ssl-cert",   program_options::value<std::string>(), "path to the ssl certificate file")
     ("ssl-key",    program_options::value<std::string>(), "path to the ssl key file")
     ("ssl-dh",     program_options::value<std::string>(), "path to a tmp_dh_file")
+#endif
     ;
   program_options::store(program_options::parse_command_line(argc, argv, desc), vm);
   program_options::notify(vm);
@@ -63,6 +69,7 @@ void ProgramOptions::initialize_thread_pool(HttpServer::options& options) const
 
 void ProgramOptions::initialize_ssl_context(HttpServer::options& options) const
 {
+#ifdef CRAILS_WITH_SSL
   auto ctx = std::make_shared<asio::ssl::context>(asio::ssl::context::sslv23);
   std::string certificate_chain_file = get_value("ssl-cert", std::string("server.pem"));
   std::string private_key_file       = get_value("ssl-key",  std::string("server.pem"));
@@ -79,4 +86,5 @@ void ProgramOptions::initialize_ssl_context(HttpServer::options& options) const
   if (vm.count("ssl-dh"))
     ctx->use_tmp_dh_file(vm["ssl-dh"].as<std::string>());
   options.context(ctx);
+#endif
 }
