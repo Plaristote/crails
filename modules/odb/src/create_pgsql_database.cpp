@@ -53,6 +53,8 @@ static bool pgsql_run_queries(const Crails::Databases::DatabaseSettings& databas
     int    status;
 
     full_command += '"' + query + '"';
+    if (logger.get_log_level() > Logger::Info)
+      full_command += " > /dev/null";
     logger << Logger::Info << ":: running query " << query << Logger::endl;
     logger << Logger::Debug << ":: command " << full_command << Logger::endl;
     status = std::system(full_command.c_str());
