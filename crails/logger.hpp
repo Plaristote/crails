@@ -12,8 +12,8 @@ namespace Crails
   public:
     enum Symbol
     {
-      Info = 0,
-      Debug,
+      Debug = 0,
+      Info,
       Warning,
       Error,
       endl
@@ -43,6 +43,8 @@ namespace Crails
     }
 
     void flush();
+
+    unsigned char get_log_level() const { return log_level; }
   private:
     static const Symbol log_level;
     static thread_local Buffer buffer;
