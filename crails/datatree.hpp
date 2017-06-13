@@ -201,6 +201,8 @@ public:
   boost::property_tree::ptree& get_ptree() { return tree->get_child(path); }
   const boost::property_tree::ptree& get_ptree() const { return tree->get_child(path); }
 
+  std::vector<std::string> get_keys() const;
+
 private:
   boost::property_tree::ptree* tree;
   std::string                  context, key, path;

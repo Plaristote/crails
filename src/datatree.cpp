@@ -86,6 +86,16 @@ bool Data::is_null() const
   return !exists() || as<string>() == "null";
 }
 
+std::vector<std::string> Data::get_keys() const
+{
+  auto& tree = (path == "") ? *(this->tree) : this->tree->get_child(path);
+  vector<string> keys;
+
+  for (boost::property_tree::ptree::value_type& v : tree)
+    keys.push_back(v.first);
+  return keys;
+}
+
 std::vector<std::string> Data::find_missing_keys(const std::vector<std::string>& keys) const
 {
   vector<string> missing_keys;
