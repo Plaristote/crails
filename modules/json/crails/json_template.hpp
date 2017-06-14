@@ -186,6 +186,8 @@ namespace Crails
   };
   template<> void JsonTemplate::json<std::function<void()> >(const std::string& key, const std::function<void()> func);
   template<> void JsonTemplate::add_value<bool>(bool value);
+  template<> void JsonTemplate::add_value<char>(char value);
+  template<> void JsonTemplate::add_value<unsigned char>(unsigned char value);
   template<> void JsonTemplate::add_value<float>(float value);
   template<> void JsonTemplate::add_value<double>(double value);
   template<> void JsonTemplate::add_value<const char*>(const char* val);

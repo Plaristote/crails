@@ -148,4 +148,16 @@ namespace Crails
   {
     value.output(stream);
   }
+
+  template<>
+  void JsonTemplate::add_value<char>(char value)
+  {
+    stream << (short)value;
+  }
+
+  template<>
+  void JsonTemplate::add_value<unsigned char>(unsigned char value)
+  {
+    stream << (unsigned short)value;
+  }
 }
