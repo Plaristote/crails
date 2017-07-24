@@ -19,10 +19,9 @@ namespace Crails
 
   class Controller
   {
-    friend class Router;
-    friend class Mailer;
   protected:
     Controller(Params& params);
+  public:
     virtual ~Controller();
 
     void initialize(void);
