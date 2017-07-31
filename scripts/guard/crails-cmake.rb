@@ -1,6 +1,5 @@
 require 'guard/crails-base'
 require 'guard/crails-notifier'
-require 'guard/crails-server'
 
 module ::Guard
   class CrailsCmake < CrailsPlugin
@@ -14,11 +13,7 @@ module ::Guard
 
   private
     def compile
-      message = {
-        console: 'Your crails server is recompiling right now',
-        html: "<h4>crails-cmake: #{get_project_name}</h4><div>Recompiling right now...</div>"
-      }
-      Crails::Notifier.notify 'crails-cmake', message
+      Crails::Notifier.notify get_project_name, "Compiling..."
       success = false
       duration = nil
       success = run_cmake
@@ -33,24 +28,10 @@ module ::Guard
         end
       end
       if success
-        message = {
-          console: 'Your crails server built successfully',
-          html: "<h4>crails-cmake success</h4><div>All targets for <b>#{get_project_name}</b> built successfully.<br/>In #{duration}s.</div>"
-        }
-        Crails::Notifier.notify 'crails-cmake', message, :success
+        Crails::Notifier.notify 'crails-cmake', "Compiled in #{duration}s", image: :success
       else
-        message = {
-          console: 'Your crails server failed to build',
-          html: "<h4>crails-cmake failure</h4><div>Failed to build some targets for <b>#{get_project_name}</b>.</div>"
-        }
-        Crails::Notifier.notify 'crails-cmake', message, :failure
+        Crails::Notifier.notify get_project_name, "Compilation failed", image: :failed
       end
-    end
-
-    def restart_server
-      server = CrailsServer.instance
-      server.restart_server if not server.nil?
     end
   end
 end
-

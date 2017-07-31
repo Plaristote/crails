@@ -107,18 +107,12 @@ module ::Guard
           end
           puts ">> Generated #{output_file} in #{(Time.now.to_f - file_starts_at).round 2}s"
         end
-        message = {
-          console: "Finished crailsjs job in #{(Time.now.to_f - starts_at).round 2} seconds.",
-          html: "<h4>crails-js success</h4><div>Finished crails-js job in #{(Time.now.to_f - starts_at).round 2} seconds."
-        }
-        Crails::Notifier.notify 'crails-js', message, :success
+        message =  "Compiled javascript in #{(Time.now.to_f - starts_at).round 2} seconds."
+        Crails::Notifier.notify get_project_name, message, image: :success
       rescue Exception => e
-        message = {
-          console: "Catched exception: #{e.message}\n!! crailsjs couldn't perform its duties",
-          html: "<h4>crails-js failure</h4><div>Catched exception: #{e.message}"
-        }
+        message = "Failed to compile javascript:\n#{e.message}",
         set_exit_success -2
-        Crails::Notifier.notify 'crails-js', message, :failure
+        Crails::Notifier.notify get_project_name, message, image: :failed
       end
     end
 

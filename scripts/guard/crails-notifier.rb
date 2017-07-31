@@ -1,62 +1,11 @@
 module Crails
   module Notifier
-    def self.notify title, message, mood = nil
-      message_console = message_notify = message
-      if message.class == Hash
-        message_console = message[:console]
-        message_notify  = message[:html]
-      end
-      notifier = notifiers.first
-      notifiers.first.notify title, message_notify, mood unless (notifier.nil? or message_notify.nil?)
-      puts ">> " + message_console.magenta unless message_console.nil?
-    end
-
-    def self.notifiers
-      [
-        NotifySend, KDialog, TerminalNotifier
-      ].select {|i| i.is_available? }
-    end
-
-    class NotifySend
-      def self.moods
-        {
-          success: 'face-cool',
-          failure: 'face-crying',
-          pending: 'face-sad'
-        }
-      end
-
-      def self.is_available?
-        `which notify-send 2> /dev/null`
-        $?.success?
-      end
-
-      def self.notify title, message, mood
-        icon = unless mood.nil? then "-i #{moods[mood]}" else '' end
-        `notify-send "#{message}" -t 4000 #{icon}`
-      end
-    end
-
-    class KDialog
-      def self.is_available?
-        `which kdialog 2> /dev/null`
-        $?.success?
-      end
-
-      def self.notify title, message, mood
-        `kdialog --title "#{title}" --passivepopup "#{message}"`
-      end
-    end
-
-    class TerminalNotifier
-      def self.is_available?
-        `which terminal-notifier 2> /dev/null`
-        $?.success?
-      end
-
-      def self.notify title, message, mood
-        `terminal-notifier -title "#{title}" -message "#{message}"`
-      end
+    def self.notify title, message, opts = {}
+      ::Guard::Notifier.notify(
+        message, ({ title: title }).merge(opts)
+      )
+      message_console = "#{title} - #{message}"
+      puts ">> " + message_console.magenta
     end
   end
 end
