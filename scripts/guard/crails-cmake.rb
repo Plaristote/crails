@@ -23,7 +23,7 @@ module ::Guard
       duration = nil
       success = run_cmake
       if success
-        Dir.chdir 'build' do
+        Dir.chdir build_path do
           puts ">> Make server"
           starts_at = Time.now.to_f
           run_command 'make'
