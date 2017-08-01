@@ -8,7 +8,13 @@ namespace Crails
 {
   struct DatabaseUrl
   {
-    DatabaseUrl(const std::string& url)
+    DatabaseUrl(const char* str)
+    {
+      if (str)
+        initialize(str);
+    }
+
+    void initialize(const std::string& url)
     {
       if (url.size() > 0)
       {
