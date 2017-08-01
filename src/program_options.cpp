@@ -24,6 +24,7 @@ ProgramOptions::ProgramOptions(int argc, char** argv)
     ("port,p",     program_options::value<std::string>(),    "listened port")
     ("hostname,h", program_options::value<std::string>(),    "listened host")
     ("threads,t",  program_options::value<unsigned short>(), "amount of threads")
+    ("pidfile",    program_options::value<std::string>(),    "pid file")
 #ifdef CRAILS_WITH_SSL
     ("ssl",        "enable SSL")
     ("ssl-cert",   program_options::value<std::string>(), "path to the ssl certificate file")
@@ -44,7 +45,26 @@ HttpServer::options ProgramOptions::get_server_options(Server& handler) const
   initialize_thread_pool(server_options);
   if (vm.count("ssl"))
     initialize_ssl_context(server_options);
+  if (vm.count("pidfile"))
+    initialize_pid_file(server_options);
   return server_options;
+}
+
+void ProgramOptions::initialize_pid_file(HttpServer::options& options) const
+{
+  std::string filepath = get_value("pidfile", std::string("crails.pid"));
+  std::ofstream output(filepath.c_str());
+
+  if (output.is_open())
+  {
+    pid_t pid = getpid();
+
+    logger << ">> PID " << pid << " (stored in " << filepath << ')' << Logger::endl;
+    output << pid;
+    output.close();
+  }
+  else
+    logger << "!! Failed to open PID file " << filepath << Logger::endl;
 }
 
 void ProgramOptions::initialize_interface(HttpServer::options& options) const

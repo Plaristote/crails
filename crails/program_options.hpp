@@ -26,6 +26,7 @@ namespace Crails
     void initialize_interface(HttpServer::options&) const;
     void initialize_thread_pool(HttpServer::options&) const;
     void initialize_ssl_context(HttpServer::options&) const;
+    void initialize_pid_file(HttpServer::options&) const;
     
     boost::program_options::variables_map vm;
   };
