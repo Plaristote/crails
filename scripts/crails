@@ -35,7 +35,7 @@ end
 unless command == 'new'
   require 'fileutils'
 
-  until (File.exists? 'CMakeLists.txt' and File.exists? 'app' and File.exists? 'public')
+  until File.exists? 'CMakeLists.txt'
     FileUtils.cd '..'
     if Dir.pwd == '/'
       puts 'You\'re not in a Crails application'
