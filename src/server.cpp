@@ -19,6 +19,7 @@ using namespace Crails;
 
 Server::RequestParsers  Server::request_parsers;
 Server::RequestHandlers Server::request_handlers;
+shared_ptr<boost::asio::io_service> Server::io_service;
 
 void Server::add_request_handler(RequestHandler* request_handler)
 {
@@ -164,6 +165,7 @@ Server::~Server()
 
 Server::Server()
 {
+  io_service = make_shared<boost::asio::io_service>();
   initialize_exception_catcher();
   initialize_request_pipe();
 }

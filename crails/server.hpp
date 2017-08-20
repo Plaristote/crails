@@ -44,6 +44,7 @@ namespace Crails
     void                   add_request_handler(RequestHandler* request_handler);
     void                   add_request_parser(RequestParser* request_parser);
     static RequestHandler* get_request_handler(const std::string& name);
+    static std::shared_ptr<boost::asio::io_service> get_io_service() { return io_service; }
 
     static void Launch(int argc, char** argv);
 
@@ -59,6 +60,7 @@ namespace Crails
 
     static void ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Params& params);
 
+    static std::shared_ptr<boost::asio::io_service> io_service;
     static RequestParsers    request_parsers;
     static RequestHandlers   request_handlers;
     ExceptionCatcher         exception_catcher;

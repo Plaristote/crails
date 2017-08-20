@@ -40,7 +40,9 @@ HttpServer::options ProgramOptions::get_server_options(Server& handler) const
 {
   HttpServer::options server_options(handler);
 
-  server_options.reuse_address(true);
+  server_options
+    .io_service(handler.get_io_service())
+    .reuse_address(true);
   initialize_interface(server_options);
   initialize_thread_pool(server_options);
   if (vm.count("ssl"))
