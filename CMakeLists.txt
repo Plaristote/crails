@@ -28,6 +28,7 @@ endif()
 
 if (USE_COOKIE_CIPHER)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCRAILS_WITH_COOKIE_ENCRYPTION")
+  include_directories(/usr/include/openssl-1.0)
 endif()
 
 if (USE_SSL)
