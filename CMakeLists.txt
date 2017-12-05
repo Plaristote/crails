@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 project(crails_project)
 
-option(USE_MEMCACHED     "Memcached"             ON)
+option(USE_MEMCACHED     "Memcached"             OFF)
 option(USE_MONGODB       "MongoDB"               ON)
 option(USE_ODB           "ODB ORM"               ON)
-option(USE_COOKIE_CIPHER "Include cookie cipher" ON)
-option(USE_SSL           "Include ssl support"   ON)
+option(USE_COOKIE_CIPHER "Include cookie cipher" OFF)
+option(USE_SSL           "Include ssl support"   OFF)
 option(DEVELOPER_MODE    "Developer mode"        ON)
 
 cmake_policy(SET CMP0042 OLD)
@@ -45,9 +45,9 @@ endif()
 ##
 ## Dependencies
 ##
-find_package(cppnetlib REQUIRED)
+#find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system random REQUIRED)
-find_package(ImageMagick COMPONENTS Magick++)
+#find_package(ImageMagick COMPONENTS Magick++)
 
 include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ImageMagick_INCLUDE_DIRS})
 
