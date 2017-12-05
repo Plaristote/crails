@@ -18,6 +18,7 @@ namespace Crails
   {
   public:
     static const std::string temporary_path;
+    static const std::string public_path;
 
     friend class ExceptionCatcher;
     friend class Request;
@@ -44,6 +45,7 @@ namespace Crails
     void                   add_request_handler(RequestHandler* request_handler);
     void                   add_request_parser(RequestParser* request_parser);
     static RequestHandler* get_request_handler(const std::string& name);
+    static FileCache&      get_file_cache() { return file_cache; }
     static std::shared_ptr<boost::asio::io_service> get_io_service() { return io_service; }
 
     static void Launch(int argc, char** argv);
@@ -63,6 +65,7 @@ namespace Crails
     static std::shared_ptr<boost::asio::io_service> io_service;
     static RequestParsers    request_parsers;
     static RequestHandlers   request_handlers;
+    static FileCache         file_cache;
     ExceptionCatcher         exception_catcher;
   };
 }

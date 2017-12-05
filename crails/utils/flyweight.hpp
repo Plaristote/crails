@@ -49,6 +49,7 @@ public:
     }
 
     TYPE& operator*(void) { return (*(instance->instance)); }
+    operator bool() const { return instance != nullptr; }
 
   private:
     Instance* instance;

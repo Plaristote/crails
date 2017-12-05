@@ -8,9 +8,6 @@
 using namespace std;
 using namespace Crails;
 
-static const string pwd         = boost::filesystem::current_path().string();
-static const string public_path = boost::filesystem::canonical(pwd + "/public").string();
-
 void FileRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& response, Params& params, function<void(bool)> callback)
 {
   if (request.method == "GET")
@@ -21,10 +18,10 @@ void FileRequestHandler::operator()(const HttpServer::request& request, Building
 
     if (pos != std::string::npos)
       fullpath.erase(pos);
-    fullpath = boost::filesystem::canonical(public_path + fullpath, ec).string();
+    fullpath = boost::filesystem::canonical(Server::public_path + fullpath, ec).string();
     if (ec != boost::system::errc::success)
       params["response-data"]["code"] = (int)Server::HttpCodes::not_found;
-    else if (fullpath.find(public_path) == string::npos)
+    else if (fullpath.find(Server::public_path) == string::npos)
       params["response-data"]["code"] = (int)Server::HttpCodes::bad_request;
     else
     {
@@ -76,12 +73,12 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
 {
   file_cache.Lock();
   {
-    bool               cached = cache_enabled && file_cache.Contains(fullpath);
-    const std::string& str    = *(file_cache.Require(fullpath));
-    const std::string* ptr    = &str;
+    bool cached = cache_enabled && file_cache.Contains(fullpath);
+    auto file   = file_cache.Require(fullpath);
 
-    if (ptr != 0)
+    if (file)
     {
+      const string& str = *file;
       std::stringstream str_length;
 
       str_length << (str.size() - first_bit);

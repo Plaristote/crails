@@ -11,15 +11,21 @@
 #include <crails/request_handlers/file.hpp>
 #include <crails/logger.hpp>
 #include <crails/program_options.hpp>
+#include <boost/filesystem.hpp>
 #include <csignal>
 #include "crails/request.hpp"
 
 using namespace std;
 using namespace Crails;
 
+Crails::FileCache       Server::file_cache;
 Server::RequestParsers  Server::request_parsers;
 Server::RequestHandlers Server::request_handlers;
 shared_ptr<boost::asio::io_service> Server::io_service;
+
+const string Server::public_path = boost::filesystem::canonical(
+  boost::filesystem::current_path().string() + "/public"
+).string();
 
 void Server::add_request_handler(RequestHandler* request_handler)
 {

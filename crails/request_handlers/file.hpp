@@ -9,7 +9,7 @@ namespace Crails
   {
     friend class Server;
   public:
-    FileRequestHandler() : RequestHandler("file")
+    FileRequestHandler() : RequestHandler("file"), file_cache(Crails::Server::get_file_cache())
     {
 #ifdef SERVER_DEBUG
       cache_enabled = false;
@@ -30,8 +30,8 @@ namespace Crails
     bool send_file(const std::string& path, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit = 0);
     bool if_not_modified(Params&, BuildingResponse&, const std::string& path);
 
-    bool      cache_enabled;
-    FileCache file_cache;
+    bool       cache_enabled;
+    FileCache& file_cache;
   };
 }
   
