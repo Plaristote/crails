@@ -107,7 +107,7 @@ void Sentry::capture_exception(Data params, const std::exception& e)
 
     initialize_exception_message(message.as_data(), params, e);
     {
-      Data exceptions_data = message["exceptions"];
+      Data exceptions_data = message["exception"];
       DataTree exception_data;
 
       exception_data["type"] = get_type_as_string(e);
