@@ -169,5 +169,11 @@ void Sentry::send_message(Data message)
           << network::header("X-Sentry-Auth", sentry_auth)
           << network::body(body_str);
   auto response = http.post(request);
-  logger << Logger::Info << "[Sentry] exception logged with id " << body(response) << Logger::endl;
+  auto response_status = status(response);
+
+  logger << Logger::Info << "[Sentry] ";
+  if (response_status == 200)
+    logger << "exception logged with id " << body(response) << Logger::endl;
+  else 
+    logger << "failed to log exception (status " << (int)response_status << "): " << body(response) << Logger::endl;
 }
