@@ -1,4 +1,5 @@
 #include <boost/lexical_cast.hpp>
+#include <chrono>
 #include "crails/logger.hpp"
 #include "crails/server.hpp"
 #include "crails/sentry.hpp"
@@ -140,6 +141,7 @@ void Sentry::send_message(Data message)
 {
   string body_str = message.to_json();
   string sentry_auth;
+  time_t timestamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
   auto monkey_patch_body = [](string b, string val) -> string
   {
@@ -157,7 +159,7 @@ void Sentry::send_message(Data message)
   sentry_auth = string("Sentry ")
     + "sentry_version=7,"
     + "sentry_client=sentry_crails,"
-    + "sentry_sentry_timestamp" + boost::lexical_cast<string>(time(0)) + ','
+    + "sentry_sentry_timestamp" + boost::lexical_cast<string>(timestamp) + ','
     + "sentry_key=" + sentry_key + ','
     + "sentry_secret=" + sentry_secret;
 
