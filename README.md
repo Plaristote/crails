@@ -12,6 +12,7 @@ Crails is modular, and comes by default with a bunch of modules:
 - With crails-cache, you get a simple API to handle your caching using memcached
 - With crails-mail, you get the ability to easily render and send mails
 - With crails-image, you can store image in your models, and use Magick++ to generate thumbnails
+- With crails-sentry, you can monitor server exceptions using [Sentry](http://sentry.io)
 
 Install Crails Framework
 ========
@@ -28,7 +29,7 @@ Here's a list of the dependecies:
 - [libmemcached](http://libmemcached.org) (optional, used by crails-cache)
 - [Magick++](http://www.imagemagick.org/Magick++/) (optional, used by crails-image)
 
-MacOSX users, you're out of luck (sort of): this project requires the `thread_local` feature from C++11, which Apple has removed from clang. You can still work using the `cedar14-compat` branch.
+MacOSX users: this project requires the `thread_local` feature from C++11, which isn't available on Apple's clang.
 
 Building the Crails Framework
 --------
@@ -65,12 +66,10 @@ Once you've done that, the next thing you should do is pick which modules from c
 
 At any point, you may also change some of the framework internal settings, using `crails set-env`:
 
-    # disable development mode, and use a thread pool to handle HTTP requests
+    # disable development mode
     crails set-env production
-    crails set-env multithread
-    # enable development mode, and use a single thread to handle HTTP requests
+    # enable development mode
     crails set-env development
-    crails set-env synchronous
 
 Once your application is created and configured, you may launch the `crails guard` tool. It has several applications:
   - The task `assets` compiles your javascript and stylesheet assets;
@@ -85,8 +84,8 @@ Here's how you'd use `crails guard`:
     guard> before_compile
     guard> compile
 
-Now that everything is ready, you may launch your server using the `crails server` command:
+Now that everything is ready, you may launch your server by running the binary:
 
-    crails server -p 8080 -h 0.0.0.0
+    build/server -p 8080 -h 0.0.0.0
 
-Note that `crails server` binds to port 3001 and host 127.0.0.1 by default.
+Note that by defaults, the server binds to port 3001 and host 127.0.0.1.

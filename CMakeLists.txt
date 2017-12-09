@@ -104,6 +104,7 @@ add_subdirectory(modules/html)
 add_subdirectory(modules/json)
 add_subdirectory(modules/mail)
 add_subdirectory(modules/proxy)
+add_subdirectory(modules/sentry)
 add_subdirectory(modules/front)
 
 if (${ImageMagick_Magick++_FOUND})
