@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0042 OLD)
 
 project(<%= options[:name] %>)
-option(DEVELOPER_MODE  "enable debugging tools"       ON)
-
-cmake_policy(SET CMP0042 OLD)
+option(DEVELOPER_MODE  "enable debugging tools" ON)
 
 <% cxx_options  = ''
    cxx_options += " -DUSE_SEGVCATCH" unless options[:segvcatch] != true -%>
@@ -14,7 +13,7 @@ find_package(Boost COMPONENTS thread filesystem program_options system random RE
 
 include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} .)
 
-if (DEVELOPER_MODE)
+if(DEVELOPER_MODE)
   set(CMAKE_BUILD_TYPE "Debug")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSERVER_DEBUG")
 else()
@@ -36,6 +35,8 @@ file(GLOB_RECURSE server_files
 file(GLOB_RECURSE tests_files
      spec/*.cpp)
 
+<%= CMAKE_CUSTOM_MODULES_HEADER %>
+
 add_library(crails-app SHARED ${crails_app})
 add_executable(server ${server_files})
 add_executable(tests  ${tests_files})
@@ -44,13 +45,14 @@ if(DEVELOPER_MODE)
   set(crails-suffix -debug)
 endif()
 
-set(dependencies      crails-core${crails-suffix}
-                      crails-html${crails-suffix}
-                      crails-app
-                      ${Boost_LIBRARIES}
-                      pthread dl crypto ssl
-                      ${CPPNETLIB_LIBRARIES}
-                      <% if options[:segvcatch] == true %> segvcatch <% end %>)
+set(dependencies crails-core${crails-suffix}
+                 crails-html${crails-suffix}
+                 crails-app
+                 ${Boost_LIBRARIES}
+                 pthread dl crypto ssl
+                 ${CPPNETLIB_LIBRARIES}
+                 ${dependencies}
+                 <% if options[:segvcatch] == true %>segvcatch<% end %>)
 
 <%= CMAKE_CUSTOM_DEPENDENCIES_HEADER %>
 

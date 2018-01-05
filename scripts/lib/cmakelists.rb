@@ -1,4 +1,5 @@
 CMAKE_CUSTOM_DEPENDENCIES_HEADER = "# Custom dependencies (do not modify this line)"
+CMAKE_CUSTOM_MODULES_HEADER = "# Add your modules here (do not modify this line)"
 
 class CMakeLists
   def initialize
@@ -14,8 +15,12 @@ class CMakeLists
   end
 
   def add_dependency name
-    append "set(dependencies ${dependencies} #{name})"
+    append_dependency "set(dependencies ${dependencies} #{name})"
     puts "\033[32m[CMAKE]\033[0m Adding dependency #{name}"
+  end
+
+  def add_custom_module name
+    append_module "add_subdirectory(modules/#{name})"
   end
 
   def add_crails_module name
@@ -48,11 +53,16 @@ class CMakeLists
   end
 
 private
-  def append str
-    @content.gsub!(
-      CMAKE_CUSTOM_DEPENDENCIES_HEADER,
-      "#{CMAKE_CUSTOM_DEPENDENCIES_HEADER}\n#{str}"
-    )
+  def append_dependency str
+    append_to CMAKE_CUSTOM_DEPENDENCIES_HEADER, str
+  end
+
+  def append_module str
+    append_to CMAKE_CUSTOM_MODULES_HEADER, str
+  end
+
+  def append_to header, str
+    @content.gsub!(header, "#{header}\n#{str}")
   end
 end
 
