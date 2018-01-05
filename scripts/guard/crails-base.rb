@@ -52,6 +52,7 @@ module ::Guard
     end
 
     def get_cmake_variable variable
+      require_cmakecache
       `cat #{cmakecache_path} | grep #{variable} | cut -d= -f2`.strip!
     end
 
@@ -95,6 +96,10 @@ module ::Guard
       else
         ENV['CRAILS_BUILD_PATH']
       end
+    end
+
+    def require_cmakecache
+      run_cmake unless File.exists? cmakecache_path
     end
 
     def cmakecache_path
