@@ -40,7 +40,7 @@ void        Smtp::Mail::del_recipient(const std::string& address)
 using namespace boost::asio::ip;
 
 Smtp::Server::Server() :
-  ssl_context(io_service, boost::asio::ssl::context::tlsv12),
+  ssl_context(boost::asio::ssl::context::tlsv12),
   ssl_sock(io_service, ssl_context),
   sock(ssl_sock.next_layer()),
   tls_enabled(false)
