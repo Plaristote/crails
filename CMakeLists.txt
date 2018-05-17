@@ -9,8 +9,6 @@ option(USE_COOKIE_CIPHER "Include cookie cipher" OFF)
 option(USE_SSL           "Include ssl support"   OFF)
 option(DEVELOPER_MODE    "Developer mode"        ON)
 
-cmake_policy(SET CMP0042 OLD)
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 ##
