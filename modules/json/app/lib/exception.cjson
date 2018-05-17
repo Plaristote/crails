@@ -1,0 +1,36 @@
+// BEGIN LINKING
+#include <crails/params.hpp>
+
+using namespace Crails;
+using namespace std;
+
+string  @exception_name;
+string  @exception_what;
+Params& @params;
+
+// END LINKING
+
+json<std::function<void()> >("exception", [=]()
+{
+  json("type", exception_name);
+  json("what", exception_what);
+
+  if (params["controller-data"].exists())
+  {
+    json<std::function<void()> >("controller", [=]()
+    {
+      json("type",   params["controller-data"]["name"].defaults_to<string>(""));
+      json("method", params["controller-data"]["action"].defaults_to<string>(""));
+    });
+    params["controller-data"].destroy();
+  }
+
+  if (params["backtrace"].exists())
+  {
+    json("backtrace", params["backtrace"].as<string>());
+    params["backtrace"].destroy();
+  }
+
+  json("params", params.as_data());
+  json("session", params.get_session());
+});

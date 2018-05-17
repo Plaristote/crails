@@ -8,6 +8,7 @@ file(GLOB crails_json             src/json_renderer.cpp src/json_template.cpp)
 file(GLOB guard_json_plugins      scripts/guard/*.rb)
 file(GLOB scripts_json_templates  scripts/guard/templates/*.erb)
 file(GLOB scripts_json_module     scripts/modules/json/*.rb)
+file(GLOB json_templates          app/lib/exception.cjson)
 
 add_library(crails-json${crails-suffix} SHARED ${crails_json})
 
@@ -15,4 +16,5 @@ install(DIRECTORY crails                 DESTINATION include)
 install(FILES ${scripts_json_templates}  DESTINATION share/crails/guard/templates)
 install(FILES ${scripts_json_module}     DESTINATION share/crails/scripts/modules/json)
 install(FILES ${guard_json_plugins}      DESTINATION share/crails/guard)
+install(FILES ${json_templates}          DESTINATION share/crails/app_template/json)
 install(TARGETS crails-json${crails-suffix} LIBRARY DESTINATION lib)

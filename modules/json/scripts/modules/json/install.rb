@@ -19,6 +19,13 @@ project.base_directory source, base_directory do
   end
 end
 
+source         = "#{ENV['CRAILS_SHARED_DIR']}/app_template/json"
+project.base_directory source, base_directory do
+  project.directory :lib do
+    project.file 'exception.cjson'
+  end
+end
+
 cmake = CMakeLists.new
 cmake.add_crails_module 'json'
 
