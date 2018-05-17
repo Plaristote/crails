@@ -70,13 +70,13 @@ void ExceptionCatcher::response_exception(Request& request, string e_name, strin
     try {
       Renderer::render("lib/exception", request.params.as_data(), response, vars);
     }
-    catch (MissingTemplate exception) {
+    catch (const MissingTemplate& exception) {
       logger << Logger::Warning
         << "# Template lib/exception not found for format "
         << request.params["headers"]["Accept"].defaults_to<string>("")
         << Logger::endl;
     }
-    catch(std::exception e) {
+    catch (const std::exception& e) {
       logger << Logger::Error << "# Template lib/exception crashed (" << e.what() << ')' << Logger::endl;
     }
     catch (...) {
