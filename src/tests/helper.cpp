@@ -51,19 +51,18 @@ void Helper::run_test(Group group, Test test)
   }
   catch (...)
   {
-    if (group.after)
-      group.after();
-    if (after_all)
-      after_all();
+    after_test(group);
     throw;
   }
+  after_test(group);
+}
 
-  {
-    if (group.after)
-      group.after();
-    if (after_all)
-      after_all();
-  }
+void Helper::after_test(Group group)
+{
+  if (group.after)
+    group.after();
+  if (after_all)
+    after_all();
 }
 
 void Helper::run_protected_test(Group group, Test test)

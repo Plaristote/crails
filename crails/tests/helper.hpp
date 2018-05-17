@@ -55,6 +55,7 @@ namespace Crails
     private:
       void run_test(Group, Test);
       void run_protected_test(Group, Test);
+      void after_test(Group);
       void display_test_results(Test);
       
     protected:
