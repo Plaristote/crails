@@ -15,7 +15,7 @@ ProxyRequestHandler::ProxyRequestHandler()
   config.from_json_file("config/proxy.json");
   default_mode = Proxy;
   default_mode = get_mode_from_data(config["default_mode"]);
-  config["rules"].each([this](Data rule_data)
+  config["rules"].each([this](Data rule_data) -> bool
   {
     Rule rule;
 
@@ -24,6 +24,7 @@ ProxyRequestHandler::ProxyRequestHandler()
     rule.target_port = rule_data["to_port"].defaults_to(80);
     rule.mode        = get_mode_from_data(rule_data["mode"]);
     rules.push_back(rule);
+    return true;
   });
 }
 

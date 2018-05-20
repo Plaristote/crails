@@ -33,18 +33,30 @@ DataTree& DataTree::from_json_file(const string& json_file)
   return *this;
 }
 
-void Data::each(std::function<void (Data)> functor)
+void Data::each(std::function<bool (Data)> functor)
 {
   auto& tree = (path == "") ? *(this->tree) : this->tree->get_child(path);
 
-  _each_break = false;
   for (boost::property_tree::ptree::value_type& v : tree)
   {
     Data data(v.second, v.first);
 
     data.overload_path("");
-    functor(data);
-    if (_each_break)
+    if (!(functor(data)))
+      break ;
+  }
+}
+
+void Data::each(std::function<bool (const Data)> functor) const
+{
+  const auto& tree = (path == "") ? *(this->tree) : this->tree->get_child(path);
+
+  for (const boost::property_tree::ptree::value_type& v : tree)
+  {
+    Data data(const_cast<boost::property_tree::ptree&>(v.second), v.first);
+
+    data.overload_path("");
+    if (!(functor(data)))
       break ;
   }
 }

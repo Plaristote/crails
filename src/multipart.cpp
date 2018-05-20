@@ -52,7 +52,7 @@ void MultipartParser::parse(Params& params)
           content_data[key] = val;
           return true;
         });
-        content_data.as_data().each([this](Data data)
+        content_data.as_data().each([this](Data data) -> bool
         {
           string str = data.as<std::string>();
 
@@ -61,6 +61,7 @@ void MultipartParser::parse(Params& params)
           if (str.size() > 0)
             str.erase(str.size() - 1, str.size());
           data = str;
+	  return true;
         });
         read_buffer.erase(0, form_end);
         parsed_state++;

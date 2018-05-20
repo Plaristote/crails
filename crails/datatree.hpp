@@ -189,8 +189,8 @@ public:
   bool exists() const;
   void destroy();
 
-  void each(std::function<void (Data)> functor);
-  void _break() { _each_break = true; }
+  void each(std::function<bool (Data)> functor);
+  void each(std::function<bool (const Data)> functor) const;
 
   void output(std::ostream& out = std::cout) const;
   std::string to_json() const;
@@ -206,7 +206,6 @@ public:
 private:
   boost::property_tree::ptree* tree;
   std::string                  context, key, path;
-  bool                         _each_break;
 };
 
 class DataTree

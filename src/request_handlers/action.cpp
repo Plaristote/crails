@@ -27,9 +27,10 @@ void ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
 
         if (data["headers"].exists())
         {
-          data["headers"].each([&out](Data header)
+          data["headers"].each([&out](Data header) -> bool
           {
             out.set_headers(header.get_key(), header.as<string>());
+	    return true;
           });
         }
         params.session->finalize(out);

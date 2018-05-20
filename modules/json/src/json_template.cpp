@@ -32,12 +32,13 @@ void JsonTemplate::json_array(const std::string& key, Data value)
   add_key(key);
   stream << '[';
   first_item_in_object = true;
-  value.each([this](Data item)
+  value.each([this](Data item) -> bool
   {
     if (first_item_in_object == false)
       stream << ',';
     stream << item.to_json();
     first_item_in_object = false;
+    return true;
   });
   stream << ']';
   first_item_in_object = false;

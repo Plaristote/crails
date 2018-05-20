@@ -13,9 +13,10 @@ MailServers::MailServers(void)
 
 void MailServers::load_mail_servers(Data data)
 {
-  data.each([this](Data server_data)
+  data.each([this](Data server_data) -> bool
   {
     server_confs.emplace(server_data.get_key(), Conf(server_data));
+    return true;
   });
 }
 
