@@ -15,6 +15,7 @@ end
 module ::Guard
   class CrailsTemplatePlugin < CrailsPlugin
     def initialize arg
+      @input = arg[:input]
       @file_matcher = arg[:matcher]
       super
     end
@@ -28,6 +29,21 @@ module ::Guard
         self.send "compile_#{@template_type}", path
       end
       compile_renderer watched_files
+    end
+
+    def watched_files
+      unless @input.nil?
+        selected_files = []
+        path = '{' + @input.join(',') + '}'
+        Dir["{#{@input.join ','}}/**/*.#{@extension}"].each do |path|
+          unless File.directory? path
+            selected_files << path
+          end
+        end
+        selected_files
+      else
+        super
+      end
     end
 
   protected
