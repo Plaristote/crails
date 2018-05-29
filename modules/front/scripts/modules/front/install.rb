@@ -28,7 +28,8 @@ renderers_cpp.add_initializer 'renderers.push_back(new ArchiveRenderer);'
 
 guardfile = GuardfileEditor.new
 guardfile.add_task 'before_compile', <<RUBY
-guard 'crails-front'
+guard 'crails-archive'
+guard 'crails-cheerp'
 RUBY
 
 cmake.write
