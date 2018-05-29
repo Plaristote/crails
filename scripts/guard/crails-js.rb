@@ -111,7 +111,7 @@ module ::Guard
         Crails::Notifier.notify get_project_name, message, image: :success
       rescue Exception => e
         message = "Failed to compile javascript:\n#{e.message}",
-        set_exit_success -2
+        set_exit_success(-2)
         Crails::Notifier.notify get_project_name, message, image: :failed
       end
     end
