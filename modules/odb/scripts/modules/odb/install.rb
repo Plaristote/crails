@@ -46,7 +46,7 @@ picked_backends.each do |backend|
   cmake.add_code <<CMAKE
 if (ODB_WITH_#{backend.upcase})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DODB_WITH_#{backend.upcase}")
-  set(dependencies "${dependencies} odb-#{backend})
+  set(dependencies "${dependencies} odb-#{backend}")
 endif()
 CMAKE
 end
