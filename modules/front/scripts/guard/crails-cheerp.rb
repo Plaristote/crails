@@ -26,8 +26,10 @@ module ::Guard
     end
 
     def source_files
+      input = options[:input] || "front"
+      throw "no input folder found for crails-cheerp" unless File.exists? input
       lib = Dir["#{ENV['CRAILS_SHARED_DIR']}/front/**/*.cpp"]
-      src = Dir["#{options[:input]}/**/*.cpp"]
+      src = Dir["#{input}/**/*.cpp"]
       lib + src
     end
 
@@ -40,7 +42,7 @@ module ::Guard
     end
 
     def cxx_flags
-      flags = "-target cheerp"
+      flags = "-target cheerp -D__CHEERP_CLIENT__"
       flags += "-frtti" if options[:with_rtti] == true
       flags += options[:cxx_flags] if not options[:cxx_flags].nil?
       flags

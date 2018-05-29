@@ -32,8 +32,7 @@ void Ajax::clear_transport()
 {
   if (xhr)
   {
-    delete xhr;
-    xhr = nullptr;
+    xhr = nullptr; // xhr has a client type (client::XMLHttpRequest) and is managed by the JavaScript GC, no delete required
     opened = false;
   }
 }

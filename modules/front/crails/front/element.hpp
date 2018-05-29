@@ -23,7 +23,7 @@ namespace Crails
 
       Element& html(client::String* content)      { el->set_innerHTML(content); return *this; }
       Element& html(const std::string& content)   { _html<std::string>(content); return *this; }
-      Element& html(const std::wstring& content)  { _html<std::wstring>(content); { return *this; }
+      Element& html(const std::wstring& content)  { _html<std::wstring>(content); return *this; }
       Element& text(client::String* content)      { el->set_textContent(content); return *this; }
       Element& text(const std::string& content)   { _text<std::string>(content); return *this; }
       Element& text(const std::wstring& content)  { _text<std::wstring>(content); return *this; }
