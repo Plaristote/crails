@@ -15,8 +15,8 @@ module ::Guard
       files          = Dir["#{@base_path}**/*"]
       selected_files = []
       @watchers.each do |watcher|
-	matcher = @file_matcher || watcher.pattern
-        selected_files += files.select {|x| x =~ matcher}
+        matcher = @file_matcher || watcher.pattern
+        selected_files += files.select {|x| not matcher.match(x).nil? }
       end
       selected_files
     end
