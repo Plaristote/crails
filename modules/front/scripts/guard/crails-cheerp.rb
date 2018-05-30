@@ -3,6 +3,12 @@ require 'guard/crails-notifier'
 
 module ::Guard
   class CrailsCheerp < CrailsPlugin
+    def initialize arg
+      @input  = arg[:input]  || "front"
+      @output = arg[:output] || "public/assets/application.js"
+      super
+    end
+
     def run_all
       if not File.exists? cheerp_path
         puts "[crails-cheerp] cheerp not found at `#{cheerp_path}`. You may set the path using the cheerp_path option."
@@ -10,7 +16,7 @@ module ::Guard
       end
 
       command = ""
-      command = "#{cc} #{cxx_flags} -o #{options[:output]} "
+      command = "#{cc} #{cxx_flags} -o #{@output} "
       if not options[:sourcemap_output].nil?
         command += "-g -cheerp-sourcemap='#{options[:sourcemap_output]}' "
       end
@@ -26,10 +32,9 @@ module ::Guard
     end
 
     def source_files
-      input = options[:input] || "front"
-      throw "no input folder found for crails-cheerp" unless File.exists? input
+      throw "no input folder found for crails-cheerp" unless File.exists? @input
       lib = Dir["#{ENV['CRAILS_SHARED_DIR']}/front/**/*.cpp"]
-      src = Dir["#{input}/**/*.cpp"]
+      src = Dir["#{@input}/**/*.cpp"]
       lib + src
     end
 

@@ -1,4 +1,5 @@
 #include <crails/front/element.hpp>
+#include <crails/front/object.hpp>
 
 using namespace std;
 using namespace Crails::Front;
@@ -88,6 +89,17 @@ Element& Element::attr(const std::map<std::string, client::String*>& attrs)
   return *this;
 }
 
+string Element::attr(const string& name)
+{
+  if (el->hasAttribute(name.c_str()))
+  {
+    Crails::Front::Object attribute = el->getAttribute(name.c_str());
+
+    return attribute;
+  }
+  return "";
+}
+
 void Element::append_to(client::HTMLElement* el)
 {
   el->appendChild(this->el);
@@ -109,7 +121,7 @@ bool Element::contains(const client::HTMLElement* source)
 
 std::vector<Element> Element::find(const std::string& selector)
 {
-  auto* node_list = el->querySelectorAll(selector.c_str());
+  client::NodeListOf<client::Element>* node_list = el->querySelectorAll(selector.c_str());
   std::vector<Element> results;
 
   results.resize(node_list->get_length());

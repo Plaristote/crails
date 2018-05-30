@@ -22,6 +22,9 @@ namespace Crails
 
       bool navigate(const std::string& path, bool trigger = true);
 
+      void initialize();
+      std::string get_current_path() const;
+
     private:
       void on_hash_changed();
 

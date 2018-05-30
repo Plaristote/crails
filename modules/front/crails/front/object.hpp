@@ -106,6 +106,8 @@ namespace Crails
         return client::eval(str.c_str());
       }
 
+      bool is_undefined() const { return ptr; }
+
     private:
       std::string _apply_params(char) { return ""; }
 

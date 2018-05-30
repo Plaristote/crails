@@ -1,4 +1,5 @@
 #include <crails/front/router.hpp>
+#include <crails/front/object.hpp>
 
 using namespace Crails::Front;
 using namespace std;
@@ -43,4 +44,18 @@ bool Router::navigate(const string& path, bool trigger)
       on_route_not_found.trigger(path);
   }
   return false;
+}
+
+string Router::get_current_path() const
+{
+  Crails::Front::Object location_hash = window.get_location()->get_hash();
+  string result = location_hash;
+
+  result.erase(result.begin()); // remove the sharp character
+  return result;
+}
+
+void Router::initialize()
+{
+  navigate(get_current_path(), true);
 }
