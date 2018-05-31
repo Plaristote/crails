@@ -23,6 +23,8 @@ namespace Crails
       typedef std::vector<DomEventListener> EventListeners;
       typedef std::vector<std::pair<client::EventTarget*,std::pair<std::string, client::EventListener*> > > ConnectedListeners;
     public:
+      typedef Crails::Front::Element El;
+
       View();
       virtual ~View();
 

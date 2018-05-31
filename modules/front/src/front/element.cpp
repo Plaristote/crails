@@ -89,7 +89,13 @@ Element& Element::attr(const std::map<std::string, client::String*>& attrs)
   return *this;
 }
 
-string Element::attr(const string& name)
+Element& Element::attr(const string& name, const string& value)
+{
+  el->setAttribute(name.c_str(), value.c_str());
+  return *this;
+}
+
+string Element::attr(const string& name) const
 {
   if (el->hasAttribute(name.c_str()))
   {

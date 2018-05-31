@@ -17,6 +17,8 @@ namespace Crails
       typedef std::shared_ptr<MODEL>            ModelPtr;
       typedef std::map<unsigned long, ModelPtr> Map;
     public:
+      typedef MODEL Model;
+
       Signal<MODEL&> added;
       Signal<MODEL&> removed;
       Signal<MODEL&> changed;

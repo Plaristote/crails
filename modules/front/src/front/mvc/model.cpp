@@ -25,9 +25,20 @@ void Model::save(Ajax::Callbacks callbacks)
 
   serialize(archive);
   Ajax::query(get_id() == 0 ? "POST" : "PUT", get_url())
-    .headers({{"Content-Type", Archive::mimetype}})
+    .headers({
+      {"Content-Type", Archive::mimetype},
+      {"Accept",       Archive::mimetype}
+    })
     .data(archive.as_string())
-    .callbacks(callbacks)();
+    .callbacks(callbacks)
+    .on_success([this, callbacks](const Ajax& ajax)
+    {
+      if (ajax->get_responseText())
+        parse((std::string)(*ajax->get_responseText()));
+      if (callbacks.success)
+        callbacks.success(ajax);
+      synced.trigger();
+    })();
 }
 
 void Model::parse(const std::string& str)

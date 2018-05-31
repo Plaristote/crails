@@ -20,7 +20,8 @@ namespace Crails
       Element& attr(const std::map<std::string, std::string>& attrs);
       Element& attr(const std::map<std::string, std::wstring>& attrs);
       Element& attr(const std::map<std::string, client::String*>& attrs);
-      std::string attr(const std::string& name);
+      Element& attr(const std::string& name, const std::string& value);
+      std::string attr(const std::string& name) const;
 
       Element& html(client::String* content)      { el->set_innerHTML(content); return *this; }
       Element& html(const std::string& content)   { _html<std::string>(content); return *this; }

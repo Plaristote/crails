@@ -143,7 +143,7 @@ protected:
   template<typename NUMERICAL_TYPE>
   void unserialize_number(NUMERICAL_TYPE& value)
   {
-    int length;
+    int length = 0;
 
     for (size_t i = offset ; i < str.size() && str[i] != ';' ; ++i)
       ++length;
