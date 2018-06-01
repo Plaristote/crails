@@ -1,31 +1,15 @@
 #include "crails/file_cache.hpp"
+#include "crails/read_file.hpp"
 
 using namespace std;
 using namespace Crails;
 
 std::string* FileCache::CreateInstance(std::string key)
 {
-  ifstream file(key.c_str(), std::ios::binary);
+  string* instance = new string;
 
-  if (file.is_open())
-  {
-    long           size, begin, end;
-    char*          raw;
-    std::string*   instance;
-
-    begin       = file.tellg();
-    file.seekg(0, std::ios::end);
-    end         = file.tellg();
-    file.seekg(0, std::ios::beg);
-    size        = end - begin;
-    raw         = new char[size + 1];
-    file.read(raw, size);
-    file.close();
-    instance = new std::string;
-    instance->resize(size);
-    std::copy(raw, raw + size, instance->begin());
-    delete[] raw;
-    return (instance);
-  }
-  return (0);
+  if (read_file(key, *instance))
+    return instance;
+  delete instance;
+  return 0;
 }
