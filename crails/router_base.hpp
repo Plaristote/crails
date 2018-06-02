@@ -5,13 +5,7 @@
 # include <vector>
 # include <string>
 # include <regex>
-
-// TODO Cheerp regex are broken. Restore that to the previous state once they are fixed.
-# ifdef __CHEERP_CLIENT__
-#  define ROUTER_PARAM_PATTERN "\\w+|\\d+"
-# else
-#  define ROUTER_PARAM_PATTERN "[a-zA-Z0-9_-]"
-# endif
+# define ROUTER_PARAM_PATTERN "[a-zA-Z0-9_-]*"
 
 namespace Crails
 {
@@ -75,7 +69,7 @@ namespace Crails
     void      item_initialize_regex(Item& item, const std::string& route)
     {
       using namespace std;
-      regex find_params(':' + std::string(ROUTER_PARAM_PATTERN) + '*', regex_constants::ECMAScript);
+      regex find_params(':' + std::string(ROUTER_PARAM_PATTERN), regex_constants::ECMAScript);
       string regexified_route;
       auto matches = sregex_iterator(route.begin(), route.end(), find_params);
       size_t last_position = 0;
@@ -85,7 +79,7 @@ namespace Crails
         smatch match = *it;
 
         regexified_route += route.substr(last_position, match.position(0) - last_position);
-        regexified_route  = regexified_route + '(' + ROUTER_PARAM_PATTERN + "*)";
+        regexified_route  = regexified_route + '(' + ROUTER_PARAM_PATTERN + ')';
         item.param_names.push_back(route.substr(match.position(0) + 1, match.length(0) - 1));
         last_position = match.position(0) + match.length(0);
       }
