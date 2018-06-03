@@ -38,6 +38,7 @@ namespace Crails
 
     protected:
       void add_event_listener(const std::string& selector, const std::string& name, DomEventListener::JsCallback callback);
+      void bind_event_listener(Element& element, const std::string& event, DomEventListener::JsCallback callback);
 
       Element el;
     private:

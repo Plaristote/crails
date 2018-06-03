@@ -23,14 +23,25 @@ void View::attach(Element& el)
   this->el.append_to(*el);
 }
 
-void View::add_event_listener(const string& selector, const string& name, DomEventListener::JsCallback callback)
+void View::add_event_listener(const string& selector, const string& event, DomEventListener::JsCallback callback)
 {
   DomEventListener event_listener;
 
   event_listener.selector = selector;
-  event_listener.event    = name;
+  event_listener.event    = event;
   event_listener.callback = callback;
   event_listeners.push_back(event_listener);
+}
+
+void View::bind_event_listener(Crails::Front::Element& element, const string& event, DomEventListener::JsCallback raw_callback)
+{
+  client::EventListener* callback = cheerp::Callback(raw_callback);
+  pair<string, client::EventListener*> tmp(event, callback);
+
+  element->addEventListener(event.c_str(), callback);
+  connected_listeners.push_back(
+    ConnectedListeners::value_type(*element, tmp)
+  );
 }
 
 void View::delegate_events()
@@ -42,15 +53,7 @@ void View::delegate_events()
 
     elements = el.find(event_listener.selector);
     for (auto element : elements)
-    {
-      client::EventListener* callback = cheerp::Callback(event_listener.callback);
-      pair<string, client::EventListener*> tmp(event_listener.event, callback);
-
-      element->addEventListener(event_listener.event.c_str(), callback);
-      connected_listeners.push_back(
-        ConnectedListeners::value_type(*element, tmp)
-      );
-    }
+      bind_event_listener(element, event_listener.event, event_listener.callback);
   }
 }
 
