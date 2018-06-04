@@ -4,6 +4,7 @@
 # include <cheerp/client.h>
 # include <cheerp/clientlib.h>
 # include <map>
+# include "object.hpp"
 
 namespace Crails
 {
@@ -32,7 +33,21 @@ namespace Crails
       Element& value(client::String* val)         { static_cast<client::HTMLInputElement*>(el)->set_value(val); return *this; }
       Element& value(const std::string& val)      { _value<std::string>(val); return *this; }
       Element& value(const std::wstring& val)     { _value<std::wstring>(val); return *this; }
+      template<typename T>
+      Element& value(const T val) { std::stringstream stream; stream << val; _value<std::string>(stream.str()); return *this; }
       Element& checked(bool val)                  { static_cast<client::HTMLInputElement*>(el)->set_checked(val); return *this; }
+
+      std::string html() const { return Crails::Front::Object(el->get_innerHTML()); }
+
+      template<typename T>
+      T value()
+      {
+        T var;
+        std::stringstream stream;
+        stream << get_value();
+        stream >> var;
+        return var;
+      }
 
       Element& operator>(const std::vector<Element>& children);
       Element& operator>(Element child);
