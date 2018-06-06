@@ -36,6 +36,27 @@ bool Element::is_visible() const
          (!css_visible || (string)(*css_visible) != "hidden");
 }
 
+Element& Element::visible(bool value, const string& _display)
+{
+  auto*  style       = el->get_style();
+  auto*  css_display = style->get_display();
+  string display;
+
+  if (value)
+  {
+    string tag = tagName();
+
+    if (!_display.length())
+      display = (tag == "DIV" || tag == "div") ? "block" : "inline-block";
+    else
+      display = _display;
+  }
+  else
+    display = "none";
+  style->set_display(display.c_str());
+  return *this;
+}
+
 bool Element::has_parent() const
 {
   return el->get_parentElement() != 0;

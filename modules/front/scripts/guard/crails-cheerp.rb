@@ -19,7 +19,9 @@ module ::Guard
       command = "#{cc} #{cxx_flags} -o #{@output} "
       if not options[:sourcemap_output].nil?
         command += "-g -cheerp-sourcemap='#{options[:sourcemap_output]}' "
+        command += "-cheerp-sourcemap-standalone " if options[:sourcemap_standalone]
       end
+      command += "-cheerp-preexecute " if options[:preexecute]
       include_paths.each do |include_path|
         command += "-I'#{include_path}' "
       end

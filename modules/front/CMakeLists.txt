@@ -5,7 +5,7 @@ project(crails-front)
 include_directories(.)
 
 file(GLOB crails_front            src/*.cpp)
-file(GLOB crails_front_js         src/*.cpp ../../src/http.cpp)
+file(GLOB crails_front_js         src/*.cpp ../../src/http.cpp ../../src/utils/string_semantics.cpp ../../src/utils/string_split.cpp)
 file(GLOB crails_back             backend_src/*.cpp)
 file(GLOB guard_front_plugins     scripts/guard/*.rb)
 file(GLOB scripts_front_templates scripts/guard/templates/*.erb)

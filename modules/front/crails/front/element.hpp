@@ -37,7 +37,8 @@ namespace Crails
       Element& value(const T val) { std::stringstream stream; stream << val; _value<std::string>(stream.str()); return *this; }
       Element& checked(bool val)                  { static_cast<client::HTMLInputElement*>(el)->set_checked(val); return *this; }
 
-      std::string html() const { return Crails::Front::Object(el->get_innerHTML()); }
+      std::string html()    const { return Crails::Front::Object(el->get_innerHTML()); }
+      std::string tagName() const { return Crails::Front::Object(el->get_tagName()); }
 
       template<typename T>
       T value()
@@ -77,6 +78,7 @@ namespace Crails
       void                 remove_attribute(const std::string& key);
 
       bool                 is_visible() const;
+      Element&             visible(bool, const std::string& display = "");
 
       std::string          get_value() const;
       bool                 get_checked() const { return static_cast<client::HTMLInputElement*>(el)->get_checked(); }
