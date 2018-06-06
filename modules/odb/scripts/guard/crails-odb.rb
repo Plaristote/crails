@@ -165,6 +165,7 @@ module ::Guard
     end
 
     def apply_new_version target_dir
+      FileUtils.mkdir_p target_dir
       Dir["#{@temporary_output}/*"].each do |generated_file|
         filename = generated_file.split('/').last
         last_generated_file = "#{target_dir}/#{filename}"
