@@ -202,7 +202,7 @@ namespace Crails
       ObjectImpl(client::Object* ptr) { this->ptr = ptr; }
 
       CLIENT_TYPE* operator*() const { return static_cast<CLIENT_TYPE*>(ptr); }
-      CLIENT_TYPE* operator->() { return static_cast<CLIENT_TYPE*>(ptr); }
+      CLIENT_TYPE* operator->() const { return static_cast<CLIENT_TYPE*>(ptr); }
     };
   }
 }

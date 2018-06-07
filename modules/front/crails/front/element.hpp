@@ -10,7 +10,7 @@ namespace Crails
 {
   namespace Front
   {
-    struct Element
+    struct Element : public ObjectImpl<client::HTMLElement>
     {
     public:
       Element();
@@ -60,9 +60,6 @@ namespace Crails
       bool    has_parent() const;
       Element get_parent();
       Element get_next();
-
-      client::HTMLElement* operator->() { return el; }
-      client::HTMLElement* operator*()  { return el; }
 
       std::vector<Element> find(const std::string& selector);
       bool                 contains(const client::HTMLElement*);

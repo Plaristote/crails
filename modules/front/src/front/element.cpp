@@ -4,31 +4,29 @@
 using namespace std;
 using namespace Crails::Front;
 
-Element::Element()
+Element::Element() : ObjectImpl(client::document.createElement("div"))
 {
-  el = client::document.createElement("div");
 }
 
-Element::Element(const client::String& type, const map<string, string>& children)
+Element::Element(const client::String& type, const map<string, string>& children) :
+  ObjectImpl(client::document.createElement(type))
 {
-  el = client::document.createElement(type);
   attr(children);
 }
 
-Element::Element(client::HTMLElement* el)
+Element::Element(client::HTMLElement* el) : ObjectImpl(el)
 {
-  this->el = el;
 }
 
 void Element::destroy()
 {
   if (has_parent())
-    el->get_parentElement()->removeChild(el);
+    (*this)->get_parentElement()->removeChild(el);
 }
 
 bool Element::is_visible() const
 {
-  auto* style       = el->get_style();
+  auto* style       = (*this)->get_style();
   auto* css_display = style->get_display();
   auto* css_visible = style->get_visibility();
 
@@ -38,7 +36,7 @@ bool Element::is_visible() const
 
 Element& Element::visible(bool value, const string& _display)
 {
-  auto*  style       = el->get_style();
+  auto*  style       = (*this)->get_style();
   auto*  css_display = style->get_display();
   string display;
 
@@ -59,23 +57,23 @@ Element& Element::visible(bool value, const string& _display)
 
 bool Element::has_parent() const
 {
-  return el->get_parentElement() != 0;
+  return (*this)->get_parentElement() != 0;
 }
 
 Element Element::get_parent()
 {
-  return Element(el->get_parentElement());
+  return Element((*this)->get_parentElement());
 }
 
 Element Element::get_next()
 {
-  return Element((client::HTMLElement*)el->get_nextElementSibling());
+  return Element((client::HTMLElement*)((*this)->get_nextElementSibling()));
 }
 
 Element& Element::inner(const std::vector<Element>& children)
 {
   for (Element element : children)
-    el->appendChild(element.el);
+    (*this)->appendChild(element.el);
   return *this;
 }
 
@@ -92,35 +90,35 @@ Element& Element::operator>(Element child)
 Element& Element::attr(const std::map<std::string, std::string>& attrs)
 {
   for (auto it = attrs.begin() ; it != attrs.end() ; ++it)
-   el->setAttribute(it->first.c_str(), it->second.c_str());
+   (*this)->setAttribute(it->first.c_str(), it->second.c_str());
   return *this;
 }
 
 Element& Element::attr(const std::map<std::string, std::wstring>& attrs)
 {
   for (auto it = attrs.begin() ; it != attrs.end() ; ++it)
-   el->setAttribute(it->first.c_str(), it->second.c_str());
+   (*this)->setAttribute(it->first.c_str(), it->second.c_str());
   return *this;
 }
 
 Element& Element::attr(const std::map<std::string, client::String*>& attrs)
 {
   for (auto it = attrs.begin() ; it != attrs.end() ; ++it)
-   el->setAttribute(it->first.c_str(), it->second);
+   (*this)->setAttribute(it->first.c_str(), it->second);
   return *this;
 }
 
 Element& Element::attr(const string& name, const string& value)
 {
-  el->setAttribute(name.c_str(), value.c_str());
+  (*this)->setAttribute(name.c_str(), value.c_str());
   return *this;
 }
 
 string Element::attr(const string& name) const
 {
-  if (el->hasAttribute(name.c_str()))
+  if ((*this)->hasAttribute(name.c_str()))
   {
-    Crails::Front::Object attribute = el->getAttribute(name.c_str());
+    Crails::Front::Object attribute = (*this)->getAttribute(name.c_str());
 
     return attribute;
   }
@@ -129,7 +127,7 @@ string Element::attr(const string& name) const
 
 void Element::append_to(client::HTMLElement* el)
 {
-  el->appendChild(this->el);
+  el->appendChild(**this);
 }
 
 bool Element::contains(const client::HTMLElement* source)
@@ -148,7 +146,7 @@ bool Element::contains(const client::HTMLElement* source)
 
 std::vector<Element> Element::find(const std::string& selector)
 {
-  client::NodeListOf<client::Element>* node_list = el->querySelectorAll(selector.c_str());
+  client::NodeListOf<client::Element>* node_list = (*this)->querySelectorAll(selector.c_str());
   std::vector<Element> results;
 
   results.resize(node_list->get_length());
@@ -159,7 +157,7 @@ std::vector<Element> Element::find(const std::string& selector)
 
 void Element::each(std::function<bool (Element&)> func)
 {
-  auto* node_list = el->get_childNodes();
+  auto* node_list = (*this)->get_childNodes();
 
   for (double i = 0 ; i < node_list->get_length() ; ++i)
   {
@@ -172,12 +170,12 @@ void Element::each(std::function<bool (Element&)> func)
 
 Element& Element::empty()
 {
-  auto* node_list = el->get_childNodes();
+  auto* node_list = (*this)->get_childNodes();
 
   while (node_list->get_length())
   {
-    el->removeChild(node_list->item(0));
-    node_list = el->get_childNodes();
+    (*this)->removeChild(node_list->item(0));
+    node_list = (*this)->get_childNodes();
   }
   return *this;
 }
@@ -195,7 +193,7 @@ void Element::toggle_class(const std::string& str, bool set)
 
 void Element::add_class(const std::string& str)
 {
-  client::String* original = el->getAttribute("class");
+  client::String* original = (*this)->getAttribute("class");
   std::string result;
 
   if (original)
@@ -203,12 +201,12 @@ void Element::add_class(const std::string& str)
   if (result.size() > 0)
     result += ' ';
   result += str;
-  el->setAttribute("class", result.c_str());
+  (*this)->setAttribute("class", result.c_str());
 }
 
 void Element::remove_class(const std::string& str)
 {
-  client::String* original = el->getAttribute("class");
+  client::String* original = (*this)->getAttribute("class");
 
   if (original)
   {
@@ -218,13 +216,13 @@ void Element::remove_class(const std::string& str)
       result.erase(it - 1, it + str.size() + 1);
     else
       result.erase(it, it + str.size() + 1);
-    el->setAttribute("class", result.c_str());
+    (*this)->setAttribute("class", result.c_str());
   }
 }
 
 bool Element::has_class(const std::string& str) const
 {
-  client::String* class_ptr = el->getAttribute("class");
+  client::String* class_ptr = (*this)->getAttribute("class");
 
   if (class_ptr)
   {
@@ -237,24 +235,24 @@ bool Element::has_class(const std::string& str) const
 
 bool Element::has_attribute(const std::string& key) const
 {
-  return el->hasAttribute(key.c_str());
+  return (*this)->hasAttribute(key.c_str());
 }
 
 std::string Element::get_attribute(const std::string& key) const
 {
-  client::String* attr_ptr = el->getAttribute(key.c_str());
+  client::String* attr_ptr = (*this)->getAttribute(key.c_str());
 
   return (std::string)(*attr_ptr);
 }
 
 void Element::remove_attribute(const std::string& key)
 {
-  el->removeAttribute(key.c_str());
+  (*this)->removeAttribute(key.c_str());
 }
 
 std::string Element::get_value() const
 {
-  auto* input_el      = static_cast<client::HTMLInputElement*>(el);
+  auto* input_el      = static_cast<client::HTMLInputElement*>(**this);
   auto* client_string = input_el->get_value();
 
   return (std::string)(*client_string);

@@ -8,8 +8,8 @@ namespace Crails
 {
   namespace Front
   {
-    extern Element                         body;
-    extern ObjectImpl<client::EventTarget> window;
+    extern Element                    body;
+    extern ObjectImpl<client::Window> window;
   }
 }
 
