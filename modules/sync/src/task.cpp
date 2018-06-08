@@ -54,7 +54,9 @@ void Task::notify()
   progress /= task_count;
   if (progress > 1)
     progress = 1;
-  metadata["progress"] = progress;
+  metadata["progress"]      = progress;
+  metadata["item_count"]    = task_count;
+  metadata["item_progress"] = task_progress;
   last_notification = task_progress;
   faye.publish("/tasks", metadata.as_data());
 }
