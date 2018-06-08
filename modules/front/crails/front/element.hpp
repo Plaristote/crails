@@ -24,21 +24,21 @@ namespace Crails
       Element& attr(const std::string& name, const std::string& value);
       std::string attr(const std::string& name) const;
 
-      Element& html(client::String* content)      { el->set_innerHTML(content); return *this; }
+      Element& html(client::String* content)      { (*this)->set_innerHTML(content); return *this; }
       Element& html(const std::string& content)   { _html<std::string>(content); return *this; }
       Element& html(const std::wstring& content)  { _html<std::wstring>(content); return *this; }
-      Element& text(client::String* content)      { el->set_textContent(content); return *this; }
+      Element& text(client::String* content)      { (*this)->set_textContent(content); return *this; }
       Element& text(const std::string& content)   { _text<std::string>(content); return *this; }
       Element& text(const std::wstring& content)  { _text<std::wstring>(content); return *this; }
-      Element& value(client::String* val)         { static_cast<client::HTMLInputElement*>(el)->set_value(val); return *this; }
+      Element& value(client::String* val)         { static_cast<client::HTMLInputElement*>(**this)->set_value(val); return *this; }
       Element& value(const std::string& val)      { _value<std::string>(val); return *this; }
       Element& value(const std::wstring& val)     { _value<std::wstring>(val); return *this; }
       template<typename T>
       Element& value(const T val) { std::stringstream stream; stream << val; _value<std::string>(stream.str()); return *this; }
-      Element& checked(bool val)                  { static_cast<client::HTMLInputElement*>(el)->set_checked(val); return *this; }
+      Element& checked(bool val)                  { static_cast<client::HTMLInputElement*>(**this)->set_checked(val); return *this; }
 
-      std::string html()    const { return Crails::Front::Object(el->get_innerHTML()); }
-      std::string tagName() const { return Crails::Front::Object(el->get_tagName()); }
+      std::string html()    const { return Crails::Front::Object((*this)->get_innerHTML()); }
+      std::string tagName() const { return Crails::Front::Object((*this)->get_tagName()); }
 
       template<typename T>
       T value()
@@ -78,28 +78,26 @@ namespace Crails
       Element&             visible(bool, const std::string& display = "");
 
       std::string          get_value() const;
-      bool                 get_checked() const { return static_cast<client::HTMLInputElement*>(el)->get_checked(); }
+      bool                 get_checked() const { return static_cast<client::HTMLInputElement*>(**this)->get_checked(); }
 
     private:
       template<typename TYPE>
       void _html(const TYPE& content)
       {
-        el->set_innerHTML(content.c_str());
+        (*this)->set_innerHTML(content.c_str());
       }
 
       template<typename TYPE>
       void _text(const TYPE& content)
       {
-        el->set_textContent(content.c_str());
+        (*this)->set_textContent(content.c_str());
       }
 
       template<typename TYPE>
       void _value(const TYPE& val)
       {
-        static_cast<client::HTMLInputElement*>(el)->set_value(val.c_str());
+        static_cast<client::HTMLInputElement*>(**this)->set_value(val.c_str());
       }
-
-      client::HTMLElement* el;
     };
   }
 }

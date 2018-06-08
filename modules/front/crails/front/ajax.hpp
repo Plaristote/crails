@@ -41,6 +41,8 @@ namespace Crails
       Ajax& on_progress(AjaxCallback callback) { _callbacks.progress = callback; return *this; }
       Ajax& on_complete(AjaxCallback callback) { _callbacks.complete = callback; return *this; }
 
+      std::string get_response_text() const;
+
     protected:
       void on_ready_state_changed();
       void on_done();

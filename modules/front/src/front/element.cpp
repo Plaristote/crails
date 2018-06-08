@@ -21,7 +21,7 @@ Element::Element(client::HTMLElement* el) : ObjectImpl(el)
 void Element::destroy()
 {
   if (has_parent())
-    (*this)->get_parentElement()->removeChild(el);
+    (*this)->get_parentElement()->removeChild(**this);
 }
 
 bool Element::is_visible() const
@@ -73,7 +73,7 @@ Element Element::get_next()
 Element& Element::inner(const std::vector<Element>& children)
 {
   for (Element element : children)
-    (*this)->appendChild(element.el);
+    (*this)->appendChild(*element);
   return *this;
 }
 
@@ -134,7 +134,7 @@ bool Element::contains(const client::HTMLElement* source)
 {
   bool result = false;
 
-  if (el == source)
+  if (**this == source)
     return true;
   each([&result, source](Element& el) -> bool
   {

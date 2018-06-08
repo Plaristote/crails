@@ -52,6 +52,21 @@ namespace Crails
         ptr = array;
       }
 
+      static Object from_json(const std::string& str)
+      {
+        return from_json(str.c_str());
+      }
+
+      static Object from_json(client::String* str)
+      {
+        return client::JSON.parse(str);
+      }
+
+      std::string to_json() const
+      {
+        return Object(client::JSON.stringify(ptr));
+      }
+
       template<typename FUNCTYPE>
       Object(FUNCTYPE func) { ptr = cheerp::Callback(func); }
 
@@ -67,6 +82,7 @@ namespace Crails
       }
 
       client::Object* operator*() const { return ptr; }
+      client::Object* operator->() const { return ptr; }
 
       operator std::string() const { return (std::string)(*static_cast<client::String*>(ptr)); }
       operator double()      const { return (double)(*ptr); }
@@ -106,7 +122,7 @@ namespace Crails
         return client::eval(str.c_str());
       }
 
-      bool is_undefined() const { return ptr; }
+      bool is_undefined() const { return ptr == 0; }
 
     private:
       std::string _apply_params(char) { return ""; }

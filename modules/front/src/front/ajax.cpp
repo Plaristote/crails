@@ -1,4 +1,5 @@
 #include <crails/front/ajax.hpp>
+#include <crails/front/object.hpp>
 
 using namespace Crails::Front;
 using namespace client;
@@ -118,4 +119,13 @@ void Ajax::on_done()
 void Ajax::clear_callbacks()
 {
   _callbacks = Callbacks();
+}
+
+string Ajax::get_response_text() const
+{
+  Crails::Front::Object object(xhr->get_responseText());
+
+  if (object.is_undefined())
+    return "";
+  return object;
 }
