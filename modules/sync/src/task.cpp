@@ -49,8 +49,9 @@ void Task::notify(const std::string& message)
 
 void Task::notify()
 {
-  float progress = task_progress / task_count;
+  float progress = task_progress;
 
+  progress /= task_count;
   if (progress > 1)
     progress = 1;
   metadata["progress"] = progress;
