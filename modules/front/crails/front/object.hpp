@@ -52,11 +52,6 @@ namespace Crails
         ptr = array;
       }
 
-      static Object from_json(const std::string& str)
-      {
-        return from_json(str.c_str());
-      }
-
       static Object from_json(client::String* str)
       {
         return client::JSON.parse(str);
