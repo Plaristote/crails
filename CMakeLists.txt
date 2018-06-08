@@ -105,6 +105,7 @@ add_subdirectory(modules/proxy)
 add_subdirectory(modules/sentry)
 add_subdirectory(modules/front)
 add_subdirectory(modules/sidekic)
+add_subdirectory(modules/sync)
 
 if (${ImageMagick_Magick++_FOUND})
   add_subdirectory(modules/image)
