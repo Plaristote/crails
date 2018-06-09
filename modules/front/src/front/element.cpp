@@ -1,5 +1,6 @@
 #include <crails/front/element.hpp>
 #include <crails/front/object.hpp>
+#include <crails/utils/string.hpp>
 
 using namespace std;
 using namespace Crails::Front;
@@ -123,6 +124,50 @@ string Element::attr(const string& name) const
     return attribute;
   }
   return "";
+}
+
+static std::string generate_style_attribute(std::map<std::string, std::string> attrs)
+{
+  std::string result;
+
+  for (auto entry : attrs)
+    result += entry.first + ':' + entry.second + ';';
+  return result;
+}
+
+Element& Element::css(const string& name, const string& value)
+{
+  auto css_attributes = css();
+
+  css_attributes[name] = value;
+  attr("style", generate_style_attribute(css_attributes));
+  return *this;
+}
+
+Element& Element::css(const map<string,string>& attrs)
+{
+  auto css_attributes = css();
+
+  for (auto entry : attrs)
+    css_attributes[entry.first] = entry.second;
+  attr("style", generate_style_attribute(css_attributes));
+  return *this;
+}
+
+map<string, string> Element::css() const
+{
+  string style = attr("style");
+  auto   css_attributes = Crails::split(style, ';');
+  map<string, string> results;
+
+  for (auto css_attribute : css_attributes)
+  {
+    auto parts = Crails::split(css_attribute, ':');
+
+    if (parts.size() == 2)
+      results.insert(pair<string,string>(*(parts.begin()), *(parts.rbegin())));
+  }
+  return results;
 }
 
 void Element::append_to(client::HTMLElement* el)
