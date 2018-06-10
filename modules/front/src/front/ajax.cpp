@@ -1,5 +1,4 @@
 #include <crails/front/ajax.hpp>
-#include <crails/front/object.hpp>
 
 using namespace Crails::Front;
 using namespace client;
@@ -128,4 +127,13 @@ string Ajax::get_response_text() const
   if (object.is_undefined())
     return "";
   return object;
+}
+
+Crails::Front::Object Ajax::get_response_as_json() const
+{
+  ObjectImpl<client::String> object(xhr->get_responseText());
+
+  if (object.is_undefined())
+    return object;
+  return Crails::Front::Object::from_json(*object);
 }

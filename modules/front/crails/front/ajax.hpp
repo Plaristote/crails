@@ -4,6 +4,7 @@
 # include <cheerp/client.h>
 # include <cheerp/clientlib.h>
 # include "signal.hpp"
+# include "object.hpp"
 # include <map>
 # include <string>
 
@@ -41,7 +42,8 @@ namespace Crails
       Ajax& on_progress(AjaxCallback callback) { _callbacks.progress = callback; return *this; }
       Ajax& on_complete(AjaxCallback callback) { _callbacks.complete = callback; return *this; }
 
-      std::string get_response_text() const;
+      std::string           get_response_text() const;
+      Crails::Front::Object get_response_as_json() const;
 
     protected:
       void on_ready_state_changed();
