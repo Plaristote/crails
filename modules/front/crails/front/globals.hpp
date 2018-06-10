@@ -3,6 +3,7 @@
 
 # include <crails/front/element.hpp>
 # include <crails/front/object.hpp>
+# include <crails/front/document.hpp>
 
 namespace Crails
 {
@@ -10,6 +11,7 @@ namespace Crails
   {
     extern Element                    body;
     extern ObjectImpl<client::Window> window;
+    extern Document                   document;
   }
 }
 

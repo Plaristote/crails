@@ -63,7 +63,7 @@ namespace Crails
       }
 
       template<typename FUNCTYPE>
-      Object(FUNCTYPE func) { ptr = cheerp::Callback(func); }
+      Object(std::function<FUNCTYPE> func) { ptr = cheerp::Callback(func); }
 
       Object operator[](const char* key)
       {
