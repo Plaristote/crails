@@ -57,6 +57,7 @@ template<> void IArchive::unserialize<std::string>(std::string& value)
   unserialize_number<int>(length);
 #ifdef __CHEERP_CLIENT__ // wide characters in std::string do not behave as expected with Cheerp
   int end = offset + length;
+  value = "";
   while (offset < end)
   {
     unsigned int char_value = (unsigned int)str[offset];
