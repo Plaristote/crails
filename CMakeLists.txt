@@ -106,6 +106,7 @@ add_subdirectory(modules/sentry)
 add_subdirectory(modules/front)
 add_subdirectory(modules/sidekic)
 add_subdirectory(modules/sync)
+add_subdirectory(modules/xmlrpc)
 
 if (${ImageMagick_Magick++_FOUND})
   add_subdirectory(modules/image)
