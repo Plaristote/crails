@@ -1,4 +1,5 @@
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional/optional.hpp>
 #include <crails/datatree.hpp>
 #include <sstream>
@@ -9,6 +10,11 @@ using namespace std;
 string DataTree::to_json() const
 {
   return const_cast<DataTree*>(this)->as_data().to_json();
+}
+
+string DataTree::to_xml() const
+{
+  return const_cast<DataTree*>(this)->as_data().to_xml();
 }
 
 DataTree& DataTree::from_json(stringstream& stream)
@@ -30,6 +36,28 @@ DataTree& DataTree::from_json_file(const string& json_file)
   ifstream stream(json_file.c_str());
 
   boost::property_tree::read_json(stream, tree);
+  return *this;
+}
+
+DataTree& DataTree::from_xml(stringstream& stream)
+{
+  boost::property_tree::read_xml(stream, tree);
+  return *this;
+}
+
+DataTree& DataTree::from_xml(const string& xml)
+{
+  stringstream stream;
+
+  stream.str(xml);
+  return from_xml(stream);
+}
+
+DataTree& DataTree::from_xml_file(const string& xml_file)
+{
+  ifstream stream(xml_file.c_str());
+
+  boost::property_tree::read_xml(stream, tree);
   return *this;
 }
 
@@ -177,5 +205,13 @@ string Data::to_json() const
   stringstream stream;
 
   output(stream);
+  return stream.str();
+}
+
+string Data::to_xml() const
+{
+  stringstream stream;
+
+  boost::property_tree::xml_parser::write_xml(stream, get_ptree());
   return stream.str();
 }

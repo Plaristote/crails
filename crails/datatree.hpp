@@ -194,6 +194,7 @@ public:
 
   void output(std::ostream& out = std::cout) const;
   std::string to_json() const;
+  std::string to_xml() const;
 
   void merge(Data data);
   void merge(DataTree data_tree);
@@ -222,6 +223,11 @@ public:
   DataTree& from_json(const std::string&);
   DataTree& from_json_file(const std::string&);
   std::string to_json() const;
+
+  DataTree& from_xml(std::stringstream&);
+  DataTree& from_xml(const std::string&);
+  DataTree& from_xml_file(const std::string&);
+  std::string to_xml() const;
 
   boost::property_tree::ptree&       get_ptree()       { return tree; }
   const boost::property_tree::ptree& get_ptree() const { return tree; }
