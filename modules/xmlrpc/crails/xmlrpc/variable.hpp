@@ -36,8 +36,15 @@ namespace XmlRpc
         array.push_back(Variable(item));
     }
 
+    const Variable& operator[](const char* name) const;
     const Variable& operator[](const std::string& name) const;
     const Variable& operator[](unsigned int i) const;
+
+    operator int()         const { return as_int();     }
+    operator double()      const { return as_double();  }
+    operator bool()        const { return as_boolean(); }
+    operator std::string() const { return as_string();  }
+    operator std::time_t() const { return as_date();    }
 
     bool is_nil() const;
 

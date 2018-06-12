@@ -4,9 +4,14 @@
 
 using namespace XmlRpc;
 
-const Variable& Variable::operator[](const std::string& name) const
+const Variable& Variable::operator[](const char* name) const
 {
   return members.at(name);
+}
+
+const Variable& Variable::operator[](const std::string& name) const
+{
+  return operator[](name.c_str());
 }
 
 const Variable& Variable::operator[](unsigned int i) const
