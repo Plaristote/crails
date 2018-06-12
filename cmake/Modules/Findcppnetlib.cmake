@@ -14,7 +14,7 @@ endif()
 if(CPPNETLIB_PATH)
   set(__libraries cppnetlib-client-connections
                   cppnetlib-server-parsers
-                  network-uri)
+                  cppnetlib-uri)
 
   foreach(__library ${__libraries})
     if(TARGET ${__library})
