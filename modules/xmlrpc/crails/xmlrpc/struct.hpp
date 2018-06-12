@@ -34,6 +34,16 @@
   void set_##name(const std::vector<std::string>& value) { data.members[#name] = XmlRpc::Variable(value); } \
   bool is_##name##_nil() const { return data[#name].is_nil(); }
 
+# define XmlRpc_int_array_property(name) \
+  std::vector<int> get_##name() const { return data[#name].as_array<int>(&XmlRpc::Variable::as_int); } \
+  void set_##name(const std::vector<int>& value) { data.members[#name] = XmlRpc::Variable(value); } \
+  bool is_##name##_nil() const { return data[#name].is_nil(); }
+
+# define XmlRpc_double_array_property(name) \
+  std::vector<double> get_##name() const { return data[#name].as_array<std::string>(&XmlRpc::Variable::as_double); } \
+  void set_##name(const std::vector<double>& value) { data.members[#name] = XmlRpc::Variable(value); } \
+  bool is_##name##_nil() const { return data[#name].is_nil(); }
+
 namespace XmlRpc
 {
   class Struct

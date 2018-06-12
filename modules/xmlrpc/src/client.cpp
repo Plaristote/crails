@@ -20,16 +20,9 @@ void Client::raise_xmlrpc_fault(const DataTree& data) const
   throw Fault(fault_struct);
 }
 
-vector<XmlRpc::Variable> Client::get_response_params(const DataTree& data) const
+XmlRpc::Variable Client::get_response_variable(const DataTree& data) const
 {
-  std::vector<XmlRpc::Variable> variables;
-  const Data params = data["methodResponse"]["params"];
+  const Data param = data["methodResponse"]["params"]["param"];
 
-  variables.reserve(params.count());
-  params.each([&variables](const Data data) -> bool
-  {
-    variables.push_back(Variable::from_data(data["value"]));
-    return true;
-  });
-  return variables;
+  return Variable::from_data(param["value"]);
 }

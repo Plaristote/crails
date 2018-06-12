@@ -22,7 +22,7 @@ namespace XmlRpc
     }
 
     template<typename ...Args>
-    std::vector<Variable> call(const std::string& method_name, Args... args)
+    Variable call(const std::string& method_name, Args... args)
     {
       std::string body = xml_for_method_call(method_name, args...);
       boost::network::http::client::request request(endpoint);
@@ -42,7 +42,7 @@ namespace XmlRpc
       response_data.from_xml(boost::network::http::body(response));
       if (is_faulty_response(response_data))
         raise_xmlrpc_fault(response_data);
-      return get_response_params(response_data);
+      return get_response_variable(response_data);
     }
 
     bool is_faulty_response(const DataTree& data) const
@@ -52,7 +52,7 @@ namespace XmlRpc
 
     void raise_xmlrpc_fault(const DataTree& data) const;
 
-    std::vector<XmlRpc::Variable> get_response_params(const DataTree& data) const;
+    XmlRpc::Variable get_response_variable(const DataTree& data) const;
   };
 }
 
