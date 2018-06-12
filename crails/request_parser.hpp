@@ -97,6 +97,14 @@ namespace Crails
   private:
     void body_received(const HttpServer::request&, BuildingResponse&, Params&, const std::string& body);
   };
+
+  class RequestXmlParser : public BodyParser
+  {
+  public:
+   void operator()(const HttpServer::request&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>);
+  private:
+    void body_received(const HttpServer::request&, BuildingResponse&, Params&, const std::string& body);
+  };
 }
 
 #endif

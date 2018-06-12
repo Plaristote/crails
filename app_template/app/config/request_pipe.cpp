@@ -11,6 +11,7 @@ void Server::initialize_request_pipe()
   add_request_parser(new RequestDataParser);
   add_request_parser(new RequestFormParser);
   add_request_parser(new RequestJsonParser);
+  add_request_parser(new RequestXmlParser);
   add_request_parser(new RequestMultipartParser);
 
   add_request_handler(new FileRequestHandler);

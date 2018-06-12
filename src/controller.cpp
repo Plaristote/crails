@@ -121,7 +121,7 @@ void Controller::set_content_type(RenderType type)
       content_type = "application/javascript";
       break ;
     case XML:
-      content_type = "application/xml";
+      content_type = "text/xml";
       break ;
     case HTML:
       content_type = "text/html";
