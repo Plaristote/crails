@@ -23,7 +23,7 @@ module ::Guard
       @schema_prologue  = options[:schema_prologue]
       @generate_session = options[:generate_session]
       @defines          = options[:defines]
-      @requires         = ['crails/safe_ptr.hpp']
+      @requires         = ['crails/safe_ptr.hpp', 'crails/odb/traits.hpp', 'config/odb.hpp']
       @requires        += options[:requires] unless options[:requires].nil?
     end
 
