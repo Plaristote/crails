@@ -47,6 +47,7 @@ namespace Sync
     typedef std::list<std::shared_ptr<IUpdate> > UpdateList;
   public:
     static bool is_enabled();
+    static std::function<void (DataTree&)> on_commit;
 
     void commit();
     void rollback();

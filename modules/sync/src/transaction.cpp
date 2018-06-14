@@ -9,6 +9,7 @@ using namespace std;
 namespace Sync
 {
   bool enabled = true;
+  function<void (DataTree&)> Transaction::on_commit;
 }
 
 bool Transaction::is_enabled()
@@ -28,6 +29,8 @@ void Transaction::commit()
     for (auto removal : removals)
       removal_uids.push_back(removal->uid());
     message["removals"].from_vector<string>(removal_uids);
+    if (on_commit)
+      on_commit(message);
     faye.publish("/sync", message.as_data());
     rollback();
   }
