@@ -4,7 +4,7 @@
 # include "model/timestamps.hpp"
 # include "config/odb.hpp"
 
-namespace Db
+namespace ODB
 {
   typedef ModelTimestamps Model;
 }

@@ -1,6 +1,7 @@
 #include "../crails/odb/transaction.hpp"
 #include "../crails/odb/database_settings.hpp"
 #include <odb/transaction.hxx>
+#include <odb/session.hxx>
 #include <odb/pgsql/database.hxx>
 #include <crails/databases.hpp>
 #include <crails/odb/database.hpp>
@@ -11,22 +12,22 @@ using namespace Crails;
 
 extern const std::string default_configuration_name;
 
-Db::Transaction::Transaction() : odb_database(0)
+ODB::Transaction::Transaction() : odb_database(0)
 {
 }
 
-Db::Transaction::~Transaction()
+ODB::Transaction::~Transaction()
 {
 }
 
-odb::database& Db::Transaction::get_database()
+odb::database& ODB::Transaction::get_database()
 {
   if (!odb_database)
     throw std::runtime_error("asked for a database on an uninitialized Transaction");
   return *odb_database;
 }
 
-void Db::Transaction::require(const std::string& name)
+void ODB::Transaction::require(const std::string& name)
 {
   if (database_name != name || !odb_database)
   {
@@ -34,7 +35,7 @@ void Db::Transaction::require(const std::string& name)
       start(name, CRAILS_DATABASE(ODB, default_configuration_name).get_agnostic_database());
     else
     {
-      auto  database_settings = Db::get_database_settings_for(name);
+      auto  database_settings = ODB::get_database_settings_for(name);
       auto& crails_database = CRAILS_DATABASE_FROM_SETTINGS(ODB, name, database_settings);
 
       start(name, crails_database.get_agnostic_database());
@@ -42,7 +43,7 @@ void Db::Transaction::require(const std::string& name)
   }
 }
 
-void Db::Transaction::start(const std::string& name, odb::database& database)
+void ODB::Transaction::start(const std::string& name, odb::database& database)
 {
   rollback();
   try
@@ -51,6 +52,8 @@ void Db::Transaction::start(const std::string& name, odb::database& database)
     odb_transaction = unique_ptr<odb::transaction>(
       new odb::transaction(database.begin())
     );
+    if (use_session)
+      odb_session   = unique_ptr<odb::session>(new odb::session);
     odb_database    = &database;
   }
   catch (const odb::exception& e)
@@ -59,7 +62,7 @@ void Db::Transaction::start(const std::string& name, odb::database& database)
   }
 }
 
-void Db::Transaction::commit()
+void ODB::Transaction::commit()
 {
   if (odb_transaction)
   {
@@ -76,7 +79,7 @@ void Db::Transaction::commit()
   }
 }
 
-void Db::Transaction::rollback()
+void ODB::Transaction::rollback()
 {
   if (odb_transaction)
   {
@@ -93,8 +96,9 @@ void Db::Transaction::rollback()
   }
 }
 
-void Db::Transaction::cleanup()
+void ODB::Transaction::cleanup()
 {
   odb_database    = nullptr;
+  odb_session     = nullptr;
   odb_transaction = nullptr;
 }

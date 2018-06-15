@@ -5,7 +5,7 @@
 # include <sstream>
 # include <iostream> 
 
-namespace Odb
+namespace ODB
 {
   template<typename MODEL>
   void throw_exception(const MODEL& model, const std::string& what)

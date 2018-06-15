@@ -3,22 +3,22 @@
 
 using namespace std;
 
-thread_local safe_ptr<Db::Connection> Db::Connection::instance;
+thread_local safe_ptr<ODB::Connection> ODB::Connection::instance;
 
-Db::Connection::Connection()
+ODB::Connection::Connection()
 {
   if (instance)
-    throw runtime_error("only one instance of Db::Connection allowed per thread");
-  instance = shared_ptr<Db::Connection>(this, [](Db::Connection*) {});
+    throw runtime_error("only one instance of ODB::Connection allowed per thread");
+  instance = shared_ptr<ODB::Connection>(this, [](ODB::Connection*) {});
 }
 
-Db::Connection::~Connection()
+ODB::Connection::~Connection()
 {
   rollback();
   instance.reset();
 }
 
-void Db::Connection::commit()
+void ODB::Connection::commit()
 {
   Crails::logger << Crails::Logger::Info << "Transaction commit. Database time: " << time << 's' << Crails::Logger::endl;
   Utils::Timer timer;
@@ -31,7 +31,7 @@ void Db::Connection::commit()
   time = 0.f;
 }
 
-void Db::Connection::rollback()
+void ODB::Connection::rollback()
 {
   transaction.rollback();
 #ifdef WITH_CRAILS_SYNC

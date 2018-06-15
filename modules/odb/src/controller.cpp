@@ -2,11 +2,11 @@
 
 using namespace Crails;
 
-Odb::Controller::Controller(Crails::Params& params) : Crails::Controller(params)
+ODB::Controller::Controller(Crails::Params& params) : Crails::Controller(params)
 {
 }
 
-void Odb::Controller::finalize()
+void ODB::Controller::finalize()
 {
   if (!(response["status"].exists()) || (response["status"].as<unsigned short>() == Server::HttpCodes::ok))
     database.commit();

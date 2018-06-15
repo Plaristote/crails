@@ -4,7 +4,7 @@
 # include "soft_delete.hpp"
 # include <ctime>
 
-namespace Db
+namespace ODB
 {
   #pragma db object abstract
   class ModelTimestamps : public ModelSoftDelete

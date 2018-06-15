@@ -5,7 +5,7 @@
 #  define ODB_ID_TYPE unsigned long
 # endif
 
-namespace Db
+namespace ODB
 {
   typedef ODB_ID_TYPE id_type;
 }

@@ -11,7 +11,7 @@
 namespace ODB { class Database; }
 # endif
 
-namespace Db
+namespace ODB
 {
   typedef std::function<bool (ODB::Database&, odb::schema_version)> MigrateFunction;
 
@@ -31,12 +31,12 @@ namespace Db
 
     operator MigrateFunction() const
     {
-      return std::bind(&Db::Migrations::run_for_version, this, std::placeholders::_1, std::placeholders::_2);
+      return std::bind(&ODB::Migrations::run_for_version, this, std::placeholders::_1, std::placeholders::_2);
     }
   };
 }
 
 # define ADD_MIGRATION(name, version, body) \
-  Db::Migration name = { #name, version, [](ODB::Database& database) -> bool body };
+  ODB::Migration name = { #name, version, [](ODB::Database& database) -> bool body };
 
 #endif

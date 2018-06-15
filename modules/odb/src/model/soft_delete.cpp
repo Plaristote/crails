@@ -2,13 +2,13 @@
 
 using namespace std;
 
-void Db::ModelSoftDelete::save(odb::database& db)
+void ODB::ModelSoftDelete::save(odb::database& db)
 {
   deleted = false;
   BaseType::save(db);
 }
 
-void Db::ModelSoftDelete::destroy(odb::database& db)
+void ODB::ModelSoftDelete::destroy(odb::database& db)
 {
   if (with_soft_delete() && get_id() != 0)
   {

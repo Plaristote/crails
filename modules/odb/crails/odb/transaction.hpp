@@ -7,10 +7,11 @@
 namespace odb
 {
   class transaction;
+  class session;
   class database;
 }
 
-namespace Db
+namespace ODB
 {
   struct Transaction
   {
@@ -28,8 +29,11 @@ namespace Db
   private:
     void cleanup();
 
+    static const bool use_session;
+
     std::string                       database_name;
     std::unique_ptr<odb::transaction> odb_transaction;
+    std::unique_ptr<odb::session>     odb_session;
     odb::database*                    odb_database;
   };
 }

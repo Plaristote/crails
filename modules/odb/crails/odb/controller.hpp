@@ -4,12 +4,12 @@
 # include <crails/controller.hpp>
 # include "connection.hpp"
 
-namespace Odb
+namespace ODB
 {
   class Controller : public Crails::Controller
   {
   protected:
-    Db::Connection database;
+    ODB::Connection database;
 
   public:
     Controller(Crails::Params& params);

@@ -18,7 +18,7 @@
 
 namespace odb { class access; }
 
-namespace Db
+namespace ODB
 {
   # pragma db object abstract
   class ModelBase

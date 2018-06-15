@@ -3,7 +3,7 @@
 
 # include "base.hpp"
 
-namespace Db
+namespace ODB
 {
   # pragma db object abstract
   class ModelSoftDelete : public ModelBase

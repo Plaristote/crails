@@ -3,7 +3,7 @@
 
 # include <crails/databases.hpp>
 
-namespace Db
+namespace ODB
 {
   Crails::Databases::DatabaseSettings get_database_settings_for(const std::string& name);
 }

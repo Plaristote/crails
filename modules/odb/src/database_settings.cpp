@@ -5,7 +5,7 @@ using namespace Crails;
 
 extern const std::string default_configuration_name = "odb";
 
-Databases::DatabaseSettings Db::get_database_settings_for(const std::string& name)
+Databases::DatabaseSettings ODB::get_database_settings_for(const std::string& name)
 {
   const auto& settings = Databases::settings
     .at(Crails::environment)

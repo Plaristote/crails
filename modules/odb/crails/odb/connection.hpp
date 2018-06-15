@@ -13,12 +13,12 @@
 #  include <crails/sync/transaction.hpp>
 # endif
 
-namespace Db
+namespace ODB
 {
   class Connection
   {
   public:
-    static thread_local safe_ptr<Db::Connection> instance;
+    static thread_local safe_ptr<ODB::Connection> instance;
 
     Connection();
     ~Connection();
@@ -61,7 +61,7 @@ namespace Db
     }
 
     template<typename MODEL_PTR>
-    bool find_one(MODEL_PTR& model, Db::id_type id)
+    bool find_one(MODEL_PTR& model, ODB::id_type id)
     {
       return find_one(model, odb::query<typename MODEL_PTR::element_type>::id == id);
     }
@@ -108,7 +108,7 @@ namespace Db
       }
       catch (const odb::object_not_persistent& e)
       {
-        Odb::throw_exception(model, e.what());
+        ODB::throw_exception(model, e.what());
       }
       time += timer.GetElapsedSeconds();
     }

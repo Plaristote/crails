@@ -4,7 +4,7 @@
 # include <string>
 # include <sstream>
 
-namespace odb
+namespace ODB
 {
   template<typename ARRAY>
   std::string array_to_string(const ARRAY& array, const std::string& sql_type)

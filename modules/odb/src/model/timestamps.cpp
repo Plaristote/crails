@@ -3,19 +3,19 @@
 
 using namespace std;
 
-void Db::ModelTimestamps::save(odb::database& db)
+void ODB::ModelTimestamps::save(odb::database& db)
 {
   update_timestamps();
   BaseType::save(db);
 }
 
-void Db::ModelTimestamps::destroy(odb::database& db)
+void ODB::ModelTimestamps::destroy(odb::database& db)
 {
   update_timestamps();
   BaseType::destroy(db);
 }
 
-void Db::ModelTimestamps::update_timestamps()
+void ODB::ModelTimestamps::update_timestamps()
 {
   auto now = chrono::system_clock::now();
 
