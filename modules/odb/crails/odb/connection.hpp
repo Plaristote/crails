@@ -9,9 +9,6 @@
 # include "exception.hpp"
 # include "id_type.hpp"
 # include <crails/utils/timer.hpp>
-# ifdef WITH_CRAILS_SYNC
-#  include <crails/sync/transaction.hpp>
-# endif
 
 namespace ODB
 {
@@ -22,6 +19,8 @@ namespace ODB
 
     Connection();
     ~Connection();
+
+    static safe_ptr<ODB::Connection> get() { return instance; }
 
     float time = 0.f;
 
@@ -83,10 +82,6 @@ namespace ODB
       start_transaction_for(model);
       model.before_save();
       model.save(transaction.get_database());
-#ifdef WITH_CRAILS_SYNC
-      if (use_sync_transaction)
-        sync_transaction.save(model);
-#endif
       model.after_save();
     }
 
@@ -100,10 +95,6 @@ namespace ODB
       try
       {
         model.destroy(transaction.get_database());
-#ifdef WITH_CRAILS_SYNC
-	if (use_sync_transaction)
-          sync_transaction.destroy(model);
-#endif
 	model.after_destroy();
       }
       catch (const odb::object_not_persistent& e)
@@ -125,15 +116,7 @@ namespace ODB
       }
     }
 
-    Transaction       transaction;
-#ifdef WITH_CRAILS_SYNC
-# ifdef ODB_USE_CRAILS_SYNC
-    bool              use_sync_transaction = true;
-# else
-    bool              use_sync_transaction = false;
-# endif
-    Sync::Transaction sync_transaction;
-#endif
+    Transaction transaction;
   };
 }
 

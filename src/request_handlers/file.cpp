@@ -32,7 +32,7 @@ void FileRequestHandler::operator()(const HttpServer::request& request, Building
       {
         params["response-data"]["code"] = (int)Server::HttpCodes::not_modified;
         callback(true);
-	return ;
+        return ;
       }
       else if (send_file(fullpath, response, Server::HttpCodes::ok))
       {

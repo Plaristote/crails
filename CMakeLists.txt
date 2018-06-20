@@ -125,6 +125,5 @@ if (USE_ODB)
 endif()
 
 if (USE_CRAILS_SYNC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWITH_CRAILS_SYNC")
   add_subdirectory(modules/sync)
 endif()
