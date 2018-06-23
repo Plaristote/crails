@@ -58,6 +58,18 @@ namespace ODB
           sync_transaction.destroy(model);
       }
 
+      template<typename MODEL>
+      void destroy(odb::query<MODEL> query = odb::query<MODEL>(true))
+      {
+        odb::result<MODEL> results;
+
+	if (ODB::Connection::find(results, query))
+	{
+          for (auto& model : results)
+            destroy(model);
+        }
+      }
+
       bool use_sync_transaction = true;
       ::Sync::Transaction sync_transaction;
     };
