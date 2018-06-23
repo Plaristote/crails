@@ -79,10 +79,13 @@ namespace ODB
     template<typename MODEL>
     void save(MODEL& model)
     {
+      Utils::Timer timer;
+
       start_transaction_for(model);
       model.before_save();
       model.save(transaction.get_database());
       model.after_save();
+      time += timer.GetElapsedSeconds();
     }
 
     template<typename MODEL>
