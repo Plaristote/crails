@@ -7,7 +7,7 @@ using namespace std;
 
 Crails::Front::Document Crails::Front::document;
 
-Document::Document() : ObjectImpl(*(window.get<client::Document>("document")))
+Document::Document() : ObjectImpl(&(client::document))
 {
 }
 
