@@ -11,18 +11,18 @@ namespace Crails
   class FileCache : public Flyweight<std::string, std::string>
   {
   public:
-    void         Lock(void)
+    void lock(void)
     {
       mutex.lock();
     }
 
-    void         Unlock(void)
+    void unlock(void)
     {
       mutex.unlock();
     }
 
   private:
-    std::string* CreateInstance(std::string key);
+    std::shared_ptr<std::string> create_instance(std::string key);
 
     std::mutex mutex;
   };

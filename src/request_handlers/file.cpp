@@ -71,10 +71,10 @@ bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& respo
 
 bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit)
 {
-  file_cache.Lock();
+  file_cache.lock();
   {
-    bool cached = cache_enabled && file_cache.Contains(fullpath);
-    auto file   = file_cache.Require(fullpath);
+    bool cached = cache_enabled && file_cache.contains(fullpath);
+    auto file   = file_cache.require(fullpath);
 
     if (file)
     {
@@ -92,13 +92,13 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
         logger << (cached ? "(was cached)" : "(was not cached)") << Logger::endl;
       else
       {
-        file_cache.GarbageCollect();
+        file_cache.garbage_collect();
         logger << "(cache disabled)" << Logger::endl;
       }
-      file_cache.Unlock();
-      return (true);
+      file_cache.unlock();
+      return true;
     }
   }
-  file_cache.Unlock();
-  return (false);
+  file_cache.unlock();
+  return false;
 }

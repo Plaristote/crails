@@ -4,110 +4,62 @@
 # include <list>
 # include <algorithm>
 # include <functional>
+# include <memory>
 
 template<typename TYPE, typename KEY_TYPE>
 class Flyweight
 {
   struct Instance
   {
-    Instance(TYPE* instance, KEY_TYPE key) : key(key), ref_count(0), instance(instance) {}
+    bool operator==(KEY_TYPE comp) const { return key == comp; }
+    bool should_garbage_collect()  const { return ptr == nullptr || ptr.use_count() == 1; }
 
-    bool operator==(KEY_TYPE comp) const { return (key == comp); }
-
-    KEY_TYPE       key;
-    unsigned short ref_count;
-    TYPE*          instance;
+    KEY_TYPE              key;
+    std::shared_ptr<TYPE> ptr;
   };
 
   typedef std::list<Instance> Instances;
 
 public:
-  class Item
-  {
-  public:
-    Item(void) : instance(0) {}
+  virtual std::shared_ptr<TYPE> create_instance(KEY_TYPE key) = 0;
 
-    Item(Instance* instance) : instance(instance)
-    {
-      instance->ref_count++;
-    }
-
-    ~Item(void)
-    {
-      if (instance)
-        instance->ref_count--;
-    }
-
-    const Item& operator=(const Item& other)
-    {
-      if (instance != 0)
-        instance->ref_count--;
-      instance = other.instance;
-      if (instance != 0)
-        instance->ref_count++;
-      return (*this);
-    }
-
-    TYPE& operator*(void) { return (*(instance->instance)); }
-    operator bool() const { return instance != nullptr; }
-
-  private:
-    Instance* instance;
-  };
-
-  Flyweight() {}
-
-  ~Flyweight()
-  {
-    std::for_each(instances.begin(), instances.end(), [](Instance& cur)
-    {
-      delete cur.instance;
-    });
-  }
-
-  virtual TYPE* CreateInstance(KEY_TYPE key) = 0;
-
-  Item      Require(KEY_TYPE key)
+  std::shared_ptr<TYPE> require(KEY_TYPE key)
   {
     auto iterator = std::find(instances.begin(), instances.end(), key);
 
-    if (iterator != instances.end())
-      return (Item(&(*iterator)));
-    return (Item(&Instantiate(key)));
+    if (iterator == instances.end())
+    {
+      Instance instance;
+
+      instance.key = key;
+      instance.ptr = create_instance(key);
+      instances.push_back(instance);
+      return instance.ptr;
+    }
+    return iterator->ptr;
   }
   
-  bool      Contains(KEY_TYPE key)
+  bool contains(KEY_TYPE key)
   {
     auto iterator = std::find(instances.begin(), instances.end(), key);
     
     return iterator != instances.end();
   }
 
-  void      GarbageCollect(void)
+  void garbage_collect(void)
   {
-    typename Instances::iterator cur, last;
+    auto it = instances.begin();
 
-    for (cur = instances.begin(), last = instances.end() ; cur != last ;)
+    while (it != instances.end())
     {
-      if (cur->ref_count == 0)
-      {
-        delete cur->instance;
-        cur = instances.erase(cur);
-      }
+      if (it->should_garbage_collect())
+        it = instances.erase(it);
       else
-        ++cur;
+        ++it;
     }
   }
 
 private:
-  Instance&     Instantiate(KEY_TYPE key)
-  {
-    TYPE* ptr = CreateInstance(key);
-
-    instances.push_back(Instance(ptr, key));
-    return (*(instances.rbegin()));
-  }
-
   Instances instances;
 };
 
