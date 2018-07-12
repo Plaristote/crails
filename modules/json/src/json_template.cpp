@@ -9,6 +9,8 @@ void JsonTemplate::inline_partial(const std::string& view, SharedVars vars)
 
   if (str.find('"') != std::string::npos)
   {
+    if (!first_item_in_object)
+      stream << ',';
     stream << str.substr(1, str.size() - 2);
     first_item_in_object = false;
   }
