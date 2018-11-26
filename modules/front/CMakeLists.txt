@@ -11,6 +11,7 @@ file(GLOB guard_front_plugins     scripts/guard/*.rb)
 file(GLOB cppgen_front_plugins    scripts/cppgen/*.rb)
 file(GLOB scripts_front_templates scripts/guard/templates/*.erb)
 file(GLOB scripts_front_module    scripts/modules/front/*.rb)
+file(GLOB_RECURSE docker_template app/docker/*)
 
 add_library(crails-front${crails-suffix} SHARED ${crails_front} ${crails_back})
 
@@ -21,4 +22,5 @@ install(FILES ${scripts_front_templates}  DESTINATION share/crails/guard/templat
 install(FILES ${scripts_front_module}     DESTINATION share/crails/scripts/modules/front)
 install(FILES ${guard_front_plugins}      DESTINATION share/crails/guard)
 install(FILES ${cppgen_front_plugins}     DESTINATION share/crails/cppgen)
+install(FILES ${docker_template}          DESTINATION share/crails/app_template/docker)
 install(TARGETS crails-front${crails-suffix} LIBRARY DESTINATION lib)
