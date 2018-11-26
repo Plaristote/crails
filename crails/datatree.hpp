@@ -1,12 +1,15 @@
-#ifndef  DATATREE_HPP
-# define DATATREE_HPP
+#ifdef __CHEERP_CLIENT__
+# include <crails/front/datatree.hpp>
+#else
+# ifndef  DATATREE_HPP
+#  define DATATREE_HPP
 
-# include <boost/property_tree/ptree.hpp>
-# include <functional>
-# include <vector>
-# include <string>
-# include <iostream>
-# include <crails/utils/backtrace.hpp>
+#  include <boost/property_tree/ptree.hpp>
+#  include <functional>
+#  include <vector>
+#  include <string>
+#  include <iostream>
+#  include <crails/utils/backtrace.hpp>
 
 class DataTree;
 
@@ -236,5 +239,5 @@ private:
   mutable boost::property_tree::ptree tree;
 };
 
+# endif
 #endif
- 
