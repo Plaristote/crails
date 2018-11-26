@@ -20,6 +20,8 @@ namespace Crails
   class Controller
   {
   protected:
+    typedef Crails::Server::HttpCodes ResponseStatus;
+
     Controller(Params& params);
   public:
     virtual ~Controller();
@@ -37,6 +39,7 @@ namespace Crails
     };
 
     void            redirect_to(const std::string& uri);
+    void            respond_with(Crails::Server::HttpCode);
 
     void            render(const std::string& view);
     void            render(RenderType type, Data value);

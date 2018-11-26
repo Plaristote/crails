@@ -41,6 +41,11 @@ void Controller::redirect_to(const string& uri)
   response["headers"]["Location"] = uri;
 }
 
+void Controller::respond_with(Crails::Server::HttpCode code)
+{
+  response["status"] = (unsigned short)code;
+}
+
 void Controller::protect_from_forgery(void)
 {
   // If request contains a body (ie: not get), check for the CSRF token
