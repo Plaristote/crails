@@ -69,7 +69,7 @@ void Ajax::operator()()
   open_transport();
   if (_data.size() > 0)
   {
-    String js_string(_data.c_str());
+    client::String js_string(_data.c_str());
 
     xhr->send(&js_string);
   }

@@ -104,6 +104,11 @@ namespace Crails
           set(item.first, item.second);
       }
 
+      void unset(const std::string& str)
+      {
+        ptr->set_(str.c_str(), nullptr);
+      }
+
       template<typename ...ARGS>
       Object apply(const std::string& name, ARGS... args)
       {
@@ -214,6 +219,18 @@ namespace Crails
 
       CLIENT_TYPE* operator*() const { return static_cast<CLIENT_TYPE*>(ptr); }
       CLIENT_TYPE* operator->() const { return static_cast<CLIENT_TYPE*>(ptr); }
+    };
+
+    class String : public ObjectImpl<client::String>
+    {
+    public:
+      String() { ptr = new client::String; }
+      String(client::String* ptr) { this->ptr = ptr; }
+      String(client::Object* ptr) { this->ptr = ptr; }
+      String(const char* str)         { ptr = new client::String(str); }
+      String(const wchar_t* str)      { ptr = new client::String(str); }
+      String(const std::string& str)  { ptr = new client::String(str.c_str()); }
+      String(const std::wstring& str) { ptr = new client::String(str.c_str()); }
     };
   }
 }
