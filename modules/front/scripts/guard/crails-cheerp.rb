@@ -34,9 +34,16 @@ module ::Guard
     end
 
     def source_files
-      throw "no input folder found for crails-cheerp" unless File.exists? @input
       lib = Dir["#{ENV['CRAILS_SHARED_DIR']}/front/**/*.cpp"]
-      src = Dir["#{@input}/**/*.cpp"]
+      src = []
+      if @input.class == Array
+        @input.each do |input_folder|
+          src += Dir["#{input_folder}/**/*.cpp"]
+        end
+      else
+        throw "no input folder found for crails-cheerp" unless File.exists? @input
+        src = Dir["#{@input}/**/*.cpp"]
+      end
       lib + src
     end
 

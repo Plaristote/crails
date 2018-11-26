@@ -23,6 +23,10 @@ protected:
   }
 
 public:
+  Data() : object(Crails::Front::Object())
+  {
+  }
+
   template<typename T>
   T operator[](const std::string& key) const
   {
@@ -40,7 +44,7 @@ public:
     Crails::Front::Object a(k);
     Crails::Front::ObjectImpl<client::String> str_object(*a);
 
-    if (!object->hasOwnProperty(*str_object))
+    if (!as_object()->hasOwnProperty(*str_object))
       object.set(key, Crails::Front::Object());
     return Data(as_object(), k.c_str());
   }
@@ -55,14 +59,14 @@ public:
   bool require(const std::vector<std::string>& keys) const;
 
   const std::string& get_path() const { return key; }
-  const std::string& get_ket()  const { return key; }
+  const std::string& get_key()  const { return key; }
 
   std::size_t count() const;
 
   template<typename T>
   T as() const
   {
-    std::string as_string = as_object();
+    std::string as_string = as_object().apply("toString");
     std::stringstream stream;
     T value;
 
@@ -72,7 +76,7 @@ public:
   }
 
   template<typename T>
-  T defaults_to(const T def) const { return as_object().is_undefined() ? (T)(as_object()) : def; }
+  T defaults_to(const T def) const { return exists() ? as<T>() : def; }
 
   template<typename T>
   operator T() const
@@ -83,7 +87,7 @@ public:
   template<typename T>
   std::vector<T> to_vector() const
   {
-    return (std::vector<T>)(as_object());
+    return as_object().to_vector<T>();
   }
 
   template<typename T>
@@ -103,7 +107,7 @@ public:
   template<typename T>
   operator std::vector<T>() const
   {
-    return (std::vector<T>)(as_object());
+    return to_vector<T>();
   }
 
   template<typename T>

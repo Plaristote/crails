@@ -79,17 +79,36 @@ namespace Crails
       client::Object* operator*() const { return ptr; }
       client::Object* operator->() const { return ptr; }
 
-      operator std::string() const { return (std::string)(*static_cast<client::String*>(ptr)); }
+      operator std::string() const
+      {
+        if (!is_of_type("String"))
+          __asm__("throw 'Crails::Front::Object cast to std::string, but type is not String'");
+        return (std::string)(*static_cast<client::String*>(ptr));
+      }
+
       operator double()      const { return (double)(*ptr); }
 
       template<typename T>
       operator std::vector<T>() const
       {
-        const client::Array& array = *(static_cast<client::Array*>(ptr));
+        return to_vector<T>();
+      }
+
+      bool is_of_type(const std::string& type) const { return is_of_type(type.c_str()); }
+      bool is_of_type(const char* type) const;
+
+      template<typename T>
+      std::vector<T> to_vector() const
+      {
         std::vector<T> result;
-        result.resize(array.get_length());
-        for (int i = 0 ; i < array.get_length() ; ++i)
-          result[i] = (T)(Object(array[i]));
+
+        if (is_of_type("Array"))
+	{
+          const client::Array& array = *(static_cast<client::Array*>(ptr));
+          result.resize(array.get_length());
+          for (int i = 0 ; i < array.get_length() ; ++i)
+            result[i] = (T)(Object(array[i]));
+        }
         return result;
       }
 
@@ -122,7 +141,7 @@ namespace Crails
         return client::eval(str.c_str());
       }
 
-      bool is_undefined() const { return ptr == 0; }
+      bool is_undefined() const;
 
     private:
       std::string _apply_params(char) { return ""; }

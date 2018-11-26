@@ -65,7 +65,7 @@ bool Data::exists() const
   {
     Crails::Front::String js_key(key);
 
-    return !object->hasOwnProperty(*js_key);
+    return object->hasOwnProperty(*js_key);
   }
   return true;
 }
