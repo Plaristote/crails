@@ -16,6 +16,8 @@
   void serialize(IArchive& a) { serialize<IArchive>(a); } \
   void serialize(OArchive& a) { serialize<OArchive>(a); }
 
+class DataTree;
+
 struct Archive
 {
   static const std::string mimetype;
@@ -169,6 +171,7 @@ template<> char Archive::typecode<short>();
 template<> char Archive::typecode<unsigned short>();
 template<> char Archive::typecode<char>();
 template<> char Archive::typecode<unsigned char>();
+template<> char Archive::typecode<DataTree>();
 
 template<> void OArchive::serialize<bool>(const bool& value);
 template<> void OArchive::serialize<char>(const char& value);
@@ -180,6 +183,7 @@ template<> void OArchive::serialize<unsigned long>(const unsigned long& value);
 template<> void OArchive::serialize<unsigned int>(const unsigned int& value);
 template<> void OArchive::serialize<unsigned short>(const unsigned short& value);
 template<> void OArchive::serialize<std::string>(const std::string& value);
+template<> void OArchive::serialize<DataTree>(const DataTree& value);
 
 template<> void IArchive::unserialize<bool>(bool& value);
 template<> void IArchive::unserialize<char>(char& value);
@@ -190,7 +194,7 @@ template<> void IArchive::unserialize<unsigned char>(unsigned char& value);
 template<> void IArchive::unserialize<unsigned int>(unsigned int& value);
 template<> void IArchive::unserialize<unsigned long>(unsigned long& value);
 template<> void IArchive::unserialize<unsigned short>(unsigned short& value);
-
 template<> void IArchive::unserialize<std::string>(std::string& value);
+template<> void IArchive::unserialize<DataTree>(DataTree& value);
 
 #endif

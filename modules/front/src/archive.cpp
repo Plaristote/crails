@@ -1,4 +1,5 @@
 #include <crails/front/archive.hpp>
+#include <crails/datatree.hpp>
 
 using namespace std;
 
@@ -14,6 +15,7 @@ template<> char Archive::typecode<short>()          { return 'h'; }
 template<> char Archive::typecode<unsigned short>() { return 'i'; }
 template<> char Archive::typecode<char>()           { return 'j'; }
 template<> char Archive::typecode<unsigned char>()  { return 'k'; }
+template<> char Archive::typecode<DataTree>()       { return 'l'; }
 
 template<> void OArchive::serialize<char>(const char& value)                   { str += value; }
 template<> void OArchive::serialize<unsigned char>(const unsigned char& value) { str += value; }
@@ -33,6 +35,11 @@ template<> void OArchive::serialize<std::string>(const std::string& value)
   for (len = 0 ; cstr[len] ; ++len);
   str += boost::lexical_cast<std::string>(len) + ';';
   str += value;
+}
+
+template<> void OArchive::serialize<DataTree>(const DataTree& value)
+{
+  serialize(value.as_data().to_json());
 }
 
 template<> void IArchive::unserialize<bool>(bool& value)
@@ -71,4 +78,12 @@ template<> void IArchive::unserialize<std::string>(std::string& value)
   value   = str.substr(offset, length);
   offset += length;
 #endif
+}
+
+template<> void IArchive::unserialize<DataTree>(DataTree& value)
+{
+  std::string json;
+
+  unserialize(json);
+  value.from_json(json);
 }
