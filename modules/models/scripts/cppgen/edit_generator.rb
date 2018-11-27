@@ -257,7 +257,7 @@ class EditGenerator < GeneratorBase
     _append "void #{@klassname}::fetch_#{name}()"
     _append "{"
     @indent += 1
-    _append "typedef podb::query<#{type}> query;"
+    _append "typedef odb::pgsql::query<#{type}> query;"
     _append "auto& database = *#{GeneratorBase.odb_connection[:object]}::instance;"
     _append "odb::result<#{type}> results;"
     _append "#{name}.clear();"
