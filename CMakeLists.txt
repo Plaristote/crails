@@ -107,6 +107,7 @@ add_subdirectory(modules/sentry)
 add_subdirectory(modules/front)
 add_subdirectory(modules/sidekic)
 add_subdirectory(modules/xmlrpc)
+add_subdirectory(modules/signin)
 add_subdirectory(modules/models)
 
 if (${ImageMagick_Magick++_FOUND})
