@@ -45,7 +45,7 @@ namespace Crails
     void            render(RenderType type, Data value);
     void            render(RenderType type, const std::string& value);
 
-    virtual bool    must_protect_from_forgery(void) const { return (true); };
+    virtual bool    must_protect_from_forgery() const { return true; };
 
     Params&         params;
     Data            session;
