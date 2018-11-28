@@ -68,7 +68,7 @@ class ViewGenerator < GeneratorBase
 
     def make_file filename, data
       source = ""
-      source += "#include \"app/models/helpers.hpp\"\n"
+      source += "#include <crails/models/helpers.hpp>\n"
       #source += ((Includes.list[filename] || []).collect {|a| "#include \"#{a}\""}).join "\n"
       source += (collect_includes_for filename).join("\n")
       source += "\n" + (data[:headers].join "\n")

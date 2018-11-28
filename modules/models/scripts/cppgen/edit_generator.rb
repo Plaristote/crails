@@ -14,6 +14,7 @@ class EditGenerator < GeneratorBase
     @klassname = get_classname(object)
     reset
     generate_edit_method object
+    generate_json_methods object
     generate_parameter_validator object
     generate_relations object
     @src
@@ -32,6 +33,19 @@ class EditGenerator < GeneratorBase
     self.instance_eval &object[:block]
     @indent -= 1
     _append "}\n"
+  end
+
+  def generate_json_methods object
+    @rendering_to_json = true
+    _append "std::string #{@klassname}::to_json() const"
+    _append "{"
+    @indent += 1
+    _append "DataTree data;\n"
+    self.instance_eval &object[:block]
+    _append "return data.to_json();"
+    @indent -= 1
+    _append "}\n"
+    @rendering_to_json = false
   end
 
   def generate_parameter_validator object
@@ -68,6 +82,11 @@ class EditGenerator < GeneratorBase
   def property type, name, options = {}
     if @rendering_validations && !options[:validate].nil?
       validation type, name, options[:validate]
+    elsif @rendering_to_json
+      case type
+      when "DataTree" then _append "data[\"#{name}\"].merge(#{name});"
+      else                 _append "data[\"#{name}\"] = #{name};"
+      end
     elsif options[:read_only] != true && !([@rendering_has_many, @rendering_validations].include? true)
       setter = "set_#{name}(data[\"#{name}\"]);"
       setter = "set_#{name}(data[\"#{name}\"].as<int>());" if not (type =~ /^(unsigned)?\s*char$/).nil?
@@ -128,6 +147,13 @@ class EditGenerator < GeneratorBase
           validation tptr, name, options[:validate]
         end
       end
+    elsif @rendering_to_json
+      if options[:joined] == false
+        _append "data[\"#{name}_id\"] = get_#{name}_id();"
+      else
+        _append "if (#{name} != nullptr)"
+        _append "  data[\"#{name}_id\"] = get_#{name}_id();"
+      end
     elsif (not @rendering_has_many) && (options[:read_only] != true)
       data_id = "data[\"#{name}_id\"]"
       _append "if (#{data_id}.exists())"
@@ -170,6 +196,8 @@ class EditGenerator < GeneratorBase
       @indent -= 1
       _append "}"
     elsif @rendering_validations
+    elsif @rendering_to_json
+      _append "data[\"#{get_singular_name name}_ids\"].from_vector<ODB::id_type>(get_#{get_singular_name name}_ids());"
     elsif options[:read_only] != true
       data = "data[\"#{get_singular_name name}_ids\"]"
       _append "if (#{data}.exists())"
@@ -281,7 +309,7 @@ class EditGenerator < GeneratorBase
         body.gsub! "${view-placeholder}", base.split("/")[0...-2].join("/")
       end
       source  = "#include \"#{include}\"\n"
-      source += "#include \"app/models/helpers.hpp\"\n"
+      source += "#include <crails/models/helpers.hpp>\n"
       source += "#include <crails/odb/any.hpp>\n"
       source += "#include <#{GeneratorBase.odb_connection[:include]}>\n"
       source += "#include \"lib/odb/application-odb.hxx\"\n"
