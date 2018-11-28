@@ -41,10 +41,7 @@ public:
 
   Data operator[](const std::string& k) const
   {
-    Crails::Front::Object a(k);
-    Crails::Front::ObjectImpl<client::String> str_object(*a);
-
-    if (!as_object()->hasOwnProperty(*str_object))
+    if (is_null())
       object.set(key, Crails::Front::Object());
     return Data(as_object(), k.c_str());
   }
@@ -207,6 +204,9 @@ public:
 class DataTree
 {
 public:
+  DataTree() {}
+  DataTree(Crails::Front::Object o) : tree(o) {}
+
   operator   Data()                                   { return as_data();  }
   Data       as_data()                                { return Data(tree); }
   const Data as_data() const                          { return Data(tree); }
