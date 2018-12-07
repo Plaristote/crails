@@ -4,6 +4,8 @@
 # include "object.hpp"
 # include <vector>
 
+# include "globals.hpp"
+
 namespace Crails
 {
   namespace Front
@@ -11,6 +13,8 @@ namespace Crails
     class Promise : public ObjectImpl<client::Promise<client::Object> >
     {
     public:
+      static Promise solved_promise;
+
       static Promise all(const std::vector<Promise>& promises);
 
       Promise(std::function<void (std::function<void ()>, std::function<void ()>)> resolver);
@@ -18,15 +22,16 @@ namespace Crails
       Promise(client::Object* ptr) : ObjectImpl(ptr) {}
 
       template<typename T>
-      Promise& then(T callback)
+      Promise then(T callback)
       {
+        Crails::Front::window.set("tintin", *this);
         client::Object* func = cheerp::Callback(callback);
         this->apply("then", func);
         return *this;
       }
 
       template<typename T>
-      Promise& _catch(T callback)
+      Promise _catch(T callback)
       {
         client::Object* func = cheerp::Callback(callback);
         this->apply("catch", func);

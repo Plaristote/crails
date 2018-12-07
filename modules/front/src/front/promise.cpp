@@ -4,15 +4,17 @@
 using namespace std;
 using namespace Crails::Front;
 
+Promise Promise::solved_promise([](function<void()> resolve, function<void()>) { resolve(); });
+
 Promise::Promise(std::function<void (std::function<void ()>, std::function<void ()>)> resolver)
 {
-  client::Object* func = cheerp::Callback([this, resolver](client::Object* _resolve, client::Object* _reject)
+  client::Object* func = cheerp::Callback([resolver](client::Object* callbacks_ptr)
   {
-    this->set("_resolve", _resolve);
-    this->set("_reject",  _reject);
+    Crails::Front::Object callbacks(callbacks_ptr);
+
     resolver(
-      [this]() { this->apply("_resolve"); },
-      [this]() { this->apply("_reject"); }
+      [callbacks]() mutable { callbacks.apply("resolve"); },
+      [callbacks]() mutable { callbacks.apply("reject");  }
     );
   });
   new_promise(func);
@@ -21,7 +23,7 @@ Promise::Promise(std::function<void (std::function<void ()>, std::function<void 
 void Promise::new_promise(client::Object* resolver)
 {
   prepare_promise_constructor();
-  ptr = *(Crails::Front::window.apply("_crails_new_promise", resolver));
+  ptr = *(window.apply("_crails_new_promise", resolver));
 }
 
 void Promise::prepare_promise_constructor()
@@ -30,7 +32,7 @@ void Promise::prepare_promise_constructor()
 
   if (!is_prepared)
   {
-    client::eval("window._crails_new_promise = function(r) { return new Promise(r); }");
+    client::eval("window._crails_new_promise = function(r) { return new Promise(function(resolve, reject) { return r({ resolve: resolve, reject: reject }); }); }");
     is_prepared = true;
   }
 }
@@ -41,5 +43,5 @@ Promise Promise::all(const std::vector<Promise>& promises)
 
   for (auto promise : promises)
     array->push(*promise);
-  return *(Crails::Front::window["Promise"].apply("all", array));
+  return *(window["Promise"].apply("all", array));
 }
