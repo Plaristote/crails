@@ -3,6 +3,7 @@
 
 # ifndef  ODB_ID_TYPE
 #  define ODB_ID_TYPE unsigned long
+#  define ODB_NULL_ID 0
 # endif
 
 namespace ODB
