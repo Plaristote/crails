@@ -1,4 +1,5 @@
 #include <crails/front/modal.hpp>
+#include <crails/front/globals.hpp>
 
 using namespace Crails::Front;
 using namespace std;

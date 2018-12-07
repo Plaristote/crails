@@ -25,9 +25,13 @@ class DataWithFrontGenerator < DataGenerator
     _append_macro "#ifdef #{self.class.client_define}"
     _append "ODB::id_type get_id() const { return id; }"
     _append "void         set_id(ODB::id_type value) { id = value; }"
-    _append "void         from_json(Data data) { edit(data); }"
+    _append "void         from_json(Data data);"
     _append_macro "#endif"
-    super
+    _append "virtual std::vector<std::string> find_missing_parameters(Data) const;"
+    _append "virtual void                     edit(Data);"
+    _append "virtual std::string              to_json() const;"
+    _append "virtual bool                     is_valid();"
+    _append ""
   end
 
   def resource_name name

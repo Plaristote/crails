@@ -7,6 +7,19 @@ class EditWithFrontGenerator < EditGenerator
     @src += str + "\n"
   end
 
+  def generate_json_methods object
+    super
+    _append_macro "#ifdef #{DataWithFrontGenerator.client_define}"
+    _append "void #{@klassname}::from_json(Data data)"
+    _append "{"
+    @indent += 1
+    _append "id = data[\"id\"].defaults_to<ODB::id_type>(ODB_NULL_ID);"
+    _append "edit(data);"
+    @indent -= 1
+    _append "}"
+    _append_macro "#endif"
+  end
+
   def validation type, name, data
     if data[:uniqueness] == true
       _append_macro "#ifndef #{DataWithFrontGenerator.client_define}"

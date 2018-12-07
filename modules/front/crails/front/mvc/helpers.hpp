@@ -26,13 +26,7 @@ bool update_id_list(
   }
 
   for (ODB::id_type id : ids)
-  {
-    std::shared_ptr<MODEL> model;
-
-    model->set_id(id);
-    model->fetch();
     model_list.push_back(id);
-  }
   return true;
 }
 
