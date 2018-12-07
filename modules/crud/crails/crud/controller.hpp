@@ -74,7 +74,6 @@ namespace Crud
         BASE::vars["model"] = model.get();
         BASE::render(get_show_view());
         after_create();
-	std::cout << "end of crud create method" << std::endl;
       }
     }
 

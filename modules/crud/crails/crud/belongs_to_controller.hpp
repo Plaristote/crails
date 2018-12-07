@@ -12,7 +12,7 @@ namespace Crud
   template<typename BASE, typename RESOURCE, typename PARENT = RESOURCE>
   class BelongsToController : public Crud::Controller<BASE, RESOURCE>
   {
-    typedef Crud::Controller<RESOURCE> Super;
+    typedef Crud::Controller<BASE, RESOURCE> Super;
   public:
     BelongsToController(Crails::Params& params) : Super(params)
     {}

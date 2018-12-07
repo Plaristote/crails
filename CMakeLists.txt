@@ -109,6 +109,7 @@ add_subdirectory(modules/sidekic)
 add_subdirectory(modules/xmlrpc)
 add_subdirectory(modules/signin)
 add_subdirectory(modules/models)
+add_subdirectory(modules/crud)
 
 if (${ImageMagick_Magick++_FOUND})
   add_subdirectory(modules/image)
