@@ -112,7 +112,21 @@ bool Data::is_array() const
 
 void Data::merge(Data data)
 {
-  __asm__("throw 'Data::merge not implemented'");
+  if (data.exists())
+  {
+    if (key.length() > 0)
+    {
+     if (data.is_array())
+        object.set(key, data.as_object().apply("slice", 0));
+      else
+        object.set(key, Crails::Front::Object::from_json(data.as_object().to_json()));
+    }
+    else
+    {
+      for (const auto& key : data.get_keys())
+        (*this)[key].merge(data[key]);
+    }
+  }
 }
 
 void Data::merge(DataTree datatree)
