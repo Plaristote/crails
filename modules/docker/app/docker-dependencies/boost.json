@@ -1,0 +1,11 @@
+{
+  "name": "boost",
+  "tier": 1,
+  "versions": {
+    "system": {
+      "debian": ["libboost-all-dev"]
+    },
+    "custom":  "x.x.x",
+    "default": "1.59.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "odb",
+  "tier": 2,
+  "versions": {
+    "system": {
+      "debian": ["libodb-dev", "libodb-pgsql-dev", "odb"]
+    },
+    "custom":  "x.x.x",
+    "default": "2.4.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "cppnetlib",
+  "tier": 2,
+  "versions": {
+    "custom":  "x.x.x",
+    "default": "0.11.2"
+  }
+}

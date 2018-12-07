@@ -1,0 +1,19 @@
+FROM <%= docker_image %>
+
+RUN <%= command_install_package %> <%= distibution_dependencies %>
+
+RUN gem install bundler
+
+WORKDIR /tmp/compile-dir
+
+<%= compile_dependencies_tiers.each do |tier| -%>
+  <%= compile_dependencies[tier].each do |dependency| -%>
+COPY <%= dependency.first %>.sh <%= dependency.first %>.sh
+RUN bash ./<%= dependency.first %>.sh <%= dependency.second.split('.').join(' ') %>
+
+  <% end -%>
+<% end -%>
+WORKDIR /
+
+COPY make-application-package.sh /usr/local/bin/make-application-package.sh
+RUN chmod +x /usr/local/bin/make-application-package.sh
