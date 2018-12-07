@@ -137,17 +137,18 @@ namespace Crails
       template<typename ...ARGS>
       Object apply(const std::string& name, ARGS... args)
       {
-        ((client::EventTarget*)&client::window)->set_("_crails_front_", ptr);
-
         std::string str      = "_crails_front_." + name + '(';
         std::string str_args = _apply_params('a', args...);
 
         str = str + str_args;
         str = str + ')';
+        set_global("_crails_front_", *this);
         return client::eval(str.c_str());
       }
 
       bool is_undefined() const;
+      
+      static void set_global(const std::string&, Crails::Front::Object);
 
     private:
       std::string _apply_params(char) { return ""; }
@@ -186,7 +187,7 @@ namespace Crails
         std::string varname = "_crails_front_arg_0_";
 
         varname[18] = i;
-        ((client::EventTarget*)&client::window)->set_(varname.c_str(), *object);
+        Object::set_global(varname.c_str(), object);
         return varname;
       }
     };
