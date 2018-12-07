@@ -5,17 +5,17 @@
 using namespace std;
 using namespace Crails::Front;
 
-Element::Element() : ObjectImpl(client::document.createElement("div"))
+Element::Element() : ObjectImpl(client::document.createElement("div")), events(make_shared<JavascriptEvents>(static_cast<client::HTMLElement*>(ptr)))
 {
 }
 
 Element::Element(const client::String& type, const map<string, string>& children) :
-  ObjectImpl(client::document.createElement(type))
+  ObjectImpl(client::document.createElement(type)), events(make_shared<JavascriptEvents>(static_cast<client::HTMLElement*>(ptr)))
 {
   attr(children);
 }
 
-Element::Element(client::HTMLElement* el) : ObjectImpl(el)
+Element::Element(client::HTMLElement* el) : ObjectImpl(el), events(make_shared<JavascriptEvents>(static_cast<client::HTMLElement*>(ptr)))
 {
 }
 

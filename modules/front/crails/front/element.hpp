@@ -5,6 +5,7 @@
 # include <cheerp/clientlib.h>
 # include <map>
 # include "object.hpp"
+# include "events.hpp"
 
 namespace Crails
 {
@@ -13,6 +14,8 @@ namespace Crails
     struct Element : public ObjectImpl<client::HTMLElement>
     {
     public:
+      std::shared_ptr<JavascriptEvents> events;
+
       Element();
       Element(const client::String& str, const std::map<std::string, std::string>& attrs = {});
       Element(client::HTMLElement*);
