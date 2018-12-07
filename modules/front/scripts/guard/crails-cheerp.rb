@@ -7,6 +7,7 @@ module ::Guard
     def initialize arg
       @input  = arg[:input]  || "front"
       @output = arg[:output] || "public/assets/application.js"
+      @atonce = arg[:at_once]
       super
     end
 
@@ -35,6 +36,11 @@ module ::Guard
       puts "[crails-cheerp] compiling..."
       item_count = source_files.count.to_f
       source_files.each_with_index do |src, index|
+        if @atonce
+          command += src + ' '
+          next
+	end
+
 	source_path    = Pathname.new(src)
 	compile_path   = Pathname.new(cheerp_compiled_path + '/' + src + '.bc')
 
@@ -54,8 +60,11 @@ module ::Guard
       end
       timer_unit_compilation = Time.now
 
-      command = command_base
-      command += "-cheerp-preexecute " if options[:preexecute]
+      unless @atonce
+        command = command_base
+        command += "-cheerp-preexecute " if options[:preexecute]
+      end
+
       if not options[:sourcemap_output].nil?
         command += "-cheerp-sourcemap='#{options[:sourcemap_output]}' "
         command += "-cheerp-sourcemap-standalone " if options[:sourcemap_standalone]
