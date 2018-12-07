@@ -3,7 +3,8 @@
 
 # include <crails/front/signal.hpp>
 # include <crails/front/archive.hpp>
-# include <crails/front/ajax.hpp>
+# include <crails/front/promise.hpp>
+# include <crails/datatree.hpp>
 
 # define add_model_property(type, name) \
   Crails::Signal<type> name##_changed; \
@@ -43,14 +44,39 @@ namespace Crails
       Signal<void> removed;
       Signal<void> synced;
 
-      virtual void serialize(OArchive&) = 0;
-      virtual void serialize(IArchive&) = 0;
       virtual unsigned long get_id() const = 0;
       virtual std::string get_url() const = 0;
+      virtual std::string get_resource_name() const { return ""; }
 
-      void fetch(Ajax::Callbacks callbacks = Ajax::Callbacks());
-      void save(Ajax::Callbacks callbacks = Ajax::Callbacks());
+      Promise fetch();
+      Promise save();
+      virtual void parse(const std::string& str) = 0;
+
+    protected:
+      virtual std::string get_payload() = 0;
+      virtual std::string get_content_type() const = 0;
+    };
+
+    class ArchiveModel : public Model
+    {
+    public:
+      virtual void serialize(OArchive&) = 0;
+      virtual void serialize(IArchive&) = 0;
       void parse(const std::string& str);
+    protected:
+      std::string get_payload();
+      std::string get_content_type() const;
+    };
+
+    class JsonModel : public Model
+    {
+    public:
+      virtual void from_json(Data) = 0;
+      virtual std::string to_json() const = 0;
+      void parse(const std::string& str);
+    protected:
+      std::string get_payload();
+      std::string get_content_type() const;
     };
   }
 }

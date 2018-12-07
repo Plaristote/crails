@@ -3,6 +3,7 @@
 
 # include <crails/front/signal.hpp>
 # include <crails/front/archive.hpp>
+# include <crails/front/http.hpp>
 # include <crails/front/mvc/model.hpp>
 # include <map>
 # include <list>
@@ -85,19 +86,22 @@ namespace Crails
         return nullptr;
       }
 
-      void fetch(Ajax::Callbacks callbacks = Ajax::Callbacks())
+      Promise fetch()
       {
-        Ajax::query(get_url())
-          .headers({{"Accept",Archive::mimetype}})
-          .callbacks(callbacks)
-          .on_success([this, callbacks](const Ajax& ajax)
+        auto request = Http::Request::get(get_url());
+        
+        request->set_headers({{"Accept",Archive::mimetype}});
+        return request->send()->then([this, request]()
+        {
+          auto response = request->get_response();
+          
+          if (response->ok())
           {
-            if (ajax->get_responseText())
-              parse((std::string)(*ajax->get_responseText()));
-	    if (callbacks.success)
-              callbacks.success(ajax);
+            if (response->has_body())
+              parse(response->get_response_text());
             synced.trigger();
-          })();
+          }
+        });
       }
 
       unsigned int count() const
