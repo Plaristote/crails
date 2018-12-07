@@ -1,4 +1,5 @@
 #include <crails/front/cookies.hpp>
+#include <crails/front/exception.hpp>
 #include <crails/http.hpp>
 #include <crails/utils/parse_cookie_values.hpp>
 #include <cheerp/client.h>
@@ -20,7 +21,7 @@ string Cookies::get<string>(const string& key)
 {
   ensure_cookie_map_is_updated();
   if (!has(key))
-    client::eval(("throw 'std::runtime_error(\"cookie `" + key + "` does not exist\")'").c_str());
+    Crails::raise(std::runtime_error("cookie `" + key + "` does not exist"));
   return cookie_store.at(key);
 }
 
