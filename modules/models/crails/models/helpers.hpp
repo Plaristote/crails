@@ -5,6 +5,7 @@
 # include <list>
 # include <memory>
 # include <crails/datatree.hpp>
+# include <crails/odb/id_type.hpp>
 # ifndef ODB_COMPILER
 #  include <crails/odb/connection.hpp>
 # endif
@@ -41,13 +42,27 @@ LIST my_unique(const LIST& list)
   return new_list;
 }
 
+template<typename MODELS>
+std::vector<ODB::id_type> collect_ids_from(const MODELS& models)
+{
+  std::vector<ODB::id_type> ids;
+
+  for (auto model : models)
+  {
+    if (model)
+      ids.push_back(model->get_id());
+  }
+  return ids;
+}
+
+# ifndef CRAILS_FRONT_HELPERS
 template<typename MODEL>
 bool update_id_list(
-  std::vector<unsigned long>& model_list,
+  std::vector<ODB::id_type>& model_list,
   Data model_ids)
 {
-#ifndef ODB_COMPILER
-  auto ids = my_unique<std::vector<unsigned long> >(model_ids);
+#  ifndef ODB_COMPILER
+  auto ids = my_unique<std::vector<ODB::id_type> >(model_ids);
 
   for (auto it = model_list.begin() ; it != model_list.end() ;)
   {
@@ -62,7 +77,7 @@ bool update_id_list(
     }
   }
 
-  for (unsigned long id : ids)
+  for (ODB::id_type id : ids)
   {
     std::shared_ptr<MODEL> model;
 
@@ -70,7 +85,7 @@ bool update_id_list(
       return false;
     model_list.push_back(id);
   }
-#endif
+#  endif
   return true;
 }
 
@@ -79,8 +94,8 @@ bool update_id_list(
   std::list<std::shared_ptr<MODEL> >& model_list,
   Data model_ids)
 {
-#ifndef ODB_COMPILER
-  std::vector<unsigned long> ids = model_ids;
+#  ifndef ODB_COMPILER
+  std::vector<ODB::id_type> ids = model_ids;
   {
     auto it = model_list.begin();
 
@@ -99,7 +114,7 @@ bool update_id_list(
     }
   }
 
-  for (unsigned long id : ids)
+  for (ODB::id_type id : ids)
   {
     std::shared_ptr<MODEL> model;
 
@@ -107,21 +122,9 @@ bool update_id_list(
       return false;
     model_list.push_back(model);
   }
-#endif
+#  endif
   return true;
 }
-
-template<typename MODELS>
-std::vector<unsigned long> collect_ids_from(const MODELS& models)
-{
-  std::vector<unsigned long> ids;
-
-  for (auto model : models)
-  {
-    if (model)
-      ids.push_back(model->get_id());
-  }
-  return ids;
-}
+# endif
 
 #endif

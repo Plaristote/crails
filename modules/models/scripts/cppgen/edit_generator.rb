@@ -79,6 +79,10 @@ class EditGenerator < GeneratorBase
     end
   end
 
+  def rendering_edit?
+    not ([@rendering_has_many, @rendering_validations, @rendering_to_json].include? true)
+  end
+
   def property type, name, options = {}
     if @rendering_validations && !options[:validate].nil?
       validation type, name, options[:validate]
@@ -87,7 +91,7 @@ class EditGenerator < GeneratorBase
       when "DataTree" then _append "data[\"#{name}\"].merge(#{name});"
       else                 _append "data[\"#{name}\"] = #{name};"
       end
-    elsif options[:read_only] != true && !([@rendering_has_many, @rendering_validations].include? true)
+    elsif options[:read_only] != true && (rendering_edit? || @rendering_to_json)
       setter = "set_#{name}(data[\"#{name}\"]);"
       setter = "set_#{name}(data[\"#{name}\"].as<int>());" if not (type =~ /^(unsigned)?\s*char$/).nil?
       if options[:required] == true
@@ -115,6 +119,30 @@ class EditGenerator < GeneratorBase
     if data[:self_reference] == true
       _append validate_self_reference type, name
     end
+    #if data[:uniqueness] == true
+    #  _append validate_uniqueness type, name
+    #end
+  end
+
+  def has_one_getter type, name, options
+    type = get_type type
+    tptr = ptr_type type
+    _append "#{tptr} #{@klassname}::get_#{name}()"
+    _append "{"
+    _append "  auto& database = *#{GeneratorBase.odb_connection[:object]}::instance;"
+    _append "  #{tptr} result;\n"
+    _append "  database.find_one(result, #{name}_id);"
+    _append "  return result;"
+    _append "}\n"
+  end
+
+  def has_one_setter type, name, options
+    type = get_type type
+    tptr = ptr_type type
+    _append "void #{@klassname}::set_#{name}(#{tptr} v)"
+    _append "{"
+    _append "  #{name}_id = v->get_id();"
+    _append "}\n"
   end
 
   def has_one type, name, options = {}
@@ -122,17 +150,8 @@ class EditGenerator < GeneratorBase
     tptr = ptr_type type
     if @rendering_has_many
       if options[:joined] == false
-        _append "#{tptr} #{@klassname}::get_#{name}()"
-        _append "{"
-        _append "  auto& database = *#{GeneratorBase.odb_connection[:object]}::instance;"
-        _append "  #{tptr} result;\n"
-        _append "  database.find_one(result, #{name}_id);"
-        _append "  return result;"
-        _append "}\n"
-        _append "void #{@klassname}::set_#{name}(#{tptr} v)"
-        _append "{"
-        _append "  #{name}_id = v->get_id();"
-        _append "}\n"
+        has_one_getter type, name, options
+        has_one_setter type, name, options
       else
         _append "ODB::id_type #{@klassname}::get_#{name}_id() const"
         _append "{"
@@ -154,7 +173,7 @@ class EditGenerator < GeneratorBase
         _append "if (#{name} != nullptr)"
         _append "  data[\"#{name}_id\"] = get_#{name}_id();"
       end
-    elsif (not @rendering_has_many) && (options[:read_only] != true)
+    elsif options[:read_only] != true
       data_id = "data[\"#{name}_id\"]"
       _append "if (#{data_id}.exists())"
       if options[:joined] != false
@@ -282,6 +301,12 @@ class EditGenerator < GeneratorBase
     @indent -= 1
     _append "}\n"
 
+    has_many_fetch type, name, options
+  end
+
+  def has_many_fetch type, name, options
+    singular_name = get_singular_name name
+
     _append "void #{@klassname}::fetch_#{name}()"
     _append "{"
     @indent += 1
@@ -302,6 +327,13 @@ class EditGenerator < GeneratorBase
   class << self
     def extension ; ".cpp" ; end
 
+    def generate_includes
+      source  = "#include <crails/models/helpers.hpp>\n"
+      source += "#include <crails/odb/any.hpp>\n"
+      source += "#include <#{GeneratorBase.odb_connection[:include]}>\n"
+      source += "#include \"lib/odb/application-odb.hxx\"\n"
+    end
+
     def make_file filename, data
       base = "lib/" + filename[0...-3]
       include = base + ".hpp"
@@ -309,12 +341,9 @@ class EditGenerator < GeneratorBase
         body.gsub! "${view-placeholder}", base.split("/")[0...-2].join("/")
       end
       source  = "#include \"#{include}\"\n"
-      source += "#include <crails/models/helpers.hpp>\n"
-      source += "#include <crails/odb/any.hpp>\n"
-      source += "#include <#{GeneratorBase.odb_connection[:include]}>\n"
-      source += "#include \"lib/odb/application-odb.hxx\"\n"
+      source += generate_includes
       source += (collect_includes_for filename).join "\n"
-      source += "\n" + (data[:bodies].join "\n")
+      source += "\n\n" + (data[:bodies].join "\n")
     end
   end
 end

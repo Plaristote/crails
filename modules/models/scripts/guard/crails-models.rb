@@ -24,7 +24,7 @@ module ::Guard
       GeneratorBase.prepare @input, @tmpdir
       GeneratorBase.odb_connection = @odb_connection
       @generators.each do |generator|
-        const_name = generator.to_s.capitalize + "Generator"
+        const_name = generator.to_s.camelcase + "Generator"
         klass      = Kernel.const_get const_name
 	GeneratorBase.use klass
       end

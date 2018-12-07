@@ -20,8 +20,9 @@ if (#{name} < #{max})
 CPP
 end
 
-def validate_uniqueness source_type, type, name
-  if type.start_with?("std::shared_ptr")
+def validate_uniqueness source_type, name
+  if source_type.start_with?("std::shared_ptr")
+    type = source_type[16..-2]
 <<CPP
   {
     auto& database = *#{GeneratorBase.odb_connection[:object]}::instance;

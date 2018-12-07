@@ -17,6 +17,11 @@ class DataGenerator < GeneratorBase
     @src[@current_visibility] += str + "\n"
   end
 
+  def _append_macro str
+    @src[@current_visibility] ||= ""
+    @src[@current_visibility] += str + "\n"
+  end
+
   def get_headers
     forward_source = ""
     @forward_declarations.each do |type|
@@ -36,13 +41,17 @@ class DataGenerator < GeneratorBase
     forward_source
   end
 
+  def generate_class_head object
+    _append "#pragma db object abstract"
+    _append "struct #{object[:name]}"
+  end
+
   def generate_for object
     reset
     @forward_declarations << object[:classname] unless object[:classname].nil?
     @current_visibility = :_preblock
     @indent += 1
-    _append "#pragma db object abstract"
-    _append "struct #{object[:name]}"
+    generate_class_head object
     _append "{"
     @indent += 1
     _append "friend class odb::access;"
@@ -64,7 +73,8 @@ class DataGenerator < GeneratorBase
     _append "virtual void                     edit(Data);"
     _append "virtual std::string              to_json() const;"
     _append "virtual bool                     is_valid();"
-    _append "virtual void                     on_dependent_destroy(ODB::id_type);\n"
+    _append "virtual void                     on_dependent_destroy(ODB::id_type);"
+    _append ""
   end
 
   def prepare_order_by
@@ -215,6 +225,12 @@ CPP
     _append "#{list_type} #{name};"
   end
 
+  def has_many_fetch list_type, name, options
+    with_visibility :public do
+      _append "void fetch_#{name}();"
+    end
+  end
+
   def _id_based_has_many list_type, name, options
     singular_name = get_singular_name name
     store_type = "std::vector<ODB::id_type>"
@@ -223,9 +239,7 @@ CPP
       _append "const #{list_type}& get_#{name}();"
       _append "void set_#{singular_name}_ids(const #{store_type}& val) { #{singular_name}_ids = val; #{name}_fetched = false; }"
     end
-    with_visibility :private do
-      _append "void fetch_#{name}();"
-    end
+    has_many_fetch list_type, name, options
     options[:db]        ||= {}
     options[:db][:type] ||= "INTEGER[]"
     make_pragma_db options[:db], [:type, :column, :null]
@@ -239,18 +253,23 @@ CPP
   class << self
     def extension ; ".hpp" ; end
 
-    def make_file filename, data
-      file_define = "_#{filename[0...-3].upcase.gsub "/", "_"}_HPP"
-      source = <<CPP
-#ifndef  #{file_define}
-# define #{file_define}
-
+    def generate_includes
+<<CPP
 # include <vector>
 # include <list>
 # include <map>
 # include <string>
 # include <crails/datatree.hpp>
 # include <crails/odb/id_type.hpp>
+CPP
+    end
+
+    def make_file filename, data
+      file_define = "_#{filename[0...-3].upcase.gsub "/", "_"}_HPP"
+      source = <<CPP
+#ifndef  #{file_define}
+# define #{file_define}
+#{generate_includes}
 #{collect_includes_for(filename, true).join "\n"}
 namespace odb { class access; }
 #{data[:headers].join ""}
