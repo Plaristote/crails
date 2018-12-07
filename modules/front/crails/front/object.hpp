@@ -6,7 +6,8 @@
 # include <map>
 # include <vector>
 # include <string>
-# include <boost/lexical_cast.hpp>
+# include <sstream>
+# include <iostream>
 
 #define js_object(...) \
   Crails::Front::Object(std::map<std::string, Crails::Front::Object>({__VA_ARGS__}))
@@ -57,9 +58,14 @@ namespace Crails
         return client::JSON.parse(str);
       }
 
+      static Object from_json(const std::string& str)
+      {
+        return from_json(new client::String(str.c_str()));
+      }
+
       std::string to_json() const
       {
-        return Object(client::JSON.stringify(ptr));
+        return (std::string)(*static_cast<client::String*>(client::JSON.stringify(ptr)));
       }
 
       template<typename FUNCTYPE>
@@ -163,7 +169,13 @@ namespace Crails
     template<typename ARG>
     struct ApplyParamsToString
     {
-      static std::string func(ARG arg, char) { return boost::lexical_cast<std::string>(arg); }
+      static std::string func(ARG arg, char)
+      {
+        std::stringstream stream;
+
+        stream << arg;
+        return stream.str();
+      }
     };
 
     template<>
