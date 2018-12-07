@@ -10,7 +10,7 @@ Crails::Front::Promise Model::fetch()
   auto request = Http::Request::get(get_url());
 
   request->set_headers({{"Accept", get_content_type()}});
-  return request->send()->then([this, request]()
+  return request->send().then([this, request]()
   {
     auto response = request->get_response();
 
@@ -32,7 +32,7 @@ Crails::Front::Promise Model::save()
     {"Accept",       get_content_type()}
   });
   request->set_body(get_payload());
-  return request->send()->then([this, request]()
+  return request->send().then([this, request]()
   {
     auto response = request->get_response();
     

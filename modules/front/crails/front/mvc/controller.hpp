@@ -50,7 +50,7 @@ namespace Crails
       {
         auto request = Http::Request::get(MODEL().get_url());
 
-        return request->send()->then([this, request]()
+        return request->send().then([this, request]()
         {
           auto response = request->get_response();
 
