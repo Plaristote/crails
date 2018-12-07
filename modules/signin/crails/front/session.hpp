@@ -3,6 +3,7 @@
 
 # include <crails/front/signal.hpp>
 # include <crails/front/ajax.hpp>
+# include <crails/front/http.hpp>
 # include <crails/front/cookies.hpp>
 # include <crails/datatree.hpp>
 # include <crails/odb/id_type.hpp>
@@ -18,25 +19,37 @@ namespace Crails
     public:
       Crails::Signal<void> on_connect, on_disconnect;
 
-      void connect(const std::string& login, const std::string& password)
+      Crails::Front::Promise connect(const std::string& login, const std::string& password)
       {
+        auto request = Http::Request::post(DESC::path);
         DataTree params;
 
         params[DESC::login_key]    = login;
         params[DESC::password_key] = password;
-        Ajax::query("POST", DESC::path)
-          .headers(get_headers())
-          .data(params.to_json())
-          .on_success(std::bind(&Session::on_connect_success, this, std::placeholders::_1))
-          .on_error  (std::bind(&Session::on_connect_failure, this, std::placeholders::_1))
-          ();
+        request->set_headers(get_headers());
+        request->set_body(params.to_json());
+        return request->send()->then([this, request]()
+        {
+          auto response = request->get_response();
+
+          if (response->ok())
+            on_connect_success(*response);
+          else
+            on_connect_failure(*response);
+        });
       }
 
-      void disconnect()
+      Crails::Front::Promise disconnect()
       {
-        Ajax::query("DELETE", DESC::path)
-          .on_success(std::bind(&Session::on_disconnect_success, this, std::placeholders::_1))
-          ();
+        auto request = Http::Request::_delete(DESC::path);
+        
+        return request->send()->then([this, request]()
+        {
+          auto response = request->get_response();
+          
+          if (response->ok())
+            on_disconnect_success(*response);
+        });
       }
 
       void get_current_user(std::function<void (UserPtr)> callback)
@@ -67,25 +80,25 @@ namespace Crails
 
       void set_current_user(UserPtr ptr) { current_user = ptr; }
 
-      virtual void on_connect_success(const Ajax& ajax)
+      virtual void on_connect_success(const Http::Response& response)
       {
-        DataTree response(ajax.get_response_as_json());
+        DataTree data = response.get_response_data();
 
-        cookies.set("auth_token", response["auth_token"].as<std::string>());
-        cookies.set("cuid",       response["cuid"].as<ODB::id_type>());
+        cookies.set("auth_token", data["auth_token"].as<std::string>());
+        cookies.set("cuid",       data["cuid"].as<ODB::id_type>());
         on_connect.trigger();
       }
 
-      virtual void on_connect_failure(const Ajax&)
+      virtual void on_connect_failure(const Http::Response&)
       {
       }
 
-      bool is_connected() const
+      bool is_connected()
       {
         return cookies.has("auth_token") && cookies.has("cuid");
       }
 
-      virtual void on_disconnect_success(const Ajax&)
+      virtual void on_disconnect_success(const Http::Response&)
       {
         cookies.remove("auth_token");
         cookies.remove("cuid");
