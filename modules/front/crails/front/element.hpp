@@ -6,6 +6,7 @@
 # include <map>
 # include "object.hpp"
 # include "events.hpp"
+# include "append_semantics.hpp"
 
 namespace Crails
 {
@@ -20,7 +21,6 @@ namespace Crails
       Element(const client::String& str, const std::map<std::string, std::string>& attrs = {});
       Element(client::HTMLElement*);
 
-      Element& inner(const std::vector<Element>& children);
       Element& attr(const std::map<std::string, std::string>& attrs);
       Element& attr(const std::map<std::string, std::wstring>& attrs);
       Element& attr(const std::map<std::string, client::String*>& attrs);
@@ -57,11 +57,21 @@ namespace Crails
         return var;
       }
 
-      Element& operator>(const std::vector<Element>& children);
-      Element& operator>(Element child);
+      inline Element& inner(const std::vector<Element>& els)                  { return operator>(els); }
+      inline Element& inner(const std::vector<Element*>& els)                 { return operator>(els); }
+      inline Element& inner(const std::vector<std::shared_ptr<Element> > els) { return operator>(els); }
+
+      template<typename LIST>
+      Element& operator>(const LIST& list)
+      {
+        ElementListAppender<LIST, is_array_container<LIST>::value>::append_list(list, **this);
+        return *this;
+      }
+
       Element& empty();
 
       void append_to(client::HTMLElement* el);
+      void append_to(Element& el);
       void destroy();
 
       bool    has_parent() const;

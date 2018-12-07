@@ -71,23 +71,6 @@ Element Element::get_next()
   return Element((client::HTMLElement*)((*this)->get_nextElementSibling()));
 }
 
-Element& Element::inner(const std::vector<Element>& children)
-{
-  for (Element element : children)
-    (*this)->appendChild(*element);
-  return *this;
-}
-
-Element& Element::operator>(const std::vector<Element>& children)
-{
-  return inner(children);
-}
-
-Element& Element::operator>(Element child)
-{
-  return inner({ child });
-}
-
 Element& Element::attr(const std::map<std::string, std::string>& attrs)
 {
   for (auto it = attrs.begin() ; it != attrs.end() ; ++it)
@@ -173,6 +156,11 @@ map<string, string> Element::css() const
 void Element::append_to(client::HTMLElement* el)
 {
   el->appendChild(**this);
+}
+
+void Element::append_to(Element& el)
+{
+  el->appendChild(static_cast<client::HTMLElement*>(ptr));
 }
 
 bool Element::contains(const client::HTMLElement* source)
