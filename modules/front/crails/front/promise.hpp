@@ -4,8 +4,6 @@
 # include "object.hpp"
 # include <vector>
 
-# include "globals.hpp"
-
 namespace Crails
 {
   namespace Front
@@ -24,7 +22,6 @@ namespace Crails
       template<typename T>
       Promise then(T callback)
       {
-        Crails::Front::window.set("tintin", *this);
         client::Object* func = cheerp::Callback(callback);
         this->apply("then", func);
         return *this;
