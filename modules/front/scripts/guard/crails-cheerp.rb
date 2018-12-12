@@ -20,6 +20,26 @@ module ::Guard
       options[:cheerp_path] || "/opt/cheerp"
     end
 
+    def make_symbolic_links
+      prefix = ""
+      p1 = Pathname.new(File.expand_path(@output)).parent
+      p2 = FileUtils.pwd
+      while p1.to_s != p2.to_s
+        p1 = p1.parent
+	prefix += "../"
+      end
+
+      built_path = "#{front_build_path}/application.js"
+      if File.exists? built_path
+        `unlink "#{@output}"`
+        `ln -s "#{prefix}#{built_path}" "#{@output}"`
+        if File.exists? "#{built_path}.map"
+          `unlink "#{@output}.map"`
+          `ln -s "#{prefix}#{built_path}.map" "#{@output}.map"`
+        end
+      end
+    end
+
     def compile
       Crails::Notifier.notify get_project_name, "Compiling Front..."
       duration = nil
@@ -35,6 +55,7 @@ module ::Guard
         end
       end
       if success
+        make_symbolic_links
         Crails::Notifier.notify 'crails-cheerp', "Compiled in #{duration}s", image: :success
       else
         Crails::Notifier.notify 'crails-cheerp', "Compilation failed", image: :failed
