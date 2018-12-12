@@ -13,6 +13,8 @@ class String
   end
 end
 
+require 'pathname'
+
 class GeneratorBase
   def self.is_file_based? ; true ; end
 
@@ -67,11 +69,18 @@ class GeneratorBase
       end
       files.each do |key,value|
         source = generator_class.make_file key, value
-        `mkdir -p #{@output_dir}/#{File.dirname key}`
-        File.open "#{@output_dir}/#{key[0...-3]}#{generator_class.extension}", 'w' do |f|
+        path   = generator_class.sourcefile_to_destfile key
+        `mkdir -p #{@output_dir}/#{File.dirname path}`
+        File.open "#{@output_dir}/#{path}", 'w' do |f|
           f.write source
         end
       end
+    end
+
+    def sourcefile_to_destfile sourcefile
+      sourcepath = Pathname.new(sourcefile)
+      extension  = sourcepath.extname
+      sourcefile[0...-extension.length] + self.extension
     end
   end
 

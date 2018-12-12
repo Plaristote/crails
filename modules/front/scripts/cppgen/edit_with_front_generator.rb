@@ -116,5 +116,12 @@ class EditWithFrontGenerator < EditGenerator
 #endif
 CPP
     end
+
+    def sourcefile_to_destfile sourcefile
+      base      = super sourcefile
+      basepath  = Pathname.new base
+      parentdir = basepath.dirname.to_s + "/shared"
+      "#{parentdir}/#{basepath.basename}"
+    end
   end
 end
