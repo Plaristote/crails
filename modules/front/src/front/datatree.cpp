@@ -1,5 +1,6 @@
 #include <crails/front/datatree.hpp>
 #include <crails/front/globals.hpp>
+#include <iostream>
 
 using namespace std;
 
@@ -166,4 +167,18 @@ void Data::destroy()
     for (auto subkey : get_keys())
       object.unset(subkey);
   }
+}
+
+template<>
+bool Data::as<bool>() const
+{
+  std::string as_string = as_object().apply("toString");
+  std::stringstream stream;
+  int numerical_value;
+
+  if (as_string == "true" || as_string == "false")
+    return as_string == "true";
+  stream << as_string;
+  stream >> numerical_value;
+  return numerical_value != 0;
 }

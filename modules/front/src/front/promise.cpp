@@ -4,8 +4,6 @@
 using namespace std;
 using namespace Crails::Front;
 
-Promise Promise::solved_promise([](function<void()> resolve, function<void()>) { resolve(); });
-
 Promise::Promise(std::function<void (std::function<void ()>, std::function<void ()>)> resolver)
 {
   client::Object* func = cheerp::Callback([resolver](client::Object* callbacks_ptr)
@@ -44,4 +42,9 @@ Promise Promise::all(const std::vector<Promise>& promises)
   for (auto promise : promises)
     array->push(*promise);
   return *(window["Promise"].apply("all", array));
+}
+
+Promise Promise::solved_promise()
+{
+  return Promise([](function<void()> resolve, function<void()>) { resolve(); });
 }

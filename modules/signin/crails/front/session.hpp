@@ -28,7 +28,7 @@ namespace Crails
         params[DESC::password_key] = password;
         request->set_headers(get_headers());
         request->set_body(params.to_json());
-        return request->send()->then([this, request]()
+        return request->send().then([this, request]()
         {
           auto response = request->get_response();
 
@@ -43,7 +43,7 @@ namespace Crails
       {
         auto request = Http::Request::_delete(DESC::path);
         
-        return request->send()->then([this, request]()
+        return request->send().then([this, request]()
         {
           auto response = request->get_response();
           

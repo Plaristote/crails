@@ -7,6 +7,7 @@
 # include <iostream>
 # include <sstream>
 # include <crails/front/object.hpp>
+# include <iostream>
 
 class DataTree;
 
@@ -200,6 +201,8 @@ public:
   mutable Crails::Front::Object object;
   std::string                   key;
 };
+
+template<> bool Data::as<bool>() const;
 
 class DataTree
 {

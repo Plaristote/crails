@@ -6,6 +6,9 @@
 # include <crails/front/router.hpp>
 # include <crails/odb/id_type.hpp>
 # include <sstream>
+# include <map>
+# include "layout.hpp"
+# include "view.hpp"
 
 namespace Crails
 {
@@ -13,16 +16,27 @@ namespace Crails
   {
     class Controller
     {
+      static std::map<std::string, std::shared_ptr<Layout> > layouts;
+      static std::string current_layout;
     public:
       Controller(const Params& p) : params(p)
       {
       }
 
-      Crails::Front::Promise initialize() { return Promise::solved_promise; }
-      Crails::Front::Promise finalize()   { return Promise::solved_promise; }
+      Crails::Front::Promise initialize() { return Promise::solved_promise(); }
+      Crails::Front::Promise finalize()   { return Promise::solved_promise(); }
+
+      void render(std::shared_ptr<View>);
+
+      static void set_layout(const std::string&);
+      static void register_layout(const std::string& name, std::shared_ptr<Layout> object) { layouts.emplace(name, object); }
 
     protected:
       Params params;
+
+    private:
+      static void attach_layout(const std::string&);
+      static void detach_layout();
     };
 
     template<typename MODEL, typename SUPER = Crails::Front::Controller>

@@ -179,7 +179,7 @@ bool Element::contains(const client::HTMLElement* source)
 
 std::vector<Element> Element::find(const std::string& selector)
 {
-  client::NodeListOf<client::Element>* node_list = (*this)->querySelectorAll(selector.c_str());
+  client::NodeList* node_list = (*this)->querySelectorAll(selector.c_str());
   std::vector<Element> results;
 
   results.resize(node_list->get_length());

@@ -1,0 +1,26 @@
+# -DCMAKE_TOOLCHAIN_FILE /opt/cheerp/share/cmake/Modules/CheerpToolchain.cmake
+cmake_minimum_required(VERSION 3.0)
+
+project(<%= project_name %>-front)
+option(DEVELOPER_MODE "enable debugging tools" ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__CHEERP_CLIENT__ -pedantic")
+
+include_directories(include /usr/local/include . ..)
+
+if(DEVELOPER_MODE)
+  set(CMAKE_BUILD_TYPE "Debug")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -cheerp-sourcemap=application.js.map -cheerp-sourcemap-standalone")
+else()
+  set(CMAKE_BUILD_TYPE "Release")
+ #set(CMAKE_CXX_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -cheerp-preexecute")
+endif()
+
+file(GLOB_RECURSE front_files
+     *.cpp
+     ../lib/app/data/shared/*.cpp)
+
+file(GLOB_RECURSE crails_front_files
+     /usr/local/share/crails/front/*.cpp)
+
+add_executable(application ${crails_front_files} ${front_files})

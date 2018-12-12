@@ -11,8 +11,7 @@ namespace Crails
     class Promise : public ObjectImpl<client::Promise>
     {
     public:
-      static Promise solved_promise;
-
+      static Promise solved_promise();
       static Promise all(const std::vector<Promise>& promises);
 
       Promise(std::function<void (std::function<void ()>, std::function<void ()>)> resolver);
