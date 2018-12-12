@@ -1,5 +1,4 @@
 #include <crails/front/mvc/controller.hpp>
-#include <crails/front/globals.hpp>
 #include <crails/front/exception.hpp>
 
 using namespace std;
@@ -34,7 +33,7 @@ void Controller::attach_layout(const string& name)
 {
   const Element& layout = *(layouts.at(name));
 
-  body->appendChild(*layout);
+  client::document.get_body()->appendChild(*layout);
   current_layout = name;
 }
 
