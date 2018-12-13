@@ -66,7 +66,7 @@ module ::Guard
       cmakelists_path = Dir.pwd + "/front"
       opts = []
       opts << "-DCMAKE_TOOLCHAIN_FILE=#{cheerp_path}/share/cmake/Modules/CheerpToolchain.cmake"
-      opts << "-DDEVELOPER_MODE=#{developer_mode? ? "OFF" : "ON"}"
+      opts << "-DDEVELOPER_MODE=#{developer_mode? ? "ON" : "OFF"}"
       FileUtils.mkdir_p front_build_path
       Dir.chdir front_build_path do
         run_command "cmake #{opts.join ' '} #{cmakelists_path}"
