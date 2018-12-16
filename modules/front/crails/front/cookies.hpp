@@ -27,7 +27,13 @@ namespace Crails
       template<typename TYPE>
       void set(const std::string& key, const TYPE& val)
       {
-        set(key, boost::lexical_cast<std::string>(val));
+        set(key, boost::lexical_cast<std::string>(val), 0);
+      }
+
+      template<typename TYPE>
+      void set(const std::string& key, const TYPE& val, std::time_t expires_in)
+      {
+        set(key, boost::lexical_cast<std::string>(val), expires_in);
       }
 
     private:
@@ -49,7 +55,7 @@ namespace Crails
     template<>
     std::string Cookies::get<std::string>(const std::string& key);
     template<>
-    void Cookies::set(const std::string& key, const std::string& val);
+    void Cookies::set(const std::string& key, const std::string& val, std::time_t);
   }
 }
 

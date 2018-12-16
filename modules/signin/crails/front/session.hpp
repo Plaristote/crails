@@ -83,9 +83,10 @@ namespace Crails
       virtual void on_connect_success(const Http::Response& response)
       {
         DataTree data = response.get_response_data();
+        time_t expires_in = data["expires_in"].as<std::time_t>();
 
-        cookies.set("auth_token", data["auth_token"].as<std::string>());
-        cookies.set("cuid",       data["cuid"].as<ODB::id_type>());
+        cookies.set("auth_token", data["auth_token"].as<std::string>(), expires_in);
+        cookies.set("cuid",       data["cuid"].as<ODB::id_type>(),      expires_in);
         on_connect.trigger();
       }
 

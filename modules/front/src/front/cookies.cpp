@@ -1,5 +1,6 @@
 #include <crails/front/cookies.hpp>
 #include <crails/front/exception.hpp>
+#include <crails/front/object.hpp>
 #include <crails/http.hpp>
 #include <crails/utils/parse_cookie_values.hpp>
 #include <cheerp/client.h>
@@ -35,6 +36,29 @@ void Cookies::set<string>(const string& key, const string& val)
     cookie_store.insert(pair<string, string>(key, val));
   set_cookie_string(
     Http::Url::Encode(key) + '=' + Http::Url::Encode(val)
+  );
+}
+
+template<>
+void Cookies::set<string>(const string& key, const string& val, time_t expires_in)
+{
+  string time_string;
+
+  ensure_cookie_map_is_updated();
+  if (has(key))
+    cookie_store.at(key) = val;
+  else
+    cookie_store.insert(pair<string, string>(key, val));
+  if (expires_in > 0)
+  {
+    ObjectImpl<client::Date> date;
+    double expires_time = date->getTime() + expires_in * 1000;
+
+    date->setTime(expires_time);
+    time_string = "; expires=" + (string)date.apply("toGMTString");
+  }
+  set_cookie_string(
+    Http::Url::Encode(key) + '=' + Http::Url::Encode(val) + time_string
   );
 }
 
