@@ -85,12 +85,13 @@ void Controller::render(RenderType type, Data value)
   switch (type)
   {
     case JSON:
-    {
       value.output(body);
       break ;
-    }
+    case XML:
+      body << value.to_xml();
+      break ;
     default:
-      throw boost_ext::invalid_argument("ControllerBase::render(RenderType,Data) only supports JSON type");
+      throw boost_ext::invalid_argument("Crails::Controller::render(RenderType,Data) only supports JSON and XML");
   }
   response["body"] = body.str();
   set_content_type(type);
