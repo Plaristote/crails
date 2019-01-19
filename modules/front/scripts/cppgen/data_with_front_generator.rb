@@ -59,7 +59,7 @@ class DataWithFrontGenerator < DataGenerator
     end
 
     def client_super_class
-      "Crails::Front::JsonModel"
+      "MODELS_CLIENT_SUPER_CLASS"
     end
 
     def generate_includes
@@ -68,6 +68,9 @@ class DataWithFrontGenerator < DataGenerator
 #ifdef #{client_define}
 # include <crails/front/mvc/model.hpp>
 # include <crails/front/promise.hpp>
+# ifndef #{client_super_class}
+#  define #{client_super_class} Crails::Front::JsonModel
+# endif
 #endif
 CPP
     end
