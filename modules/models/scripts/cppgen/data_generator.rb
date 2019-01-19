@@ -219,8 +219,10 @@ CPP
   end
 
   def _join_based_has_many list_type, name, options
+    singular_name = get_singular_name name
     with_visibility :public do
       _append "const #{list_type}& get_#{name}() const { return #{name}; }"
+      _append "std::vector<ODB::id_type> get_#{singular_name}_ids() const;"
     end
     _append "#{list_type} #{name};"
   end

@@ -88,10 +88,11 @@ class EditGenerator < GeneratorBase
       validation type, name, options[:validate]
     elsif @rendering_to_json
       case type
-      when "DataTree" then _append "data[\"#{name}\"].merge(#{name});"
-      else                 _append "data[\"#{name}\"] = #{name};"
+      when "DataTree"     then _append "data[\"#{name}\"].merge(#{name});"
+      when "LocaleString" then _append "data[\"#{name}\"] = #{name}.to_string();"
+      else                     _append "data[\"#{name}\"] = #{name};"
       end
-    elsif options[:read_only] != true && (rendering_edit? || @rendering_to_json)
+    elsif options[:read_only] != true && rendering_edit?
       setter = "set_#{name}(data[\"#{name}\"]);"
       setter = "set_#{name}(data[\"#{name}\"].as<int>());" if not (type =~ /^(unsigned)?\s*char$/).nil?
       if options[:required] == true
@@ -228,6 +229,13 @@ class EditGenerator < GeneratorBase
     tptr = ptr_type type
     list_type = "std::list<#{tptr} >"
     singular_name = get_singular_name name
+    _append "std::vector<ODB::id_type> #{@klassname}::get_#{singular_name}_ids() const"
+    _append "{"
+    @indent += 1
+    _append "return collect_ids_from(get_#{name}());"
+    @indent -= 1
+    _append "}\n"
+
     _append "bool #{@klassname}::update_#{name}(Data ids)"
     _append "{"
     @indent += 1
