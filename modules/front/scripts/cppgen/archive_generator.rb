@@ -17,8 +17,10 @@ class ArchiveGenerator < GeneratorBase
 
   def generate_for object
     reset
+    _append "#ifndef #{self.class.client_define}"
+    _append "# include <crails/renderer.hpp>"
+    _append "#endif"
     _append "#include <crails/front/archive.hpp>"
-    _append "#include <crails/renderer.hpp>"
     _append "#include \"#{object[:header]}\"\n"
     _append "void #{object[:classname]}::serialize(IArchive& archive)"
     _append "{"
@@ -42,6 +44,7 @@ class ArchiveGenerator < GeneratorBase
     ptr_type = "#{object[:classname]}*"
     funcname_prefix = "render_#{object[:classname].underscore}"
     funcname = "#{funcname_prefix}_show_archive"
+    _append "#ifndef #{self.class.client_define}"
     _append "std::string #{funcname}(const Crails::Renderer* renderer, Crails::SharedVars& vars)"
     _append "{"
     @indent += 1
@@ -65,6 +68,7 @@ class ArchiveGenerator < GeneratorBase
     _append "return archive.as_string();"
     @indent -= 1
     _append "}"
+    _append "#endif"
   end
 
   def property type, name, options = {}
@@ -89,6 +93,10 @@ class ArchiveGenerator < GeneratorBase
   end
 
   class << self
+    def client_define
+      "__CHEERP_CLIENT__"
+    end
+
     def extension ; ".archive.cpp" ; end
 
     def make_file filename, data

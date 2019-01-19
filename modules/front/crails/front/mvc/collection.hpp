@@ -91,7 +91,7 @@ namespace Crails
         auto request = Http::Request::get(get_url());
         
         request->set_headers({{"Accept",Archive::mimetype}});
-        return request->send()->then([this, request]()
+        return request->send().then([this, request]()
         {
           auto response = request->get_response();
           
