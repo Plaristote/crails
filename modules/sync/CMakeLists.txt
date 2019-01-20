@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(crails-sync)
 
+include_directories(. ../odb)
+
 file(GLOB crails_sync src/*.cpp)
 
 file(GLOB headers_crails_sync crails/sync/*.hpp)
