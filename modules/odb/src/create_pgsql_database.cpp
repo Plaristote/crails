@@ -95,11 +95,11 @@ bool pgsql_create_from_settings(const Crails::Databases::DatabaseSettings& datab
   initialize_credentials(database_config, db_user, db_password, user, password);
   if (db_user != user)
   {
-    queries.push_back("CREATE USER " + db_user + " WITH PASSWORD '" + db_password + "';");
+    queries.push_back("CREATE USER \\\"" + db_user + "\\\" WITH PASSWORD '" + db_password + "';");
     pgsql_run_queries(database_config, user, password, queries, true);
     queries.clear();
   }
-  queries.push_back("CREATE DATABASE " + db_name + " WITH OWNER=\\\"" + db_user + "\\\";");
+  queries.push_back("CREATE DATABASE \\\"" + db_name + "\\\" WITH OWNER=\\\"" + db_user + "\\\";");
   return pgsql_run_queries(database_config, user, password, queries);
 }
 
