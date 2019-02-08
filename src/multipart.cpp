@@ -14,7 +14,7 @@ using namespace Crails;
 void MultipartParser::parse(Params& params)
 {
   bool blocked;
-  
+
   do
   {
     blocked = true;
@@ -28,7 +28,8 @@ void MultipartParser::parse(Params& params)
         smatch       match    = *matches;
         unsigned int disp_so  = match.position(1);
         unsigned int disp_len = match.length(1);
-        unsigned int form_end = match.length(0);
+        unsigned int form_end = disp_so + disp_len + 1;
+        //unsigned int form_end = match.length(0);
 
         content_disposition = read_buffer.substr(disp_so, disp_len);
         read_buffer.erase(0, form_end);
@@ -95,8 +96,34 @@ void MultipartParser::parse(Params& params)
         if (pos != string::npos)
         {
           string field = content_data["name"];
+          string value = read_buffer.substr(0, pos - 4);
+          string ptree_key;
+          bool   is_array = false;
 
-          params[field] = read_buffer.substr(0, pos - 4);
+          // From CGI parameter to Ptree parameter
+          for (size_t i = 0 ; i < field.length() ; ++i)
+          {
+            if (field[i] == '[')
+            {
+              if (field[i] + 1 == ']')
+                is_array = true;
+              else
+                ptree_key += '.';
+            }
+            else if (field[i] != ']')
+              ptree_key += field[i];
+          }
+          if (is_array)
+          {
+            if (params[ptree_key].exists())
+              params[ptree_key].push_back(value);
+            else
+              params[ptree_key].from_vector(std::vector<std::string>({value}));
+          }
+          else
+            params[ptree_key] = value;
+          // END From CGI parameter to Ptree parameter
+
           read_buffer.erase(0, pos);
           parsed_state = 0;
           blocked = false;
