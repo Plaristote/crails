@@ -4,7 +4,7 @@ project(crails-odb)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
-find_package(ODB REQUIRED libodb OPTIONAL_COMPONENTS mysql pgsql sqlite oracle)
+#find_package(ODB REQUIRED libodb OPTIONAL_COMPONENTS mysql pgsql sqlite oracle)
 
 if (${ODB_mysql_FOUND})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DODB_WITH_MYSQL")
