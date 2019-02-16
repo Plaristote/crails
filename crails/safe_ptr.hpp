@@ -36,14 +36,14 @@ public:
     return *this;
   }
 
-  T* operator->() const throw(NullPointerException)
+  T* operator->() const
   {
     if (this->get() == 0)
       throw NullPointerException();
     return (this->get());
   }
   
-  T& operator*(void) const throw(NullPointerException)
+  T& operator*(void) const
   {
     if (this->get() == 0)
       throw NullPointerException();
