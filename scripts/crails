@@ -54,14 +54,26 @@ def run_command cmd
   $?.exitstatus
 end
 
-def run_using_bundler cmd
+def find_bundler
   bundler_gemspec = Gem::Specification::find_all_by_name('bundler')
-  unless bundler_gemspec.any?
+  system_bundler  = `which bundle 2> /dev/null`
+  if bundler_gemspec.any?
+    bundler_gem = bundler_gemspec.first
+    "#{bundler_gem.bin_dir}/#{bundler_gem.executables.first}"
+  elsif system_bundler != ""
+    system_bundler.split("\n").first
+  else
+    nil
+  end
+end
+
+def run_using_bundler cmd
+  bundler_bin = find_bundler
+
+  if bundler_bin.nil?
     puts "/!\\ Bundler gem not found. Please install it with `gem install bundler`."
     exit 2
   end
-  bundler_gem = bundler_gemspec.first
-  bundler_bin = "#{bundler_gem.bin_dir}/#{bundler_gem.executables.first}"
 
   puts "[crails] Using ruby bundler #{bundler_bin}"
 
