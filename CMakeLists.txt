@@ -8,6 +8,7 @@ option(USE_ODB           "ODB ORM"               ON)
 option(USE_COOKIE_CIPHER "Include cookie cipher" OFF)
 option(USE_SSL           "Include ssl support"   OFF)
 option(USE_CRAILS_SYNC   "crails-sync"           ON)
+option(USE_SELENIUM      "Selenium testing"      OFF) # require webdrivercxx
 option(DEVELOPER_MODE    "Developer mode"        ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
@@ -129,4 +130,8 @@ endif()
 
 if (USE_CRAILS_SYNC)
   add_subdirectory(modules/sync)
+endif()
+
+if (USE_SELENIUM)
+  add_subdirectory(modules/selenium)
 endif()
