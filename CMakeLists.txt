@@ -8,7 +8,6 @@ option(USE_ODB           "ODB ORM"               ON)
 option(USE_COOKIE_CIPHER "Include cookie cipher" OFF)
 option(USE_SSL           "Include ssl support"   OFF)
 option(USE_CRAILS_SYNC   "crails-sync"           ON)
-option(USE_SELENIUM      "Selenium testing"      OFF) # require webdrivercxx
 option(DEVELOPER_MODE    "Developer mode"        ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
@@ -48,8 +47,9 @@ endif()
 find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system random REQUIRED)
 find_package(ImageMagick COMPONENTS Magick++)
+find_package(webdriverxx)
 
-include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ImageMagick_INCLUDE_DIRS})
+include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ImageMagick_INCLUDE_DIRS} ${WEBDRIVERXX_INCLUDE_DIRS})
 
 ##
 ## Source files
@@ -132,6 +132,6 @@ if (USE_CRAILS_SYNC)
   add_subdirectory(modules/sync)
 endif()
 
-if (USE_SELENIUM)
+if (${WEBDRIVERXX_FOUND})
   add_subdirectory(modules/selenium)
 endif()
