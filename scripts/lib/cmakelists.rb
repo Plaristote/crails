@@ -14,8 +14,8 @@ class CMakeLists
     puts "\033[32m[EDITED]\033[0m " + @source_file
   end
 
-  def add_dependency name
-    append_dependency "set(dependencies ${dependencies} #{name})"
+  def add_dependency name, dependency_group = "dependencies"
+    append_dependency "set(#{dependency_group} ${#{dependency_group}} #{name})"
     puts "\033[32m[CMAKE]\033[0m Adding dependency #{name}"
   end
 
@@ -23,8 +23,8 @@ class CMakeLists
     append_module "add_subdirectory(modules/#{name})"
   end
 
-  def add_crails_module name
-    add_dependency "crails-#{name}${crails-suffix}"
+  def add_crails_module name, dependency_group = "dependencies"
+    add_dependency "crails-#{name}${crails-suffix}", dependency_group
   end
 
   def add_crails_task name

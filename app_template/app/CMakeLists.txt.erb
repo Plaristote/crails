@@ -53,7 +53,9 @@ set(dependencies crails-core${crails-suffix}
                  ${dependencies}
                  <% if options[:segvcatch] == true %>segvcatch<% end %>)
 
+set(tests_dependencies "")
+
 <%= CMAKE_CUSTOM_DEPENDENCIES_HEADER %>
 
 target_link_libraries(server ${dependencies})
-target_link_libraries(tests  crails-tests${crails-suffix} ${dependencies})
+target_link_libraries(tests  crails-tests${crails-suffix} ${dependencies} ${tests_dependencies})
