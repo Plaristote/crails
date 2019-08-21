@@ -10,7 +10,7 @@ namespace Crails
   {
     typedef boost::network::http::server_options<boost::network::http::tags::http_server, Crails::Server> ServerOptions;
   public:
-    ProgramOptions(int argc, char** argv);
+    ProgramOptions(int argc, const char** argv);
 
     HttpServer::options get_server_options(Crails::Server&) const;
 

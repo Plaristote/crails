@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Crails;
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   // Initializers
   Renderer::initialize();

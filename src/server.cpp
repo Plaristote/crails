@@ -123,7 +123,7 @@ void Server::ThrowCrashSegv()
 std::function<void (void)> shutdown_lambda;
 static void shutdown(int) { shutdown_lambda(); }
 
-void Server::Launch(int argc, char **argv)
+void Server::Launch(int argc, const char **argv)
 {
   logger << Logger::Info << "## Launching the amazing Crails Server ##" << Logger::endl;
   ProgramOptions options(argc, argv);

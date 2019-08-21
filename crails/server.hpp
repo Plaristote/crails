@@ -48,7 +48,7 @@ namespace Crails
     static FileCache&      get_file_cache() { return file_cache; }
     static std::shared_ptr<boost::asio::io_service> get_io_service() { return io_service; }
 
-    static void Launch(int argc, char** argv);
+    static void Launch(int argc, const char** argv);
 
     static void SetResponse(Params& params, BuildingResponse& out, Server::HttpCode code, const std::string& content);
   private:

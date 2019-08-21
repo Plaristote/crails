@@ -16,7 +16,7 @@ namespace Crails {
 }
 #endif
 
-ProgramOptions::ProgramOptions(int argc, char** argv)
+ProgramOptions::ProgramOptions(int argc, const char** argv)
 {
   program_options::options_description desc("Options");
 
