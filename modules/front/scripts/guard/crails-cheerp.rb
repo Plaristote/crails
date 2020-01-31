@@ -5,9 +5,7 @@ require 'pathname'
 module ::Guard
   class CrailsCheerp < CrailsPlugin
     def initialize arg
-      @input  = arg[:input]  || "front"
       @output = arg[:output] || "public/assets/application.js"
-      @atonce = arg[:at_once]
       super
     end
 
