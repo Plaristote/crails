@@ -78,6 +78,8 @@ class CrailsCheerpHtmlGenerator
       @inline_ref_count = 0
       @named_elements   = {}
       @ref_types        = {}
+      @root_element     = klass[:el]
+      @named_elements[klass[:el].path] = "(*this)" unless klass[:el] == @body
       header += "\n"
       header += generate_class_header klass
       source += "\n"
@@ -391,12 +393,28 @@ class CrailsCheerpHtmlGenerator
     result
   end
 
+  def make_attr_from_el el
+    hard_attributes  = []
+    el.attributes.each do |key, value|
+      if key != "ref" && !(key.end_with? ".bind") && !(key.end_with? ".trigger") && !(key.end_with? ".for")
+        hard_attributes << "{\"#{key}\",\"#{value}\"}"
+      end
+    end
+    hard_attributes
+  end
+
   def append_constructor root
     result = ""
     result += "  std::map<std::string, Crails::Front::Element> element_cache;\n\n"
-
     result += append_constructor_refs root
+    @bite = true
+    result += append_bound_attributes_for root unless root == @body
+    @bite = false
     result += append_bound_attributes root
+    unless root == @body
+      hard_attributes = make_attr_from_el root
+      result += "  attr({#{hard_attributes.join ','}});\n" if hard_attributes.length > 0
+    end
     result += "  inner({#{append_children root, 4}\n  });\n"
     result
   end
@@ -429,46 +447,54 @@ class CrailsCheerpHtmlGenerator
     [value, bind_mode]
   end
 
+  def append_bound_attributes_for el
+    result = ""
+    el_is_cached = el == @root_element
+    el_is_ref    = !(el.attributes["ref"].nil?)
+    attributes_to_clean_up = []
+    puts "Bound attributes for #{el.path} (cached: #{el_is_cached})" if @bite
+    puts "Named element: #{@named_elements[el.path]}" if @bite
+    el.attributes.each do |key, value|
+      if key.end_with? ".trigger"
+        if !el_is_ref && !el_is_cached
+          result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
+          el_is_cached = true
+          @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
+        end
+        result += "  #{@named_elements[el.path]}.events->on(\"#{key.delete_suffix(".trigger")}\", [this](client::Event* _event) { #{value}; });\n"
+        attributes_to_clean_up << key
+      elsif key.end_with? ".bind"
+        if !el_is_ref && !el_is_cached
+          result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
+          el_is_cached = true
+          @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
+        end
+
+        attribute_name   = key.split(".").first
+        is_cpp           = attribute_name.start_with?("cpp::")
+        attribute_name   = attribute_name[5..-1] if is_cpp
+        value, bind_mode = extract_bind_mode_from value
+
+        initializer = unless is_cpp
+          "Crails::Front::Bindable(#{@named_elements[el.path]}, \"#{attribute_name}\", [this]() -> std::string { return boost::lexical_cast<std::string>(#{value}); })"
+        else
+          "Crails::Front::Bindable([this]() { #{@named_elements[el.path]}.set_#{attribute_name}(#{value}); })"
+        end
+
+        result += "  bound_attributes.push_back(#{initializer}#{bind_mode});\n"
+        attributes_to_clean_up << key
+      end
+    end
+    attributes_to_clean_up.each do |key| el.remove_attribute(key) end
+    result
+  end
+
   def append_bound_attributes parent
     result = ""
     parent.children.each do |el|
       subtype = get_subtype_for(el)
       if subtype.nil?
-        el_is_cached = false
-        el_is_ref    = !(el.attributes["ref"].nil?)
-        attributes_to_clean_up = []
-        el.attributes.each do |key, value|
-          if key.end_with? ".trigger"
-            if !el_is_ref && !el_is_cached
-              result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
-              el_is_cached = true
-              @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
-            end
-            result += "  #{@named_elements[el.path]}.events->on(\"#{key.delete_suffix(".trigger")}\", [this](client::Event* _event) { #{value}; });\n"
-            attributes_to_clean_up << key
-          elsif key.end_with? ".bind"
-            if !el_is_ref && !el_is_cached
-              result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
-              el_is_cached = true
-              @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
-            end
-
-            attribute_name   = key.split(".").first
-            is_cpp           = attribute_name.start_with?("cpp::")
-            attribute_name   = attribute_name[5..-1] if is_cpp
-            value, bind_mode = extract_bind_mode_from value
-
-            initializer = unless is_cpp
-              "Crails::Front::Bindable(#{@named_elements[el.path]}, \"#{attribute_name}\", [this]() -> std::string { return boost::lexical_cast<std::string>(#{value}); })"
-            else
-              "Crails::Front::Bindable([this]() { #{@named_elements[el.path]}.set_#{attribute_name}(#{value}); })"
-            end
-
-            result += "  bound_attributes.push_back(#{initializer}#{bind_mode});\n"
-            attributes_to_clean_up << key
-          end
-        end
-        attributes_to_clean_up.each do |key| el.remove_attribute(key) end
+        result += append_bound_attributes_for el
         el.children.each do |child|
           result += append_bound_attributes child
         end
@@ -487,15 +513,8 @@ class CrailsCheerpHtmlGenerator
     parent.children.each do |el|
       next unless get_subtype_for(el).nil?
       if el.name != "text"
-        is_ref = false
-        hard_attributes  = []
-        el.attributes.each do |key, value|
-          if key == "ref"
-            is_ref = true
-          elsif !(key.end_with? ".bind")
-            hard_attributes << "{\"#{key}\",\"#{value}\"}"
-          end
-        end
+        is_ref = !el["ref"].nil?
+        hard_attributes  = make_attr_from_el el
 
         result += "," if count > 0
         result += "\n" + (" " * indent)

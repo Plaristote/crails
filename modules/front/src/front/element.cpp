@@ -170,14 +170,8 @@ void Element::insert_before(client::HTMLElement* el)
     auto* parent = el->get_parentElement();
 
     if (parent)
-    {
       parent->insertBefore(**this, el);
-      std::cout << "Insert before successful" << std::endl;
-    }
-    else
-      std::cout << "Insert before without parent" << std::endl;
   }
-  std::cout << "Insert before without element" << std::endl;
 }
 
 void Element::insert_before(Element& el)
