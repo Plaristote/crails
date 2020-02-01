@@ -132,7 +132,7 @@ class CrailsCheerpHtmlGenerator
       if !el["repeat.for"].nil?
         @repeater_count += 1
         value, bind_mode = extract_bind_mode_from el["repeat.for"].to_s
-        parts = value.to_s.match /^\s*\[([^\]]+)\]\s*([^\s]+)\s+of\s+\[([^\]]+)\]\s*(.*)$/
+        parts = value.to_s.match /^\s*(\[([^\]]+)\])?\s*([^\s]+)\s+of\s+\[([^\]]+)\]\s*(.*)$/
         if parts.nil?
           throw "invalid repeater at #{relative_filepath}:#{el.line}"
         end
@@ -144,10 +144,10 @@ class CrailsCheerpHtmlGenerator
           el:       el,
           repeater: {
             ref:       "repeater_#{@repeater_count}",
-            type:      parts[1],
-            name:      parts[2],
-            list_type: parts[3],
-            list:      parts[4],
+            type:      parts[2] || "#{parts[4]}::value_type",
+            name:      parts[3],
+            list_type: parts[4],
+            list:      parts[5],
             bind_mode: bind_mode,
             anchor:    find_repeater_anchor(el)
           }
