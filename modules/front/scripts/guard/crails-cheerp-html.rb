@@ -67,6 +67,7 @@ class CrailsCheerpHtmlGenerator
     header  = "#ifndef #{define_name}\n"
     header += "#define #{define_name}\n\n" 
     header += "#include <crails/front/bindable.hpp>\n"
+    header += "#include <crails/front/repeater.hpp>\n"
     header += "#include <crails/front/element.hpp>\n"
     header += "#include <crails/front/signal.hpp>\n"
     header += append_includes + "\n"
@@ -102,15 +103,52 @@ class CrailsCheerpHtmlGenerator
     nil
   end
 
+  def find_repeater_anchor el
+    it = el
+    loop do
+      it = it.previous
+      break if it.nil? || it.name != "text"
+    end
+    unless it.nil?
+      { el: it, mode: :append }
+    else
+      it = el
+      loop do
+        it = it.next
+        break if it.nil? || it.name != "text"
+      end
+      unless it.nil?
+        { el: it, mode: :prepend }
+      else
+        { el: el.parent, mode: :children }
+      end
+    end
+  end
+
   def find_subtypes root, parent
     root.children.each do |el|
       if !el["repeat.for"].nil?
         @repeater_count += 1
+        value, bind_mode = extract_bind_mode_from el["repeat.for"].to_s
+        parts = value.to_s.match /^\s*\[([^\]]+)\]\s*([^\s]+)\s+of\s+\[([^\]]+)\]\s*(.*)$/
+        if parts.nil?
+          throw "invalid repeater at #{relative_filepath}:#{el.line}"
+        end
         descriptor = {
-          typename: "#{@classes.last[:typename]}Repeater_#{@repeater_count}",
-          extends:  "Crails::Front::Element",
+          behavior: :repeater,
+          typename: "#{@classes.last[:typename]}Repeatable_#{@repeater_count}",
+          extends:  if @element_types.keys.include?(el.name) then @element_types[el.name] else "Crails::Front::Element" end,
           parent:   parent,
-          el:       el
+          el:       el,
+          repeater: {
+            ref:       "repeater_#{@repeater_count}",
+            type:      parts[1],
+            name:      parts[2],
+            list_type: parts[3],
+            list:      parts[4],
+            bind_mode: bind_mode,
+            anchor:    find_repeater_anchor(el)
+          }
         }
         @classes.prepend descriptor
         find_subtypes el, descriptor
@@ -118,6 +156,20 @@ class CrailsCheerpHtmlGenerator
         find_subtypes el, parent
       end
     end
+  end
+
+  def append_repeaters_declarations root
+    result = ""
+    root.children.each do |el|
+      subtype = get_subtype_for(el)
+      if !subtype.nil? && subtype[:behavior] == :repeater
+        element_type = "Crails::Front::Element"
+        result += "    Crails::Front::Repeater<#{subtype[:repeater][:list_type]}, #{subtype[:typename]}> #{subtype[:repeater][:ref]};\n"
+      elsif subtype.nil?
+        result += append_repeaters_declarations el
+      end
+    end
+    result
   end
 
   def generate_class_header klass
@@ -129,13 +181,17 @@ class CrailsCheerpHtmlGenerator
     result += "  protected:\n"
     result += "    Crails::Signal<std::string> signaler;\n"
     result += "    #{klass[:parent][:typename]}* parent;\n" unless klass[:parent].nil?
+    result += "    #{klass[:repeater][:type]} #{klass[:repeater][:name]};\n" if klass[:behavior] == :repeater
     result += append_attributes if klass[:el] == @body
     result += append_refs klass[:el]
+    result += append_repeaters_declarations klass[:el]
     result += "  private:\n"
     result += append_inline_refs klass[:el]
     result += "  public:\n"
     if klass[:parent].nil?
       result += "    #{klass[:typename]}();\n"
+    elsif klass[:behavior] == :repeater
+      result += "    #{klass[:typename]}(#{klass[:parent][:typename]}*, #{klass[:repeater][:type]});\n"
     else
       result += "    #{klass[:typename]}(#{klass[:parent][:typename]}*);\n"
     end
@@ -146,26 +202,78 @@ class CrailsCheerpHtmlGenerator
     result
   end
 
+  def get_repeaters_for klass
+    results = []
+    @classes.each do |other_klass|
+      results << other_klass if other_klass[:parent] == klass && other_klass[:behavior] == :repeater
+    end
+    results
+  end
+
+  def append_repeater_initializers klass
+    result = ""
+    repeaters = get_repeaters_for klass
+    repeaters.each do |repeater|
+      anchor_name = @named_elements[repeater[:repeater][:anchor][:el].path]
+      anchor_mode = case repeater[:repeater][:anchor][:mode]
+                    when :append   then "AppendAnchor"
+                    when :prepend  then "PrependAnchor"
+                    when :children then "ChildrenAnchor"
+                    end
+      result += "  #{repeater[:repeater][:ref]}.set_anchor(#{anchor_name}, Crails::Front::#{anchor_mode});\n"
+    end
+    result
+  end
+
   def generate_class_source klass
     result = ""
-    if klass[:parent].nil?
-      result += "HtmlTemplate::#{klass[:typename]}::#{klass[:typename]}()\n"
-    else
-      result += "HtmlTemplate::#{klass[:typename]}::#{klass[:typename]}(#{klass[:parent][:typename]}* p) : parent(p)\n"
+    initializers = []
+    if klass[:extends] == "Crails::Front::Element" && klass[:el] != @body
+      initializers << "Crails::Front::Element(\"#{klass[:el].name}\")"
     end
+    if klass[:parent].nil?
+      result += "HtmlTemplate::#{klass[:typename]}::#{klass[:typename]}()"
+    elsif klass[:behavior] == :repeater
+      initializers << "parent(__p)" << "#{klass[:repeater][:name]}(__i)"
+      result += "HtmlTemplate::#{klass[:typename]}::#{klass[:typename]}(#{klass[:parent][:typename]}* __p, #{klass[:repeater][:type]} __i)"
+    else
+      initializers << "parent(__p)"
+      result += "HtmlTemplate::#{klass[:typename]}::#{klass[:typename]}(#{klass[:parent][:typename]}* __p)"
+    end
+    result += ": " + initializers.join(", ") if initializers.length > 0
+    result += "\n"
     result += "{\n"
     result += append_constructor klass[:el]
+    result += append_repeater_initializers klass
     result += "}\n\n"
     result += "void HtmlTemplate::#{klass[:typename]}::bind_attributes()\n"
     result += "{\n"
     result += "  bound_attributes.enable(signaler);\n"
     result += append_bind_attributes klass[:el]
+    result += append_bind_repeaters klass
     result += "}\n\n"
     result += "void HtmlTemplate::#{klass[:typename]}::trigger_binding_updates()\n"
     result += "{\n"
     result += "  bound_attributes.update();\n"
     result += append_bind_updates klass[:el]
+    result += append_bind_repeaters_update klass
     result += "}\n"
+    result
+  end
+
+  def append_bind_repeaters_update klass
+    result = ""
+    get_repeaters_for(klass).each do |repeater|
+      result += "  #{repeater[:repeater][:ref]}.trigger_binding_updates();\n"
+    end
+    result
+  end
+
+  def append_bind_repeaters klass
+    result = ""
+    get_repeaters_for(klass).each do |repeater|
+      result += "  #{repeater[:repeater][:ref]}.bind_attributes();\n"
+    end
     result
   end
 
@@ -232,6 +340,7 @@ class CrailsCheerpHtmlGenerator
     parent = @body if parent.nil?
     result = ""
     parent.children.each do |el|
+      next unless get_subtype_for(el).nil?
       unless el.attributes["ref"].nil?
         type = if @element_types.keys.include? el.name
                  @element_types[el.name]
@@ -255,18 +364,28 @@ class CrailsCheerpHtmlGenerator
     result
   end
 
+  def add_inline_ref el
+    varname   = "element_#{@inline_ref_count}"
+    type      = @element_types[el.name] || "Crails::Front::Element"
+    el["ref"] = varname
+    @ref_types[varname] = type
+    @named_elements[el.path] = varname
+    @inline_ref_count += 1
+    return "    #{type} #{varname};\n"
+  end
+
   def append_inline_refs parent = nil
     parent = @body if parent.nil?
     result = ""
     parent.children.each do |el|
-      if el["ref"].nil? && (@element_types.keys.include?(el.name) || has_trigger_attributes?(el))
-        varname   = "element_#{@inline_ref_count}"
-        type      = @element_types[el.name] || "Crails::Front::Element"
-        el["ref"] = varname
-        result   += "    #{type} #{varname};\n"
-        @ref_types[varname] = type
-        @named_elements[el.path] = varname
-        @inline_ref_count += 1
+      subtype = get_subtype_for(el)
+      if subtype.nil?
+        result += add_inline_ref el if (@named_elements[el.path].nil? && el["ref"].nil? &&
+                                        (@element_types.keys.include?(el.name) || has_trigger_attributes?(el)))
+        result += append_inline_refs el
+      elsif subtype[:behavior] == :repeater
+        anchor = subtype[:repeater][:anchor][:el]
+        result += add_inline_ref anchor if @named_elements[anchor.path].nil?
       end
     end
     result
@@ -286,7 +405,7 @@ class CrailsCheerpHtmlGenerator
     result = ""
     parent.children.each do |el|
       next unless get_subtype_for(el).nil?
-      if (!el["ref"].nil?) && (@ref_types[el["ref"]].nil?)
+      if (!el["ref"].nil?) && (@ref_types[el["ref"]].nil? || (@ref_types[el["ref"]] == "Crails::Front::Element"))
         result += "  #{el["ref"]} = Crails::Front::Element(\"#{el.name}\");\n"
       end
       result += append_constructor_refs el
@@ -294,59 +413,69 @@ class CrailsCheerpHtmlGenerator
     result
   end
 
+  def extract_bind_mode_from value
+    bind_mode_match = value.to_s.match(/\s*&\s*(throttle|signal):([a-zA-Z0-9_-]+)$/)
+    if bind_mode_match.nil?
+      bind_mode = ""
+    else
+      value = value.to_s.delete_suffix bind_mode_match[0]
+      bind_mode_enum = case bind_mode_match[1]
+                       when 'signal' then "SignalBind"
+                       when 'throttle' then "ThrottleBind"
+                       else "StaticBind"
+                       end
+      bind_mode = ".use_mode(Crails::Front::Bindable::#{bind_mode_enum}, \"#{bind_mode_match[2]}\")"
+    end
+    [value, bind_mode]
+  end
+
   def append_bound_attributes parent
     result = ""
     parent.children.each do |el|
-      next unless get_subtype_for(el).nil?
-      el_is_cached = false
-      el_is_ref    = !(el.attributes["ref"].nil?)
-      attributes_to_clean_up = []
-      el.attributes.each do |key, value|
-        if key.end_with? ".trigger"
-          if !el_is_ref && !el_is_cached
-            result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
-            el_is_cached = true
-            @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
-          end
-          result += "  #{@named_elements[el.path]}.events->on(\"#{key.delete_suffix(".trigger")}\", [this](client::Event* _event) { #{value}; });\n"
-          attributes_to_clean_up << key
-        elsif key.end_with? ".bind"
-          if !el_is_ref && !el_is_cached
-            result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
-            el_is_cached = true
-            @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
-          end
-          attribute_name = key.split(".").first
+      subtype = get_subtype_for(el)
+      if subtype.nil?
+        el_is_cached = false
+        el_is_ref    = !(el.attributes["ref"].nil?)
+        attributes_to_clean_up = []
+        el.attributes.each do |key, value|
+          if key.end_with? ".trigger"
+            if !el_is_ref && !el_is_cached
+              result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
+              el_is_cached = true
+              @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
+            end
+            result += "  #{@named_elements[el.path]}.events->on(\"#{key.delete_suffix(".trigger")}\", [this](client::Event* _event) { #{value}; });\n"
+            attributes_to_clean_up << key
+          elsif key.end_with? ".bind"
+            if !el_is_ref && !el_is_cached
+              result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
+              el_is_cached = true
+              @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
+            end
 
-          is_cpp = attribute_name.start_with?("cpp::")
-          attribute_name = attribute_name[5..-1] if is_cpp
+            attribute_name   = key.split(".").first
+            is_cpp           = attribute_name.start_with?("cpp::")
+            attribute_name   = attribute_name[5..-1] if is_cpp
+            value, bind_mode = extract_bind_mode_from value
 
-          bind_mode_match = value.to_s.match(/\s*&\s*(throttle|signal):([a-zA-Z0-9_-]+)$/)
-          if bind_mode_match.nil?
-            bind_mode = ""
-          else
-            value = value.to_s.delete_suffix bind_mode_match[0]
-            bind_mode_enum = case bind_mode_match[1]
-                             when 'signal' then "SignalBind"
-                             when 'throttle' then "ThrottleBind"
-                             else "StaticBind"
-                             end
-            bind_mode = ".use_mode(Crails::Front::Bindable::#{bind_mode_enum}, \"#{bind_mode_match[2]}\")"
+            initializer = unless is_cpp
+              "Crails::Front::Bindable(#{@named_elements[el.path]}, \"#{attribute_name}\", [this]() -> std::string { return boost::lexical_cast<std::string>(#{value}); })"
+            else
+              "Crails::Front::Bindable([this]() { #{@named_elements[el.path]}.set_#{attribute_name}(#{value}); })"
+            end
+
+            result += "  bound_attributes.push_back(#{initializer}#{bind_mode});\n"
+            attributes_to_clean_up << key
           end
-
-          initializer = unless is_cpp
-            "Crails::Front::Bindable(#{@named_elements[el.path]}, \"#{attribute_name}\", [this]() -> std::string { return boost::lexical_cast<std::string>(#{value}); })"
-          else
-            "Crails::Front::Bindable([this]() { #{@named_elements[el.path]}.set_#{attribute_name}(#{value}); })"
-          end
-
-          result += "  bound_attributes.push_back(#{initializer}#{bind_mode});\n"
-          attributes_to_clean_up << key
         end
-      end
-      attributes_to_clean_up.each do |key| el.remove_attribute(key) end
-      el.children.each do |child|
-        result += append_bound_attributes child
+        attributes_to_clean_up.each do |key| el.remove_attribute(key) end
+        el.children.each do |child|
+          result += append_bound_attributes child
+        end
+      elsif subtype[:behavior] == :repeater
+        refresh_code = "#{subtype[:repeater][:ref]}.refresh(this, #{subtype[:repeater][:list]});"
+        initializer  = "Crails::Front::Bindable([this]() { #{refresh_code} })"
+        result += "  bound_attributes.push_back(#{initializer}#{subtype[:repeater][:bind_mode]});\n"
       end
     end
     result
