@@ -19,16 +19,26 @@ class String
 end
 
 class CrailsCheerpHtmlGenerator
-  def initialize output
-    @output = output
+  def initialize output, input, file
+    @output   = output
+    @input    = input
+    @filepath = file
   end
 
-  def compiled_header_path_for filepath
-    @output + filepath.delete_suffix(File.extname filepath) + ".hpp"
+  def relative_filepath
+    @filepath[@input.length..-1]
   end
 
-  def generate filepath
-    src = File.read filepath
+  def compiled_header_path
+    @output + relative_filepath.delete_suffix(File.extname relative_filepath) + ".hpp"
+  end
+
+  def compiled_source_path
+    @output + relative_filepath.delete_suffix(File.extname relative_filepath) + ".cpp"
+  end
+
+  def generate
+    src = File.read @filepath
     src.gsub! "<template",  "<html"
     src.gsub! "</template>", "</html>"
 
@@ -36,53 +46,126 @@ class CrailsCheerpHtmlGenerator
     @html = document.xpath("html")
     @head = document.xpath("//head")
     @body = document.xpath("//body")
-
-    @inline_ref_count = 0
-    @named_elements = {}
     @element_types = {}
-    @ref_types = {}
 
-    klassname = File.basename(filepath, ".html").to_s.camelize
-    superclass = if @html.attribute("extends").nil? then "Crails::Front::Element" else @html.attribute("extends").value end
-    define_name = "__CRAILS_FRONT_HTML_#{klassname}__"
+    @repeater_count = 0
 
-    result  = "#ifndef #{define_name}\n"
-    result += "#define #{define_name}\n\n"
-    
-    result += "#include <crails/front/bindable.hpp>\n"
-    result += "#include <crails/front/element.hpp>\n"
-    result += "#include <crails/front/signal.hpp>\n"
-    result += append_includes + "\n"
-    result += "namespace HtmlTemplate\n"
-    result += "{\n"
-    result += "  class #{klassname} : public #{superclass}\n"
+    @classes = [
+      {
+        typename: (File.basename(@filepath, ".html").to_s.camelize),
+        extends:  if @html.attribute("extends").nil? then "Crails::Front::Element" else @html.attribute("extends").value end,
+        el:       @body
+      }
+    ]
+
+    find_subtypes @body, @classes.last
+
+    source  = "#include <boost/lexical_cast.hpp>\n"
+    source += "#include \"#{compiled_header_path}\"\n"
+
+    define_name = "__CRAILS_FRONT_HTML_#{@classes.last[:typename].upcase}__"
+    header  = "#ifndef #{define_name}\n"
+    header += "#define #{define_name}\n\n" 
+    header += "#include <crails/front/bindable.hpp>\n"
+    header += "#include <crails/front/element.hpp>\n"
+    header += "#include <crails/front/signal.hpp>\n"
+    header += append_includes + "\n"
+    header += "namespace HtmlTemplate\n"
+    header += "{\n"
+    header += append_classes_predeclaration
+    @classes.each do |klass|
+      @inline_ref_count = 0
+      @named_elements   = {}
+      @ref_types        = {}
+      header += "\n"
+      header += generate_class_header klass
+      source += "\n"
+      source += generate_class_source klass
+    end
+    header += "}\n\n"
+    header += "#endif"
+    header
+
+    { header: header, source: source }
+  end
+
+  def append_classes_predeclaration
+    result = ""
+    @classes.each do |klass|
+      result += "  class #{klass[:typename]};\n"
+    end
+    result
+  end
+
+  def get_subtype_for el
+    @classes.each {|klass| return klass if klass[:el] == el}
+    nil
+  end
+
+  def find_subtypes root, parent
+    root.children.each do |el|
+      if !el["repeat.for"].nil?
+        @repeater_count += 1
+        descriptor = {
+          typename: "#{@classes.last[:typename]}Repeater_#{@repeater_count}",
+          extends:  "Crails::Front::Element",
+          parent:   parent,
+          el:       el
+        }
+        @classes.prepend descriptor
+        find_subtypes el, descriptor
+      else
+        find_subtypes el, parent
+      end
+    end
+  end
+
+  def generate_class_header klass
+    superclass = if klass[:extends].nil? then "Crails::Front::Element" else klass[:extends] end
+    result  = ""
+    result += "  class #{klass[:typename]} : public #{superclass}\n"
     result += "  {\n"
     result += "    Crails::Front::BoundAttributes bound_attributes;\n"
     result += "  protected:\n"
     result += "    Crails::Signal<std::string> signaler;\n"
-    result += append_attributes
-    result += append_refs
+    result += "    #{klass[:parent][:typename]}* parent;\n" unless klass[:parent].nil?
+    result += append_attributes if klass[:el] == @body
+    result += append_refs klass[:el]
     result += "  private:\n"
-    result += append_inline_refs
+    result += append_inline_refs klass[:el]
     result += "  public:\n"
-    result += "    #{klassname}()\n"
-    result += "    {\n"
-    result += append_constructor
-    result += "    }\n\n"
-    result += "    void bind_attributes()\n"
-    result += "    {\n"
-    result += "      bound_attributes.enable(signaler);\n"
-    result += append_bind_attributes
-    result += "    }\n\n"
-    result += "    void trigger_binding_updates()\n"
-    result += "    {\n"
-    result += "      bound_attributes.update();\n"
-    result += append_bind_updates
-    result += "    }\n\n"
-    result += append_code
+    if klass[:parent].nil?
+      result += "    #{klass[:typename]}();\n"
+    else
+      result += "    #{klass[:typename]}(#{klass[:parent][:typename]}*);\n"
+    end
+    result += "    void bind_attributes();\n"
+    result += "    void trigger_binding_updates();\n"
+    result += append_code if klass[:el] == @body
     result += "  };\n"
+    result
+  end
+
+  def generate_class_source klass
+    result = ""
+    if klass[:parent].nil?
+      result += "HtmlTemplate::#{klass[:typename]}::#{klass[:typename]}()\n"
+    else
+      result += "HtmlTemplate::#{klass[:typename]}::#{klass[:typename]}(#{klass[:parent][:typename]}* p) : parent(p)\n"
+    end
+    result += "{\n"
+    result += append_constructor klass[:el]
     result += "}\n\n"
-    result += "#endif"
+    result += "void HtmlTemplate::#{klass[:typename]}::bind_attributes()\n"
+    result += "{\n"
+    result += "  bound_attributes.enable(signaler);\n"
+    result += append_bind_attributes klass[:el]
+    result += "}\n\n"
+    result += "void HtmlTemplate::#{klass[:typename]}::trigger_binding_updates()\n"
+    result += "{\n"
+    result += "  bound_attributes.update();\n"
+    result += append_bind_updates klass[:el]
+    result += "}\n"
     result
   end
 
@@ -189,21 +272,22 @@ class CrailsCheerpHtmlGenerator
     result
   end
 
-  def append_constructor
+  def append_constructor root
     result = ""
-    result += "      std::map<std::string, Crails::Front::Element> element_cache;\n\n"
+    result += "  std::map<std::string, Crails::Front::Element> element_cache;\n\n"
 
-    result += append_constructor_refs @body
-    result += append_bound_attributes @body
-    result += "      inner({#{append_children @body, 8}\n    });\n"
+    result += append_constructor_refs root
+    result += append_bound_attributes root
+    result += "  inner({#{append_children root, 4}\n  });\n"
     result
   end
 
   def append_constructor_refs parent
     result = ""
     parent.children.each do |el|
+      next unless get_subtype_for(el).nil?
       if (!el["ref"].nil?) && (@ref_types[el["ref"]].nil?)
-        result += "      #{el["ref"]} = Crails::Front::Element(\"#{el.name}\");\n"
+        result += "  #{el["ref"]} = Crails::Front::Element(\"#{el.name}\");\n"
       end
       result += append_constructor_refs el
     end
@@ -213,21 +297,22 @@ class CrailsCheerpHtmlGenerator
   def append_bound_attributes parent
     result = ""
     parent.children.each do |el|
+      next unless get_subtype_for(el).nil?
       el_is_cached = false
       el_is_ref    = !(el.attributes["ref"].nil?)
       attributes_to_clean_up = []
       el.attributes.each do |key, value|
         if key.end_with? ".trigger"
           if !el_is_ref && !el_is_cached
-            result += "      element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
+            result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
             el_is_cached = true
             @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
           end
-          result += "      #{@named_elements[el.path]}.events->on(\"#{key.delete_suffix(".trigger")}\", [this](client::Event* _event) { #{value}; });\n"
+          result += "  #{@named_elements[el.path]}.events->on(\"#{key.delete_suffix(".trigger")}\", [this](client::Event* _event) { #{value}; });\n"
           attributes_to_clean_up << key
         elsif key.end_with? ".bind"
           if !el_is_ref && !el_is_cached
-            result += "      element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
+            result += "  element_cache.emplace(\"#{el.path}\", Crails::Front::Element(\"#{el.name}\"));\n"
             el_is_cached = true
             @named_elements[el.path] = "element_cache[\"#{el.path}\"]"
           end
@@ -255,7 +340,7 @@ class CrailsCheerpHtmlGenerator
             "Crails::Front::Bindable([this]() { #{@named_elements[el.path]}.set_#{attribute_name}(#{value}); })"
           end
 
-          result += "      bound_attributes.push_back(#{initializer}#{bind_mode});\n"
+          result += "  bound_attributes.push_back(#{initializer}#{bind_mode});\n"
           attributes_to_clean_up << key
         end
       end
@@ -271,6 +356,7 @@ class CrailsCheerpHtmlGenerator
     result = ""
     count = 0
     parent.children.each do |el|
+      next unless get_subtype_for(el).nil?
       if el.name != "text"
         is_ref = false
         hard_attributes  = []
@@ -323,13 +409,15 @@ module ::Guard
     def compile
       FileUtils.rm_rf @output
       watched_files.each do |file|
-        generator   = CrailsCheerpHtmlGenerator.new @output
-        output_file = generator.compiled_header_path_for file[@input.length..-1]
+        generator   = CrailsCheerpHtmlGenerator.new @output, @input, file
+        relative_filepath = file[@input.length..-1]
+        header_file = generator.compiled_header_path
+        source_file = generator.compiled_source_path
 
-        FileUtils.mkdir_p File.dirname(output_file)
-        File.open output_file, 'w' do |f|
-          f.write generator.generate(file)
-        end
+        FileUtils.mkdir_p File.dirname(header_file)
+        code = generator.generate
+        File.open header_file, 'w' do |f| f.write code[:header] end
+        File.open source_file, 'w' do |f| f.write code[:source] end
       end
     end
   end
