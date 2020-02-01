@@ -72,6 +72,10 @@ namespace Crails
 
       void append_to(client::HTMLElement* el);
       void append_to(Element& el);
+      void insert_before(client::HTMLElement* el);
+      void insert_before(Element& el);
+      void insert_after(client::HTMLElement* el);
+      void insert_after(Element& el);
       void destroy();
 
       bool    has_parent() const;

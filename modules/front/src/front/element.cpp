@@ -163,6 +163,47 @@ void Element::append_to(Element& el)
   el->appendChild(static_cast<client::HTMLElement*>(ptr));
 }
 
+void Element::insert_before(client::HTMLElement* el)
+{
+  if (el)
+  {
+    auto* parent = el->get_parentElement();
+
+    if (parent)
+    {
+      parent->insertBefore(**this, el);
+      std::cout << "Insert before successful" << std::endl;
+    }
+    else
+      std::cout << "Insert before without parent" << std::endl;
+  }
+  std::cout << "Insert before without element" << std::endl;
+}
+
+void Element::insert_before(Element& el)
+{
+  insert_before(static_cast<client::HTMLElement*>(el.ptr));
+}
+
+void Element::insert_after(client::HTMLElement* el)
+{
+  if (el)
+  {
+    Crails::Front::Element wrapper(el);
+    auto* nextSibling = el->get_nextSibling();
+
+    if (nextSibling)
+      insert_before(static_cast<client::HTMLElement*>(nextSibling));
+    else if (wrapper.has_parent())
+      append_to(*(wrapper.get_parent()));
+  }
+}
+
+void Element::insert_after(Element& el)
+{
+  insert_after(static_cast<client::HTMLElement*>(el.ptr));
+}
+
 bool Element::contains(const client::HTMLElement* source)
 {
   bool result = false;
