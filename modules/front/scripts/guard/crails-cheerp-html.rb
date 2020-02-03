@@ -343,15 +343,15 @@ class CrailsCheerpHtmlGenerator
     result = ""
     parent.children.each do |el|
       next unless get_subtype_for(el).nil?
-      unless el.attributes["ref"].nil?
+      unless el["ref"].nil?
         type = if @element_types.keys.include? el.name
                  @element_types[el.name]
                else
                  "Crails::Front::Element"
                end
-        result += "    #{type} #{el.attributes["ref"]};\n"
-        @named_elements[el.path] = el.attributes["ref"]
-        @ref_types[el.attributes["ref"]] = type
+        result += "    #{type} #{el["ref"]};\n"
+        @named_elements[el.path] = el["ref"]
+        @ref_types[el["ref"]] = type
       end
       result += append_refs el
     end
@@ -407,15 +407,14 @@ class CrailsCheerpHtmlGenerator
     result = ""
     result += "  std::map<std::string, Crails::Front::Element> element_cache;\n\n"
     result += append_constructor_refs root
-    @bite = true
     result += append_bound_attributes_for root unless root == @body
-    @bite = false
     result += append_bound_attributes root
     unless root == @body
       hard_attributes = make_attr_from_el root
       result += "  attr({#{hard_attributes.join ','}});\n" if hard_attributes.length > 0
     end
     result += "  inner({#{append_children root, 4}\n  });\n"
+    result += "  bind_attributes();\n"
     result
   end
 
@@ -452,8 +451,6 @@ class CrailsCheerpHtmlGenerator
     el_is_cached = el == @root_element
     el_is_ref    = !(el.attributes["ref"].nil?)
     attributes_to_clean_up = []
-    puts "Bound attributes for #{el.path} (cached: #{el_is_cached})" if @bite
-    puts "Named element: #{@named_elements[el.path]}" if @bite
     el.attributes.each do |key, value|
       if key.end_with? ".trigger"
         if !el_is_ref && !el_is_cached
