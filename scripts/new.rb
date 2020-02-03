@@ -89,6 +89,7 @@ project.base_directory source, base_directory do
   end
   project.directory :public do
     project.directory :assets do end
+    project.file 'index.html'
     project.file '404.html'
     project.file '500.html'
   end
