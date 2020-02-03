@@ -20,8 +20,8 @@
 //   tool; if not, write to the Free Software Foundation, Inc., 59
 //   Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 // ================================================================
-#ifdef CRAILS_WITH_COOKIE_ENCRYPTION
 #include "crails/cipher.h"
+#ifdef CRAILS_WITH_COOKIE_ENCRYPTION
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -530,5 +530,9 @@ void Cipher::file_write(const string& fn,const string& data,bool nl) const
     ofs << endl;
   }
   ofs.close();
+}
+#else
+void Cipher::initialize()
+{
 }
 #endif
