@@ -88,8 +88,6 @@ bool Database::create_from_settings(const Crails::Databases::DatabaseSettings& s
     case sqlite:
       logger << Logger::Info << ":: Database::create_from_settings not needed for sqlite backend" << Logger::endl;
       return true;
-#else
-# pragma message "compiling crails-odb without sqlite support: create and drop databases will be disabled"
 #endif
 
     default:

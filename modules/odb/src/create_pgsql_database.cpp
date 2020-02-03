@@ -78,7 +78,7 @@ static bool pgsql_run_queries(const Crails::Databases::DatabaseSettings& databas
         else
         {
           logger << Logger::Debug << ":: command didn't return" << Logger::endl;
-         return false;
+          return false;
         }
       }
     }

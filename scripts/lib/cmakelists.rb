@@ -48,8 +48,15 @@ class CMakeLists
     @content.insert include_dir_pos, "include_directories(#{include_dirs})\n"
   end
 
+  def add_link_directories link_dirs
+    link_dir_pos = @content.index /link_directories\([^)]*\)/n
+    link_dir_pos = @content.index /include_directories\([^)]*\)/n if link_dir_pos.nil?
+    @content.insert link_dir_pos, "link_directories(#{link_dirs.join ' '})\n"
+  end
+
   def add_code code
-    @content += "\n#{code}"
+    include_dir_pos = @content.index /target_link_libraries\(server\s+/
+    @content.insert include_dir_pos, "#{code}\n"
   end
 
 private
