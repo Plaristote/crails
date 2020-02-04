@@ -1,8 +1,51 @@
 <html>
   <head>
     <title>Crails Application</title>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        font-family: Arial;
+	background-color: #ced5ff;
+      }
+
+      .crails-logo {
+        position: relative;
+        background-color: #ff0000;
+	color: white;
+	font-weight: bold;
+	font-size: 2em;
+	width: 100px;
+	margin: 50px auto 25px;
+	padding: 5px 0 15px;
+	line-height: 0.8em;
+	border-top: 10px #f10000 solid;
+      }
+
+      .crails-logo-layer {
+        position: absolute;
+        background-color: #d10000;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 50%;
+        opacity: 0.3;
+      }
+
+      .crails-logo, .crails-logo-layer { border-bottom-left-radius: 60px; }
+      .crails-logo { border-bottom-right-radius: 60px; }
+    </style>
   </head>
   <body>
+    <div class="crails-logo">
+      <div class="crails-logo-layer"></div>
+      C<br/>
+      +<br/>
+      +<br/>
+    </div>
     <h1>Welcome to your new Crails Application</h1>
   </body>
 </html>
