@@ -15,6 +15,9 @@
 #include <csignal>
 #include "crails/request.hpp"
 
+#include <boost/asio/signal_set.hpp>
+#include "crails/http_server/listener.hpp"
+
 using namespace std;
 using namespace Crails;
 
@@ -120,13 +123,11 @@ void Server::ThrowCrashSegv()
 }
 #endif
 
-std::function<void (void)> shutdown_lambda;
-static void shutdown(int) { shutdown_lambda(); }
-
 void Server::Launch(int argc, const char **argv)
 {
   logger << Logger::Info << "## Launching the amazing Crails Server ##" << Logger::endl;
   ProgramOptions options(argc, argv);
+  boost::asio::io_context io_context;
 
 #ifdef USE_SEGVCATCH
   segvcatch::init_segv(&CrailsServer::ThrowCrashSegv);
@@ -141,18 +142,33 @@ void Server::Launch(int argc, const char **argv)
     logger << Logger::Info << ">> Route initialized" << Logger::endl;
   }
   {
-    Server     handler;
-    HttpServer server(options.get_server_options(handler));
+    const auto address      = boost::asio::ip::make_address(options.get_value("hostname", std::string("127.0.0.1")));
+    const auto port         = options.get_value("port", (unsigned short)3001);
+    const auto hw_threads   = (unsigned short)(std::thread::hardware_concurrency());
+    const auto thread_count = options.get_value("threads", hw_threads);
+    std::vector<std::thread> threads;
 
-    signal(SIGINT, &shutdown);
-    shutdown_lambda = [&server]()
+    std::make_shared<Crails::Listener>(
+      io_context,
+      boost::asio::ip::tcp::endpoint{address, port}
+    )->run();
+
+    boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
+    signals.async_wait([&](const boost::beast::error_code&, int)
     {
       logger << Logger::Info << ">> Crails server will shut down." << Logger::endl;
       logger << ">> Waiting for requests to end..." << Logger::endl;
-      server.stop();
+      io_context.stop();
       logger << ">> Done." << Logger::endl;
-    };
-    server.run();
+    });
+
+    threads.reserve(thread_count);
+    for (auto i = thread_count - 1 ; i > 0 ; --i)
+      threads.emplace_back([&io_context] { io_context.run(); });
+    io_context.run();
+
+    for (auto& thread : threads)
+      thread.join();
   }
   Router::singleton::Finalize();  
 }
