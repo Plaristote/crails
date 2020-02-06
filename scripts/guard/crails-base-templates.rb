@@ -95,7 +95,7 @@ module ::Guard
       content_lines = Array.new
       part          = 0
 
-      lines.each do | line |
+      lines.each do |line|
         if part == 0
           if line[0] == '#' || /^\s*using\s+namespace\s+/.match(line) != nil || /^\s*typedef\s+/.match(line)
             include_lines << line
@@ -109,7 +109,11 @@ module ::Guard
           part += 1
         end
       end
-      [include_lines, linking_lines, content_lines]
+      if part == 0
+        [[], [], lines]
+      else
+        [include_lines, linking_lines, content_lines]
+      end
     end
 
     def process_linked_variables code
@@ -122,7 +126,7 @@ module ::Guard
       tmp_lines = linking_lines
       linking_lines = []
       variables_initialization = []
-      tmp_lines.each do | line |
+      tmp_lines.each do |line|
         if line.match /@[a-zA-Z_]+/
           type = line.scan /^(unsigned\s+)?([a-zA-Z0-9_:]+(<[a-zA-Z_0-9:\s<>*&]+>){0,1}[*&]*)/
           name = line.scan /@[a-zA-Z_]+/
