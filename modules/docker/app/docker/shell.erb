@@ -1,9 +1,28 @@
 #!/bin/sh -ex
 
-docker build -t "crails/<%= project_name %>" docker/base
+machine_name="<%= project_name %>_dock"
+docker_build_options="-q"
+docker_options="-it"
+command=""
 
-docker run -it --rm \
-  -v "`pwd`:/home/crails/crails-app" \
-  -p 3001:3001 \
-  "crails/<%= project_name %>" bash $*
+while getopts "vac:" option
+do
+  case $option in
+    v)
+      docker_build_options=""
+      ;;
+    a)
+      docker_options="-t"
+      ;;
+    c)
+      command="$OPTARG"
+      ;;
+  esac
+done
 
+docker build $docker_build_options -t "$machine_name" docker/base
+
+docker run --net=host $docker_options --rm \
+  -v "`pwd`:/opt/webapp" \
+  -p 3000:3000 \
+  "$machine_name" bash $command

@@ -1,42 +1,35 @@
-FROM debian:jessie
+FROM debian:buster
+
+ENV LD_LIBRARY_PATH /usr/local/lib
 
 RUN apt-get -y update && apt-get -y install wget \
- cmake \
- build-essential \
- libbz2-dev \
- libssl-dev \
- git \
- ruby \
- ruby-dev \
- nodejs \
- libpq-dev
-
-RUN gem install bundler
+  cmake \
+  build-essential \
+  libbz2-dev \
+  libssl-dev \
+  git \
+  ruby \
+  ruby-bundler \
+  ruby-dev \
+  nodejs \
+  libpq-dev
 
 WORKDIR /tmp/compile-dir
 
-COPY compile-boost.sh compile-boost.sh
-RUN bash /tmp/compile-dir/compile-boost.sh
+# BEGIN Crails dependencies
+COPY boost.sh boost.sh
+RUN bash /tmp/compile-dir/boost.sh
 
-COPY compile-cppnetlib.sh compile-cppnetlib.sh
-RUN bash ./compile-cppnetlib.sh
+COPY cppnetlib.sh cppnetlib.sh
+RUN bash ./cppnetlib.sh
+# END Crails dependencies
 
-RUN apt-get -y install scons
-COPY compile-mongodb-cxx-driver.sh compile-mongodb-cxx-driver.sh
-RUN bash ./compile-mongodb-cxx-driver.sh
-
-COPY compile-odb.sh compile-odb.sh
-RUN bash ./compile-odb.sh
-
-COPY compile-libmemcached.sh compile-libmemcached.sh
-RUN bash ./compile-libmemcached.sh
-
-COPY compile-magick++.sh compile-magick++.sh
-RUN bash ./compile-magick++.sh
-
-COPY compile-crails.sh compile-crails.sh
-RUN bash ./compile-crails.sh
+COPY crails.sh crails.sh
+RUN bash ./crails.sh
 ENV CRAILS_SHARED_DIR /usr/local/share/crails
+
+# BEGIN Dependencies
+# END Dependencies
 
 WORKDIR /
 RUN rm -Rf /tmp/compile-dir

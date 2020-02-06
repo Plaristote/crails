@@ -23,14 +23,12 @@ project.base_directory source, Dir.pwd do
     project.generate_erb 'shell', 'shell.erb', binding: binding
     project.directory :base do
       project.file 'Dockerfile'
-      project.file 'compile-crails.sh'
-      project.file 'compile-cppnetlib.sh'
-      project.file 'compile-boost.sh'
-      project.file 'compile-magick++.sh'
-      project.file 'compile-libmemcached.sh'
-      project.file 'compile-odb.sh'
-      project.file 'compile-mongodb-cxx-driver.sh'
-      project.file 'make-application-package.sh'
+      project.file 'crails.sh'
+      project.file 'cppnetlib.sh'
+      project.file 'boost.sh'
+    end
+    project.directory :scripts do
+      project.file 'package.sh'
     end
   end
 end

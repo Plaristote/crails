@@ -1,5 +1,7 @@
 #!/bin/sh
 
+apt-get install -y scons
+
 mongodb_version_major="2"
 mongodb_version_minor="4"
 mongodb_version="${mongodb_version_major}.${mongodb_version_minor}.14"

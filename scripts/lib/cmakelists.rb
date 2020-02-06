@@ -72,4 +72,3 @@ private
     @content.gsub!(header, "#{header}\n#{str}")
   end
 end
-
