@@ -1,7 +1,7 @@
 #!/bin/sh
 
 boost_version_major="1"
-boost_version_minor="59"
+boost_version_minor="72"
 boost_version_patch="0"
 boost_directory="boost_${boost_version_major}_${boost_version_minor}_${boost_version_patch}"
 

@@ -8,4 +8,4 @@ mkdir -p docker/runtime
 
 docker run -it --rm \
   -v "`pwd`:/opt/webapp" \
-  "$machine_name" /usr/local/bin/package.sh
+  "$machine_name" /opt/webapp/docker/scripts/package.sh

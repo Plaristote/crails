@@ -2,7 +2,9 @@ FROM debian:buster
 
 ENV LD_LIBRARY_PATH /usr/local/lib
 
-RUN apt-get -y update && apt-get -y install wget \
+RUN apt-get -y --allow-unauthenticated update && \
+    apt-get -y --allow-unauthenticated upgrade && \
+    apt-get -y install wget \
   cmake \
   build-essential \
   libbz2-dev \
@@ -11,8 +13,12 @@ RUN apt-get -y update && apt-get -y install wget \
   ruby \
   ruby-bundler \
   ruby-dev \
-  nodejs \
-  libpq-dev
+  nodejs
+
+# Downgrade to gcc-7 to solve compatibility issues with odb 2.5
+RUN apt-get -y install gcc-7 g++-7
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 20
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 20
 
 WORKDIR /tmp/compile-dir
 
@@ -31,11 +37,5 @@ ENV CRAILS_SHARED_DIR /usr/local/share/crails
 # BEGIN Dependencies
 # END Dependencies
 
-WORKDIR /
-RUN rm -Rf /tmp/compile-dir
-
-RUN useradd -ms /bin/bash crails
-VOLUME ["/home/crails"]
-
-COPY make-application-package.sh /usr/local/bin/make-application-package.sh
-RUN chmod +x /usr/local/bin/make-application-package.sh
+RUN mkdir -p /opt/webapp
+WORKDIR /opt/webapp
