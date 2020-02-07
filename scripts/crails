@@ -77,8 +77,12 @@ def run_using_bundler cmd
 
   puts "[crails] Using ruby bundler #{bundler_bin}"
 
+  unless ENV['CRAILS_RUBY_BUNDLE_PATH'].nil?
+    cmd = "#{bundler_bin} config set path #{ENV['CRAILS_RUBY_BUNDLE_PATH']}"
+    run_command cmd
+  end
+
   bundle_cmd = "#{bundler_bin} install"
-  bundle_cmd += " --path #{ENV['CRAILS_RUBY_BUNDLE_PATH']}" unless ENV['CRAILS_RUBY_BUNDLE_PATH'].nil?
   cmd = "#{bundler_bin} exec #{cmd}"
 
   puts `echo "+ bundle check" && #{bundler_bin} check`

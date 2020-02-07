@@ -39,3 +39,4 @@ ENV CRAILS_SHARED_DIR /usr/local/share/crails
 
 RUN mkdir -p /opt/webapp
 WORKDIR /opt/webapp
+ENV CRAILS_RUBY_BUNDLE_PATH /opt/webapp/docker
