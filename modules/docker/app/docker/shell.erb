@@ -20,9 +20,12 @@ do
   esac
 done
 
+mkdir -p docker/build docker/.bundle
+
 docker build $docker_build_options -t "$machine_name" docker/base
 
 docker run --net=host $docker_options --rm \
   -v "`pwd`:/opt/webapp" \
-  -p 3000:3000 \
+  -v "`pwd`/docker/output:/opt/webapp/build" \
+  -v "`pwd`/docker/.bundle:/opt/webapp/.bundle" \
   "$machine_name" bash $command
