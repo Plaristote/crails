@@ -9,36 +9,94 @@
 
 namespace MongoDB
 {
+  typedef std::string id_type;
+
   class Database : public Crails::Databases::Db
   {
   public:
-    typedef std::list<Collection> Collections;
-
     static const std::string ClassType(void) { return ("mongodb"); }
 
-    Database(Data settings);
+    Database(const Crails::Databases::DatabaseSettings&);
 
-    bool                       operator==(const std::string& name) const { return (this->name == name); }
-    Collection&                operator[](const std::string& name);
-    void                       authenticate_with(const std::string& username, const std::string& password);
-    const std::string&         get_name(void)         const      { return (name);        }
-    Collections&               get_collections(void)             { return (collections); }
-    const Collections&         get_collections(void) const       { return (collections); }
-    void                       refresh_collections(void);
-    void                       drop_all_collections(void);
-    void                       drop_collection(const std::string& name);
+    mongocxx::collection get_collection(const std::string& name);
 
-    void                       connect(void);
+    void connect();
+    void drop();
+
+    template<typename MODEL>
+    void save(MODEL& model)
+    {
+      bsoncxx::document::value document;
+      auto collection = get_collection(model.get_collection_name());
+      auto builder    = bsoncxx::builder::stream::document;
+
+      model.save(builder);
+      document = builder << bsoncxx::builder::stream::finalize;
+      if (model.get_id() == "")
+      {
+        bsoncxx::stdx::optional<mongocxx::result::insert_one> result;
+
+        result = collection.insert_one(document)
+        if (result)
+          model.set_id(result->inserted_id());
+        else
+          throw std::runtime_error("failed to insert document in " + model.get_collection_name());
+      }
+      else
+      {
+        bsoncxx::stdx::optional<mongocxx::result::update_one> result;
+
+	result = collection.update_one(document);
+	if (!result)
+          throw std::runtime_error("failed to update document " + model.get_id() + " in " + model.get_collection_name());
+      }
+    }
+
+    template<typename MODEL>
+    bool find_one(std::shared_ptr<MODEL> model, id_type id)
+    {
+      bsoncxx::stdx::optional<mongocxx::document::value> result;
+      auto collection = get_collection(MODEL().get_collection_name());
+
+      result = collection.find_one(bsoncxx::builder::stream::document{} << "_id" << id);
+      if (result)
+      {
+        model = std::make_shared<MODEL>();
+        model->load(*result);
+        return true;
+      }
+      return false;
+    }
+
+    template<typename MODEL>
+    bool find(MongoDB::Result<MODEL> results)
+    {
+      auto collection = get_collection(MODEL().get_collection_name());
+      mongocxx::cursor cursor;
+
+      cursor = collection.find({});
+      results.initialize(cursor);
+      return cursor.begin() != cursor.end();
+    }
+
+    template<typename MODEL>
+    void destroy(MODEL& model)
+    {
+      auto collection = get_collection(model.get_collection_name());
+      bsoncxx::stdx::optional<mongocxx::result::delete> result;
+
+      result = collection.delete_one(bsoncxx::builder::stream::document{} << "_id" << model.get_id());
+      if (!result || result->deleted_count() < 1)
+        throw std::runtime_error("failed to delete document " + model.get_id() + " in " model.get_collection_name());
+    }
 
   private:
-    void                       initialize_mongo_client();
+    mongocxx::uri uri_from_settings(const Crails::Databases::DatabaseSettings&);
 
-    mongo::DBClientConnection  connection;
-    const std::string          name;
-    Collections                collections;
-    std::string                hostname, username, password;
-    unsigned short             port;
-    bool                       connected;
+    std::unique_ptr<mongocxx::client> client;
+    mongocxx::database database;
+    mongocxx::uri      database_uri;
+    std::string        database_name;
   };
 }
 
