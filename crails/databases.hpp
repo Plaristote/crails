@@ -5,6 +5,7 @@
 # include <vector>
 # include "datatree.hpp"
 # include "environment.hpp"
+# include "utils/backtrace.hpp"
 
 # define CRAILS_DATABASE(type,database) \
   Crails::databases.get_database<type::Database>(database)
@@ -41,7 +42,7 @@ namespace Crails
 
     typedef std::vector<Db*> Dbs;
 
-    struct Exception : public std::exception
+    struct Exception : public boost_ext::exception
     {
       Exception(const std::string& message) : message(message) {}
 
@@ -89,8 +90,12 @@ namespace Crails
     template<typename TYPE>
     TYPE& get_database(const std::string& key)
     {
+      if (settings.find(Crails::environment) == settings.end())
+        throw Databases::Exception("Database configuration not found for environment '" + Crails::environment + '\'');
       auto environment_settings = settings.at(Crails::environment);
 
+      if (environment_settings.find(key) == environment_settings.end())
+        throw Databases::Exception("Database configuration not found for '" + key + "' with environment '" + Crails::environment + "'");
       return get_database<TYPE>(key, environment_settings[key]);
     }
 
