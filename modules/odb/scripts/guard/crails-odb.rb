@@ -48,7 +48,7 @@ module ::Guard
 
   private
     def with_tmp_dir &block
-      `mkdir -p '#{@temporary_output}'`
+      `mkdir -p '#{@temporary_output}' '#{@temporary_output}/crails-odb'`
       block.call
       `rm -Rf '#{@temporary_output}'`
     end
@@ -86,22 +86,43 @@ module ::Guard
       parts[0...-1].join('/')
     end
 
+    def crails_models_include_path
+      "#{crails_include_path}/crails/odb/model"
+    end
+
+    def crails_odb_model_files
+      result = []
+      Dir[crails_models_include_path + "/*.hpp"].each do |file_name|
+        result << Pathname.new(file_name).basename.to_s
+      end
+      result
+    end
+
+    def crails_odb_model_file_names
+      crails_odb_model_files.map do |filename|
+        filename.split(".")[0...-1]
+      end
+    end
+
     # TODO find how the ODB compiler can do this part for us
     def fix_ixx_includes
-     Dir["#{@temporary_output}/*"].each do |file_name|
-       text = File.read(file_name)
-       new_contents = text.gsub /#include\s+["<][^">]*(hxx|ixx)[">]/ do |str|
-         unless str.index(@include_prefix).nil?
-           res = str.scan /["<](.*)(hxx|ixx)[">]/
-           res = res.flatten.join('').inspect
-           res = res[1...-1]
-           "#include \"#{res.split('/').last}\""
-         else
-           str
-         end
-       end
-
-       File.open(file_name, "w") {|file| file.puts new_contents }
+      Dir["#{@temporary_output}/**/*"].each do |file_name|
+        next if File.directory? file_name
+        text = File.read(file_name)
+        new_contents = text.gsub /^#include\s+["<][^">]*(hxx|ixx)[">]/ do |str|
+          if !(str.index(@include_prefix).nil?)
+            res = str.scan /["<](.*)(hxx|ixx)[">]/
+            res = res.flatten.join('').inspect
+            res = res[1...-1]
+            "#include \"#{res.split('/').last}\""
+          elsif !(str.index("#include \"#{crails_models_include_path}/").nil?)
+            str.gsub "#include \"#{crails_models_include_path}/", "#include \""
+          else
+            str.gsub /<crails\/odb\/model\/(#{crails_odb_model_file_names.join '|'})-odb.(hxx|ixx)>/, '"lib/odb/crails-odb/\1-odb.\2"'
+          end
+        end
+        new_contents = new_contents.gsub /^#include\s+\"#{crails_include_path}\/crails\/([^"]+)\"/, '#include <crails/\1>'
+        File.open(file_name, "w") {|file| file.puts new_contents }
       end
     end
 
@@ -148,6 +169,12 @@ module ::Guard
         `#{cmd}`
       end
 
+      crails_odb_model_files.each do |crails_odb_file|
+        cmd = "odb #{odb_options "#{@temporary_output}/crails-odb", crails_models_include_path} #{crails_models_include_path}/#{crails_odb_file}"
+        puts "+ #{cmd}"
+        `#{cmd}`
+      end unless @at_once == true
+
       fix_ixx_includes
       apply_new_version @output_dir
     end
@@ -166,8 +193,9 @@ module ::Guard
 
     def apply_new_version target_dir
       FileUtils.mkdir_p target_dir
-      Dir["#{@temporary_output}/*"].each do |generated_file|
-        filename = generated_file.split('/').last
+      Dir["#{@temporary_output}/**/*"].each do |generated_file|
+        next if File.directory? generated_file
+        filename = generated_file.gsub "#{@temporary_output}/", ""
         last_generated_file = "#{target_dir}/#{filename}"
         if File.exists? last_generated_file
           if File.read(generated_file) == File.read(last_generated_file)

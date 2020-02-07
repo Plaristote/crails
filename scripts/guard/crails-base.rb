@@ -21,6 +21,23 @@ module ::Guard
       selected_files
     end
 
+    def crails_include_path
+      require_cmakecache
+      source = "#{build_path}/CMakeFiles/server.dir/flags.make"
+      flags_make = File.read source
+      includes_define = flags_make.match(/^CXX_INCLUDES\s*=\s*([^\n]+)$/)[1]
+      system_include_paths = ["/usr/include", "/usr/local/include"]
+      custom_include_paths = unless includes_define.nil?
+        includes_define.split(" ").map {|entry| entry.gsub(/^-I/, "")}
+      else
+        []
+      end
+      (system_include_paths + custom_include_paths).each do |path|
+        return path if File.exists? "#{path}/crails/server.hpp"
+      end
+      nil
+    end
+
     def platform
       case RbConfig::CONFIG['host_os']
       when /mswin|msys|mingw|cygwin|bccwin|wince|emc/
