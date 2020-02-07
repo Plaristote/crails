@@ -69,6 +69,16 @@ void Controller::render(const std::string& view)
   Renderer::render(view, params.as_data(), response.as_data(), vars);
 }
 
+void Controller::render(const std::string& view, SharedVars vars)
+{
+  for (const auto& var : this->vars)
+  {
+    if (vars.find(var.first) == vars.end())
+      vars.emplace(var.first, var.second);
+  }
+  Renderer::render(view, params.as_data(), response.as_data(), vars);
+}
+
 void Controller::render(RenderType type, const string& value)
 {
   string body;

@@ -42,6 +42,7 @@ namespace Crails
     void            respond_with(Crails::Server::HttpCode);
 
     void            render(const std::string& view);
+    void            render(const std::string& view, SharedVars);
     void            render(RenderType type, Data value);
     void            render(RenderType type, const std::string& value);
 
