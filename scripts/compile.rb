@@ -6,7 +6,7 @@ require 'guard/crails-base'
 Guard.setup
 
 groups = ARGV
-groups = ['compile'] if ARGV.length == 0
+groups = ['before_compile', 'compile'] if ARGV.length == 0
 
 puts "[guard] Running guard tasks: #{groups.join ', '}"
 
