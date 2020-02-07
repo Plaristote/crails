@@ -1,16 +1,16 @@
 #include <sstream>
 #include <iostream>
 #include <crails/shared_vars.hpp>
-#include <crails/template.hpp>
+#include <crails/html_template.hpp>
 <%= include_lines.join "\n" -%>
 
 using namespace std;
 
-class <%= class_name %> : public Crails::Template
+class <%= class_name %> : public Crails::HtmlTemplate
 {
 public:
   <%= class_name %>(const Crails::Renderer* renderer, Crails::SharedVars& vars) :
-    Template(renderer, vars)<%= ',' if lines[:variables_initialization].count > 0 %>
+    HtmlTemplate(renderer, vars)<%= ',' if lines[:variables_initialization].count > 0 %>
     <%= lines[:variables_initialization].join ",\n" %>
   {
   }

@@ -14,7 +14,7 @@ void Renderer::finalize()
 
 void Renderer::render(const std::string& view, Data params, Data response, SharedVars& vars)
 {
-  Renderer* renderer = pick_renderer(view, params);
+  const Renderer* renderer = pick_renderer(view, params);
 
   if (renderer == NULL)
     throw MissingTemplate(view);

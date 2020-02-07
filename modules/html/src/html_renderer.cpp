@@ -21,8 +21,13 @@ void HtmlRenderer::render_template(const std::string& view, Data params, Data re
   response["headers"]["Content-Type"] = "text/html";
   if (layout != "" && view != layout)
   {
-    vars["yield"] = &html_view;
-    render(response["layout"], params, response, vars);
+    if (can_render("text/html", layout))
+    {
+      vars["yield"] = &html_view;
+      render_template(layout, params, response, vars);
+    }
+    else
+      throw MissingTemplate(layout);
   }
   else
     response["body"] = html_view;
