@@ -73,7 +73,7 @@ namespace ODB
       start_transaction_for<MODEL>();
       results = transaction.get_database().query<MODEL>(query);
       time += timer.GetElapsedSeconds();
-      return results.size() > 0;
+      return !results.empty();
     }
 
     template<typename MODEL>

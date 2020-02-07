@@ -41,7 +41,6 @@ namespace ODB
   {
     using namespace Crails;
     odb::schema_version v(database.schema_version());
-    odb::schema_version cv(odb::schema_catalog::current_version(database));
 
     logger << Logger::Info;
     if (v == 0)
@@ -52,39 +51,44 @@ namespace ODB
       odb::schema_catalog::create_schema(database);
       t.commit();
     }
-    else if (v < cv)
+    else
     {
-      logger << ":: Migration" << '\n';
-      for (v = odb::schema_catalog::next_version(database, v) ;
-           v <= cv ;
-           v = odb::schema_catalog::next_version(database, v))
+      odb::schema_version cv(odb::schema_catalog::current_version(database));
+
+      if (v < cv)
       {
+        logger << ":: Migration" << '\n';
+        for (v = odb::schema_catalog::next_version(database, v) ;
+             v <= cv ;
+             v = odb::schema_catalog::next_version(database, v))
         {
-          odb::transaction t(database.begin());
+          {
+            odb::transaction t(database.begin());
 
-          logger << ":: Running migration to version " << v << '\n';
-          odb::schema_catalog::migrate_schema_pre(database, v);
-          t.commit();
-        }
+            logger << ":: Running migration to version " << v << '\n';
+            odb::schema_catalog::migrate_schema_pre(database, v);
+            t.commit();
+          }
 
-        {
-          odb::transaction t(database.begin());
+          {
+            odb::transaction t(database.begin());
 
-          if (callback && !(callback(self, v)))
-            throw boost_ext::runtime_error("database migration failed");
-          t.commit();
-        }
+            if (callback && !(callback(self, v)))
+              throw boost_ext::runtime_error("database migration failed");
+            t.commit();
+          }
 
-        {
-          odb::transaction t(database.begin());
+          {
+            odb::transaction t(database.begin());
 
-          odb::schema_catalog::migrate_schema_post(database, v);
-          t.commit();
+            odb::schema_catalog::migrate_schema_post(database, v);
+            t.commit();
+          }
         }
       }
+      else
+        logger << ":: Nothing to do" << Logger::endl;
     }
-    else
-      logger << ":: Nothing to do" << Logger::endl;
   }
 }
 
