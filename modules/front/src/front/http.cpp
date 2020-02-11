@@ -76,9 +76,9 @@ Promise Request::send()
     xhr->set_onload(request_on_load(xhr, response, resolve, reject));
     if (body.length() > 0)
     {
-      client::String js_string(body.c_str());
+      Crails::Front::String js_string(body.c_str());
 
-      xhr->send(&js_string);
+      xhr->send(*js_string);
     }
     else
       xhr->send();

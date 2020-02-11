@@ -69,9 +69,9 @@ void Ajax::operator()()
   open_transport();
   if (_data.size() > 0)
   {
-    client::String js_string(_data.c_str());
+    Crails::Front::String js_string(_data.c_str());
 
-    xhr->send(&js_string);
+    xhr->send(*js_string);
   }
   else
     xhr->send();

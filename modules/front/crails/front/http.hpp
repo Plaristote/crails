@@ -37,7 +37,7 @@ namespace Crails
         const std::string          method,  path;
         std::string                body;
         std::shared_ptr<Response>  response;
-	client::XMLHttpRequest*    xhr;
+        client::XMLHttpRequest*    xhr;
 
       public:
         Request(const std::string& m, const std::string& p);
