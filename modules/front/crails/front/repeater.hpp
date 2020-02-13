@@ -1,33 +1,19 @@
 #ifndef  CRAILS_FRONT_REPEATER_HPP
 # define CRAILS_FRONT_REPEATER_HPP
 
+# include "anchorable_element.hpp"
+
 namespace Crails
 {
   namespace Front
   {
-    enum AnchorMode
-    {
-      ChildrenAnchor,
-      AppendAnchor,
-      PrependAnchor
-    };
-
     template<typename ARRAY, typename ELEMENT>
-    struct Repeater
+    struct Repeater : public AnchorableElement
     {
-      Crails::Front::Element anchor;
-      AnchorMode             anchor_mode;
-
       typedef typename ARRAY::const_iterator                 Iterator;
       typedef std::pair<Iterator, std::shared_ptr<ELEMENT> > ElementPair;
       typedef std::vector<ElementPair>                       Elements;
       Elements elements;
-
-      void set_anchor(Crails::Front::Element el, AnchorMode mode)
-      {
-        anchor = el;
-        anchor_mode = mode;
-      }
 
       template<typename PARENT>
       void refresh(PARENT* parent, const ARRAY& array)
@@ -35,7 +21,7 @@ namespace Crails
         purge_removed_elements(array);
         update_elements(parent, array);
         attach_elements();
-	trigger_binding_updates();
+        trigger_binding_updates();
       }
 
       void bind_attributes()
@@ -53,33 +39,12 @@ namespace Crails
     private:
       void attach_elements()
       {
-        switch (anchor_mode)
-        {
-        case ChildrenAnchor:
-          for (auto& pair : elements)
-            pair.second->append_to(anchor);
-          break ;
-        case AppendAnchor:
-          {
-            auto current_anchor = anchor;
-            for (auto it = elements.begin() ; it != elements.end() ; ++it)
-            {
-              it->second->insert_after(current_anchor);
-              current_anchor = Crails::Front::Element(*it->second);
-            }
-          }
-          break ;
-        case PrependAnchor:
-          {
-            auto current_anchor = anchor;
-            for (auto it = elements.rbegin(); it != elements.rend() ; ++it)
-            {
-              it->second->insert_before(current_anchor);
-              current_anchor = Crails::Front::Element(*it->second);
-            }
-          }
-          break ;
-        }
+        std::vector< std::shared_ptr<ELEMENT> > element_vector;
+
+	element_vector.reserve(elements.size());
+	for (const auto& pair : elements)
+          element_vector.push_back(pair.second);
+	attach_elements(element_vector);
       }
 
       void purge_removed_elements(const ARRAY& array)
