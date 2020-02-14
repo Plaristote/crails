@@ -20,6 +20,7 @@ module CrailsCheerpHtml
       super el, parent
       value, bind_mode = extract_bind_mode_from el["repeat.for"].to_s
       parts = value.to_s.match /^\s*(\[([^\]]+)\])?\s*([^\s]+)\s+of\s+\[([^\]]+)\]\s*(.*)$/
+      raise ParseError.new(el, "invalid repeater definition: `#{value}`") if parts.nil?
       @typename   = "#{context.classes.first.typename}Repeatable_#{context.repeater_count}"
       @superclass = context.find_cpp_type(el.name)
 
@@ -29,10 +30,9 @@ module CrailsCheerpHtml
       @list_type     = parts[4]
       @list_name     = parts[5]
       @bind_mode     = bind_mode
-      @anchor        = find_anchorable_anchor(el)
-
-      if parent.find_reference_for(@anchor[:el]).nil?
-        parent.refs << (Reference.new @anchor[:el], parent)
+      
+      unless is_valid_cpp_variable_name?(@value_name)
+        raise ParseError.new(el, "invalid variable name `#{@value_name}`") 
       end
 
       context.repeater_count += 1
@@ -40,6 +40,14 @@ module CrailsCheerpHtml
 
     def constructor_decl
       "#{@typename}(#{parent.typename}*, #{@value_type});"
+    end
+    
+    def is_anchorable?
+      true
+    end
+    
+    def blocks_remote_references?
+      true
     end
   end
 end

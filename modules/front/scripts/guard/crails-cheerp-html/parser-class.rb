@@ -4,8 +4,8 @@ require 'crails-cheerp-html/parser-binding'
 
 module CrailsCheerpHtml
   class Class < Context
-    attr_accessor :typename, :inline_code
-    attr_reader :el, :parent, :children, :superclass, :refs, :slots, :slot_plugins, :repeaters, :bindings, :event_listeners
+    attr_accessor :typename, :inline_code, :anchor_name, :superclass
+    attr_reader :el, :parent, :children, :refs, :slots, :slot_plugins, :repeaters, :bindings, :event_listeners
 
     def initialize el, parent = nil
       context.classes << self
@@ -34,8 +34,19 @@ module CrailsCheerpHtml
       nil
     end
     
+    def find_class_for el
+      collect_children.each do |child|
+        return child if child.el == el
+      end
+      nil
+    end
+
     def is_root?
       @parent.nil?
+    end
+    
+    def is_anchorable?
+      false
     end
     
     def collect_children
@@ -45,7 +56,7 @@ module CrailsCheerpHtml
       end
       children
     end
-
+    
     def recursively_collect_children
       children = collect_children
       descendants = []
@@ -67,10 +78,11 @@ module CrailsCheerpHtml
       probe_references
       probe_bindings
     end
-    
+
     def probe_subtypes root = nil
       root = @el if root.nil?
       root.children.each do |el|
+        context.use_cpp_type el.name if context.has_cpp_type?(el)
         if Slot::Probe.matches? el
           @slots << Slot.new(el, self)
           @slots.last.probe
@@ -89,12 +101,20 @@ module CrailsCheerpHtml
         next unless el["_cheerp_class"].nil?
         next unless find_reference_for(el).nil?
         if !(el["ref"].nil?)
-          @refs << Reference.new(el, self, :explicit)
+          create_reference(el, :explicit)
         elsif context.has_cpp_type?(el)
-          @refs << Reference.new(el, self, :implicit)
+          create_reference(el, :implicit)
         end
         probe_references el unless context.has_cpp_type?(el)
       end
+    end
+    
+    def create_reference el, mode
+      @refs << Reference.new(el, self, mode)
+    end
+    
+    def blocks_remote_references?
+      false
     end
     
     def probe_bindings root = nil

@@ -20,8 +20,10 @@ module ::Guard
     def compile
       FileUtils.rm_rf @output
       @config = if File.exists?(@config_file) then JSON.parse(File.read "config/front.json") else nil end
+      current_filename = nil
       begin
         watched_files.each do |file|
+          current_filename = file
           generator = ::CrailsCheerpHtml::Generator.new @output, @input, file
           generator.set_config @config unless @config.nil?
           header_file = generator.compiled_header_path
@@ -32,6 +34,8 @@ module ::Guard
           File.open header_file, 'w' do |f| f.write code[:header] end
           File.open source_file, 'w' do |f| f.write code[:source] end
         end
+      rescue ::CrailsCheerpHtml::ParseError => e
+        puts "[crails-cheerp-html] parse error at #{current_filename}:#{e.line}: #{e.message}"
       rescue StandardError => e
         puts e.message
         e.backtrace.each do |line| puts line end

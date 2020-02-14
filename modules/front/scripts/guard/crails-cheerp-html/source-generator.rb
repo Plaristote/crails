@@ -5,7 +5,7 @@ module CrailsCheerpHtml
     def initialize object
       @object = object
     end
-    
+
     def generate
       @source  = generate_constructor_header
       @source += generate_constructor_body
@@ -16,7 +16,15 @@ module CrailsCheerpHtml
     end
 
     def tag_name
-      if @object.parent.nil? then @object.typename.dasherize else @object.el.name end
+      if @object.parent.nil?
+        if @object.el.first["tag-name"].nil?
+          @object.typename.dasherize
+        else
+          @object.el.first["tag-name"]
+        end
+      else
+        @object.el.name
+      end
     end
     
     def root_ptr
@@ -53,6 +61,9 @@ module CrailsCheerpHtml
       else
         initializers << "root(this)"
       end
+      (object.refs.select{|r| r.class == RemoteReference}).each do |remote_ref|
+        initializers << "#{remote_ref.name}(#{root_ptr}->#{remote_ref.name})"
+      end
       if object.class == Repeater
         initializers << "#{object.value_name}(__i)"
         result += ", #{object.value_type} __i"
@@ -63,7 +74,7 @@ module CrailsCheerpHtml
       result += "{\n"
       result
     end
-    
+
     def generate_constructor_body
       result  = generate_element_initializers
       result += generate_binding_initializers
@@ -132,8 +143,15 @@ module CrailsCheerpHtml
       result = ""
       count = 0
       el.children.each do |el|
-        next unless el["_cheerp_class"].nil?
-        if el.name != "text" && el.name != "comment"
+        sub_object = object.find_class_for el
+        if !sub_object.nil? && sub_object.is_anchorable?
+          result += "," if count > 0
+          result += "\n" + (" " * indent)
+          result += sub_object.anchor_name
+          count += 1
+        elsif !(el["_cheerp_class"].nil?)
+          next
+        elsif el.name != "text" && el.name != "comment"
           reference = object.find_reference_for(el)
           html_attributes = make_attr_from_el el
 
@@ -161,13 +179,11 @@ module CrailsCheerpHtml
     def generate_anchors_initializers
       result = ""
       object.repeaters.each do |repeater|
-        anchor_ref = object.find_reference_for(repeater.anchor[:el])
-        result += "  #{repeater.repeater_name}.set_anchor(#{anchor_ref.name}, #{anchor_symbol_to_enum repeater.anchor[:mode]});\n"
+        result += "  #{repeater.repeater_name}.set_anchor(#{repeater.anchor_name}, #{anchor_symbol_to_enum :append});\n"
       end
 
       object.slots.each do |slot|
-        anchor_ref = object.find_reference_for(slot.anchor[:el])
-        result += "  #{slot.slot_ref}.set_anchor(#{anchor_ref.name}, #{anchor_symbol_to_enum slot.anchor[:mode]});\n"
+        result += "  #{slot.slot_ref}.set_anchor(#{slot.anchor_name}, #{anchor_symbol_to_enum :append});\n"
         result += "  #{slot.slot_ref}.set_element(std::make_shared<#{slot.typename}>(this));\n"
       end
       

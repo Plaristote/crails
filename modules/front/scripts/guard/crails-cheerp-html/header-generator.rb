@@ -5,6 +5,10 @@ module CrailsCheerpHtml
     def initialize object
       @object = object
     end
+    
+    def indent
+      "      "
+    end
 
     def signaler_definition
       # Signaler def. Must be a reference if the object isn't the root object
@@ -17,8 +21,21 @@ module CrailsCheerpHtml
       result = ""
       object.refs.each do |ref|
         if ref.class == CppReference
-          result += "      virtual void set_#{ref.name}(const #{ref.type}& __v) { #{ref.name} = __v; }\n"
-          result += "      const #{ref.type}& get_#{ref.name}() const { return #{ref.name}; }\n"
+          result += indent + "virtual void set_#{ref.name}(const #{ref.type}& __v) { #{ref.name} = __v; }\n"
+          result += indent + "const #{ref.type}& get_#{ref.name}() const { return #{ref.name}; }\n"
+        end
+      end
+      result
+    end
+    
+    def generate_anchors
+      result = ""
+      anchor_count = 0
+      object.collect_children.each do |child|
+        if child.is_anchorable?
+          anchor_count += 1
+          child.anchor_name = "anchor_#{anchor_count}"
+          result += indent + "Crails::Front::CommentElement #{child.anchor_name};\n"
         end
       end
       result
@@ -29,22 +46,27 @@ module CrailsCheerpHtml
       public_properties_def    = ""
       private_properties_def   = ""
       if object.is_root?
-        private_properties_def += "      #{object.typename}* root;\n"
+        private_properties_def += indent + "#{object.typename}* root;\n"
       else
-        public_properties_def  += "      #{object.parent.typename}* parent;\n"
-        private_properties_def += "      #{object.root.typename}* root;\n"
+        public_properties_def  += indent + "#{object.parent.typename}* parent;\n"
+        private_properties_def += indent + "#{object.root.typename}* root;\n"
       end
       object.refs.each do |ref|
         suffix = " = #{ref.default_value}" if ref.has_default_value?
         if ref.is_explicit?
-          protected_properties_def += "      #{ref.type} #{ref.name}#{suffix};\n"
+          protected_properties_def += indent + "#{ref.type} #{ref.name}#{suffix};\n"
         elsif ref.is_implicit?
-          private_properties_def   += "      #{ref.type} #{ref.name}#{suffix};\n"
+          private_properties_def   += indent + "#{ref.type} #{ref.name}#{suffix};\n"
         end
       end
+      ## BEGIN Repeaters
       object.repeaters.each do |repeater|
-        protected_properties_def += "      Crails::Front::Repeater<#{repeater.list_type}, #{repeater.typename}> #{repeater.repeater_name};\n" 
+        protected_properties_def += indent + "Crails::Front::Repeater<#{repeater.list_type}, #{repeater.typename}> #{repeater.repeater_name};\n" 
       end
+      if object.class == Repeater
+        public_properties_def += indent + "#{object.value_type} #{object.value_name};\n"
+      end
+      ## END Repeaters
       ## BEGIN SLOTS
       # Slots emanate from the root object.
       if object.is_root?
@@ -53,11 +75,11 @@ module CrailsCheerpHtml
           all_slots += child.slots
         end
         all_slots.each do |slot|
-          public_properties_def += "      Crails::Front::SlotElement #{slot.slot_ref};\n"
+          public_properties_def += indent + "Crails::Front::SlotElement #{slot.slot_ref};\n"
         end
       else
         object.slots.each do |slot|
-          public_properties_def += "      Crails::Front::SlotElement& #{slot.slot_ref};\n"
+          public_properties_def += indent + "Crails::Front::SlotElement& #{slot.slot_ref};\n"
         end
       end
       ## END SLOTS
@@ -65,6 +87,7 @@ module CrailsCheerpHtml
     end
 
     def generate
+      anchors_def = generate_anchors
       public_properties_def, protected_properties_def, private_properties_def = generate_properties
 
 <<HEADER
@@ -74,6 +97,7 @@ module CrailsCheerpHtml
     protected:
 #{protected_properties_def}
     private:
+#{anchors_def}
 #{private_properties_def}
     public:
       #{signaler_definition}

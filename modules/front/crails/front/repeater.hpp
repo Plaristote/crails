@@ -44,7 +44,7 @@ namespace Crails
 	element_vector.reserve(elements.size());
 	for (const auto& pair : elements)
           element_vector.push_back(pair.second);
-	attach_elements(element_vector);
+        AnchorableElement::attach_elements(element_vector);
       }
 
       void purge_removed_elements(const ARRAY& array)

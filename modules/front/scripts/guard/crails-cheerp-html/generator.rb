@@ -8,6 +8,19 @@ require 'nokogiri'
 require 'pathname'
 
 module CrailsCheerpHtml
+  class ParseError
+    attr_reader :el, :message
+
+    def initialize el, message
+      @el = el
+      @message = message
+    end
+    
+    def line
+      el.line
+    end
+  end
+
   class Generator
     def initialize output, input, file
       @output   = output
@@ -38,11 +51,9 @@ module CrailsCheerpHtml
       end
       result
     end
-
-    def prepare_includes head
-      result = ""
+    
+    def load_includes head
       head.css("include").each do |include_attribute|
-        include_path = include_attribute["src"]
         unless include_attribute["require"].nil?
           include_attribute["require"].to_s.split(";").each do |type|
             parts = type.split("<")
@@ -51,10 +62,19 @@ module CrailsCheerpHtml
             Context.element_types[html_type] = type
           end
         end
+      end
+    end
+
+    def prepare_includes head
+      result = ""
+      head.css("include").each do |include_attribute|
+        include_path = include_attribute["src"]
         result += "# include \"#{include_path}\"\n"
       end
       @config["elements"].each do |element_data|
-        result += "# include \"#{element_data["include"]}\"\n"
+        if Context.referenced_types.include? element_data["require"]
+          result += "# include \"#{element_data["include"]}\"\n"
+        end
       end if !@config.nil? && !@config["elements"].nil?
       result
     end
@@ -65,7 +85,7 @@ module CrailsCheerpHtml
       src.gsub! /<\/template/i, "</html>"
 
       document = Nokogiri::HTML.parse(src)
-      html = document.xpath("html")
+      html = document.xpath("html").first
       head = document.xpath("//head")
       body = document.xpath("//body")
 
@@ -73,30 +93,32 @@ module CrailsCheerpHtml
       if !@config.nil? && !@config["elements"].nil?
         Context.load_global_element_types @config["elements"]
       end
-
-      includes_str = prepare_includes head
+      
+      load_includes head
 
       main_element = CrailsCheerpHtml::Class.new body
       main_element.typename = File.basename(@filepath, ".html").to_s.camelize
+      main_element.superclass = html["extends"] unless html["extends"].nil?
       main_element.probe
-      
+
       main_element.inline_code = ""
       head.css("script").each do |script|
         main_element.inline_code += script.text.strip + "\n"
       end
 
       head.css("attribute").each do |attribute|
-        main_element.refs << (CppReference.new attribute["type"], attribute["name"], attribute["value"])
+        main_element.refs << (CppReference.new attribute, attribute["type"], attribute["name"], attribute["value"])
       end
-      
+
       define_name = "__CRAILS_FRONT_HTML_#{main_element.typename.upcase}__"
-      
       header_code = ""
       source_code = ""
       Context.classes.each do |object|
         header_code += HeaderGenerator.new(object).generate + "\n"
         source_code += SourceGenerator.new(object).generate + "\n"
       end
+
+      includes_str = prepare_includes head
       
       header = <<HEADER
 #ifndef  #{define_name}
@@ -105,6 +127,7 @@ module CrailsCheerpHtml
 # include <crails/front/bindable.hpp>
 # include <crails/front/repeater.hpp>
 # include <crails/front/slot_element.hpp>
+# include <crails/front/comment_element.hpp>
 # include <crails/front/element.hpp>
 # include <crails/front/signal.hpp>
 #{includes_str}

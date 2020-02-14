@@ -61,7 +61,7 @@ end
     end
     hard_attributes
   end
-  
+
   def extract_bind_mode_from value
     bind_mode_match = value.to_s.match(/\s*&\s*(throttle|signal):([a-zA-Z0-9_-]+)$/)
     if bind_mode_match.nil?
@@ -76,5 +76,13 @@ end
       bind_mode = ".use_mode(Crails::Front::Bindable::#{bind_mode_enum}, \"#{bind_mode_match[2]}\")"
     end
     [value, bind_mode]
+  end
+  
+  def is_valid_cpp_variable_name? value
+    if value.length <= 255
+      not (value.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/).nil?)
+    else
+      false
+    end
   end
 #end

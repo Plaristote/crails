@@ -2,13 +2,14 @@ module CrailsCheerpHtml
   class Context
     class << self
       attr_accessor :slot_count, :repeater_count, :element_types
-      attr_reader :classes
+      attr_reader :classes, :referenced_types
 
       def reset
         @slot_count = @repeater_count = 0
         @implicit_ref_count = 0
         @classes = []
         @element_types = {}
+        @referenced_types = []
       end
       
       def template_base_type
@@ -25,6 +26,10 @@ module CrailsCheerpHtml
         else
           "Crails::Front::Element"
         end
+      end
+      
+      def use_cpp_type name
+        @referenced_types << @element_types[name]
       end
 
       def generate_new_ref_name
