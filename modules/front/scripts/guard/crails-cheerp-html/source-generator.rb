@@ -121,10 +121,20 @@ module CrailsCheerpHtml
         initializer  = "Crails::Front::Bindable([this]() { #{refresh_code} })"
         result += "  bound_attributes.push_back(#{initializer}#{repeater.bind_mode});\n"
       end
-        
+
       object.event_listeners.each do |event_listener|
         ref = object.find_reference_for event_listener.el
-        result += "  #{ref.name}.events->on(\"#{event_listener.attribute_name}\", [this](client::Event* _event) { #{event_listener.code}; });\n"
+        unless event_listener.is_cpp
+          result += "  #{ref.name}.events->on(\"#{event_listener.attribute_name}\", [this](client::Event* _event) { #{event_listener.code}; });\n"
+        else
+          result += "  #{ref.name}.signaler.connect([this](std::string signal_name)\n"
+          result += "  {\n"
+          result += "    if (signal_name == \"#{event_listener.attribute_name}\")\n"
+          result += "    {\n"
+          result += "      #{event_listener.code}\n"
+          result += "    }\n"
+          result += "  });\n"
+        end
       end
       result
     end

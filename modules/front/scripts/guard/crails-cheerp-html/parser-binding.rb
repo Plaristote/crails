@@ -2,14 +2,16 @@ require 'crails-cheerp-html/utils'
 
 module CrailsCheerpHtml  
   class EventListener
-    attr_reader :el, :attribute_name, :code
-    
+    attr_reader :el, :attribute_name, :code, :is_cpp
+
     def initialize el, parent, key, value
       @el             = el
       @parent         = parent
+      @is_cpp         = key.start_with?("cpp::")
       @attribute_name = key.delete_suffix(".trigger")
+      @attribute_name = @attribute_name[5..-1] if is_cpp
       @code           = value
-      
+
       if @parent.find_reference_for(el).nil?
         @parent.refs << (Reference.new(el, @parent))
       end
