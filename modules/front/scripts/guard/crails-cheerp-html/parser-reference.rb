@@ -1,12 +1,32 @@
 module CrailsCheerpHtml
-  class CppReference
+  class ReferenceBase
+    def has_default_value?
+      false
+    end
+    
+    def has_initializer?
+      false
+    end
+    
+    def has_getter?
+      false
+    end
+    
+    def has_setter?
+      false
+    end
+  end
+
+  class CppReference < ReferenceBase
     attr_reader :el, :type, :name, :default_value
+    attr_accessor :initializer, :setter_enabled
     
     def initialize el, type, name, default_value = nil
-      @el            = el
-      @type          = type
-      @name          = name
-      @default_value = default_value
+      @el             = el
+      @type           = type
+      @name           = name
+      @default_value  = default_value
+      @setter_enabled = true
       unless is_valid_cpp_variable_name?(@name)
         raise ParseError.new(el, "attribute name `#{@name}` is not a valid C++ variable name")
       end
@@ -15,9 +35,16 @@ module CrailsCheerpHtml
     def is_explicit? ; true ; end
     def is_implicit ; false ; end
     def has_default_value? ; !default_value.nil? ; end
+    def has_initializer? ; !@initializer.nil? end      
+    def has_getter? ; true ; end
+    def has_setter? ; @setter_enabled ; end
+      
+    def initializer root_getter
+      @initializer
+    end
   end
 
-  class Reference
+  class Reference < ReferenceBase
     attr_reader :el, :type, :name
 
     def initialize el, parent, mode = nil
@@ -43,12 +70,23 @@ module CrailsCheerpHtml
 
     def is_explicit? ; @mode == :explicit ; end
     def is_implicit? ; @mode == :implicit ; end
-    def has_default_value?; false ; end
   end
   
   class RemoteReference < Reference    
     def type
       "#{@type}&"
+    end
+
+    def has_initializer? ; true ; end
+
+    def initializer root_getter
+      "#{root_getter}->#{name}"
+    end
+  end
+  
+  class ThisReference
+    def name
+      "(*this)"
     end
   end
 end

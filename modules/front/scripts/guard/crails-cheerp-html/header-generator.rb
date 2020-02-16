@@ -20,9 +20,11 @@ module CrailsCheerpHtml
     def generate_getters_setters
       result = ""
       object.refs.each do |ref|
-        if ref.class == CppReference
-          result += indent + "virtual void set_#{ref.name}(const #{ref.type}& __v) { #{ref.name} = __v; }\n"
+        if ref.has_getter?
           result += indent + "const #{ref.type}& get_#{ref.name}() const { return #{ref.name}; }\n"
+        end
+        if ref.has_setter?
+          result += indent + "virtual void set_#{ref.name}(const #{ref.type}& __v) { #{ref.name} = __v; }\n"
         end
       end
       result
@@ -37,6 +39,14 @@ module CrailsCheerpHtml
           child.anchor_name = "anchor_#{anchor_count}"
           result += indent + "Crails::Front::CommentElement #{child.anchor_name};\n"
         end
+      end
+      result
+    end
+    
+    def friends_def
+      result = ""
+      object.context.classes.each do |klass|
+        result += indent + "friend class #{klass.typename};\n" unless klass == object
       end
       result
     end
@@ -93,6 +103,7 @@ module CrailsCheerpHtml
 <<HEADER
     class #{object.typename} : public #{object.superclass}
     {
+#{friends_def}
       Crails::Front::BoundAttributes bound_attributes;
     protected:
 #{protected_properties_def}

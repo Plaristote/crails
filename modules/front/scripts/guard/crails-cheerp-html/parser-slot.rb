@@ -21,7 +21,7 @@ module CrailsCheerpHtml
       end
     end
   end
-  
+
   class SlotPlugin < SlotBase
     attr_reader :slot_name, :on_element
 
@@ -31,9 +31,26 @@ module CrailsCheerpHtml
       @slot_name  = el["slot"].to_s
       @on_element = on_element
       context.slot_count += 1
+
+      if has_ref?
+        ref_root = find_remote_reference_holder
+        if ref_root.nil?
+          puts "[crails-cheerp-html] ignoring ref at #{context.filename}:#{el.line}"
+          el["ref"] = nil
+        else
+          ref = CppReference.new el, @typename, el["ref"]
+          ref.initializer = "this"
+          ref.setter_enabled = false
+          ref_root.refs << ref
+        end
+      end
+    end
+    
+    def has_ref?
+      not el["ref"].nil?
     end
   end
-  
+
   class Slot < SlotBase
     class Probe
       class << self

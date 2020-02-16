@@ -16,12 +16,26 @@ module ::Guard
     def run_all
       compile
     end
+    
+    def write_if_content_changed file, content
+      if !File.exists?(file) || File.read(file) != content
+        File.open file, 'w' do |f| f.write content end
+        puts "[crails-cheerp-html] Generated #{file}"
+      end
+    end
+    
+    def purge_old_files whitelist
+      Dir["#{@output}/**/*"].each do |file|
+        next if File.directory? file
+        File.delete file unless whitelist.include? file
+      end
+    end
 
     def compile
-      FileUtils.rm_rf @output
       @config = if File.exists?(@config_file) then JSON.parse(File.read "config/front.json") else nil end
       current_filename = nil
       begin
+        generated_files = []
         watched_files.each do |file|
           current_filename = file
           generator = ::CrailsCheerpHtml::Generator.new @output, @input, file
@@ -31,9 +45,11 @@ module ::Guard
 
           FileUtils.mkdir_p File.dirname(header_file)
           code = generator.generate
-          File.open header_file, 'w' do |f| f.write code[:header] end
-          File.open source_file, 'w' do |f| f.write code[:source] end
+          write_if_content_changed header_file, code[:header]
+          write_if_content_changed source_file, code[:source]
+          generated_files << header_file << source_file
         end
+        purge_old_files generated_files
       rescue ::CrailsCheerpHtml::ParseError => e
         puts "[crails-cheerp-html] parse error at #{current_filename}:#{e.line}: #{e.message}"
       rescue StandardError => e

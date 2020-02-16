@@ -26,19 +26,23 @@ module CrailsCheerpHtml
         @object.el.name
       end
     end
-    
+
     def root_ptr
       if object.parent.nil? then "this" else "root" end
     end
     
     def get_root_from_parent_code parent_symbol
-      result = parent_symbol
-      current_parent = object.parent
-      until current_parent.parent.nil?
-        result += "->parent"
-        current_parent = current_parent.parent
+      if object.is_root?
+        "this"
+      else
+        result = parent_symbol
+        current_parent = object.parent
+        until current_parent.parent.nil?
+          result += "->parent"
+          current_parent = current_parent.parent
+        end
+        result
       end
-      result
     end
 
     def make_parent_to_root_initializer parent_symbol
@@ -48,21 +52,23 @@ module CrailsCheerpHtml
     def generate_constructor_header
       initializers = []
       initializers << "#{object.context.template_base_type}(\"#{tag_name}\")" if object.superclass == object.context.template_base_type
+      parent_symbol = "__p"
+      root_getter   = get_root_from_parent_code parent_symbol
       # Constructor
       result  = "HtmlTemplate::#{object.typename}::#{object.typename}("
       unless object.is_root?
-        initializers << "parent(__p)"
-        initializers << "signaler(__p->signaler)"
-        result += "#{object.parent.typename}* __p"
-        initializers << make_parent_to_root_initializer("__p")
+        initializers << "parent(#{parent_symbol})"
+        initializers << "signaler(#{parent_symbol}->signaler)"
+        result += "#{object.parent.typename}* #{parent_symbol}"
+        initializers << make_parent_to_root_initializer(parent_symbol)
         object.slots.each do |slot|
-          initializers << "#{slot.slot_ref}(#{get_root_from_parent_code("__p")}->#{slot.slot_ref})"
+          initializers << "#{slot.slot_ref}(#{root_getter}->#{slot.slot_ref})"
         end
       else
         initializers << "root(this)"
       end
-      (object.refs.select{|r| r.class == RemoteReference}).each do |remote_ref|
-        initializers << "#{remote_ref.name}(#{root_ptr}->#{remote_ref.name})"
+      (object.refs.select{|r| r.has_initializer?}).each do |ref|
+        initializers << "#{ref.name}(#{ref.initializer root_getter})"
       end
       if object.class == Repeater
         initializers << "#{object.value_name}(__i)"
@@ -85,7 +91,6 @@ module CrailsCheerpHtml
 
     def generate_constructor_footer
       result = ""
-      result += "  bind_attributes();\n"    
       result += "}\n"
       result
     end
@@ -196,10 +201,15 @@ module CrailsCheerpHtml
         result += "  #{slot.slot_ref}.set_anchor(#{slot.anchor_name}, #{anchor_symbol_to_enum :append});\n"
         result += "  #{slot.slot_ref}.set_element(std::make_shared<#{slot.typename}>(this));\n"
       end
-      
+
       object.slot_plugins.each do |slot_plugin|
         ref = object.find_reference_for(slot_plugin.on_element)
-        result += "  #{ref.name}.slot_#{slot_plugin.slot_name}.set_element(std::make_shared<#{slot_plugin.typename}>(this));\n"
+        initializer = if slot_plugin.has_ref?
+          "root->#{slot_plugin.el["ref"]}"
+        else
+          "std::make_shared<#{slot_plugin.typename}>(this)"
+        end
+        result += "  #{ref.name}.slot_#{slot_plugin.slot_name}.set_element(#{initializer});\n"
       end
       result
     end
@@ -217,6 +227,16 @@ module CrailsCheerpHtml
       object.repeaters.each do |repeater|
         result += "  #{repeater.repeater_name}.bind_attributes();\n"
       end
+      object.slots.each do |slot|
+        result += "  #{slot.slot_ref}.get_element()->bind_attributes();\n"
+      end
+#       unless object.is_root?
+#         result += "  signaler.connect([this](std::string event_name)\n"
+#         result += "  {\n"
+#         result += "    if (event_name == \"refresh-bindings\")\n"
+#         result += "      trigger_binding_updates();\n"
+#         result += "  });\n"
+#       end
       result += "}\n"
       result
     end
@@ -234,6 +254,7 @@ module CrailsCheerpHtml
       object.repeaters.each do |repeater|
         result += "  #{repeater.repeater_name}.trigger_binding_updates();\n"
       end
+      #result += "  signaler.trigger(\"refresh-bindings\");\n" if object.is_root?
       result += "}\n"
       result
     end

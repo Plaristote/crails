@@ -2,31 +2,60 @@
 # define CRAILS_FRONT_SLOT_ELEMENT_HPP
 
 # include "anchorable_element.hpp"
+# include "bindable.hpp"
 
 namespace Crails
 {
   namespace Front
   {
-    struct SlotElement : public AnchorableElement
+    class SlotElement : public AnchorableElement
     {
-      std::shared_ptr<Crails::Front::Element> element;
+      std::shared_ptr<IBindableView> element;
+      IBindableView*                 element_ptr = nullptr;
+
+    public:
+      bool has_element() const
+      {
+        return element_ptr != nullptr;
+      }
+
+      IBindableView* get_element() const
+      {
+        return element_ptr;
+      }
 
       void attach()
       {
-        std::vector<std::shared_ptr<Crails::Front::Element> > element_list;
+        std::vector<Crails::Front::Element*> element_list;
 
-	element_list.push_back(element);
+        element_list.push_back(get_element());
         attach_elements(element_list);
+      }
+
+      void set_element(IBindableView& el)
+      {
+        cleanup();
+        element_ptr = &el;
+        if (is_anchorable())
+          attach();
       }
 
       template<typename ELEMENT>
       void set_element(std::shared_ptr<ELEMENT> pointer)
       {
-        if (element)
-          element->destroy();
-        element = std::dynamic_pointer_cast<Crails::Front::Element>(pointer);
-        if (is_anchorable())
+        cleanup();
+        element = std::dynamic_pointer_cast<IBindableView>(pointer);
+	element_ptr = element.get();
+        if (is_anchorable() && has_element())
           attach();
+      }
+    private:
+      void cleanup()
+      {
+        if (has_element())
+          get_element()->destroy();
+	element = nullptr;
+        element_ptr = nullptr;
       }
     };
   }

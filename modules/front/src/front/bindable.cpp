@@ -35,6 +35,7 @@ void Bindable::enable(Crails::Signal<std::string>& signal)
     });
     break ;
   case ThrottleBind:
+    enabled_ptr = std::make_shared<bool>(true);
     throttle_schedule();
     break ;
   }
@@ -48,6 +49,7 @@ void Bindable::disable()
   {
   case StaticBind:
   case ThrottleBind:
+    (*enabled_ptr) = false;
     break ;
   case SignalBind:
     stop_listening();
@@ -80,10 +82,14 @@ std::string Bindable::get_value() const
 
 void Bindable::throttle_schedule()
 {
-  Crails::Front::window->setTimeout(cheerp::Callback([this]()
+  std::shared_ptr<bool> _enabled_ptr = enabled_ptr;
+
+  Crails::Front::window->setTimeout(cheerp::Callback([this, _enabled_ptr]()
   {
-    update();
-    if (enabled)
+    if (*_enabled_ptr)
+    {
+      update();
       throttle_schedule();
+    }
   }), throttle_refresh);
 }

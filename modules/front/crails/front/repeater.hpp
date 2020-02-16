@@ -94,6 +94,7 @@ namespace Crails
           {
             auto ptr = std::make_shared<ELEMENT>(parent, *it);
 
+            ptr->bind_attributes();
             new_elements.push_back(ElementPair(it, ptr));
           }
         }

@@ -8,6 +8,15 @@ namespace Crails
 {
   namespace Front
   {
+    struct IBindableView : public Crails::Front::Element
+    {
+      IBindableView() : Crails::Front::Element("div") {}
+      IBindableView(const client::String& tagName) : Crails::Front::Element(tagName) {}
+
+      virtual void bind_attributes() = 0;
+      virtual void trigger_binding_updates() = 0;
+    };
+
     struct BindableUpdater
     {
       std::function<void()> func;
@@ -44,9 +53,10 @@ namespace Crails
       Getter                 getter;
       std::function<void()>  updater;
 
-      std::string   signal_name;
-      unsigned long throttle_refresh;
-      bool          enabled = false;
+      std::string            signal_name;
+      unsigned long          throttle_refresh;
+      bool                   enabled = false;
+      std::shared_ptr<bool>  enabled_ptr;
 
     public:
       Bindable() {}

@@ -31,6 +31,7 @@ module CrailsCheerpHtml
       @refs.each do |ref|
         return ref if ref.el == el
       end
+      return ThisReference.new if el == @el
       nil
     end
     
@@ -121,14 +122,18 @@ module CrailsCheerpHtml
       root = @el if root.nil?
       root.children.each do |el|
         next unless el["_cheerp_class"].nil?
-        el.attributes.each do |key, value|
-          if key.end_with? ".trigger"
-            @event_listeners << EventListener.new(el, self, key, value)
-          elsif key.end_with? ".bind"
-            @bindings << Binding.new(el, self, key, value)
-          end
-        end
+        probe_bindings_for el
         probe_bindings el unless context.has_cpp_type?(el)
+      end
+    end
+    
+    def probe_bindings_for el
+      el.attributes.each do |key, value|
+        if key.end_with? ".trigger"
+          @event_listeners << EventListener.new(el, self, key, value)
+        elsif key.end_with? ".bind"
+          @bindings << Binding.new(el, self, key, value)
+        end
       end
     end
     

@@ -90,6 +90,7 @@ module CrailsCheerpHtml
       body = document.xpath("//body")
 
       Context.reset
+      Context.filename = @filepath
       if !@config.nil? && !@config["elements"].nil?
         Context.load_global_element_types @config["elements"]
       end
@@ -113,7 +114,7 @@ module CrailsCheerpHtml
       define_name = "__CRAILS_FRONT_HTML_#{main_element.typename.upcase}__"
       header_code = ""
       source_code = ""
-      Context.classes.each do |object|
+      Context.classes.reverse.each do |object|
         header_code += HeaderGenerator.new(object).generate + "\n"
         source_code += SourceGenerator.new(object).generate + "\n"
       end
