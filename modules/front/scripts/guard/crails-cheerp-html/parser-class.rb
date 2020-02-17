@@ -12,7 +12,7 @@ module CrailsCheerpHtml
       parent.children << self unless parent.nil?
       el["_cheerp_class"] = self if el.class != Nokogiri::XML::NodeSet
       @el              = el
-      @superclass      = context.template_base_type
+      @superclass      = if is_root? then context.template_base_type else context.template_base_subtype end
       @parent          = parent
       @refs            = []
       @bindings        = []

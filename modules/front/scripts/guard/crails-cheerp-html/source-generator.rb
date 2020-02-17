@@ -50,10 +50,17 @@ module CrailsCheerpHtml
     end
 
     def generate_constructor_header
-      initializers = []
-      initializers << "#{object.context.template_base_type}(\"#{tag_name}\")" if object.superclass == object.context.template_base_type
+      initializers = []      
       parent_symbol = "__p"
       root_getter   = get_root_from_parent_code parent_symbol
+      
+      case object.superclass
+      when object.context.template_base_type then
+        initializers << "#{object.context.template_base_type}(\"#{tag_name}\")"
+#      when object.context.template_base_subtype then
+#        initializers << "#{object.context.template_base_subtype}(\"#{tag_name}\", #{parent_symbol}->signaler)"
+      end
+
       # Constructor
       result  = "HtmlTemplate::#{object.typename}::#{object.typename}("
       unless object.is_root?
@@ -94,7 +101,7 @@ module CrailsCheerpHtml
       result += "}\n"
       result
     end
-    
+
     def generate_element_initializers
       result = ""
       object.refs.each do |ref|
@@ -136,7 +143,7 @@ module CrailsCheerpHtml
           result += "  {\n"
           result += "    if (signal_name == \"#{event_listener.attribute_name}\")\n"
           result += "    {\n"
-          result += "      #{event_listener.code}\n"
+          result += "      #{event_listener.code};\n"
           result += "    }\n"
           result += "  });\n"
         end
@@ -222,6 +229,7 @@ module CrailsCheerpHtml
       object.refs.each do |ref|
         if ref.el && object.context.has_cpp_type?(ref.el)
           result += "  #{ref.name}.bind_attributes();\n"
+          result += "  signaler.connect([this](std::string _event) { #{ref.name}.signaler.trigger(_event); });\n"
         end
       end
       object.repeaters.each do |repeater|
@@ -230,13 +238,6 @@ module CrailsCheerpHtml
       object.slots.each do |slot|
         result += "  #{slot.slot_ref}.get_element()->bind_attributes();\n"
       end
-#       unless object.is_root?
-#         result += "  signaler.connect([this](std::string event_name)\n"
-#         result += "  {\n"
-#         result += "    if (event_name == \"refresh-bindings\")\n"
-#         result += "      trigger_binding_updates();\n"
-#         result += "  });\n"
-#       end
       result += "}\n"
       result
     end
@@ -254,7 +255,9 @@ module CrailsCheerpHtml
       object.repeaters.each do |repeater|
         result += "  #{repeater.repeater_name}.trigger_binding_updates();\n"
       end
-      #result += "  signaler.trigger(\"refresh-bindings\");\n" if object.is_root?
+      object.slots.each do |slot|
+        result += "  #{slot.slot_ref}.get_element()->trigger_binding_updates();\n"
+      end
       result += "}\n"
       result
     end

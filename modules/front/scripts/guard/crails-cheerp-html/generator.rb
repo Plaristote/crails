@@ -129,7 +129,7 @@ module CrailsCheerpHtml
 # include <crails/front/repeater.hpp>
 # include <crails/front/slot_element.hpp>
 # include <crails/front/comment_element.hpp>
-# include <crails/front/element.hpp>
+# include <crails/front/custom_element.hpp>
 # include <crails/front/signal.hpp>
 #{includes_str}
 

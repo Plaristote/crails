@@ -16,6 +16,10 @@ module CrailsCheerpHtml
       def template_base_type
         "Crails::Front::IBindableView"
       end
+      
+      def template_base_subtype
+        template_base_type
+      end
 
       def has_cpp_type? el
         @element_types.keys.include? el.name

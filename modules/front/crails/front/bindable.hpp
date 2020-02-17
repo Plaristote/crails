@@ -15,6 +15,8 @@ namespace Crails
 
       virtual void bind_attributes() = 0;
       virtual void trigger_binding_updates() = 0;
+    private:
+      IBindableView(const IBindableView&) {}
     };
 
     struct BindableUpdater

@@ -52,11 +52,11 @@ namespace Crails
       Crails::Signal<std::string>& get_signaler() { return signaler; }
     };
 
-    class TemplateElement : public BindableEngine
+    class CustomElement : public BindableEngine
     {
     public:
-      TemplateElement(const client::String& tagName) : BindableEngine(tagName) {}
-      TemplateElement() {}
+      CustomElement(const client::String& tagName) : BindableEngine(tagName) {}
+      CustomElement() {}
     };
   }
 }
