@@ -77,13 +77,15 @@ module CrailsCheerpHtml
       "#{@type}&"
     end
 
-    def has_initializer? ; true ; end
+    def has_initializer?
+      true
+    end
 
     def initializer root_getter
       "#{root_getter}->#{name}"
     end
   end
-  
+
   class ThisReference
     def name
       "(*this)"

@@ -16,9 +16,13 @@ module CrailsCheerpHtml
       def template_base_type
         "Crails::Front::IBindableView"
       end
-      
+
       def template_base_subtype
         template_base_type
+      end
+      
+      def element_base_type
+        "Crails::Front::Element"
       end
 
       def has_cpp_type? el
@@ -29,7 +33,7 @@ module CrailsCheerpHtml
         if @element_types.keys.include? name
           @element_types[name]
         else
-          options[:fallback] || "Crails::Front::Element"
+          options[:fallback] || element_base_type
         end
       end
 

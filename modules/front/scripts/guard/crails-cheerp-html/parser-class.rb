@@ -50,6 +50,10 @@ module CrailsCheerpHtml
       false
     end
     
+    def should_skip?
+      false
+    end
+    
     def collect_children
       children = []
       context.classes.each do |object|

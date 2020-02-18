@@ -214,18 +214,26 @@ module CrailsCheerpHtml
         initializer = if slot_plugin.has_ref?
           "root->#{slot_plugin.el["ref"]}"
         else
-          "std::make_shared<#{slot_plugin.typename}>(this)"
+          "std::make_shared<#{slot_plugin.typename}>(#{slot_plugin.constructor_params})"
         end
         result += "  #{ref.name}.slot_#{slot_plugin.slot_name}.set_element(#{initializer});\n"
       end
       result
     end
     
+    def inherits_binding_methods?
+      !([object.context.template_base_type, object.context.template_base_subtype].include? object.superclass)
+    end
+    
     def generate_method_bind_attributes
       result = ""
       result += "void HtmlTemplate::#{object.typename}::bind_attributes()\n"
       result += "{\n"
-      result += "  bound_attributes.enable(signaler);\n"
+      if inherits_binding_methods?
+        result += "  #{object.superclass}::bind_attributes();\n"
+      else
+        result += "  bound_attributes.enable(signaler);\n"
+      end
       object.refs.each do |ref|
         if ref.el && object.context.has_cpp_type?(ref.el)
           result += "  #{ref.name}.bind_attributes();\n"
@@ -246,7 +254,11 @@ module CrailsCheerpHtml
       result = ""
       result += "void HtmlTemplate::#{object.typename}::trigger_binding_updates()\n"
       result += "{\n"
-      result += "  bound_attributes.update();\n"
+      if inherits_binding_methods?
+        result += "  #{object.superclass}::trigger_binding_updates();\n"
+      else
+        result += "  bound_attributes.update();\n"
+      end
       object.refs.each do |ref|
         if ref.el && object.context.has_cpp_type?(ref.el)
           result += "  #{ref.name}.trigger_binding_updates();\n"

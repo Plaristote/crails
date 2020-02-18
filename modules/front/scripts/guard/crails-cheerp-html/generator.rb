@@ -47,6 +47,7 @@ module CrailsCheerpHtml
     def append_classes_predeclaration
       result = ""
       Context.classes.each do |object|
+        next if object.should_skip?
         result += "  class #{object.typename};\n"
       end
       result
@@ -55,20 +56,26 @@ module CrailsCheerpHtml
     def load_includes head
       head.css("include").each do |include_attribute|
         unless include_attribute["require"].nil?
-          include_attribute["require"].to_s.split(";").each do |type|
+          type = include_attribute["require"].to_s
+          tag  = if include_attribute["tag-name"].nil?
             parts = type.split("<")
             parts[0].gsub! "::", "_"
-            html_type = parts.join("<").dasherize
-            Context.element_types[html_type] = type
+            parts.join("<").dasherize
+          else
+            include_attribute["tag-name"].to_s
           end
+          Context.element_types[tag] = type
         end
       end
     end
 
     def prepare_includes head
       result = ""
+      included_paths = []
       head.css("include").each do |include_attribute|
-        include_path = include_attribute["src"]
+        included_paths << include_attribute["src"].to_s
+      end
+      included_paths.uniq.each do |include_path|
         result += "# include \"#{include_path}\"\n"
       end
       @config["elements"].each do |element_data|
@@ -115,6 +122,7 @@ module CrailsCheerpHtml
       header_code = ""
       source_code = ""
       Context.classes.reverse.each do |object|
+        next if object.should_skip?
         header_code += HeaderGenerator.new(object).generate + "\n"
         source_code += SourceGenerator.new(object).generate + "\n"
       end

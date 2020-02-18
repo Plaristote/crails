@@ -25,11 +25,16 @@ module CrailsCheerpHtml
   class SlotPlugin < SlotBase
     attr_reader :slot_name, :on_element
 
+    def is_custom_element?
+      context.has_cpp_type? el
+    end
+
     def initialize el, parent, on_element
       super el, parent
-      @typename   = "#{context.classes.first.typename}SlotPlugin_#{context.slot_count}"
       @slot_name  = el["slot"].to_s
       @on_element = on_element
+      @typename   = "#{context.classes.first.typename}SlotPlugin_#{context.slot_count}"
+      @superclass = context.find_cpp_type el.name, fallback: context.template_base_subtype
       context.slot_count += 1
 
       if has_ref?
@@ -38,16 +43,26 @@ module CrailsCheerpHtml
           puts "[crails-cheerp-html] ignoring ref at #{context.filename}:#{el.line}"
           el["ref"] = nil
         else
+          @parent = ref_root
           ref = CppReference.new el, @typename, el["ref"]
-          ref.initializer = "this"
+          ref.initializer = constructor_params
           ref.setter_enabled = false
           ref_root.refs << ref
         end
       end
     end
     
+    def constructor_params
+      "this"
+    end
+    
     def has_ref?
       not el["ref"].nil?
+    end
+    
+    def probe
+      super
+      probe_bindings_for el
     end
   end
 
