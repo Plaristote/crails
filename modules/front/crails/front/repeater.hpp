@@ -49,9 +49,9 @@ namespace Crails
 
       void purge_removed_elements(const ARRAY& array)
       {
-        std::vector<typename Elements::iterator> to_remove;
+        auto it = elements.begin();
 
-        for (auto it = elements.begin() ; it != elements.end() ; ++it)
+        while (it != elements.end())
         {
           bool exists = false;
           for (auto subit = array.begin() ; subit != array.end() ; ++subit)
@@ -63,12 +63,12 @@ namespace Crails
             }
           }
           if (!exists)
-            to_remove.push_back(it);
-        }
-        for (auto it : to_remove)
-        {
-          it->second->destroy();
-          elements.erase(it);
+          {
+            it->second->destroy();
+            it = elements.erase(it);
+          }
+          else
+            ++it;
         }
       }
 
@@ -77,6 +77,7 @@ namespace Crails
       {
         Elements new_elements;
 
+        new_elements.reserve(array.size());
         for (Iterator it = array.begin() ; it != array.end() ; ++it)
         {
           bool exists = false;
