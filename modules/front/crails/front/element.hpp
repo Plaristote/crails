@@ -99,6 +99,8 @@ namespace Crails
       Element&             visible(bool, const std::string& display = "");
       void                 set_visible(bool val) { visible(val); }
 
+      std::string          get_inner_html() const;
+      std::string          get_text() const;
       std::string          get_value() const;
       bool                 get_checked() const { return static_cast<client::HTMLInputElement*>(**this)->get_checked(); }
 

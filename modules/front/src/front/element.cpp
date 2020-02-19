@@ -325,3 +325,17 @@ std::string Element::get_value() const
 
   return (std::string)(*client_string);
 }
+
+std::string Element::get_text() const
+{
+  auto* client_string = (*this)->get_innerText();
+
+  return (std::string)(*client_string);
+}
+
+std::string Element::get_inner_html() const
+{
+  auto* client_string = (*this)->get_innerHTML();
+
+  return (std::string)(*client_string);
+}
