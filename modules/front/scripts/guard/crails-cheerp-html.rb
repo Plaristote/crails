@@ -52,6 +52,8 @@ module ::Guard
         purge_old_files generated_files
       rescue ::CrailsCheerpHtml::ParseError => e
         puts "[crails-cheerp-html] parse error at #{current_filename}:#{e.line}: #{e.message}"
+      rescue ::CrailsCheerpHtml::HtmlParseError => e
+        puts "[crails-cheerp-html] parse error at #{current_filename}:#{e.message}"
       rescue StandardError => e
         puts e.message
         e.backtrace.each do |line| puts line end

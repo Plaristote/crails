@@ -65,7 +65,7 @@ module CrailsCheerpHtml
       result  = "HtmlTemplate::#{object.typename}::#{object.typename}("
       unless object.is_root?
         initializers << "parent(#{parent_symbol})"
-        initializers << "signaler(#{parent_symbol}->signaler)"
+        initializers << "signaler(#{parent_symbol}->signaler)" unless object.implements_ibindable_view?
         result += "#{object.parent.typename}* #{parent_symbol}"
         initializers << make_parent_to_root_initializer(parent_symbol)
         object.slots.each do |slot|

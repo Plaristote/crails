@@ -20,6 +20,15 @@ module CrailsCheerpHtml
       el.line
     end
   end
+  
+  class HtmlParseError
+    attr_reader :message, :line
+    
+    def initialize error
+      @message = error.message
+      @line    = error.line
+    end
+  end
 
   class Generator
     def initialize output, input, file
@@ -86,12 +95,37 @@ module CrailsCheerpHtml
       result
     end
 
+    def html5_tags
+      ["article", "aside", "details", "figcaption", "figure", "footer", "header", "main", "mark", "nav", "section", "summary", "time"]
+    end
+    
+    def whitelisted_tags
+      ["svg"] + (@config["whitelisted-tags"] || [])
+    end
+    
+    def internal_tags
+      ["include", "attribute", "slot"]
+    end
+
+    def is_error_fatal? error
+      matches = error.message.match(/^[0-9]+:[0-9]+: ERROR: Tag (.+) invalid$/)
+      unless matches.nil?
+        tagName = matches[1]
+        return false if (internal_tags + html5_tags + whitelisted_tags).include? tagName
+        return (if Context.element_types[tagName].nil? then true else false end)
+      end
+      return false if error.message.end_with?("ERROR: htmlParseEntityRef: no name") ||
+                      error.message.end_with?("ERROR: Expected a doctype token$")
+      true
+    end
+
     def generate
       src = File.read @filepath
       src.gsub! /<template/i,  "<html"
       src.gsub! /<\/template/i, "</html>"
 
-      document = Nokogiri::HTML.parse(src)
+      document = Nokogiri::HTML.parse(src) do |config| config.strict end
+      
       html = document.xpath("html").first
       head = document.xpath("//head")
       body = document.xpath("//body")
@@ -103,6 +137,16 @@ module CrailsCheerpHtml
       end
       
       load_includes head
+      
+      fatal_error = nil
+      document.errors.each do |error|
+        if is_error_fatal? error
+          puts "[crails-cheerp-html] #{@filepath}:#{error.line}:#{error.column}: #{error.message}"
+          fatal_error ||= error
+          error_count += 1
+        end
+      end
+      raise HtmlParseError.new fatal_error unless fatal_error.nil?
 
       main_element = CrailsCheerpHtml::Class.new body
       main_element.typename = File.basename(@filepath, ".html").to_s.camelize

@@ -25,6 +25,10 @@ module CrailsCheerpHtml
   class SlotPlugin < SlotBase
     attr_reader :slot_name, :on_element
 
+    def implements_ibindable_view?
+      is_custom_element?
+    end
+    
     def is_custom_element?
       context.has_cpp_type? el
     end
@@ -35,6 +39,7 @@ module CrailsCheerpHtml
       @on_element = on_element
       @typename   = "#{context.classes.first.typename}SlotPlugin_#{context.slot_count}"
       @superclass = context.find_cpp_type el.name, fallback: context.template_base_subtype
+      context.use_cpp_type el.name if is_custom_element?
       context.slot_count += 1
 
       if has_ref?

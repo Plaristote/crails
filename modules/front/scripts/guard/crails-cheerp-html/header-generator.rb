@@ -11,10 +11,16 @@ module CrailsCheerpHtml
     end
 
     def signaler_definition
+      return "" if object.implements_ibindable_view?
       # Signaler def. Must be a reference if the object isn't the root object
       signaler_type  = "Crails::Signal<std::string>"
       signaler_type += "&" unless object.parent.nil?
       "#{signaler_type} signaler;"
+    end
+    
+    def bound_attributes_definition
+      return "" if object.implements_ibindable_view?
+      "Crails::Front::BoundAttributes bound_attributes;"
     end
     
     def generate_getters_setters
@@ -104,7 +110,7 @@ module CrailsCheerpHtml
     class #{object.typename} : public #{object.superclass}
     {
 #{friends_def}
-      Crails::Front::BoundAttributes bound_attributes;
+      #{bound_attributes_definition}
     protected:
 #{protected_properties_def}
     private:

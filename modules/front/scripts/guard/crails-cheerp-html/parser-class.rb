@@ -22,6 +22,10 @@ module CrailsCheerpHtml
       @event_listeners = []
       @children        = []
     end
+    
+    def implements_ibindable_view?
+      false
+    end
 
     def constructor_decl
       "#{@typename}(#{if parent.nil? then "" else "#{parent.typename}*" end});"
