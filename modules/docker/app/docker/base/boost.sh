@@ -9,6 +9,8 @@ wget http://sourceforge.net/projects/boost/files/boost/${boost_version_major}.${
 tar -zxvf download && rm download
 
 cd "${boost_directory}"
-./bootstrap.sh
+./bootstrap.sh \
+  --with-toolset=gcc \
+  --without-libraries=python
 ./b2 thread filesystem program_options system
 ./b2 install

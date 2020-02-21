@@ -16,7 +16,7 @@ RUN apt-get -y --allow-unauthenticated update && \
   nodejs
 
 # Downgrade to gcc-7 to solve compatibility issues with odb 2.5
-RUN apt-get -y install gcc-7 g++-7
+RUN apt-get -y install gcc-7 g++-7 gcc-7-plugin-dev
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 20
 RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 20
 
