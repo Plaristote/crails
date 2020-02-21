@@ -110,8 +110,8 @@ module CrailsCheerpHtml
     class #{object.typename} : public #{object.superclass}
     {
 #{friends_def}
-      #{bound_attributes_definition}
     protected:
+      #{bound_attributes_definition}
 #{protected_properties_def}
     private:
 #{anchors_def}
