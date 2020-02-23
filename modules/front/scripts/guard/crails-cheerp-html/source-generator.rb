@@ -118,6 +118,8 @@ module CrailsCheerpHtml
         ref = object.find_reference_for binding.el
         initializer = if binding.binds_to_cpp_property?
           "Crails::Front::Bindable([this]() { #{ref.name}.set_#{binding.attribute_name}(#{binding.code}); })"
+        elsif binding.attribute_name == "show"
+          "Crails::Front::Bindable([this]() { #{ref.name}.visible(#{binding.code}); })"
         elsif binding.attribute_name == "text"
           "Crails::Front::Bindable([this]() { #{ref.name}.text(#{binding.code}); })"
         elsif binding.attribute_name == "innerhtml"
