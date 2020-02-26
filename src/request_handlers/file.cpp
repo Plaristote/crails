@@ -8,6 +8,13 @@
 using namespace std;
 using namespace Crails;
 
+static bool accepts_gzip_encoding(Params& params)
+{
+  const string accepts = params["headers"]["Accept-Encoding"].as<string>();
+
+  return accepts.find("gzip") != std::string::npos;
+}
+
 void FileRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& response, Params& params, function<void(bool)> callback)
 {
   if (request.method == "GET")
@@ -30,6 +37,11 @@ void FileRequestHandler::operator()(const HttpServer::request& request, Building
     {
       if (boost::filesystem::is_directory(fullpath))
         fullpath += "/index.html";
+      if (accepts_gzip_encoding(params) && boost::filesystem::exists(fullpath + ".gz"))
+      {
+	response.set_headers("Content-Encoding", "gzip");
+        fullpath += ".gz";
+      }
       if (params["headers"]["If-Modified-Since"].exists() &&
           if_not_modified(params, response, fullpath))
       {
