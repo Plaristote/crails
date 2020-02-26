@@ -27,6 +27,9 @@ module CrailsCheerpHtml
       @name           = name
       @default_value  = default_value
       @setter_enabled = true
+      if type.nil? || name.nil?
+        raise ParseError.new(el, "incomplete attribute definition")
+      end
       unless is_valid_cpp_variable_name?(@name)
         raise ParseError.new(el, "attribute name `#{@name}` is not a valid C++ variable name")
       end

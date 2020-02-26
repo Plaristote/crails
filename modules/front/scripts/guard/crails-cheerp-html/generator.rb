@@ -8,7 +8,7 @@ require 'nokogiri'
 require 'pathname'
 
 module CrailsCheerpHtml
-  class ParseError
+  class ParseError < StandardError
     attr_reader :el, :message
 
     def initialize el, message
@@ -21,7 +21,7 @@ module CrailsCheerpHtml
     end
   end
   
-  class HtmlParseError
+  class HtmlParseError < StandardError
     attr_reader :message, :line
     
     def initialize error

@@ -31,7 +31,7 @@ namespace Crails
       {
         client::EventListener* func = cheerp::Callback(callback);
 
-	this->apply("catch", Crails::Front::Object(func));
+        this->apply("catch", Crails::Front::Object(func));
         return *this;
       }
 
