@@ -38,6 +38,9 @@ namespace Crails
 {
   namespace Front
   {
+    namespace Http { class Response; }
+    typedef std::function<void (std::shared_ptr<Http::Response>)> HttpResponseCallback;
+
     class Model : public Listener
     {
     public:
@@ -50,6 +53,7 @@ namespace Crails
 
       Promise fetch();
       Promise save();
+      Promise destroy(HttpResponseCallback callback = HttpResponseCallback());
       virtual void parse(const std::string& str) = 0;
 
     protected:

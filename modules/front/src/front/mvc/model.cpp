@@ -45,6 +45,22 @@ Crails::Front::Promise Model::save()
   });
 }
 
+Crails::Front::Promise Model::destroy(Crails::Front::HttpResponseCallback callback)
+{
+  auto request = Http::Request::_delete(get_url());
+
+  request->set_headers({{"Accept", get_content_type()}});
+  return request->send().then([this, request, callback]()
+  {
+    auto response = request->get_response();
+
+    if (response->ok())
+      removed.trigger();
+    if (callback)
+      callback(response);
+  });
+}
+
 std::string ArchiveModel::get_payload()
 {
   OArchive archive;
