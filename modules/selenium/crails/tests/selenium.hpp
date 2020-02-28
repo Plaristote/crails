@@ -48,7 +48,7 @@ namespace Crails
 
       SeleniumDriver& back()
       {
-	get_driver().Back();
+        get_driver().Back();
         return *this;
       }
 
@@ -80,7 +80,7 @@ namespace Crails
         {
           driver.reset(nullptr);
           driver_initialized = false;
-	}
+        }
       }
 
       void use_browser(const std::string& name)
