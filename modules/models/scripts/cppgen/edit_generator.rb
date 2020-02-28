@@ -128,7 +128,7 @@ class EditGenerator < GeneratorBase
   def has_one_getter type, name, options
     type = get_type type
     tptr = ptr_type type
-    _append "#{tptr} #{@klassname}::get_#{name}()"
+    _append "#{tptr} #{@klassname}::get_#{name}() const"
     _append "{"
     _append "  auto& database = *#{GeneratorBase.odb_connection[:object]}::instance;"
     _append "  #{tptr} result;\n"

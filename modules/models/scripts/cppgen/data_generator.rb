@@ -173,7 +173,7 @@ class DataGenerator < GeneratorBase
       _append "#{tptr} #{name};"
     else
       with_visibility :public do
-        _append "#{virt}#{tptr} get_#{name}();"
+        _append "#{virt}#{tptr} get_#{name}() const;"
         _append "#{virt}void set_#{name}(#{tptr} v);"
         _append "ODB::id_type get_#{name}_id() const { return #{name}_id; }"
         _append "void set_#{name}_id(ODB::id_type v) { #{name}_id = v; }"

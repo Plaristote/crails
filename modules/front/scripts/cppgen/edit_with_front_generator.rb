@@ -36,7 +36,7 @@ class EditWithFrontGenerator < EditGenerator
     _append_macro "#ifndef #{DataWithFrontGenerator.client_define}"
     super
     _append_macro "#else"
-    _append "#{tptr} #{@klassname}::get_#{name}()"
+    _append "#{tptr} #{@klassname}::get_#{name}() const"
     _append "{"
     _append "  #{tptr} model = std::make_shared<#{type}>();"
     _append "  model->set_id(get_#{name}_id());"
