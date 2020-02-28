@@ -57,14 +57,36 @@ renderers_cpp = RenderersCppEditor.new
 renderers_cpp.add_include 'crails/renderers/archive_renderer.hpp'
 renderers_cpp.add_initializer 'renderers.push_back(new ArchiveRenderer);'
 
-guardfile = GuardfileEditor.new
-guardfile.add_task 'before_compile', <<RUBY
-guard 'crails-archive'
+use_html = nil
+while use_cheerp_html.nil?
+  puts "/?\\ Do you want to use the crails-cheerp-html generator ? (yes/no)"
+  print "$> "
+  STDOUT.flush
+  answer = gets.chomp
+  if answer.start_with?('y')
+    use_html = true
+  elsif answer.start_with?('n')
+    use_html = false
+  end
+end
+
+guardfile_html_src += <<RUBY
 guard 'crails-cheerp-html' do
   watch(%r{front/.+\.html$})
 end
-guard 'crails-cheerp'
 RUBY
+guardfile_src += "\nguard 'crails-cheerp'\n"
+
+guardfile = GuardfileEditor.new
+guardfile.add_task 'before_compile', guardfile_html_src if use_html
+guardfile.add_task 'before_compile', "\nguard 'crails-archive'\n"
+guardfile.add_task 'compile', guardfile_src
+
+if use_cheerp_html
+  gemfile = GemfileEditor.new
+  gemfile.add_ruby_dependency 'nokogiri', '~> 1.10.8'
+  gemfile.write
+end
 
 cmake.write
 renderers_cpp.write

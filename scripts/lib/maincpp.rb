@@ -66,3 +66,16 @@ class GuardfileEditor < SourceEditor
     add_initializer code
   end
 end
+
+class GemfileEditor < SourceEditor
+  def initialize
+    @source_file = "Gemfile"
+    super
+  end
+
+  def add_ruby_dependency name, version = nil
+    line  = "gem \"#{name}\""
+    line += "\"#{version}\""unless version.nil?
+    @content += "\n" + line + "\n"
+  end
+end
