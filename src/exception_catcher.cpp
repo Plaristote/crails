@@ -95,6 +95,7 @@ void ExceptionCatcher::response_exception(Request& request, string e_name, strin
 
 void ExceptionCatcher::default_exception_handler(Request& request, const string exception_name, const string message, const string& trace)
 {
-  request.params["backtrace"] = trace;
+  if (trace.length() > 0)
+    request.params["backtrace"] = trace;
   response_exception(request, exception_name, message);
 }
