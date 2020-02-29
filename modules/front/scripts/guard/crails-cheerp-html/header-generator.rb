@@ -65,7 +65,7 @@ module CrailsCheerpHtml
         protected_properties_def += indent + "#{object.typename}* root;\n"
       else
         public_properties_def  += indent + "#{object.parent.typename}* parent;\n"
-        private_properties_def += indent + "#{object.root.typename}* root;\n"
+        protected_properties_def += indent + "#{object.root.typename}* root;\n"
       end
       object.refs.each do |ref|
         suffix = " = #{ref.default_value}" if ref.has_default_value?

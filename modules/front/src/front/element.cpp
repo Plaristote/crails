@@ -37,8 +37,7 @@ bool Element::is_visible() const
 
 Element& Element::visible(bool value, const string& _display)
 {
-  auto*  style       = (*this)->get_style();
-  auto*  css_display = style->get_display();
+  auto*  style = (*this)->get_style();
   string display;
 
   if (value)

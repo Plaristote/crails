@@ -64,22 +64,26 @@ module CrailsCheerpHtml
       # Constructor
       result  = "HtmlTemplate::#{object.typename}::#{object.typename}("
       unless object.is_root?
-        initializers << "signaler(#{parent_symbol}->signaler)" unless object.implements_ibindable_view?
-        initializers << "parent(#{parent_symbol})"
-        result += "#{object.parent.typename}* #{parent_symbol}"
         initializers << make_parent_to_root_initializer(parent_symbol)
-        object.slots.each do |slot|
-          initializers << "#{slot.slot_ref}(#{root_getter}->#{slot.slot_ref})"
-        end
+        result += "#{object.parent.typename}* #{parent_symbol}"
       else
         initializers << "root(this)"
       end
       (object.refs.select{|r| r.has_initializer?}).each do |ref|
         initializers << "#{ref.name}(#{ref.initializer root_getter})"
       end
+      unless object.is_root?
+        initializers << "signaler(#{parent_symbol}->signaler)" unless object.implements_ibindable_view?
+        initializers << "parent(#{parent_symbol})"
+      end
       if object.class == Repeater
         initializers << "#{object.value_name}(__i)"
         result += ", #{object.value_type} __i"
+      end
+      unless object.is_root?
+        object.slots.each do |slot|
+          initializers << "#{slot.slot_ref}(#{root_getter}->#{slot.slot_ref})"
+        end
       end
       result += ")"
       result += " : " + initializers.join(", ") if initializers.count > 0
