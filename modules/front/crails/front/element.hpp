@@ -12,7 +12,7 @@ namespace Crails
 {
   namespace Front
   {
-    struct Element : public ObjectImpl<client::HTMLElement>
+    class Element : public ObjectImpl<client::HTMLElement>
     {
     public:
       std::shared_ptr<JavascriptEvents> events;

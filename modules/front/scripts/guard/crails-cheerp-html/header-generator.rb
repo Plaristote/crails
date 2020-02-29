@@ -62,7 +62,7 @@ module CrailsCheerpHtml
       public_properties_def    = ""
       private_properties_def   = ""
       if object.is_root?
-        private_properties_def += indent + "#{object.typename}* root;\n"
+        protected_properties_def += indent + "#{object.typename}* root;\n"
       else
         public_properties_def  += indent + "#{object.parent.typename}* parent;\n"
         private_properties_def += indent + "#{object.root.typename}* root;\n"

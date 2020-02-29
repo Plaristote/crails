@@ -18,8 +18,9 @@
 
 class DataTree;
 
-struct Archive
+class Archive
 {
+public:
   static const std::string mimetype;
 
   const std::string& as_string() const { return str; }
@@ -61,8 +62,9 @@ protected:
   std::string str;
 };
 
-struct OArchive : public Archive
+class OArchive : public Archive
 {
+public:
   template<typename T>
   OArchive& operator&(const T& value)
   {
@@ -92,8 +94,9 @@ struct OArchive : public Archive
   void serialize(const T& value) { throw_unimplemented_serializer(); }
 };
 
-struct IArchive : public Archive
+class IArchive : public Archive
 {
+public:
   IArchive() : offset(0) {}
 
   void set_data(const std::string& str)
