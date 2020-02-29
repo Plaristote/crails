@@ -8,11 +8,26 @@
 using namespace std;
 using namespace Crails;
 
-static bool accepts_gzip_encoding(Params& params)
+const vector<pair<string, string> > compression_strategies = {{"br", "br"}, {"gzip", "gz"}};
+
+static bool accepts_encoding(Params& params, const std::string& name)
 {
   const string accepts = params["headers"]["Accept-Encoding"].as<string>();
 
-  return accepts.find("gzip") != std::string::npos;
+  return accepts.find(name) != std::string::npos;
+}
+
+static void serve_compressed_file_if_possible(string& fullpath, BuildingResponse& response, Params& params)
+{
+  for (const auto& strategy : compression_strategies)
+  {
+    if (accepts_encoding(params, strategy.first) && boost::filesystem::exists(fullpath + '.' + strategy.second))
+    {
+      response.set_headers("Content-Encoding", strategy.first);
+      fullpath += '.' + strategy.second;
+      break ;
+    }
+  }
 }
 
 void FileRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& response, Params& params, function<void(bool)> callback)
@@ -37,11 +52,7 @@ void FileRequestHandler::operator()(const HttpServer::request& request, Building
     {
       if (boost::filesystem::is_directory(fullpath))
         fullpath += "/index.html";
-      if (accepts_gzip_encoding(params) && boost::filesystem::exists(fullpath + ".gz"))
-      {
-        response.set_headers("Content-Encoding", "gzip");
-        fullpath += ".gz";
-      }
+      serve_compressed_file_if_possible(fullpath, response, params);
       if (params["headers"]["If-Modified-Since"].exists() &&
           if_not_modified(params, response, fullpath))
       {
