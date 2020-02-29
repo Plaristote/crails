@@ -18,13 +18,13 @@ struct ExtensionMatch
 std::string get_mimetype(const std::string& filename)
 {
   static const ExtensionMatch extensions[] = {
-    ExtensionMatch("(htm|html)", "text/html"),
-    ExtensionMatch("js",         "text/javascript"),
-    ExtensionMatch("css",        "text/css"),
-    ExtensionMatch("png",        "image/png"),
-    ExtensionMatch("(jpg|jpeg)", "image/jpg"),
-    ExtensionMatch("bmp",        "image/bmp"),
-    ExtensionMatch("txt",        "text/txt")
+    ExtensionMatch("(htm|html)(.gz)?", "text/html"),
+    ExtensionMatch("js(.gz)?",         "text/javascript"),
+    ExtensionMatch("css(.gz)?",        "text/css"),
+    ExtensionMatch("png",              "image/png"),
+    ExtensionMatch("(jpg|jpeg)",       "image/jpg"),
+    ExtensionMatch("bmp",              "image/bmp"),
+    ExtensionMatch("txt",              "text/txt")
   };
 
   for (unsigned short i = 0 ; i < 7 ; ++i)
