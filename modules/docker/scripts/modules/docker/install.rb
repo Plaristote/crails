@@ -19,8 +19,8 @@ source         = "#{ENV['CRAILS_SHARED_DIR']}/app_template/docker"
 project.base_directory source, Dir.pwd do
   project.directory :docker do
     project.file '.gitignore', 'gitignore'
-    project.generate_erb 'build', 'build.erb', binding: binding
-    project.generate_erb 'shell', 'shell.erb', binding: binding
+    project.generate_erb 'package', 'package.erb', binding: binding
+    project.generate_erb 'shell',   'shell.erb',   binding: binding
     project.directory :base do
       project.file 'Dockerfile'
       project.file 'crails.sh'
