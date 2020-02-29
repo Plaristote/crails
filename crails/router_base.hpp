@@ -87,6 +87,7 @@ namespace Crails
       item.regexp = regex(regexified_route, regex_constants::ECMAScript);
     }
 
+  public:
     Items routes;
   };
 }
