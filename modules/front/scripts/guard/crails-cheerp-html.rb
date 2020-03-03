@@ -54,6 +54,8 @@ module ::Guard
         puts "[crails-cheerp-html] parse error at #{current_filename}:#{e.line}: #{e.message}"
       rescue ::CrailsCheerpHtml::HtmlParseError => e
         puts "[crails-cheerp-html] parse error at #{current_filename}:#{e.message}"
+      rescue ::CrailsCheerpHtml::LoadError => e
+        puts "[crails-cheerp-html] #{e.message}"
       rescue StandardError => e
         puts e.message
         e.backtrace.each do |line| puts line end

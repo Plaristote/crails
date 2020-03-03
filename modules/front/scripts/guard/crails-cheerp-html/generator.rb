@@ -8,6 +8,13 @@ require 'nokogiri'
 require 'pathname'
 
 module CrailsCheerpHtml
+  class LoadError < StandardError
+    attr_reader :message
+    def initialize
+      @message = "Load error: #{message}"
+    end
+  end
+
   class ParseError < StandardError
     attr_reader :el, :message
 
@@ -129,6 +136,8 @@ module CrailsCheerpHtml
       html = document.xpath("html").first
       head = document.xpath("//head")
       body = document.xpath("//body")
+      raise LoadError.new "could not load html template `#{@filepath}`" if html.nil?
+      raise LoadError.new "missing body element in `#{@filepath}`" if body.first.nil?
 
       Context.reset
       Context.filename = @filepath
