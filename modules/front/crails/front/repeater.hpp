@@ -14,11 +14,15 @@ namespace Crails
       typedef std::pair<Iterator, std::shared_ptr<ELEMENT> > ElementPair;
       typedef std::vector<ElementPair>                       Elements;
       Elements elements;
+      bool use_element_cache = true;
 
       template<typename PARENT>
       void refresh(PARENT* parent, const ARRAY& array)
       {
-        purge_removed_elements(array);
+        if (use_element_cache)
+          purge_removed_elements(array);
+	else
+          elements.clear();
         update_elements(parent, array);
         attach_elements();
         trigger_binding_updates();
@@ -42,7 +46,7 @@ namespace Crails
         std::vector< std::shared_ptr<ELEMENT> > element_vector;
 
 	element_vector.reserve(elements.size());
-	for (const auto& pair : elements)
+        for (const auto& pair : elements)
           element_vector.push_back(pair.second);
         AnchorableElement::attach_elements(element_vector);
       }
