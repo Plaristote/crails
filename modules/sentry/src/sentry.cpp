@@ -48,11 +48,14 @@ void Sentry::set_message_request(Data message, Data params)
   Data request_data = message["request"];
   Data user_agent   = params["headers"]["User-Agent"];
 
-  request_data["headers"] = "";
-  request_data["headers"].merge(params["headers"]);
-  request_data["headers"]["Cookie"] = "";
-  if (request_data["headers"]["Cookie"].exists())
-    request_data["headers"]["Cookie"].destroy();
+  if (params["headers"].exists())
+  {
+    request_data["headers"] = "";
+    request_data["headers"].merge(params["headers"]);
+    request_data["headers"]["Cookie"] = "";
+    if (request_data["headers"]["Cookie"].exists())
+      request_data["headers"]["Cookie"].destroy();
+  }
 
   Data data = request_data["data"];
   vector<string> ignored_keys = {
@@ -68,7 +71,7 @@ void Sentry::set_message_request(Data message, Data params)
   if (url.size() > 0) { url = "http://" + url; }
   url += params["uri"].defaults_to<string>("");
   request_data["url"] = url;
-  request_data["method"] = params["method"].as<string>();
+  request_data["method"] = params["method"].defaults_to<string>("");
 }
 
 void Sentry::initialize_exception_message(Data message, Data params, const std::exception& e)
