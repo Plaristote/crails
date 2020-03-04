@@ -16,8 +16,8 @@ namespace Crails
   std::string            pluralize(const std::string&);
 
   std::string            base64_encode(unsigned char const* str, unsigned int len);
-  std::string            base64_encode(std::string str_to_encode);
-//std::string            base64_decode(std::string str_to_decode); TODO implement decode for base64
+  std::string            base64_encode(const std::string& str_to_encode);
+  std::string            base64_decode(const std::string& str_to_decode);
 }
 
 #endif
