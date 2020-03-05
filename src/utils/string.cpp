@@ -29,7 +29,7 @@ namespace Crails
     return result;
   }
 
-  string base64_encode(string str_to_encode)
+  string base64_encode(const string& str_to_encode)
   {
     return (base64_encode((unsigned char const*)str_to_encode.c_str(), str_to_encode.size()));
   }
