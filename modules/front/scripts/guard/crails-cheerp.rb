@@ -6,6 +6,7 @@ module ::Guard
   class CrailsCheerp < CrailsPlugin
     def initialize arg
       @output = arg[:output] || "public/assets/application.js"
+      @cheerp_path = arg[:cheerp_path]
       super
     end
 
@@ -15,7 +16,7 @@ module ::Guard
 
   private
     def cheerp_path
-      options[:cheerp_path] || "/opt/cheerp"
+      @cheerp_path || "/opt/cheerp"
     end
 
     def make_symbolic_links
