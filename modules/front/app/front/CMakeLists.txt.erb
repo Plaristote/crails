@@ -1,13 +1,13 @@
-# -DCMAKE_TOOLCHAIN_FILE /opt/cheerp/share/cmake/Modules/CheerpToolchain.cmake
+# -DCMAKE_TOOLCHAIN_FILE "$CHEERP_PATH/share/cmake/Modules/CheerpToolchain.cmake"
 cmake_minimum_required(VERSION 3.0)
 
-project(<%= project_name %>-front)
+project(<%= project_name %>-frontend)
 option(DEVELOPER_MODE "enable debugging tools" ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-pragmas -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__CHEERP_CLIENT__")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__CHEERP_CLIENT__ -D__COMET_CLIENT__")
 
-include_directories(include /usr/local/include . ..)
+include_directories(include /usr/local/include ../../lib/comet ../..)
 
 if(DEVELOPER_MODE)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -17,12 +17,12 @@ else()
  #set(CMAKE_CXX_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -cheerp-preexecute")
 endif()
 
-file(GLOB_RECURSE front_files
+file(GLOB_RECURSE comet_files
      *.cpp
-     ../lib/app/data/shared/*.cpp
-     ../lib/cheerp-html/*.cpp)
+     ../../lib/app/data/shared/*.cpp
+     ../../lib/comet/*.cpp)
 
-file(GLOB_RECURSE crails_front_files
+file(GLOB_RECURSE crails_comet_files
      /usr/local/share/crails/front/*.cpp)
 
-add_executable(application ${crails_front_files} ${front_files})
+add_executable(application ${crails_comet_files} ${comet_files})

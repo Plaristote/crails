@@ -46,7 +46,7 @@ class DataWithFrontGenerator < DataGenerator
   def has_many_fetch list_type, name, options
     with_visibility :public do
       _append_macro "#ifdef #{self.class.client_define}"
-      _append "Crails::Front::Promise fetch_#{name}();"
+      _append "Comet::Promise fetch_#{name}();"
       _append_macro "#else"
       _append "void fetch_#{name}();"
       _append_macro "#endif"
@@ -55,7 +55,7 @@ class DataWithFrontGenerator < DataGenerator
 
   class << self
     def client_define
-      "__CHEERP_CLIENT__"
+      "__COMET_CLIENT__"
     end
 
     def client_super_class
@@ -66,10 +66,10 @@ class DataWithFrontGenerator < DataGenerator
 <<CPP
 #{super}
 #ifdef #{client_define}
-# include <crails/front/mvc/model.hpp>
-# include <crails/front/promise.hpp>
+# include <crails/comet/mvc/model.hpp>
+# include <comet/promise.hpp>
 # ifndef #{client_super_class}
-#  define #{client_super_class} Crails::Front::JsonModel
+#  define #{client_super_class} Comet::JsonModel
 # endif
 #endif
 CPP

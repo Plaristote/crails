@@ -73,9 +73,15 @@ class GemfileEditor < SourceEditor
     super
   end
 
-  def add_ruby_dependency name, version = nil
+  def add_ruby_dependency name, options = nil
     line  = "gem \"#{name}\""
-    line += "\"#{version}\""unless version.nil?
+    if options.class.name == "String"
+      line += ", \"#{options}\""
+    elsif options.class.name == "Hash"
+      options.keys.collect do |a|
+        line += ", #{a}: \"#{options[a]}\""
+      end
+    end
     @content += "\n" + line + "\n"
   end
 end

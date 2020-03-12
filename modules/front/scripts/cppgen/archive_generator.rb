@@ -20,7 +20,7 @@ class ArchiveGenerator < GeneratorBase
     _append "#ifndef #{self.class.client_define}"
     _append "# include <crails/renderer.hpp>"
     _append "#endif"
-    _append "#include <crails/front/archive.hpp>"
+    _append "#include <crails/archive.hpp>"
     _append "#include \"#{object[:header]}\"\n"
     _append "void #{object[:classname]}::serialize(IArchive& archive)"
     _append "{"

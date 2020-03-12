@@ -53,10 +53,10 @@ class EditWithFrontGenerator < EditGenerator
     _append_macro "#ifndef #{DataWithFrontGenerator.client_define}"
     super type, name, options
     _append_macro "#else"
-    _append "Crails::Front::Promise #{@klassname}::fetch_#{name}()"
+    _append "Comet::Promise #{@klassname}::fetch_#{name}()"
     _append "{"
     @indent += 1
-    _append "std::vector<Crails::Front::Promise> promises;\n"
+    _append "std::vector<Comet::Promise> promises;\n"
     _append "for (auto id : #{singular_name}_ids)"
     _append "{"
     @indent += 1
@@ -67,7 +67,7 @@ class EditWithFrontGenerator < EditGenerator
     _append "#{name}_fetched = true;"
     @indent -= 1
     _append "}"
-    _append "return Crails::Front::Promise::all(promises);"
+    _append "return Comet::Promise::all(promises);"
     @indent -= 1
     _append "}"
     _append_macro "#endif" 
@@ -112,7 +112,7 @@ class EditWithFrontGenerator < EditGenerator
 #ifndef #{DataWithFrontGenerator.client_define}
 #{super}
 #else
-# include <crails/front/mvc/helpers.hpp>
+# include <crails/comet/mvc/helpers.hpp>
 #endif
 CPP
     end
