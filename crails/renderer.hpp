@@ -11,6 +11,11 @@ namespace Crails
 {
   struct MissingTemplate : public boost_ext::exception
   {
+    MissingTemplate(const std::string& name, const std::string& accept) : name(name)
+    {
+      message = "Template not found: '" + name + "' with format '" + accept + '\'';
+    }
+
     MissingTemplate(const std::string& name) : name(name)
     {
       message = "Template not found: '" + name + "'";
