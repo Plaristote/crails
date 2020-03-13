@@ -8,6 +8,7 @@
 # ifndef __COMET_CLIENT__
 #  include <crails/utils/backtrace.hpp>
 # endif
+# include "raise.hpp"
 
 # define define_serializer(body) \
   template<typename ARCHIVE> \
@@ -31,31 +32,22 @@ public:
     return '*';
   }
 
-  void throw_unmatching_types()
+  void throw_unmatching_types(unsigned char a, unsigned char b)
   {
-#ifdef __COMET_CLIENT__
-    __asm__("throw 'Archive: unmatching types'");
-#else
-    throw boost_ext::runtime_error("Archive: unmatching types");
-#endif
+    std::string message;
+
+    message = std::string("Archive: unmatching types (found ") + (char)a + ", expected " + (char)b + ')';
+    Crails::raise(boost_ext::runtime_error(message.c_str()));
   }
 
   void throw_unimplemented_serializer()
   {
-#ifdef __COMET_CLIENT__
-    __asm__("throw 'Archive: unimplemented serializer'");
-#else
-    throw boost_ext::logic_error("Archive: unimplemented serializer");
-#endif
+    Crails::raise(boost_ext::logic_error("Archive: unimplemented serializer"));
   }
 
   void throw_unimplemented_unserializer()
   {
-#ifdef __COMET_CLIENT__
-    __asm__("throw 'Archive: unimplemented unserializer'");
-#else
-    throw boost_ext::logic_error("Archive: unimplemented unserializer");
-#endif
+    Crails::raise(boost_ext::logic_error("Archive: unimplemented unserializer"));
   }
 
 protected:
@@ -111,7 +103,7 @@ public:
     if (str[offset] == typecode<T>())
       offset += 1;
     else
-      throw_unmatching_types();
+      throw_unmatching_types(str[offset], typecode<T>());
     unserialize<T>(value);
     return *this;
   }
@@ -121,10 +113,11 @@ public:
   {
     int length;
 
-    if (str[offset] == 'a' && str[offset + 1] == typecode<T>())
-      offset += 2;
-    else
-      throw_unmatching_types();
+    if (str[offset] != 'a')
+      throw_unmatching_types(str[offset], 'a');
+    if (str[offset + 1] != typecode<T>())
+      throw_unmatching_types(str[offset + 1], typecode<T>());
+    offset += 2;
     unserialize_number<int>(length);
     value.resize(length);
     for (int i = 0 ; i < length ; ++i)
