@@ -4,9 +4,13 @@
 # include <memory>
 # include <string>
 # include <vector>
-# include <boost/lexical_cast.hpp>
 # ifndef __COMET_CLIENT__
 #  include <crails/utils/backtrace.hpp>
+#  include <boost/lexical_cast.hpp>
+#  define archive_lexical_cast boost::lexical_cast
+# else
+#  include <comet/lexical_cast.hpp>
+#  define archive_lexical_cast Comet::lexical_cast
 # endif
 # include "raise.hpp"
 
@@ -145,7 +149,7 @@ protected:
 
     for (size_t i = offset ; i < str.size() && str[i] != ';' ; ++i)
       ++length;
-    value = boost::lexical_cast<NUMERICAL_TYPE>(str.substr(offset, length));
+    value = archive_lexical_cast<NUMERICAL_TYPE>(str.substr(offset, length));
     offset += length + 1;
   }
 

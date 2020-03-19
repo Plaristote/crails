@@ -25,12 +25,12 @@ template<> char Archive::typecode<DataTree>()           { return 'r'; }
 template<> void OArchive::serialize<char>(const char& value)                   { str += value; }
 template<> void OArchive::serialize<unsigned char>(const unsigned char& value) { str += value; }
 template<> void OArchive::serialize<bool>(const bool& value)     { str += (value ? '1' : '0'); }
-template<> void OArchive::serialize<int>(const int& value)       { str += boost::lexical_cast<std::string>(value) + ';'; }
-template<> void OArchive::serialize<long>(const long& value)     { str += boost::lexical_cast<std::string>(value) + ';'; }
-template<> void OArchive::serialize<short>(const short& value)   { str += boost::lexical_cast<std::string>(value) + ';'; }
-template<> void OArchive::serialize<unsigned long>(const unsigned long& value)   { str += boost::lexical_cast<std::string>(value) + ';'; }
-template<> void OArchive::serialize<unsigned int>(const unsigned int& value)     { str += boost::lexical_cast<std::string>(value) + ';'; }
-template<> void OArchive::serialize<unsigned short>(const unsigned short& value) { str += boost::lexical_cast<std::string>(value) + ';'; }
+template<> void OArchive::serialize<int>(const int& value)       { str += archive_lexical_cast<std::string>(value) + ';'; }
+template<> void OArchive::serialize<long>(const long& value)     { str += archive_lexical_cast<std::string>(value) + ';'; }
+template<> void OArchive::serialize<short>(const short& value)   { str += archive_lexical_cast<std::string>(value) + ';'; }
+template<> void OArchive::serialize<unsigned long>(const unsigned long& value)   { str += archive_lexical_cast<std::string>(value) + ';'; }
+template<> void OArchive::serialize<unsigned int>(const unsigned int& value)     { str += archive_lexical_cast<std::string>(value) + ';'; }
+template<> void OArchive::serialize<unsigned short>(const unsigned short& value) { str += archive_lexical_cast<std::string>(value) + ';'; }
 
 template<> void OArchive::serialize<std::string>(const std::string& value)
 {
@@ -38,7 +38,7 @@ template<> void OArchive::serialize<std::string>(const std::string& value)
   const char* cstr = value.c_str();
 
   for (len = 0 ; cstr[len] ; ++len);
-  str += boost::lexical_cast<std::string>(len) + ';';
+  str += archive_lexical_cast<std::string>(len) + ';';
   str += value;
 }
 
