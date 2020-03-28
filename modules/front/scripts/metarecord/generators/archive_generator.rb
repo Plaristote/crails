@@ -1,6 +1,6 @@
 $: << (File.dirname(__FILE__) + "/..")
-require 'cppgen/model'
-require 'cppgen/generator_base'
+require 'metarecord/model'
+require 'metarecord/generator_base'
 
 class ArchiveGenerator < GeneratorBase
   def self.is_file_based? ; false ; end

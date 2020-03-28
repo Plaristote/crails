@@ -9,7 +9,7 @@ file(GLOB crails_client_src       src/shared/*.cpp src/client/*.cpp
                                   ../../src/utils/string_semantics.cpp
                                   ../../src/utils/string_split.cpp)
 file(GLOB guard_front_plugins     scripts/guard/*.rb)
-file(GLOB cppgen_front_plugins    scripts/cppgen/*.rb)
+file(GLOB metarecord_generators   scripts/metarecord/generators/*.rb)
 file(GLOB scripts_front_templates scripts/guard/templates/*.erb)
 file(GLOB scripts_front_module    scripts/modules/front/*.rb)
 file(GLOB lib_scripts             scripts/lib/*.rb)
@@ -24,7 +24,7 @@ install(FILES ${scripts_front_templates}  DESTINATION share/crails/guard/templat
 install(FILES ${scripts_front_module}     DESTINATION share/crails/scripts/modules/front)
 install(FILES ${lib_scripts}              DESTINATION share/crails/scripts/lib)
 install(FILES ${guard_front_plugins}      DESTINATION share/crails/guard)
-install(FILES ${cppgen_front_plugins}     DESTINATION share/crails/cppgen)
+install(FILES ${metarecord_generators}    DESTINATION share/crails/metarecord/generators)
 install(FILES ${docker_template}          DESTINATION share/crails/app_template/docker)
 install(FILES ${front_templates}          DESTINATION share/crails/app_template/front)
 install(TARGETS crails-front${crails-suffix} LIBRARY DESTINATION lib)

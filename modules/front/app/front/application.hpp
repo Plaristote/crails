@@ -18,7 +18,9 @@ public:
 
   static void start()
   {
-    get();
+    auto& self = get();
+
+    self.router.start();
   }
 
   Comet::Router router;
