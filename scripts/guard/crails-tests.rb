@@ -9,6 +9,7 @@ module ::Guard
   private
     def run_command command
       last_line = nil
+      success = true
       PTY.spawn(command) do |stdout, stdin, pid|
         begin
           stdout.each {|line|
@@ -18,9 +19,10 @@ module ::Guard
         rescue Errno::EIO
         end
         Process.wait(pid)
-	set_exit_success $?.exitstatus
+        success = $?.success?
       end
       last_line.uncolorize
+      if success then :success else :failure end
     end
 
     def run_tests

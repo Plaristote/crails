@@ -29,8 +29,10 @@ module ::Guard
       end
       if success
         Crails::Notifier.notify 'crails-cmake', "Compiled in #{duration}s", image: :success
+        :success
       else
         Crails::Notifier.notify get_project_name, "Compilation failed", image: :failed
+        :failure
       end
     end
   end

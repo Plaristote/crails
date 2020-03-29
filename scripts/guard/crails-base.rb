@@ -3,14 +3,6 @@ require 'fileutils'
 
 module ::Guard
   class CrailsPlugin < Plugin
-    class << self
-      attr_accessor :exit_success
-    end
-
-    def set_exit_success value
-      CrailsPlugin.exit_success = value if @exit_success.nil? || value != 0
-    end
-
     def watched_files
       files          = Dir["#{@base_path}**/*"]
       selected_files = []

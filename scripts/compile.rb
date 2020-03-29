@@ -20,13 +20,12 @@ begin
     guards.each do |item|
       puts "[guard] Running plugin #{item.name}"
       item.start if item.methods.include? :start
-      item.run_all
+      result = item.run_all
       item.stop  if item.methods.include? :stop
+      exit 254 if result == :failure
     end
   end
 rescue Exception => e
   puts "crails/compile: caught exception: #{e.message}"
   exit 255
 end
-
-exit Guard::CrailsPlugin.exit_success if Guard::CrailsPlugin.exit_success != nil

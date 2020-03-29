@@ -29,6 +29,7 @@ if test -s "$build_config" ; then
   cmake_options="$cmake_options $cmake_module_options"
 fi
 
+echo "+ cmake \"$backend_dir\" $cmake_options"
 cmake "$backend_dir" $cmake_options
 
 # Configure crails-guard
@@ -37,12 +38,13 @@ export CRAILS_PUBLIC_PATH="$public_dir"
 
 # BEGIN Build server
 cd "$backend_dir"
+echo "+ crails compile"
 crails compile before_compile \
                compile \
                tests
 
 retval=$?
-if [[ $retval != 0 ]] ; then
+if [ $retval != 0 ] ; then
   echo "Server build failed ($retval); aborting package.sh"
   exit -1
 else

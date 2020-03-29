@@ -26,8 +26,6 @@ project.base_directory source, Dir.pwd do
       project.file 'crails.sh'
       project.file 'cppnetlib.sh'
       project.file 'boost.sh'
-    end
-    project.directory :scripts do
       project.file 'package.sh'
     end
   end

@@ -40,3 +40,5 @@ ENV CRAILS_SHARED_DIR /usr/local/share/crails
 RUN mkdir -p /opt/webapp
 WORKDIR /opt/webapp
 ENV CRAILS_RUBY_BUNDLE_PATH /opt/webapp/docker
+COPY package.sh /usr/local/bin/package.sh
+RUN chmod +x /usr/local/bin/package.sh
