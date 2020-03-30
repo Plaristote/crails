@@ -19,22 +19,22 @@ module ::Guard
         rescue Errno::EIO
         end
         Process.wait(pid)
-        success = $?.success?
       end
       last_line.uncolorize
-      if success then :success else :failure end
     end
 
     def run_tests
        starts_at = Time.now.to_f
        command   = find_test_binary
        last_line = run_command command
+       success   = $?.success?
        ends_at   = Time.now.to_f
-       image     = $?.success? ? 'success' : 'failed'
+       image     = success ? 'success' : 'failed'
        message   = image + "\n"
        message  += last_line.uncolorize + "\n"
        message  += "In #{(ends_at - starts_at).round 2}s"
        Crails::Notifier.notify get_project_name, message, image: image
+       if success then :success else :failure end
     end
 
     def find_test_binary
