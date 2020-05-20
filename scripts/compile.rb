@@ -26,6 +26,7 @@ begin
     end
   end
 rescue Exception => e
-  puts "crails/compile: caught exception: #{e.message}"
+  puts "/!\\ crails/compile: caught exception: #{e.message}"
+  puts e.backtrace
   exit 255
 end
