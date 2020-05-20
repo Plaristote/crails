@@ -5,12 +5,18 @@ end
 
 def find_bundler
   bundler_gemspec = Gem::Specification::find_all_by_name('bundler')
-  system_bundler  = `which bundle 2> /dev/null`
+  system_bundler  = `which bundle 2> /dev/null`.strip
+
   if bundler_gemspec.any?
     bundler_gem = bundler_gemspec.first
-    "#{bundler_gem.bin_dir}/#{bundler_gem.executables.first}"
+    path = "#{bundler_gem.bin_dir}/#{bundler_gem.executables.first}"
+    path = if File.exists? path then path else nil end
+  end
+
+  if !path.nil?
+    path
   elsif system_bundler != ""
-    system_bundler.split("\n").first
+    system_bundler
   else
     nil
   end
