@@ -23,7 +23,7 @@ namespace Crails
 
   private:
     std::string authentication_token;
-    std::time_t sign_in_at;
+    std::time_t sign_in_at = 0;
   };
 }
 

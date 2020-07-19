@@ -1,6 +1,7 @@
 #ifndef  SIGNIN_AUTH_CONTROLLER_HPP
 # define SIGNIN_AUTH_CONTROLLER_HPP
 
+# include <crails/controller.hpp>
 # include <crails/signin/session.hpp>
 
 namespace Crails

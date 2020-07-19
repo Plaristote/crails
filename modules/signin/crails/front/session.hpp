@@ -1,10 +1,9 @@
 #ifndef  FRONT_SIGNIN_SESSION_HPP
 # define FRONT_SIGNIN_SESSION_HPP
 
-# include <crails/front/signal.hpp>
-# include <crails/front/ajax.hpp>
-# include <crails/front/http.hpp>
-# include <crails/front/cookies.hpp>
+# include <comet/signal.hpp>
+# include <comet/http.hpp>
+# include <comet/cookies.hpp>
 # include <crails/datatree.hpp>
 # include <crails/odb/id_type.hpp>
 
@@ -17,10 +16,11 @@ namespace Crails
     {
       typedef std::shared_ptr<typename DESC::UserType> UserPtr;
     public:
-      Crails::Signal<void> on_connect, on_disconnect;
+      Comet::Signal<void> on_connect, on_disconnect;
 
-      Crails::Front::Promise connect(const std::string& login, const std::string& password)
+      Comet::Promise connect(const std::string& login, const std::string& password)
       {
+        using namespace Comet;
         auto request = Http::Request::post(DESC::path);
         DataTree params;
 
@@ -39,8 +39,9 @@ namespace Crails
         });
       }
 
-      Crails::Front::Promise disconnect()
+      Comet::Promise disconnect()
       {
+        using namespace Comet;
         auto request = Http::Request::_delete(DESC::path);
         
         return request->send().then([this, request]()
@@ -80,7 +81,7 @@ namespace Crails
 
       void set_current_user(UserPtr ptr) { current_user = ptr; }
 
-      virtual void on_connect_success(const Http::Response& response)
+      virtual void on_connect_success(const Comet::Http::Response& response)
       {
         DataTree data = response.get_response_data();
         time_t expires_in = data["expires_in"].as<std::time_t>();
@@ -90,7 +91,7 @@ namespace Crails
         on_connect.trigger();
       }
 
-      virtual void on_connect_failure(const Http::Response&)
+      virtual void on_connect_failure(const Comet::Http::Response&)
       {
       }
 
@@ -99,7 +100,7 @@ namespace Crails
         return cookies.has("auth_token") && cookies.has("cuid");
       }
 
-      virtual void on_disconnect_success(const Http::Response&)
+      virtual void on_disconnect_success(const Comet::Http::Response&)
       {
         cookies.remove("auth_token");
         cookies.remove("cuid");
@@ -111,7 +112,7 @@ namespace Crails
 
     protected:
       UserPtr current_user;
-      Cookies cookies;
+      Comet::Cookies cookies;
     };
   }
 }
