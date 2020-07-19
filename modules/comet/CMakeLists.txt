@@ -4,10 +4,10 @@ project(crails-front)
 
 include_directories(.)
 
-file(GLOB crails_server_src       src/shared/*.cpp src/server/*.cpp)
-file(GLOB crails_client_src       src/shared/*.cpp src/client/*.cpp
-                                  ../../src/utils/string_semantics.cpp
-                                  ../../src/utils/string_split.cpp)
+file(GLOB_RECURSE crails_server_src src/shared/*.cpp src/server/*.cpp)
+file(GLOB_RECURSE crails_client_src src/shared/*.cpp src/client/*.cpp
+                                    ../../src/utils/string_semantics.cpp
+                                    ../../src/utils/string_split.cpp)
 file(GLOB guard_front_plugins     scripts/guard/*.rb)
 file(GLOB metarecord_generators   scripts/metarecord/generators/*.rb)
 file(GLOB scripts_front_templates scripts/guard/templates/*.erb)

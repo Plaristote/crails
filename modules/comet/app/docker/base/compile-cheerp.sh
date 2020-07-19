@@ -2,6 +2,8 @@
 
 export CHEERP_SRC=/tmp/compile-cheerp
 
+apt-get install -y python2.7 # required for builds and tests
+
 mkdir -p $CHEERP_SRC
 cd $CHEERP_SRC
 								# LAST SEEN WORKING WITH TAG:
