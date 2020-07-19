@@ -108,11 +108,11 @@ module ::Guard
           puts ">> Generated #{output_file} in #{(Time.now.to_f - file_starts_at).round 2}s"
         end
         message =  "Compiled javascript in #{(Time.now.to_f - starts_at).round 2} seconds."
-        Crails::Notifier.notify get_project_name, message, image: :success
+        Crails::Notifier.notify(get_project_name, message, image: :success)
         :success
       rescue Exception => e
         message = "Failed to compile javascript:\n#{e.message}",
-        Crails::Notifier.notify get_project_name, message, image: :failed
+        Crails::Notifier.notify(get_project_name, message, image: :failed)
         :failure
       end
     end
