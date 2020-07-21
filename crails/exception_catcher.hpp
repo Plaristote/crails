@@ -35,7 +35,7 @@ namespace Crails
     void run_protected(Request&, std::function<void()> callback) const;
 
     template<typename EXCEPTION>
-    void add_exception_catcher(const std::string exception_name)
+    void add_exception_catcher(const std::string& exception_name)
     {
       add_exception_catcher<EXCEPTION>([this, exception_name](Request& request, const EXCEPTION e)
       {
@@ -69,7 +69,7 @@ namespace Crails
 
   private:
     void response_exception(Request&, std::string exception_name, std::string message) const;
-    void default_exception_handler(Request&, const std::string exception_name, const std::string message, const std::string& trace);
+    void default_exception_handler(Request&, const std::string& exception_name, const std::string& message, const std::string& trace);
 
     Functions     functions;
   };

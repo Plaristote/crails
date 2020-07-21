@@ -10,7 +10,7 @@ namespace Crails
   public:
     struct Header
     {
-      Header(std::string key, std::string value) : key(key), value(value)
+      Header(const std::string& key, const std::string& value) : key(key), value(value)
       {}
 
       bool    operator==(const std::string& comp) const { return (key == comp); }

@@ -5,9 +5,11 @@ using namespace std;
 
 struct ExtensionMatch
 {
-  ExtensionMatch(std::string extension, std::string mime) : pattern(extension), mime(mime)
+  ExtensionMatch(const std::string& extension, const std::string& mime) :
+    pattern(extension),
+    regexp(extension + "$", std::regex_constants::ECMAScript | std::regex_constants::icase),
+    mime(mime)
   {
-    regexp = std::regex(extension + "$", std::regex_constants::ECMAScript | std::regex_constants::icase);
   }
 
   std::string pattern;
