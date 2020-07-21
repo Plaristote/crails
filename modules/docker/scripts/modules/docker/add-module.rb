@@ -5,6 +5,7 @@ $: << "#{ENV['CRAILS_SHARED_DIR']}/scripts/lib"
 class CrailsDockerBase
   def crails_compile_files ; [] ; end
   def compile_files ; [] ; end
+  def system_dependencies ; [] ; end
 end
 
 require 'dockerfile'
@@ -32,6 +33,10 @@ end
 
 docker_plugin.compile_files.each do |file|
   dockerfile.add_compile_file file
+end
+
+docker_plugin.system_dependencies.each do |package|
+  dockerfile.add_system_dependency package
 end
 
 dockerfile.write

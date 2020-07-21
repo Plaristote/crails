@@ -23,6 +23,10 @@ class Dockerfile
     prepend_to "# END Crails dependencies", commands
   end
 
+  def add_system_dependency package
+    @content.gsub!("nodejs", "nodejs \\\n  #{package}")
+  end
+
 private
   def prepend_to footer, str
     @content.gsub!(footer, "#{str}\n#{footer}")
