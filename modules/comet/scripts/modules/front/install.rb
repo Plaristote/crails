@@ -80,7 +80,7 @@ renderers_cpp.add_initializer 'renderers.push_back(new ArchiveRenderer);'
 
 comet_html_guard = <<RUBY
 
-  guard 'comet-html', source: '#{comet_app_path}', output: '#{comet_vendor_path}', config: 'config/comet.json' do
+  guard 'comet-html', source: '#{comet_app_path}', output: '#{comet_vendor_path}/html', config: 'config/comet.json' do
     watch(%r{app/comet/.+\\.html$})
   end
 RUBY
