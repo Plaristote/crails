@@ -20,3 +20,36 @@ string HtmlTemplate::html_escape(const string& data)
   }
   return buffer;
 }
+
+string HtmlTemplate::tag(const string& name, const map<string, string>& attrs)
+{
+  return tag(name, attrs, Yieldable());
+}
+
+string HtmlTemplate::tag(const string& name, Yieldable content)
+{
+  return tag(name, {}, content);
+}
+
+string HtmlTemplate::tag(const string& name, const map<string, string>& attrs, Yieldable content)
+{
+  stringstream html_stream;
+
+  html_stream << '<' << name;
+  for (const auto& attr : attrs)
+  {
+    html_stream << ' ' << attr.first << "=\"";
+    for (size_t i = 0 ; i < attr.second.length() ; ++i)
+    {
+      if (attr.second[i] == '\\' || attr.second[i] == '"')
+        html_stream << '\\';
+      html_stream << attr.second[i];
+    }
+    html_stream << '"';
+  }
+  html_stream << '>';
+  if (content)
+    html_stream << content();
+  html_stream << "</" << name << '>';
+  return html_stream.str();
+}
