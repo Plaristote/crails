@@ -31,5 +31,5 @@ project.base_directory source, Dir.pwd do
   end
 end
 
-FileUtils.chmod 'ug+x', [ 'docker/build', 'docker/shell' ]
+FileUtils.chmod 'ug+x', [ 'docker/package', 'docker/shell' ]
 
