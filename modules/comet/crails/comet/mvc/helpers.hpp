@@ -56,10 +56,12 @@ bool update_id_list(
 
   for (ODB::id_type id : ids)
   {
-    std::shared_ptr<MODEL> model;
+    auto model = std::make_shared<MODEL>();
 
     model->set_id(id);
+#ifdef COMET_MODELS_AUTOFETCH
     model->fetch();
+#endif
     model_list.push_back(model);
   }
   return true;
