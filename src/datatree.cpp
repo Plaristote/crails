@@ -4,6 +4,7 @@
 #include <crails/datatree.hpp>
 #include <sstream>
 #include <fstream>
+#include <codecvt>
 
 using namespace std;
 
@@ -59,6 +60,14 @@ DataTree& DataTree::from_xml_file(const string& xml_file)
 
   boost::property_tree::read_xml(stream, tree);
   return *this;
+}
+
+template<>
+wstring Data::as<wstring>() const
+{
+  wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+
+  return converter.from_bytes(as<string>());
 }
 
 void Data::each(std::function<bool (Data)> functor)

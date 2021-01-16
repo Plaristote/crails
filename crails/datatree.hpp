@@ -211,6 +211,8 @@ private:
   boost::property_tree::ptree* tree;
   std::string                  context, key, path;
 };
+ 
+template<> std::wstring Data::as<std::wstring>() const;
 
 class DataTree
 {
