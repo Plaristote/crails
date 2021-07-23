@@ -50,6 +50,8 @@ namespace Crails
 
     virtual bool    must_protect_from_forgery() const { return true; };
 
+    std::string     get_action_name() const { return params["controller-data"]["action"].as<std::string>(); }
+
     Params&         params;
     Data            session;
     DataTree        response;
