@@ -111,6 +111,7 @@ add_subdirectory(modules/xmlrpc)
 add_subdirectory(modules/signin)
 add_subdirectory(modules/metarecord)
 add_subdirectory(modules/crud)
+add_subdirectory(modules/attachment)
 
 if (${ImageMagick_Magick++_FOUND})
   add_subdirectory(modules/image)
