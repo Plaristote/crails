@@ -2,6 +2,7 @@
 # define REQUEST_HANDLER_HPP
 
 # include "http_server.hpp"
+# include "http_server/connection.hpp"
 
 namespace Crails
 {
@@ -13,7 +14,7 @@ namespace Crails
 
     const std::string& get_name(void) const { return name; }
 
-    virtual void operator()(const HttpServer::request& request, BuildingResponse& response, Params& params, std::function<void(bool)> callback) = 0;
+    virtual void operator()(Connection&, BuildingResponse& response, Params& params, std::function<void(bool)> callback) = 0;
     
   private:
     const std::string name;

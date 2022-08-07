@@ -4,22 +4,18 @@
 using namespace std;
 using namespace Crails;
 
-void RequestDataParser::operator()(const HttpServer::request& request, BuildingResponse&, Params& params, function<void(RequestParser::Status)> callback)
+void RequestDataParser::operator()(Connection& connection, BuildingResponse&, Params& params, function<void(RequestParser::Status)> callback)
 {
   {
-    const char*  get_params = strrchr(request.destination.c_str(), '?');
-    std::string  uri        = request.destination;
+    const auto&  request    = connection.get_request();
+    const string destination(request.target());
+    const char*  get_params = strrchr(destination.c_str(), '?');
+    std::string  uri        = destination;
 
     // Setting Headers parameters
     {
-      auto it  = request.headers.begin();
-      auto end = request.headers.end();
-
-      for (; it != end ; ++it)
-      {
-        boost::network::http::request_header_narrow header = *it;
-        params["headers"][header.name] = header.value;
-      }      
+      for (const auto& header : request.base())
+        params["headers"][std::string(header.name_string())] = std::string(header.value());
     }
 
     // Getting get parameters
@@ -34,7 +30,7 @@ void RequestDataParser::operator()(const HttpServer::request& request, BuildingR
   
     // Set URI and method for the posterity (is that even a word ?)
     params["uri"]    = uri;
-    params["method"] = request.method;
+    params["method"] = boost::beast::http::to_string(request.method());
   }
   callback(RequestParser::Continue);
 }

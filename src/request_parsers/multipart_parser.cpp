@@ -6,13 +6,13 @@
 using namespace std;
 using namespace Crails;
 
-void RequestMultipartParser::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback)
+void RequestMultipartParser::operator()(Connection& connection, BuildingResponse&, Params& params, function<void(RequestParser::Status)> callback)
 {
   static const regex is_multipart("^multipart/form-data", regex_constants::extended);
 
   if (params["method"].as<string>() != "GET" && content_type_matches(params, is_multipart))
   {
-    parse_multipart(request, out.get_response(), params, [callback]()
+    parse_multipart(connection, params, [callback]()
     {
       callback(RequestParser::Stop);
     });
@@ -21,38 +21,32 @@ void RequestMultipartParser::operator()(const HttpServer::request& request, Buil
     callback(RequestParser::Continue);
 }
 
-RequestMultipartParser::PendingBody::PendingBody(ServerTraits::Response r, Params& p)
-  : response(r), params(p)
+RequestMultipartParser::PendingBody::PendingBody(Connection& c, Params& p)
+  : connection(c), params(p)
 {
   multipart_parser.initialize(params);
 }
 
-void RequestMultipartParser::on_receive(shared_ptr<PendingBody> pending_body, boost::iterator_range<char const*> range, size_t size_read, HttpServer::connection_ptr connection_ptr)
+void RequestMultipartParser::on_receive(shared_ptr<PendingBody> pending_body, Connection& connection)
 {
   MultipartParser& multipart_parser = pending_body->multipart_parser;
+  const string& body = connection.get_request().body();
+  unsigned int offset = multipart_parser.read_buffer.length();
 
-  multipart_parser.total_read += size_read;
-  for (unsigned int i = 0 ; i < size_read ; ++i)
-    multipart_parser.read_buffer += range[i];
+  multipart_parser.total_read = body.length();
+  for (unsigned int i = 0 ; i < body.length() - offset ; ++i)
+    multipart_parser.read_buffer += body[i + offset];
   multipart_parser.parse(pending_body->params);
   if (multipart_parser.total_read < multipart_parser.to_read)
-  {
-    connection_ptr->read([this, pending_body](boost::iterator_range<char const*> range, boost::system::error_code, size_t size_read, HttpServer::connection_ptr connection_ptr)
-    {
-      on_receive(pending_body, range, size_read, connection_ptr);
-    });
-  }
+    throw std::runtime_error("RequestMutlipartParser: Asynchronous body reception not implemented");
   else
     pending_body->finished_callback();
 }
 
-void RequestMultipartParser::parse_multipart(const HttpServer::request&, ServerTraits::Response response, Params& params, function<void()> finished_callback)
+void RequestMultipartParser::parse_multipart(Connection& connection, Params& params, function<void()> finished_callback)
 {
-  std::shared_ptr<PendingBody> pending_body = std::make_shared<PendingBody>(response, params);
+  shared_ptr<PendingBody> pending_body = make_shared<PendingBody>(connection, params);
 
   pending_body->finished_callback = finished_callback;
-  response->read([this, pending_body](boost::iterator_range<char const*> range, boost::system::error_code, size_t size_read, HttpServer::connection_ptr connection_ptr)
-  {
-    on_receive(pending_body, range, size_read, connection_ptr);
-  });
+  on_receive(pending_body, connection);
 }

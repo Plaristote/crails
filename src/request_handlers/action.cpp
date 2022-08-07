@@ -5,13 +5,15 @@
 using namespace std;
 using namespace Crails;
 
-void ActionRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, function<void(bool)> callback)
+void ActionRequestHandler::operator()(Connection& connection, BuildingResponse& out, Params& params, function<void(bool)> callback)
 {
   const Router* router = Router::singleton::Get();
 
   if (router)
   {
-    string                method = params["_method"].defaults_to<string>(request.method);
+    const auto&           request = connection.get_request();
+    string                implicit_method(boost::beast::http::to_string(request.method()));
+    string                method = params["_method"].defaults_to<string>(implicit_method);
     const Router::Action* action = router->get_action(method, params["uri"].as<string>(), params);
 
     if (action == 0)
@@ -30,7 +32,7 @@ void ActionRequestHandler::operator()(const HttpServer::request& request, Buildi
           data["headers"].each([&out](Data header) -> bool
           {
             out.set_headers(header.get_key(), header.as<string>());
-	    return true;
+            return true;
           });
         }
         params.session->finalize(out);

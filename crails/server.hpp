@@ -8,11 +8,13 @@
 # include "exception_catcher.hpp"
 # include "datatree.hpp"
 # include "utils/timer.hpp"
+# include <boost/beast/http/status.hpp>
 
 namespace Crails
 {
   class Params;
   class Request;
+  class Connection;
 
   class Server : public ServerTraits
   {
@@ -26,6 +28,7 @@ namespace Crails
     Server();
     ~Server();
 
+    typedef boost::beast::http::status   HttpCode;
     typedef std::vector<RequestParser*>  RequestParsers;
     typedef std::vector<RequestHandler*> RequestHandlers;
 
@@ -40,6 +43,7 @@ namespace Crails
     };
 
     void operator()(const HttpServer::request& request, Response response);
+    void on_request_received(Connection&);
     void log(const char* to_log);
 
     void                   add_request_handler(RequestHandler* request_handler);
@@ -47,7 +51,8 @@ namespace Crails
     static RequestHandler* get_request_handler(const std::string& name);
     static FileCache&      get_file_cache() { return file_cache; }
     static std::shared_ptr<boost::asio::io_service> get_io_service() { return io_service; }
-
+    static boost::asio::io_context& get_io_context() { return *(io_context.get()); }
+    
     static void Launch(int argc, const char** argv);
 
     static void SetResponse(Params& params, BuildingResponse& out, Server::HttpCode code, const std::string& content);
@@ -63,6 +68,7 @@ namespace Crails
     static void ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Params& params);
 
     static std::shared_ptr<boost::asio::io_service> io_service;
+    static std::shared_ptr<boost::asio::io_context> io_context;
     static RequestParsers    request_parsers;
     static RequestHandlers   request_handlers;
     static FileCache         file_cache;

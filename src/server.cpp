@@ -12,8 +12,11 @@
 #include <crails/logger.hpp>
 #include <crails/program_options.hpp>
 #include <boost/filesystem.hpp>
-#include <csignal>
+#include <boost/asio/signal_set.hpp>
 #include "crails/request.hpp"
+
+#include "crails/http_server/listener.hpp"
+#include "crails/http_server/connection.hpp"
 
 using namespace std;
 using namespace Crails;
@@ -22,6 +25,7 @@ Crails::FileCache       Server::file_cache;
 Server::RequestParsers  Server::request_parsers;
 Server::RequestHandlers Server::request_handlers;
 shared_ptr<boost::asio::io_service> Server::io_service;
+shared_ptr<boost::asio::io_context> Server::io_context;
 
 const string Server::public_path = boost::filesystem::canonical(
   boost::filesystem::current_path().string() + "/public"
@@ -76,7 +80,7 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
     params["response-data"]["code"] = (int)code;
   else
   {
-    Data         response = params["response-data"];
+    Data response = params["response-data"];
 
     if (Renderer::can_render(view_name.str(), params.as_data()))
     {
@@ -91,9 +95,16 @@ void Server::ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Par
   }
 }
 
-void Server::operator()(const HttpServer::request& _request, Response response)
+void Server::operator()(const HttpServer::request&, Response)
 {
-  auto request = new Request(this, _request, response);
+  //auto request = new Request(this, _request, response);
+
+  //(*request)();
+}
+
+void Server::on_request_received(Connection& connection)
+{
+  auto request = std::make_shared<Request>(this, connection);
 
   (*request)();
 }
@@ -106,12 +117,6 @@ void Server::log(const char* to_log)
 /*
  * Server Initialization
  */
-#include <boost/thread.hpp>
-
-using namespace boost::network::utils;
-
-typedef boost::shared_ptr<thread_pool> thread_pool_ptr;
-
 #ifdef USE_SEGVCATCH
 # include <segvcatch.h>
 void Server::ThrowCrashSegv()
@@ -119,9 +124,6 @@ void Server::ThrowCrashSegv()
   throw Server::Crash("Segmentation Fault");
 }
 #endif
-
-std::function<void (void)> shutdown_lambda;
-static void shutdown(int) { shutdown_lambda(); }
 
 void Server::Launch(int argc, const char **argv)
 {
@@ -141,18 +143,28 @@ void Server::Launch(int argc, const char **argv)
     logger << Logger::Info << ">> Route initialized" << Logger::endl;
   }
   {
-    Server     handler;
-    HttpServer server(options.get_server_options(handler));
+    Server server;
+    auto   listener = make_shared<Listener>(get_io_context());
+    boost::asio::signal_set  signals(get_io_context(), SIGINT, SIGTERM);
+    boost::beast::error_code error_code;
 
-    signal(SIGINT, &shutdown);
-    shutdown_lambda = [&server]()
+    signals.async_wait([](const boost::system::error_code&, int)
     {
       logger << Logger::Info << ">> Crails server will shut down." << Logger::endl;
       logger << ">> Waiting for requests to end..." << Logger::endl;
-      server.stop();
+      get_io_context().stop();
       logger << ">> Done." << Logger::endl;
-    };
-    server.run();
+    });
+    if (listener->listen(options.get_endpoint(), error_code))
+    {
+      listener->set_handler(
+        std::bind(&Server::on_request_received, &server, placeholders::_1)
+      );
+      listener->run();
+      get_io_context().run();
+    }
+    else
+      logger << Logger::Error << "!! Could not listen on endpoint." << Logger::endl;
   }
   Router::singleton::Finalize();  
 }
@@ -171,7 +183,10 @@ Server::~Server()
 
 Server::Server()
 {
+  auto thread_count = std::thread::hardware_concurrency();
+
   io_service = make_shared<boost::asio::io_service>();
+  io_context = make_shared<boost::asio::io_context>(thread_count);
   initialize_exception_catcher();
   initialize_request_pipe();
 }

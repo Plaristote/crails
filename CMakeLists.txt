@@ -50,12 +50,14 @@ find_package(ImageMagick COMPONENTS Magick++)
 find_package(webdriverxx)
 
 include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ImageMagick_INCLUDE_DIRS} ${WEBDRIVERXX_INCLUDE_DIRS})
+add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW)
 
 ##
 ## Source files
 ##
 file(GLOB crails_core
      src/*.cpp
+     src/http_server/*.cpp
      src/request_handlers/*.cpp
      src/request_parsers/*.cpp
      src/utils/*.cpp)

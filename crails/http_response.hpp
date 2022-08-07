@@ -2,43 +2,30 @@
 # define HTTP_RESPONSE
 
 # include "server.hpp"
+# include "http_server/connection.hpp"
 
 namespace Crails
 {
   class BuildingResponse
   {
   public:
-    struct Header
-    {
-      Header(const std::string& key, const std::string& value) : key(key), value(value)
-      {}
+    typedef std::unordered_map<std::string, std::string> Headers;
 
-      bool    operator==(const std::string& comp) const { return (key == comp); }
-      Header& operator=(const std::string& new_val)     { value = new_val; return (*this); }
-
-      std::string key;
-      std::string value;
-    };
-
-    typedef std::list<Header> Headers;
-
-    BuildingResponse(Server::Response response) : response(response)
+    BuildingResponse(Connection& connection) : connection(connection)
     {}
-    
-    void set_response(Server::HttpCode code, const std::string& body);
 
+    void set_response(Server::HttpCode code, const std::string& body);
     void set_status_code(Server::HttpCode code);
     void set_headers(const std::string& key, const std::string& value);
     void set_body(const char* str, size_t size);
-    
-    void bundle(void);
+    void send();
 
-    Server::Response& get_response() { return response; }
-    const Server::Response& get_response() const { return response; }
+    HttpResponse& get_response() { return connection.get_response(); }
+    const HttpResponse& get_response() const { return connection.get_response(); }
 
   private:
-    Server::Response response;
-    Headers          headers;
+    Connection& connection;
+    Headers     headers;
   };
 }
 

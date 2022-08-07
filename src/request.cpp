@@ -4,10 +4,9 @@
 using namespace Crails;
 using namespace std;
 
-Request::Request(const Server* server, const HttpServer::request& request, Server::Response response)
-  : server(*server), request(request), out(response)
+Request::Request(const Server* server, Connection& connection)
+  : server(*server), connection(connection), out(connection)
 {
-  reference_count = 1;
 }
 
 Request::~Request()
@@ -16,11 +15,13 @@ Request::~Request()
 
 void Request::operator()()
 {
-  run_parser(server.request_parsers.begin(),
-    bind(&Request::on_parsed, this, placeholders::_1));
+  run_parser(
+    server.request_parsers.begin(),
+    bind(&Request::on_parsed, this, placeholders::_1)
+  );
 }
 
-void Request::run_parser(Server::RequestParsers::const_iterator it, std::function<void(bool)> callback)
+void Request::run_parser(Server::RequestParsers::const_iterator it, function<void(bool)> callback)
 {
   server.exception_catcher.run(*this, [=]()
   {
@@ -28,7 +29,7 @@ void Request::run_parser(Server::RequestParsers::const_iterator it, std::functio
       callback(server.request_parsers.size() > 0);
     else
     {
-      (**it)(request, out, params, [this, it, callback](RequestParser::Status status)
+      (**it)(connection, out, params, [this, it, callback](RequestParser::Status status)
       {
         if (status == RequestParser::Abort)
           callback(false);
@@ -65,7 +66,7 @@ void Request::run_handler(Server::RequestHandlers::const_iterator it, std::funct
       callback(false);
     else
     {
-      (**it)(request, out, params, [this, it, callback](bool request_handled)
+      (**it)(connection, out, params, [this, it, callback](bool request_handled)
       {
         if (request_handled)
           callback(true);
@@ -80,7 +81,7 @@ void Request::on_handled(bool handled)
 {
   if (!handled)
   {
-    auto code = Server::HttpCodes::not_found;
+    auto code = boost::beast::http::status::not_found;
 
     if (params["response-data"]["code"].exists())
       code = (Server::HttpCode)(params["response-data"]["code"].as<int>());
@@ -100,17 +101,4 @@ void Request::on_finished()
   if (params["response-time"]["controller"].exists())
     logger << " (controller: " << params["response-time"]["controller"].as<float>() << "s)";
   logger << Logger::endl << Logger::endl;
-  remove_reference();
-}
-
-void Request::add_reference()
-{
-  ++reference_count;
-}
-
-void Request::remove_reference()
-{
-  --reference_count;
-  if (reference_count == 0)
-    delete this;
 }

@@ -7,6 +7,7 @@
 
 using namespace std;
 using namespace Crails;
+using namespace boost::beast::http;
 
 const vector<pair<string, string> > compression_strategies = {{"br", "br"}, {"gzip", "gz"}};
 
@@ -30,9 +31,9 @@ static void serve_compressed_file_if_possible(string& fullpath, BuildingResponse
   }
 }
 
-void FileRequestHandler::operator()(const HttpServer::request& request, BuildingResponse& response, Params& params, function<void(bool)> callback)
+void FileRequestHandler::operator()(Connection& connection, BuildingResponse& response, Params& params, function<void(bool)> callback)
 {
-  if (request.method == "GET")
+  if (connection.get_request().method() == boost::beast::http::verb::get)
   {
     boost::system::error_code ec;
     string                    fullpath;
@@ -60,7 +61,7 @@ void FileRequestHandler::operator()(const HttpServer::request& request, Building
         callback(true);
         return ;
       }
-      else if (send_file(fullpath, response, Server::HttpCodes::ok))
+      else if (send_file(fullpath, response, boost::beast::http::status::ok))
       {
         params["response-data"]["code"] = (int)Server::HttpCodes::ok;
         callback(true);
@@ -89,7 +90,7 @@ bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& respo
 
   if (modified_time <= condition_time)
   {
-    response.set_status_code(Server::HttpCodes::not_modified);
+    response.set_status_code(boost::beast::http::status::not_modified);
     return true;
   }
   return false;

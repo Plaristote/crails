@@ -3,22 +3,23 @@
 
 # include "server.hpp"
 # include "params.hpp"
+# include "http_server/connection.hpp"
 
 namespace Crails
 {
-  class Request
+  class Request : public std::enable_shared_from_this<Request>
   {
   public:
-    Request(const Server* server, const HttpServer::request&, Server::Response response);
+    Request(const Server* server, Connection& connection);
     ~Request();
 
-    const Server&              server;
-    const HttpServer::request  request;
-    int                        request_id;
-    Params                     params;
-    BuildingResponse           out;
-    Utils::Timer               timer;
-    ExceptionCatcher::Context  exception_context;
+    const Server&             server;
+    Connection&               connection;
+    BuildingResponse          out;
+    int                       request_id;
+    Params                    params;
+    Utils::Timer              timer;
+    ExceptionCatcher::Context exception_context;
 
     void operator()();
 
@@ -28,12 +29,6 @@ namespace Crails
     void on_parsed(bool parsed);
     void on_handled(bool handled);
     void on_finished();
-
-    void add_reference();
-    void remove_reference();
-
-  private:
-    unsigned short             reference_count;
   };
 }
 

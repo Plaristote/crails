@@ -1,44 +1,28 @@
 #include "crails/server.hpp"
 #include "crails/params.hpp"
 #include <crails/logger.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace std;
 using namespace Crails;
 
-BodyParser::PendingBody::PendingBody(const HttpServer::request& r, BuildingResponse& o, Params& p)
-  : request(r), out(o), params(p), total_read(0)
+BodyParser::PendingBody::PendingBody(Connection& c, BuildingResponse& o, Params& p)
+  : connection(c), out(o), params(p), total_read(0)
 {
-  to_read = params["headers"]["Content-Length"].defaults_to<unsigned int>(0);
-}
-
-void BodyParser::on_receive(shared_ptr<PendingBody> pending_body,
-                    boost::iterator_range<char const*> range,
-                    size_t size_read)
-{
-  for (unsigned int i = 0 ; i < size_read ; ++i)
-    pending_body->read_buffer += range[i];
-  pending_body->total_read += size_read;
-  if (pending_body->total_read == pending_body->to_read)
-  {
-    body_received(pending_body->request, pending_body->out, pending_body->params, pending_body->read_buffer);
-    pending_body->finished_callback();
-  }
+  const char* sizeHeader = "Content-Length";
+  if (c.get_request().find(sizeHeader) == c.get_request().end())
+    to_read = 0;
   else
-  {
-    pending_body->out.get_response()->read([this, pending_body](boost::iterator_range<char const*> range, boost::system::error_code, size_t size_read, HttpServer::connection_ptr)
-    {
-      on_receive(pending_body, range, size_read);
-    });
-  }
+    to_read = boost::lexical_cast<unsigned int>(c.get_request()[sizeHeader]);
+  total_read = c.get_request().body().size();
 }
 
-void BodyParser::wait_for_body(const HttpServer::request& request, BuildingResponse& out, Params& params, function<void()> finished_callback)
+void BodyParser::wait_for_body(Connection& connection, BuildingResponse& out, Params& params, function<void()> finished_callback)
 {
-  shared_ptr<PendingBody> pending_body = make_shared<PendingBody>(request, out, params);
+  shared_ptr<PendingBody> pending_body = make_shared<PendingBody>(connection, out, params);
 
-  pending_body->finished_callback = finished_callback;
-  out.get_response()->read([this, pending_body](boost::iterator_range<char const*> range, boost::system::error_code, size_t size_read, HttpServer::connection_ptr)
-  {
-    on_receive(pending_body, range, size_read);
-  });
+  if (pending_body->total_read >= pending_body->to_read)
+    finished_callback();
+  else
+    throw std::runtime_error("BoddyParser: Asynchronous body reception not implemented");
 }

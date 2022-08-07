@@ -10,7 +10,7 @@ namespace Crails
   public:
     ActionRequestHandler(void) : RequestHandler("action") {}
 
-    void operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, std::function<void(bool)> callback);
+    void operator()(Connection&, BuildingResponse& out, Params& params, std::function<void(bool)> callback);
   private:
   };
 }

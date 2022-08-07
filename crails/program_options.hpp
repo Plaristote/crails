@@ -14,6 +14,8 @@ namespace Crails
 
     HttpServer::options get_server_options(Crails::Server&) const;
 
+    boost::asio::ip::tcp::endpoint get_endpoint() const;
+    
     template<typename T>
     T get_value(const std::string& option_name, const T& default_value) const
     {

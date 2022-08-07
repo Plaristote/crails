@@ -42,11 +42,11 @@ void ExceptionCatcher::run(Request& request, std::function<void()> callback) con
 {
   if (request.exception_context.thread_id != std::this_thread::get_id())
   {
-    request.add_reference();
-    run_protected(request, callback);
+    shared_ptr<Request> shared_request = request.shared_from_this();
+
+    run_protected(request, [shared_request, callback]() { callback(); });
     if (request.exception_context.thread_id == std::this_thread::get_id())
       request.exception_context.thread_id = std::thread::id();
-    request.remove_reference();
   }
   else
     callback();
@@ -84,12 +84,12 @@ void ExceptionCatcher::response_exception(Request& request, string e_name, strin
     }
     if (response["headers"]["Content-Type"].exists())
       request.out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
-    Server::SetResponse(request.params, request.out, Server::HttpCodes::internal_server_error, response["body"].defaults_to<string>(""));
+    Server::SetResponse(request.params, request.out, boost::beast::http::status::internal_server_error, response["body"].defaults_to<string>(""));
   }
 #else
-  Server::ResponseHttpError(request.out, Server::HttpCodes::internal_server_error, request.params);
+  Server::ResponseHttpError(request.out, boost::beast::http::status::internal_server_error, request.params);
 #endif
-  request.params["response-data"]["code"] = Server::HttpCodes::internal_server_error;
+  request.params["response-data"]["code"] = boost::beast::http::status::internal_server_error;
   request.on_finished();
 }
 

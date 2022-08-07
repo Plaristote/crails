@@ -29,11 +29,11 @@ namespace Crails
 
     ProxyRequestHandler();
 
-    void operator()(const HttpServer::request& request, BuildingResponse& out, Params& params, std::function<void(RequestParser::Status)>);
+    void operator()(Connection&, BuildingResponse& out, Params& params, std::function<void(RequestParser::Status)>);
 
   private:
-    void body_received(const HttpServer::request& request, BuildingResponse& out, Params& params, const std::string& body);
-    void execute_rule(const Rule& rule, const HttpServer::request&, const std::string& body, BuildingResponse&);
+    void body_received(Connection&, BuildingResponse& out, Params& params, const std::string& body);
+    void execute_rule(const Rule& rule, Connection&, const std::string& body, BuildingResponse&);
     Mode get_mode_from_data(Data) const;
     static std::string get_proxyfied_url(const Rule& rule, const std::string& uri);
 
