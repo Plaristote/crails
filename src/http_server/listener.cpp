@@ -2,13 +2,15 @@
 #include "crails/http_server/listener.hpp"
 #include "crails/http_server/connection.hpp"
 #include "crails/logger.hpp"
+#include "crails/server.hpp"
 
 using namespace Crails;
 using namespace boost;
 
-Listener::Listener(asio::io_context& context) :
-  acceptor(asio::make_strand(context)),
-  socket{context}
+Listener::Listener(const Server& server) :
+  server(server),
+  acceptor(asio::make_strand(server.get_io_context())),
+  socket{server.get_io_context()}
 {
 }
 
@@ -40,7 +42,7 @@ void Listener::wait_accept()
 void Listener::on_accept(boost::beast::error_code ec)
 {
   if (!ec)
-    std::make_shared<Connection>(std::move(socket), handler)->start();
+    std::make_shared<Connection>(server, std::move(socket))->start();
   else
     logger << Logger::Info << "Crails::Listener failed to accept a connection: " << ec.message() << Logger::endl;
   wait_accept();

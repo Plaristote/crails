@@ -20,7 +20,7 @@ namespace Crails
   class Controller
   {
   protected:
-    typedef Crails::Server::HttpCodes ResponseStatus;
+    typedef Crails::HttpStatus ResponseStatus;
 
     Controller(Params& params);
   public:
@@ -39,7 +39,7 @@ namespace Crails
     };
 
     void            redirect_to(const std::string& uri);
-    void            respond_with(Crails::Server::HttpCode);
+    void            respond_with(Crails::HttpStatus);
     bool            require_basic_authentication(const std::string& username, const std::string& password);
     bool            require_basic_authentication(std::function<bool (const std::string&, const std::string&)>);
 

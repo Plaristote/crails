@@ -2,6 +2,7 @@
 # define XMLRPC_CONTROLLER_HPP
 
 # include <boost/fusion/functional/invocation/invoke.hpp>
+# include <boost/fusion/container.hpp>
 # include <crails/controller.hpp>
 # include "variable.hpp"
 
@@ -104,7 +105,7 @@ namespace XmlRpc
     void raise_unknown_method();
 
     template<typename KLASS, typename ...Args>
-    void register_method(const std::string& name,  void (KLASS::*method)(Args...) )
+    void register_method(const std::string& name,  void (KLASS::*method)(Args...))
     {
       methods.push_back(std::unique_ptr<IMethod>(new Method<KLASS, Args...>(name, (KLASS&)(*this), method)));
     }

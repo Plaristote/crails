@@ -37,6 +37,22 @@ private:
   static int   val;
 };
 
+template<typename TYPE, typename... Args>
+struct SingletonInstantiator
+{
+  SingletonInstantiator(Args... args)
+  {
+    Singleton<TYPE, Args...>::Initialize(args...);
+  }
+
+  ~SingletonInstantiator()
+  {
+    Singleton<TYPE, Args...>::Finalize();
+  }
+
+  TYPE* operator->() const { return Singleton<TYPE, Args...>::Get(); }
+};
+
 template<typename TYPE, typename... Args> TYPE* Singleton<TYPE, Args...>::ptr = 0;
 
 #endif

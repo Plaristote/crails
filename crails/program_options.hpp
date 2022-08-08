@@ -2,20 +2,20 @@
 # define PROGRAM_OPTIONS_HPP
 
 # include <boost/program_options.hpp>
-# include <crails/server.hpp>
+# include <boost/asio/ip/tcp.hpp>
 
 namespace Crails
 {
   class ProgramOptions
   {
-    typedef boost::network::http::server_options<boost::network::http::tags::http_server, Crails::Server> ServerOptions;
   public:
     ProgramOptions(int argc, const char** argv);
 
-    HttpServer::options get_server_options(Crails::Server&) const;
-
     boost::asio::ip::tcp::endpoint get_endpoint() const;
+    unsigned short                 get_thread_count() const;
+    std::string                    get_pidfile_path() const;
     
+  private:
     template<typename T>
     T get_value(const std::string& option_name, const T& default_value) const
     {
@@ -23,13 +23,7 @@ namespace Crails
         return vm[option_name].as<T>();
       return default_value;
     }
-
-  private:
-    void initialize_interface(HttpServer::options&) const;
-    void initialize_thread_pool(HttpServer::options&) const;
-    void initialize_ssl_context(HttpServer::options&) const;
-    void initialize_pid_file(HttpServer::options&) const;
-    
+ 
     boost::program_options::variables_map vm;
   };
 }

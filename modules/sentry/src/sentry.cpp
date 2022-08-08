@@ -33,7 +33,7 @@ string get_type_as_string(const T& t)
 
 typedef network::http::client_options<network::http::client::tag_type> http_options;
 
-Sentry::Sentry() : http(http_options().io_service(Crails::Server::get_io_service()))
+Sentry::Sentry() : http(http_options())
 {}
 
 void Sentry::set_message_context(Data message)

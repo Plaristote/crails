@@ -1,9 +1,10 @@
 #ifndef  EXCEPTION_CATCHER_HPP
 # define EXCEPTION_CATCHER_HPP
 
-# include "http_server.hpp"
 # include <crails/utils/backtrace.hpp>
 # include <sstream>
+# include <thread>
+# include <functional>
 
 namespace Crails
 {

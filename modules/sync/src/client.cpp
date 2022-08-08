@@ -10,7 +10,7 @@ typedef network::http::client_options<network::http::client::tag_type> http_opti
 
 Client::Client(const Settings& settings) :
   settings(settings),
-  http(http_options().io_service(Crails::Server::get_io_service()))
+  http(http_options())
 {
 }
 

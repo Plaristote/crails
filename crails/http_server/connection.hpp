@@ -7,12 +7,14 @@
 
 namespace Crails
 {
+  class Server;
+
   class Connection : public std::enable_shared_from_this<Connection>
   {
   public:
     typedef std::function<void(Connection&)> RequestHandler;
 
-    Connection(boost::asio::ip::tcp::socket, RequestHandler);
+    Connection(const Server&, boost::asio::ip::tcp::socket);
     ~Connection();
 
     void start();
@@ -27,11 +29,11 @@ namespace Crails
     void read(boost::beast::error_code ec, std::size_t bytes_transferred);
     void on_write(bool keep_alive, boost::beast::error_code ec, std::size_t);
 
+    const Server&             server;
     boost::beast::tcp_stream  stream;
     boost::beast::flat_buffer buffer{8192};
     HttpRequest               request{};
     HttpResponse              response{};
-    RequestHandler            handler;
   };
 }
 

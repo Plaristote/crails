@@ -1,13 +1,13 @@
 #ifndef  FILE_REQUEST_HANDLER_HPP
 # define FILE_REQUEST_HANDLER_HPP
 
-# include "../server.hpp"
+# include "../request_handler.hpp"
 
 namespace Crails
 {
   class FileRequestHandler : public RequestHandler
   {
-    friend class Server;
+    typedef std::pair<unsigned int, unsigned int> Range;
   public:
     FileRequestHandler() : RequestHandler("file"), file_cache(Crails::Server::get_file_cache())
     {
@@ -18,7 +18,8 @@ namespace Crails
 #endif
     }
 
-    void operator()(Connection& request, BuildingResponse& response, Params& params, std::function<void(bool)> callback);
+    void operator()(Request& params, std::function<void(bool)> callback) override;
+    bool send_file(const std::string& path, BuildingResponse& response, HttpStatus code, Range range = {0,0});
 
     void set_cache_enabled(bool enable) { cache_enabled = enable; }
     bool is_cache_enabled(void) const   { return cache_enabled;   }
@@ -27,7 +28,6 @@ namespace Crails
     virtual void set_headers_for_file(BuildingResponse& response, const std::string& fullpath) {}
 
   private:
-    bool send_file(const std::string& path, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit = 0);
     bool if_not_modified(Params&, BuildingResponse&, const std::string& path);
 
     bool       cache_enabled;

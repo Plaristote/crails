@@ -84,12 +84,11 @@ void ExceptionCatcher::response_exception(Request& request, string e_name, strin
     }
     if (response["headers"]["Content-Type"].exists())
       request.out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
-    Server::SetResponse(request.params, request.out, boost::beast::http::status::internal_server_error, response["body"].defaults_to<string>(""));
+    request.out.set_response(HttpStatus::internal_server_error, response["body"].defaults_to<string>(""));
   }
 #else
-  Server::ResponseHttpError(request.out, boost::beast::http::status::internal_server_error, request.params);
+  render_error_view(request.out, HttpStatus::internal_server_error, request.params);
 #endif
-  request.params["response-data"]["code"] = boost::beast::http::status::internal_server_error;
   request.on_finished();
 }
 

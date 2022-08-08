@@ -1,7 +1,7 @@
 #ifndef  ACTION_REQUEST_HANDLER_HPP
 # define ACTION_REQUEST_HANDLER_HPP
 
-# include "../server.hpp"
+# include "../request_handler.hpp"
 
 namespace Crails
 {
@@ -10,7 +10,7 @@ namespace Crails
   public:
     ActionRequestHandler(void) : RequestHandler("action") {}
 
-    void operator()(Connection&, BuildingResponse& out, Params& params, std::function<void(bool)> callback);
+    void operator()(Request& request, std::function<void(bool)> callback) override;
   private:
   };
 }

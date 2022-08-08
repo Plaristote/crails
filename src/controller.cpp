@@ -41,7 +41,7 @@ void Controller::redirect_to(const string& uri)
   response["headers"]["Location"] = uri;
 }
 
-void Controller::respond_with(Crails::Server::HttpCode code)
+void Controller::respond_with(Crails::HttpStatus code)
 {
   response["status"] = (unsigned short)code;
 }

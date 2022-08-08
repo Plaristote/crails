@@ -4,6 +4,7 @@
 # include "datatree.hpp"
 # include "session_store.hpp"
 # include <condition_variable>
+# include <list>
 
 namespace Crails
 {

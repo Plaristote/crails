@@ -1,6 +1,6 @@
 #include <boost/property_tree/json_parser.hpp>
-#include <crails/server.hpp>
-#include <crails/params.hpp>
+#include "crails/request_parser.hpp"
+#include "crails/params.hpp"
 
 using namespace std;
 using namespace Crails;

@@ -1,8 +1,12 @@
 #include "crails/request_handlers/file.hpp"
 #include "crails/server.hpp"
+#include "crails/request.hpp"
 #include "crails/params.hpp"
 #include "crails/logger.hpp"
+#include "crails/helpers.hpp"
+#include "crails/utils/string.hpp"
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 #include <time.h>
 
 using namespace std;
@@ -31,14 +35,30 @@ static void serve_compressed_file_if_possible(string& fullpath, BuildingResponse
   }
 }
 
-void FileRequestHandler::operator()(Connection& connection, BuildingResponse& response, Params& params, function<void(bool)> callback)
+static std::pair<unsigned int, unsigned int> range_from_header(const std::string& header)
 {
-  if (connection.get_request().method() == boost::beast::http::verb::get)
+  auto parts = split(header, '=');
+  pair<unsigned int, unsigned int> range{0,0};
+
+  if (parts.size() == 2)
+  {
+    parts = split(*parts.rbegin(), '-');
+    range.first  = boost::lexical_cast<unsigned int>(*parts.begin());
+    range.second = boost::lexical_cast<unsigned int>(*parts.rbegin());
+  }
+  return range;
+}
+
+void FileRequestHandler::operator()(Request& request, function<void(bool)> callback)
+{
+  if (request.connection.get_request().method() == boost::beast::http::verb::get)
   {
     boost::system::error_code ec;
     string                    fullpath;
-    string                    dirty_path = params["uri"].as<string>();
+    BuildingResponse&         response   = request.out;
+    string                    dirty_path = request.params["uri"].as<string>();
     size_t                    pos        = dirty_path.find('?');
+    Range                     range{0,0};
 
     if (pos != std::string::npos)
       dirty_path.erase(pos);
@@ -46,24 +66,25 @@ void FileRequestHandler::operator()(Connection& connection, BuildingResponse& re
     if (ec == boost::system::errc::success)
       fullpath = boost::filesystem::absolute(Server::public_path + dirty_path).string();
     if (ec != boost::system::errc::success)
-      params["response-data"]["code"] = (int)Server::HttpCodes::not_found;
+      response.set_status_code(HttpStatus::not_found);
     else if (fullpath.find(Server::public_path) == string::npos)
-      params["response-data"]["code"] = (int)Server::HttpCodes::bad_request;
+      response.set_status_code(HttpStatus::bad_request);
     else
     {
       if (boost::filesystem::is_directory(fullpath))
         fullpath += "/index.html";
-      serve_compressed_file_if_possible(fullpath, response, params);
-      if (params["headers"]["If-Modified-Since"].exists() &&
-          if_not_modified(params, response, fullpath))
+      serve_compressed_file_if_possible(fullpath, response, request.params);
+      if (request.params["headers"]["Range"].exists())
+        range = range_from_header(request.params["headers"]["Range"].as<string>());
+      if (request.params["headers"]["If-Modified-Since"].exists() &&
+          if_not_modified(request.params, response, fullpath))
       {
-        params["response-data"]["code"] = (int)Server::HttpCodes::not_modified;
+        response.set_status_code(HttpStatus::not_modified);
         callback(true);
         return ;
       }
-      else if (send_file(fullpath, response, boost::beast::http::status::ok))
+      else if (send_file(fullpath, response, HttpStatus::ok, range))
       {
-        params["response-data"]["code"] = (int)Server::HttpCodes::ok;
         callback(true);
         return ;
       }
@@ -96,7 +117,7 @@ bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& respo
   return false;
 }
 
-bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, Server::HttpCode code, unsigned int first_bit)
+bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, HttpStatus code, std::pair<unsigned int, unsigned int> range)
 {
   file_cache.lock();
   {
@@ -108,12 +129,14 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
       const string& str = *file;
       std::stringstream str_length;
 
-      str_length << (str.size() - first_bit);
+      if (range.second == 0)
+        range.second = str.size();
+      str_length << (range.second - range.first);
       response.set_headers("Content-Length", str_length.str());
       response.set_headers("Content-Type",   get_mimetype(fullpath));
       set_headers_for_file(response, fullpath);
       response.set_status_code(code);
-      response.set_body(str.c_str() + first_bit, str.size() - first_bit);
+      response.set_body(str.c_str() + range.first, range.second - range.first);
       logger << Logger::Info << "# Delivering asset `" << fullpath << "` ";
       if (cache_enabled)
         logger << (cached ? "(was cached)" : "(was not cached)") << Logger::endl;

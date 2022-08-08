@@ -2,6 +2,7 @@
 #include "crails/params.hpp"
 #include "crails/multipart.hpp"
 #include "crails/logger.hpp"
+#include "crails/request_parser.hpp"
 
 using namespace std;
 using namespace Crails;

@@ -4,7 +4,7 @@
 using namespace std;
 using namespace Crails;
 
-void BuildingResponse::set_response(Server::HttpCode code, const string& body)
+void BuildingResponse::set_response(HttpStatus code, const string& body)
 {
   set_status_code(code);
   set_body(body.c_str(), body.size());
@@ -18,10 +18,10 @@ void BuildingResponse::set_body(const char* str, size_t size)
   response.content_length(size);
   out.resize(size);
   std::copy(str, str + size, out.begin());
-  send();
+  //send();
 }
 
-void BuildingResponse::set_status_code(Server::HttpCode code)
+void BuildingResponse::set_status_code(HttpStatus code)
 {
   get_response().result(code);
 }

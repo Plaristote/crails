@@ -1,73 +1,57 @@
 #ifndef  SERVER_HPP
 # define SERVER_HPP
 
+# include "http_server/types.hpp"
 # include "file_cache.hpp"
-# include "http_server.hpp"
-# include "request_parser.hpp"
-# include "request_handler.hpp"
 # include "exception_catcher.hpp"
 # include "datatree.hpp"
-# include "utils/timer.hpp"
-# include <boost/beast/http/status.hpp>
 
 namespace Crails
 {
   class Params;
   class Request;
+  class RequestParser;
+  class RequestHandler;
   class Connection;
 
-  class Server : public ServerTraits
+  class Server
   {
+    friend class Request;
   public:
     static const std::string temporary_path;
     static const std::string public_path;
 
-    friend class ExceptionCatcher;
-    friend class Request;
-
-    Server();
+    Server(unsigned short thread_count = 1);
     ~Server();
 
-    typedef boost::beast::http::status   HttpCode;
+    typedef HttpStatus                   HttpCodes; // Deprecated
     typedef std::vector<RequestParser*>  RequestParsers;
     typedef std::vector<RequestHandler*> RequestHandlers;
 
     struct Crash : public boost_ext::exception
     {
       Crash(const std::string& details) : details(details) {}
-
-      const char* what(void) const throw()
-      { return (details.c_str()); }
-
+      const char* what(void) const throw() { return (details.c_str()); }
       std::string details;
     };
 
-    void operator()(const HttpServer::request& request, Response response);
-    void on_request_received(Connection&);
-    void log(const char* to_log);
-
-    void                   add_request_handler(RequestHandler* request_handler);
-    void                   add_request_parser(RequestParser* request_parser);
-    static RequestHandler* get_request_handler(const std::string& name);
-    static FileCache&      get_file_cache() { return file_cache; }
-    static std::shared_ptr<boost::asio::io_service> get_io_service() { return io_service; }
-    static boost::asio::io_context& get_io_context() { return *(io_context.get()); }
-    
     static void Launch(int argc, const char** argv);
+    static void Stop();
 
-    static void SetResponse(Params& params, BuildingResponse& out, Server::HttpCode code, const std::string& content);
+    static RequestHandler*          get_request_handler(const std::string& name);
+    static FileCache&               get_file_cache() { return file_cache; }
+    static boost::asio::io_context& get_io_context() { return *(io_context.get()); }
+
   private:
-    static void ThrowCrashSegv(void);
-    static void ThrowCrashFpe(void);
+    static void ThrowCrashSegv();
 
-    void initialize_request_pipe();
     void initialize_exception_catcher();
-    void run_request_parsers (RequestParsers::const_iterator, const HttpServer::request&, BuildingResponse&, Params&, std::function<void(bool)>) const;
-    void run_request_handlers(RequestHandlers::const_iterator, const HttpServer::request&, BuildingResponse&, Params&, std::function<void(bool)>) const;
+    void initialize_pid_file(const std::string&) const;
+    void initialize_request_pipe();
+    void add_request_handler(RequestHandler* request_handler);
+    void add_request_parser(RequestParser* request_parser);
+    void on_interrupted(const boost::system::error_code&, int);
 
-    static void ResponseHttpError(BuildingResponse& out, Server::HttpCode code, Params& params);
-
-    static std::shared_ptr<boost::asio::io_service> io_service;
     static std::shared_ptr<boost::asio::io_context> io_context;
     static RequestParsers    request_parsers;
     static RequestHandlers   request_handlers;
@@ -75,9 +59,5 @@ namespace Crails
     ExceptionCatcher         exception_catcher;
   };
 }
-
-// Helpers
-void        cgi2params(Data params, const std::string& encoded_str);
-std::string get_mimetype(const std::string& filename);
 
 #endif

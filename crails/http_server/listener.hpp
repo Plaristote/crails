@@ -7,19 +7,18 @@
 namespace Crails
 {
   class Connection;
+  class Server;
 
   class Listener : public std::enable_shared_from_this<Listener>
   {
-    boost::asio::ip::tcp::acceptor    acceptor;
-    boost::asio::ip::tcp::socket      socket;
-    std::function<void (Connection&)> handler;
+    const Server&                  server;
+    boost::asio::ip::tcp::acceptor acceptor;
+    boost::asio::ip::tcp::socket   socket;
   public:
-    Listener(boost::asio::io_context&);
+    Listener(const Server&);
 
     bool listen(boost::asio::ip::tcp::endpoint, boost::beast::error_code&);
     void run();
-    void set_handler(std::function<void(Connection&)>
-    value) { handler = value; }
   private:
     void wait_accept();
     void on_accept(boost::beast::error_code);

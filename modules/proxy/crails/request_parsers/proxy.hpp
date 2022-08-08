@@ -1,7 +1,7 @@
 #ifndef  PROXY_REQUEST_HANDLER_HPP
 # define PROXY_REQUEST_HANDLER_HPP
 
-# include <crails/server.hpp>
+# include "crails/request_parser.hpp"
 # include <boost/network/protocol/http/client.hpp>
 
 namespace Crails
@@ -37,9 +37,9 @@ namespace Crails
     Mode get_mode_from_data(Data) const;
     static std::string get_proxyfied_url(const Rule& rule, const std::string& uri);
 
-    static thread_local http::client client;
-    Mode                             default_mode;
-    Rules                            rules;
+    static thread_local boost::network::http::client client;
+    Mode  default_mode;
+    Rules rules;
   };
 }
 

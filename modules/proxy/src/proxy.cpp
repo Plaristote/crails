@@ -7,7 +7,7 @@
 using namespace std;
 using namespace Crails;
 
-thread_local http::client ProxyRequestHandler::client;
+thread_local boost::network::http::client ProxyRequestHandler::client;
 
 ProxyRequestHandler::ProxyRequestHandler()
 {
@@ -77,7 +77,7 @@ void ProxyRequestHandler::body_received(Connection& connection, BuildingResponse
   if (rule->mode == Redirect302)
   {
     out.set_headers("Location", get_proxyfied_url(*rule, destination));
-    out.set_response((Server::HttpCode)302, "");
+    out.set_response((HttpStatus)302, "");
     params["response-data"]["code"] = 302;
   }
   else
@@ -99,7 +99,7 @@ void ProxyRequestHandler::execute_rule(const Rule& rule, Connection& connection,
   const auto&           request = connection.get_request();
   string                destination(request.target());
   string                url = get_proxyfied_url(rule, destination);
-  http::client::request proxy_request(url);
+  boost::network::http::client::request proxy_request(url);
 
   logger << Logger::Info << "[PROXY] proxyfing `" << destination << "` to `" << url << '`' << Logger::endl;
   proxy_request << boost::network::header("Connection", "close");
@@ -109,7 +109,7 @@ void ProxyRequestHandler::execute_rule(const Rule& rule, Connection& connection,
     proxy_request << boost::network::body(body_);
   try
   {
-    http::client::response remote_response;
+    boost::network::http::client::response remote_response;
 
     if (request.method() == boost::beast::http::verb::get)
       remote_response = client.get(proxy_request);
@@ -125,10 +125,10 @@ void ProxyRequestHandler::execute_rule(const Rule& rule, Connection& connection,
     for (auto header : remote_response.headers())
       out.set_headers(header.first, header.second);
     int status_code = static_cast<int>(status(remote_response));
-    out.set_response(static_cast<Server::HttpCode>(status_code), remote_response.body());
+    out.set_response(static_cast<HttpStatus>(status_code), remote_response.body());
   }
   catch (...)
   {
-    out.set_response(static_cast<Server::HttpCode>(500), "");
+    out.set_response(static_cast<HttpStatus>(500), "");
   }
 }

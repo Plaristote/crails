@@ -8,7 +8,7 @@ using namespace XmlRpc;
 typedef boost::network::http::client_options<boost::network::http::client::tag_type>
   client_options;
 
-Client::Client(const string& endpoint) : endpoint(endpoint), client(client_options().io_service(Crails::Server::get_io_service()))
+Client::Client(const string& endpoint) : endpoint(endpoint), client(client_options())
 {
 }
 

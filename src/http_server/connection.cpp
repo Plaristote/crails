@@ -1,19 +1,21 @@
 #include <boost/asio/dispatch.hpp>
 #include "crails/http_server/connection.hpp"
 #include "crails/logger.hpp"
+#include "crails/request.hpp"
 
 using namespace Crails;
 using namespace boost;
 
-Connection::Connection(asio::ip::tcp::socket socket_, RequestHandler handler_) :
-  stream(std::move(socket_)),
-  handler(handler_)
+Connection::Connection(const Server& server_, asio::ip::tcp::socket socket_) :
+  server(server_),
+  stream(std::move(socket_))
 {
+  logger << Logger::Info << "Crails::Connection opened" << Logger::endl;
 }
 
 Connection::~Connection()
 {
-  logger << Logger::Info << "Crails::Session closed" << Logger::endl;
+  logger << Logger::Info << "Crails::Connection closed" << Logger::endl;
 }
 
 void Connection::start()
@@ -37,10 +39,7 @@ void Connection::expect_read()
 void Connection::read(beast::error_code ec, std::size_t bytes_transferred)
 {
   if (!ec)
-  {
-    response.keep_alive(request.keep_alive());
-    handler(*this);
-  }
+    std::make_shared<Request>(server, *this)->run();
   else
     logger << Logger::Error << "!! Crails failed to read on socket: " << ec.message() << Logger::endl;
 }
