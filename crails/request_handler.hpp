@@ -13,7 +13,7 @@ namespace Crails
 
     const std::string& get_name(void) const { return name; }
 
-    virtual void operator()(Request&, std::function<void(bool)> callback) = 0;
+    virtual void operator()(Request&, std::function<void(bool)> callback) const = 0;
     
   private:
     const std::string name;

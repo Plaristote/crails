@@ -49,7 +49,7 @@ static std::pair<unsigned int, unsigned int> range_from_header(const std::string
   return range;
 }
 
-void FileRequestHandler::operator()(Request& request, function<void(bool)> callback)
+void FileRequestHandler::operator()(Request& request, function<void(bool)> callback) const
 {
   if (request.connection->get_request().method() == boost::beast::http::verb::get)
   {
@@ -103,7 +103,7 @@ static std::time_t http_date_to_timestamp(const std::string& str)
   return 0;
 }
 
-bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& response, const string& fullpath)
+bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& response, const string& fullpath) const
 {
   const string str_time = params["headers"]["If-Modified-Since"].as<string>();
   time_t condition_time = http_date_to_timestamp(str_time);
@@ -117,7 +117,7 @@ bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& respo
   return false;
 }
 
-bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, HttpStatus code, std::pair<unsigned int, unsigned int> range)
+bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, HttpStatus code, std::pair<unsigned int, unsigned int> range) const
 {
   file_cache.lock();
   {

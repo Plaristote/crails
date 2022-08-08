@@ -10,7 +10,7 @@ namespace Crails
   public:
     ActionRequestHandler(void) : RequestHandler("action") {}
 
-    void operator()(Request& request, std::function<void(bool)> callback) override;
+    void operator()(Request& request, std::function<void(bool)> callback) const override;
   private:
   };
 }

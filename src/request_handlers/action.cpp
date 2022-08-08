@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Crails;
 
-void ActionRequestHandler::operator()(Request& request, function<void(bool)> callback)
+void ActionRequestHandler::operator()(Request& request, function<void(bool)> callback) const
 {
   const Router* router = Router::singleton::Get();
 
