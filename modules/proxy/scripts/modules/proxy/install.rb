@@ -12,7 +12,7 @@ source         = ENV['CRAILS_SHARED_DIR'] + '/app_template/proxy'
 
 project.base_directory source, base_directory do
   project.directory :config do
-    project.file 'proxy.json'
+    project.file 'proxy.cpp'
   end
 end
 

@@ -6,7 +6,7 @@ include_directories(.)
 
 file(GLOB crails_proxy            src/*.cpp)
 file(GLOB headers_crails_proxy    crails/request_parsers/proxy.hpp)
-file(GLOB template_crails_proxy   app/config/proxy.json)
+file(GLOB template_crails_proxy   app/config/proxy.cpp)
 file(GLOB scripts_crails_proxy    scripts/modules/proxy/*.rb)
 
 add_library(crails-proxy${crails-suffix} SHARED ${crails_proxy})
