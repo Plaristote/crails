@@ -19,12 +19,12 @@ namespace Crails
     Request(const Server& server, Connection& connection);
     ~Request();
 
-    const Server&             server;
-    Connection&               connection;
-    BuildingResponse          out;
-    Params                    params;
-    Utils::Timer              timer;
-    ExceptionCatcher::Context exception_context;
+    const Server&               server;
+    std::shared_ptr<Connection> connection;
+    BuildingResponse            out;
+    Params                      params;
+    Utils::Timer                timer;
+    ExceptionCatcher::Context   exception_context;
 
     void run();
   private:

@@ -33,7 +33,11 @@ void BuildingResponse::set_headers(const std::string& key, const std::string& va
 
 void BuildingResponse::send()
 {
-  for (auto it = headers.cbegin() ; it != headers.cend() ; ++it)
-    get_response().set(it->first, it->second);
-  connection.write();
+  if (!already_sent)
+  {
+    for (auto it = headers.cbegin() ; it != headers.cend() ; ++it)
+      get_response().set(it->first, it->second);
+    connection.write();
+    already_sent = true;
+  }
 }

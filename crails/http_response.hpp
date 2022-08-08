@@ -20,6 +20,7 @@ namespace Crails
     void set_headers(const std::string& key, const std::string& value);
     void set_body(const char* str, size_t size);
     void send();
+    bool sent() const { return already_sent; }
 
     HttpResponse& get_response() { return connection.get_response(); }
     const HttpResponse& get_response() const { return connection.get_response(); }
@@ -27,6 +28,7 @@ namespace Crails
   private:
     Connection& connection;
     Headers     headers;
+    bool        already_sent = false;
   };
 
   class Params;

@@ -13,7 +13,7 @@ void ActionRequestHandler::operator()(Request& request, function<void(bool)> cal
   if (router)
   {
     Params&               params      = request.params;
-    const auto&           raw_request = request.connection.get_request();
+    const auto&           raw_request = request.connection->get_request();
     string                implicit_method(boost::beast::http::to_string(raw_request.method()));
     string                method = params["_method"].defaults_to<string>(implicit_method);
     const Router::Action* action = router->get_action(method, params["uri"].as<string>(), params);

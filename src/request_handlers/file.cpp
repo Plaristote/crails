@@ -51,7 +51,7 @@ static std::pair<unsigned int, unsigned int> range_from_header(const std::string
 
 void FileRequestHandler::operator()(Request& request, function<void(bool)> callback)
 {
-  if (request.connection.get_request().method() == boost::beast::http::verb::get)
+  if (request.connection->get_request().method() == boost::beast::http::verb::get)
   {
     boost::system::error_code ec;
     string                    fullpath;

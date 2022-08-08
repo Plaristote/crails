@@ -7,7 +7,7 @@ using namespace Crails;
 using namespace std;
 
 Request::Request(const Server& server, Connection& connection)
-  : server(server), connection(connection), out(connection)
+  : server(server), connection(connection.shared_from_this()), out(connection)
 {
 }
 
@@ -33,7 +33,7 @@ void Request::run_parser(Server::RequestParsers::const_iterator it, function<voi
     {
       auto self = shared_from_this();
 
-      (**it)(connection, out, params, [self, it, callback](RequestParser::Status status)
+      (**it)(*connection, out, params, [self, it, callback](RequestParser::Status status)
       {
         if (status == RequestParser::Abort)
           callback(false);
@@ -48,11 +48,16 @@ void Request::run_parser(Server::RequestParsers::const_iterator it, function<voi
 
 void Request::on_parsed(bool parsed)
 {
-  if (parsed)
+  if (out.sent())
+    on_handled(true);
+  else if (parsed)
   {
-    auto callback = std::bind(&Request::on_handled, this, std::placeholders::_1);
+    auto self = shared_from_this();
 
-    run_handler(server.request_handlers.begin(), callback);
+    run_handler(server.request_handlers.begin(), [self](bool handled)
+    {
+      self->on_handled(handled);
+    });
   }
   else
   {
@@ -113,7 +118,7 @@ static void output_request_timers(Data timers)
 void Request::on_finished()
 {
   float crails_time     = timer.GetElapsedSeconds();
-  unsigned short code   = static_cast<unsigned short>(connection.get_response().result());
+  unsigned short code   = static_cast<unsigned short>(connection->get_response().result());
 
   out.send();
   logger << Logger::Info << "# Responded to " << params["method"].defaults_to<string>("GET") << " '" << params["uri"].defaults_to<string>("");
