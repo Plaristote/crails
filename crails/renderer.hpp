@@ -6,6 +6,7 @@
 # include <crails/utils/backtrace.hpp>
 # include "shared_vars.hpp"
 # include "datatree.hpp"
+# include "render_target.hpp"
 
 namespace Crails
 {
@@ -42,11 +43,11 @@ namespace Crails
 
     virtual ~Renderer() {}
     virtual bool can_render(const std::string& accept_header, const std::string& view) const = 0;
-    virtual void render_template(const std::string& view, Data params, Data response, SharedVars& vars) const = 0;
+    virtual void render_template(const std::string& view, Data params, RenderTarget&, SharedVars& vars) const = 0;
 
     static Renderer*   pick_renderer(const std::string& view, Data params);
     static bool        can_render(const std::string& view, Data params);
-    static void        render(const std::string& view, Data params, Data response, SharedVars& vars);
+    static void        render(const std::string& view, Data params, RenderTarget&, SharedVars& vars);
     static std::string partial(const std::string& view);
 
   protected:

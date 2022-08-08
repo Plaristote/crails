@@ -10,18 +10,15 @@ namespace Crails
 {
   static void render_custom_error_view(string view_name, BuildingResponse& out, HttpStatus code, Params& params)
   {
-    Data response = params["response-data"];
-
+    out.set_status_code(code);
     if (Renderer::can_render(view_name, params.as_data()))
     {
       SharedVars vars;
       string     content_type;
 
-      Renderer::render(view_name, params.as_data(), response, vars);
-      if (response["headers"]["Content-Type"].exists())
-        out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
+      Renderer::render(view_name, params.as_data(), out, vars);
     }
-    out.set_response(code, response["body"].defaults_to<string>(""));
+    out.send();
   }
 
   void render_error_view(BuildingResponse& out, HttpStatus code, Params& params)

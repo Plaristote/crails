@@ -3,11 +3,13 @@
 
 # include "http_server/types.hpp"
 # include "http_server/connection.hpp"
+# include "render_target.hpp"
 # include <unordered_map>
 
 namespace Crails
 {
-  class BuildingResponse
+
+  class BuildingResponse : public RenderTarget
   {
   public:
     typedef std::unordered_map<std::string, std::string> Headers;
@@ -17,8 +19,8 @@ namespace Crails
 
     void set_response(HttpStatus code, const std::string& body);
     void set_status_code(HttpStatus code);
-    void set_headers(const std::string& key, const std::string& value);
-    void set_body(const char* str, size_t size);
+    void set_headers(const std::string& key, const std::string& value) override;
+    void set_body(const char* str, size_t size) override;
     void send();
     bool sent() const { return already_sent; }
 

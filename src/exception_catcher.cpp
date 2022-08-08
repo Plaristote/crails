@@ -65,10 +65,8 @@ void ExceptionCatcher::response_exception(Request& request, string e_name, strin
   vars["exception_what"] = e_what;
   vars["params"]         = &(request.params);
   {
-    Data response = request.params["response-data"];
-
     try {
-      Renderer::render("lib/exception", request.params.as_data(), response, vars);
+      Renderer::render("lib/exception", request.params.as_data(), request.out, vars);
     }
     catch (const MissingTemplate& exception) {
       logger << Logger::Warning
@@ -82,9 +80,6 @@ void ExceptionCatcher::response_exception(Request& request, string e_name, strin
     catch (...) {
       logger << Logger::Error << "# Template lib/exception crashed" << Logger::endl;
     }
-    if (response["headers"]["Content-Type"].exists())
-      request.out.set_headers("Content-Type", response["headers"]["Content-Type"].as<string>());
-    request.out.set_response(HttpStatus::internal_server_error, response["body"].defaults_to<string>(""));
   }
 #else
   render_error_view(request.out, HttpStatus::internal_server_error, request.params);

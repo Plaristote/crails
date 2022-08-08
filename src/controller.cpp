@@ -1,6 +1,7 @@
 #include "crails/controller.hpp"
 #include "crails/router.hpp"
 #include "crails/renderer.hpp"
+#include "crails/request.hpp"
 #include <crails/logger.hpp>
 #include <crails/utils/backtrace.hpp>
 
@@ -9,8 +10,9 @@ using namespace Crails;
 
 std::string rand_str(std::string::size_type size); // Defined in rand_str.cpp
 
-Controller::Controller(Params& params) : params(params), session(params.get_session())
+Controller::Controller(Request& request) : params(request.params), response(request.out), session(params.get_session())
 {
+  this->request = request.shared_from_this();
   // Set the class attributes accessible to the views
   vars["controller"] = this;
   vars["params"]     = &params;
@@ -37,13 +39,13 @@ void Controller::initialize()
 
 void Controller::redirect_to(const string& uri)
 {
-  response["status"]              = 302;
-  response["headers"]["Location"] = uri;
+  request->out.set_status_code(HttpStatus::temporary_redirect);
+  request->out.set_headers("Location", uri);
 }
 
 void Controller::respond_with(Crails::HttpStatus code)
 {
-  response["status"] = (unsigned short)code;
+  request->out.set_status_code(code);
 }
 
 void Controller::protect_from_forgery(void)
@@ -66,7 +68,8 @@ bool Controller::check_csrf_token(void)// const
 
 void Controller::render(const std::string& view)
 {
-  Renderer::render(view, params.as_data(), response.as_data(), vars);
+  Renderer::render(view, params.as_data(), request->out, vars);
+  request->out.send();
 }
 
 void Controller::render(const std::string& view, SharedVars vars)
@@ -76,15 +79,15 @@ void Controller::render(const std::string& view, SharedVars vars)
     if (vars.find(var.first) == vars.end())
       vars.emplace(var.first, var.second);
   }
-  Renderer::render(view, params.as_data(), response.as_data(), vars);
+  Renderer::render(view, params.as_data(), request->out, vars);
+  request->out.send();
 }
 
 void Controller::render(RenderType type, const string& value)
 {
-  string body;
-
-  response["body"] = value;
   set_content_type(type);
+  request->out.set_body(value.c_str(), value.length());
+  request->out.send();
 }
 
 void Controller::render(RenderType type, Data value)
@@ -103,8 +106,9 @@ void Controller::render(RenderType type, Data value)
     default:
       throw boost_ext::invalid_argument("Crails::Controller::render(RenderType,Data) only supports JSON and XML");
   }
-  response["body"] = body.str();
   set_content_type(type);
+  request->out.set_body(body.str().c_str(), body.str().length());
+  request->out.send();
 }
 
 void Controller::set_content_type_from_extension(const std::string& extension)
@@ -121,7 +125,7 @@ void Controller::set_content_type_from_extension(const std::string& extension)
     content_type = "application/javascript";
   else
     content_type = "application/octet-stream";
-  response["headers"]["Content-Type"] = content_type;
+  request->out.set_headers("Content-Type", content_type);
 }
 
 void Controller::set_content_type(RenderType type)
@@ -146,5 +150,5 @@ void Controller::set_content_type(RenderType type)
       content_type = "text/plain";
       break ;
   }
-  response["headers"]["Content-Type"] = content_type;
+  request->out.set_headers("Content-Type", content_type);
 }

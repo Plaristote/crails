@@ -4,6 +4,7 @@
 # include <boost/asio.hpp>
 # include <boost/asio/ssl.hpp>
 # include <crails/utils/helpers.hpp>
+# include <crails/render_target.hpp>
 # include <map>
 # include <sstream>
 
@@ -11,7 +12,7 @@ namespace Smtp
 {
   class Server;
 
-  class Mail
+  class Mail : public Crails::RenderTarget
   {
     friend class Server;
   public:
@@ -44,9 +45,11 @@ namespace Smtp
     void        del_recipient(const std::string& address);
     const_attr_accessor(Sender&,      sender)
     const_attr_accessor(std::string&, subject)
-    const_attr_accessor(std::string&, body)
     const_attr_accessor(std::string&, reply_to)
     const_attr_accessor(std::string&, content_type)
+
+    void set_headers(const std::string& key, const std::string& value) override { if (key == "Content-Type") { set_content_type(value); } }
+    void set_body(const char* value, std::size_t length) override { body = std::string(value, length); }
 
   private:
     Recipients  recipients;

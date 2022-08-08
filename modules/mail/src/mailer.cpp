@@ -18,9 +18,7 @@ void Mailer::render(const std::string& view)
 
   if (!params["headers"]["Accept"].exists())
     params["headers"]["Accept"] = "text/html text/plain";
-  Renderer::render(view, params.as_data(), response.as_data(), vars);
-  mail.set_content_type(response["headers"]["Content-Type"].defaults_to<string>(""));
-  mail.set_body(response["body"].as<string>());
+  Renderer::render(view, params.as_data(), mail, vars);
 }
 
 void Mailer::send(void)

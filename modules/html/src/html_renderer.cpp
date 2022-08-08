@@ -12,23 +12,23 @@ bool HtmlRenderer::can_render(const std::string& accept_header, const std::strin
   return (false);
 }
 
-void HtmlRenderer::render_template(const std::string& view, Data params, Data response, SharedVars& vars) const
+void HtmlRenderer::render_template(const std::string& view, Data params, RenderTarget& target, SharedVars& vars) const
 {
   auto   tpl       = templates.find(view);
   string html_view = (*tpl).second(this, vars);
-  string layout    = response["layout"].defaults_to<string>("");
+  string layout    = params["render-layout"].defaults_to<string>("");
 
-  response["headers"]["Content-Type"] = "text/html";
+  target.set_headers("Content-Type", "text/html");
   if (layout != "" && view != layout)
   {
     if (can_render("text/html", layout))
     {
       vars["yield"] = &html_view;
-      render_template(layout, params, response, vars);
+      render_template(layout, params, target, vars);
     }
     else
       throw MissingTemplate(layout);
   }
   else
-    response["body"] = html_view;
+    target.set_body(html_view.c_str(), html_view.length());
 }

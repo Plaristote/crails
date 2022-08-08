@@ -91,7 +91,7 @@ namespace XmlRpc
     };
 
   public:
-    Controller(Crails::Params& params) : Crails::Controller(params)
+    Controller(Crails::Request& request) : Crails::Controller(request)
     {
     }
 

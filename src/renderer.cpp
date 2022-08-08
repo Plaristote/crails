@@ -12,13 +12,13 @@ void Renderer::finalize()
   renderers.clear();
 }
 
-void Renderer::render(const std::string& view, Data params, Data response, SharedVars& vars)
+void Renderer::render(const std::string& view, Data params, RenderTarget& target, SharedVars& vars)
 {
   const Renderer* renderer = pick_renderer(view, params);
 
   if (renderer == NULL)
     throw MissingTemplate(view, params["headers"]["Accept"].defaults_to<string>(default_format));
-  renderer->render_template(view, params, response, vars);
+  renderer->render_template(view, params, target, vars);
 }
 
 Renderer* Renderer::pick_renderer(const std::string& view, Data params)

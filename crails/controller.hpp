@@ -11,18 +11,19 @@ namespace Crails
 {
   class Router;
   class Mailer;
+  class Request;
 
   struct ExceptionCSRF : public std::exception
   {
     const char* what(void) const throw() { return ("The CSRF token was missing or invalid and your identity couldn't be verified."); }
   };
 
-  class Controller
+  class Controller : public std::enable_shared_from_this<Controller>
   {
   protected:
     typedef Crails::HttpStatus ResponseStatus;
 
-    Controller(Params& params);
+    Controller(Request& params);
   public:
     virtual ~Controller();
 
@@ -52,11 +53,11 @@ namespace Crails
 
     std::string     get_action_name() const { return params["controller-data"]["action"].as<std::string>(); }
 
-    Params&         params;
-    Data            session;
-    DataTree        response;
-    SharedVars      vars;
-    DataTree        flash;
+    Params&           params;
+    Data              session;
+    BuildingResponse& response;
+    SharedVars        vars;
+    DataTree          flash;
   private:
     void            protect_from_forgery(void);
     bool            check_csrf_token(void);// const;
@@ -64,7 +65,8 @@ namespace Crails
     void            set_content_type(RenderType);
     void            set_content_type_from_extension(const std::string&);
 
-    Utils::Timer    timer;
+    std::shared_ptr<Request> request;
+    Utils::Timer             timer;
   };
 }
 
