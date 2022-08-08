@@ -7,7 +7,7 @@
 using namespace std;
 using namespace Crails;
 
-void RequestMultipartParser::operator()(Connection& connection, BuildingResponse&, Params& params, function<void(RequestParser::Status)> callback)
+void RequestMultipartParser::operator()(Connection& connection, BuildingResponse&, Params& params, function<void(RequestParser::Status)> callback) const
 {
   static const regex is_multipart("^multipart/form-data", regex_constants::extended);
 
@@ -28,7 +28,7 @@ RequestMultipartParser::PendingBody::PendingBody(Connection& c, Params& p)
   multipart_parser.initialize(params);
 }
 
-void RequestMultipartParser::on_receive(shared_ptr<PendingBody> pending_body, Connection& connection)
+void RequestMultipartParser::on_receive(shared_ptr<PendingBody> pending_body, Connection& connection) const
 {
   MultipartParser& multipart_parser = pending_body->multipart_parser;
   const string& body = connection.get_request().body();
@@ -44,7 +44,7 @@ void RequestMultipartParser::on_receive(shared_ptr<PendingBody> pending_body, Co
     pending_body->finished_callback();
 }
 
-void RequestMultipartParser::parse_multipart(Connection& connection, Params& params, function<void()> finished_callback)
+void RequestMultipartParser::parse_multipart(Connection& connection, Params& params, function<void()> finished_callback) const
 {
   shared_ptr<PendingBody> pending_body = make_shared<PendingBody>(connection, params);
 

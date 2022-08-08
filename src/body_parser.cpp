@@ -17,7 +17,7 @@ BodyParser::PendingBody::PendingBody(Connection& c, BuildingResponse& o, Params&
   total_read = c.get_request().body().size();
 }
 
-void BodyParser::wait_for_body(Connection& connection, BuildingResponse& out, Params& params, function<void()> finished_callback)
+void BodyParser::wait_for_body(Connection& connection, BuildingResponse& out, Params& params, function<void()> finished_callback) const
 {
   shared_ptr<PendingBody> pending_body = make_shared<PendingBody>(connection, out, params);
 

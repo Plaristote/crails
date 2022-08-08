@@ -5,7 +5,7 @@
 using namespace std;
 using namespace Crails;
 
-void RequestDataParser::operator()(Connection& connection, BuildingResponse&, Params& params, function<void(RequestParser::Status)> callback)
+void RequestDataParser::operator()(Connection& connection, BuildingResponse&, Params& params, function<void(RequestParser::Status)> callback) const
 {
   {
     const auto&  request    = connection.get_request();

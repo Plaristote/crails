@@ -6,7 +6,7 @@ using namespace std;
 using namespace Crails;
 using namespace boost::property_tree;
 
-void RequestJsonParser::operator()(Connection& connection, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback)
+void RequestJsonParser::operator()(Connection& connection, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback) const
 {
   static const regex is_json("application/json", regex_constants::extended);
 
@@ -21,7 +21,7 @@ void RequestJsonParser::operator()(Connection& connection, BuildingResponse& out
     callback(RequestParser::Continue);
 }
 
-void RequestJsonParser::body_received(Connection&, BuildingResponse&, Params& params, const string& body)
+void RequestJsonParser::body_received(Connection&, BuildingResponse&, Params& params, const string& body) const
 {
   if (body.size() > 0)
     params.as_data().merge(DataTree().from_json(body));

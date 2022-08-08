@@ -20,20 +20,20 @@ namespace Crails
       Stop,
       Abort
     };
-    
+
     virtual ~RequestParser() {}
     
-    virtual void operator()(Connection&, BuildingResponse&, Params&, std::function<void(Status)>) = 0;
+    virtual void operator()(Connection&, BuildingResponse&, Params&, std::function<void(Status)>) const = 0;
   protected:
-    bool content_type_matches(Params&, const std::regex);
+    bool content_type_matches(Params&, const std::regex) const;
   };
 
   class BodyParser : public RequestParser
   {
   public:
-    void wait_for_body(Connection&, BuildingResponse&, Params&, std::function<void()>);
+    void wait_for_body(Connection&, BuildingResponse&, Params&, std::function<void()>) const;
   protected:
-    virtual void body_received(Connection&, BuildingResponse&, Params&, const std::string& body) = 0;
+    virtual void body_received(Connection&, BuildingResponse&, Params&, const std::string& body) const = 0;
   private:
     struct PendingBody
     {
@@ -52,24 +52,25 @@ namespace Crails
   class RequestDataParser : public RequestParser
   {
   public:
-    void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>);
+    void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>) const override;
   private:
   };
 
   class RequestFormParser : public BodyParser
   {
   public:
-    void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>);
+    void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>) const override;
   private:
-    void body_received(Connection&, BuildingResponse&, Params&, const std::string& body);
+    void body_received(Connection&, BuildingResponse&, Params&, const std::string& body) const override;
   };
 
   class RequestMultipartParser : public RequestParser
   {
   public:
-    void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>);
+    void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>) const override;
   private:
-    void parse_multipart(Connection&, Params&, std::function<void()>);
+    void parse_multipart(Connection&, Params&, std::function<void()>) const;
+
     struct PendingBody
     {
       PendingBody(Connection&, Params&);
@@ -80,23 +81,23 @@ namespace Crails
       std::function<void()>  finished_callback;
     };
 
-    void on_receive(std::shared_ptr<PendingBody>, Connection&);
+    void on_receive(std::shared_ptr<PendingBody>, Connection&) const;
   };
 
   class RequestJsonParser : public BodyParser
   {
   public:
-   void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>);
+   void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>) const override;
   private:
-    void body_received(Connection&, BuildingResponse&, Params&, const std::string& body);
+    void body_received(Connection&, BuildingResponse&, Params&, const std::string& body) const override;
   };
 
   class RequestXmlParser : public BodyParser
   {
   public:
-   void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>);
+   void operator()(Connection&, BuildingResponse&, Params&, std::function<void(RequestParser::Status)>) const override;
   private:
-    void body_received(Connection&, BuildingResponse&, Params&, const std::string& body);
+    void body_received(Connection&, BuildingResponse&, Params&, const std::string& body) const override;
   };
 }
 

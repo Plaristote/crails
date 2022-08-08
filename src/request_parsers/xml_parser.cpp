@@ -6,7 +6,7 @@ using namespace std;
 using namespace Crails;
 using namespace boost::property_tree;
 
-void RequestXmlParser::operator()(Connection& connection, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback)
+void RequestXmlParser::operator()(Connection& connection, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback) const
 {
   static const regex is_xml("(application|text)/xml", regex_constants::extended);
 
@@ -21,7 +21,7 @@ void RequestXmlParser::operator()(Connection& connection, BuildingResponse& out,
     callback(RequestParser::Continue);
 }
 
-void RequestXmlParser::body_received(Connection&, BuildingResponse&, Params& params, const string& body)
+void RequestXmlParser::body_received(Connection&, BuildingResponse&, Params& params, const string& body) const
 {
   if (body.size() > 0)
   {

@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Crails;
 
-void RequestFormParser::operator()(Connection& connection, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback)
+void RequestFormParser::operator()(Connection& connection, BuildingResponse& out, Params& params, function<void(RequestParser::Status)> callback) const
 {
   static const regex is_form("application/x-www-form-urlencoded", regex_constants::extended);
 
@@ -21,7 +21,7 @@ void RequestFormParser::operator()(Connection& connection, BuildingResponse& out
     callback(RequestParser::Continue);
 }
 
-void RequestFormParser::body_received(Connection&, BuildingResponse&, Params& params, const string& body)
+void RequestFormParser::body_received(Connection&, BuildingResponse&, Params& params, const string& body) const
 {
   if (body.size() > 0)
     cgi2params(params.as_data(), body);
