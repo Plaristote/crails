@@ -25,9 +25,6 @@ WORKDIR /tmp/compile-dir
 # BEGIN Crails dependencies
 COPY boost.sh boost.sh
 RUN bash /tmp/compile-dir/boost.sh
-
-COPY cppnetlib.sh cppnetlib.sh
-RUN bash ./cppnetlib.sh
 # END Crails dependencies
 
 COPY crails.sh crails.sh

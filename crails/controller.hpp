@@ -71,6 +71,7 @@ namespace Crails
 
     std::shared_ptr<Request> request;
     std::function<void()>    callback;
+    bool                     close_on_deletion = false;
     Utils::Timer             timer;
   };
 }

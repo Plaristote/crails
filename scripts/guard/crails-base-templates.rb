@@ -55,7 +55,7 @@ module ::Guard
          templates << { name: view_name, function: function_name }
       end
 
-      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/#{@template_type}_renderer.cpp.erb").read, nil, '-'
+      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/#{@template_type}_renderer.cpp.erb").read, trim_mode: '-'
       code = template.result(instance_eval { binding })
       filename = "lib/renderers/#{@template_type}.cpp"
       FileUtils.mkdir_p "lib/renderers"
@@ -83,7 +83,7 @@ module ::Guard
     end
 
     def write_template_to_file filename, binding_context
-      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/#{@template_type}_template.cpp.erb").read, nil, '-'
+      template = ERB.new (File.new "#{File.dirname(__FILE__)}/templates/#{@template_type}_template.cpp.erb").read, trim_mode: '-'
       code = template.result(binding_context)
       FileUtils.mkdir_p "lib/#{filename}"
       write_file_if_changed "lib/#{filename}/source.cpp", code
@@ -128,7 +128,7 @@ module ::Guard
       variables_initialization = []
       tmp_lines.each do |line|
         if line.match /@[a-zA-Z_]+/
-          type = line.scan /^(unsigned\s+)?([a-zA-Z0-9_:]+(<[a-zA-Z_0-9:\s<>*&]+>){0,1}[*&]*)/
+          type = line.scan /^(const\s+)?(unsigned\s+)?([a-zA-Z0-9_:]+(<[a-zA-Z_0-9:\s<>*&]+>){0,1}[*&]*)/
           name = line.scan /@[a-zA-Z_]+/
           dflt = line.scan /\=(.*);/
           if not type.nil? and not type[0].nil? and not name.nil? and not name[0].nil?

@@ -43,7 +43,7 @@ namespace Crails
 
     virtual ~Renderer() {}
     virtual bool can_render(const std::string& accept_header, const std::string& view) const = 0;
-    virtual void render_template(const std::string& view, Data params, RenderTarget&, SharedVars& vars) const = 0;
+    virtual void render_template(const std::string& view, RenderTarget&, SharedVars& vars) const = 0;
 
     static Renderer*   pick_renderer(const std::string& view, Data params);
     static bool        can_render(const std::string& view, Data params);

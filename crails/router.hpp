@@ -12,6 +12,8 @@
 # include "router_base.hpp"
 # include "request.hpp"
 
+# include "logger.hpp"
+
 namespace Crails
 {
   class Router : public RouterBase<Crails::Params, std::function<void (Crails::Request&, std::function<void()>)> >
@@ -42,6 +44,7 @@ namespace Crails
       }
       else
         callback();
+      controller->close_on_deletion = true;
     }
 
   private:
@@ -63,8 +66,6 @@ namespace Crails
     ControllerRoute<klass>::trigger(request, &klass::func, callback); \
   })
 
-# define match_action(method, path, controller, action) SetRoute(method, path, controller, action)
-
 # define Crudify(resource_name, controller) \
   SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \
   SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,show);   \
@@ -72,9 +73,13 @@ namespace Crails
   SetRoute("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,update); \
   SetRoute("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,destroy);
 
+
 # define SetResource(resource_name, controller) \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,new);    \
+  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,new_);    \
   SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,edit);   \
   Crudify(resource_name, controller)
 
+# define match_action(method, path, controller, action) SetRoute(method, path, controller, action)
+# define crud_actions(resource_name, controller)     Crudify(resource_name, controller)
+# define resource_actions(resource_name, controller) SetResource(resource_name, controller)
 #endif

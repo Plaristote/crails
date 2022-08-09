@@ -10,7 +10,7 @@ bool JsonRenderer::can_render(const std::string& accept_header, const std::strin
   return false;
 }
 
-void JsonRenderer::render_template(const std::string& view, Data, RenderTarget& target, SharedVars& vars) const
+void JsonRenderer::render_template(const std::string& view, RenderTarget& target, SharedVars& vars) const
 {
   auto tpl = templates.find(view);
   std::string json_view = (*tpl).second(this, vars);

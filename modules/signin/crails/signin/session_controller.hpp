@@ -17,7 +17,7 @@ namespace Crails
   public:
     typedef std::shared_ptr<USER> UserPtr;
 
-    SessionController(Crails::Params& params) : SUPER(params), user_session(SUPER::session)
+    SessionController(Crails::Request& request) : SUPER(request), user_session(SUPER::session)
     {
     }
 

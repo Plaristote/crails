@@ -31,7 +31,8 @@ Controller::Controller(Request& request) :
 
 Controller::~Controller()
 {
-  close();
+  if (close_on_deletion)
+    close();
 }
 
 void Controller::initialize()

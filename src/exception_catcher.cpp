@@ -66,6 +66,7 @@ void ExceptionCatcher::response_exception(Request& request, string e_name, strin
   vars["params"]         = &(request.params);
   {
     try {
+      request.out.set_status_code(HttpStatus::internal_server_error);
       Renderer::render("lib/exception", request.params.as_data(), request.out, vars);
     }
     catch (const MissingTemplate& exception) {

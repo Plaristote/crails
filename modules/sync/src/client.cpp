@@ -6,35 +6,25 @@ using namespace Faye;
 using namespace std;
 using namespace boost;
 
-typedef network::http::client_options<network::http::client::tag_type> http_options;
-
 Client::Client(const Settings& settings) :
   settings(settings),
-  http(http_options())
+  http(settings.hostname, settings.port)
 {
 }
 
 void Client::publish(const string& channel, Data message)
 {
   DataTree object;
+  Crails::HttpRequest request{boost::beast::http::verb::post, channel, 11};
+  string body;
 
   object["channel"] = channel;
   object["data"] = message.to_json();
   settings.hook(object.as_data());
-
-  network::http::client::request request(url_for_channel(channel));
-  string body = object.to_json();
-
-  request << network::header("Connection", "close");
-  request << network::header("Content-Length", lexical_cast<string>(body.length()));
-  request << network::header("Content-Type", "application/json");
-  request << network::body(body);
-  http.post(request);
-}
-
-std::string Client::url_for_channel(const string& channel) const
-{
-  return settings.protocol + "://"
-       + settings.hostname + ':'
-       + lexical_cast<string>(settings.port);
+  body = object.to_json();
+  request.set(boost::beast::http::field::connection, "Close");
+  request.set(boost::beast::http::field::content_type, "application/json");
+  request.content_length(body.length());
+  request.body() = body;
+  http.query(request);
 }

@@ -21,7 +21,8 @@ namespace Crails
 
     const Server&               server;
     std::shared_ptr<Connection> connection;
-    BuildingResponse            out;
+    BuildingResponse            response;
+    BuildingResponse&           out;
     Params                      params;
     Utils::Timer                timer;
     ExceptionCatcher::Context   exception_context;

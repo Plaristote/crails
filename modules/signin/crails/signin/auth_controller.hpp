@@ -10,7 +10,7 @@ namespace Crails
   class AuthController : public SUPER
   {
   public:
-    AuthController(Crails::Params& params) : SUPER(params), user_session(SUPER::session)
+    AuthController(Crails::Request& request) : SUPER(request), user_session(SUPER::session)
     {
     }
 
@@ -24,15 +24,18 @@ namespace Crails
 
     void initialize_required_user()
     {
-      if (require_authentified_user())
-        initialize_current_user();
+      if (require_authentified_user() && !initialize_current_user())
+        SUPER::close();
     }
 
   protected:
     bool initialize_current_user()
     {
       if (user_session.get_current_user() == nullptr)
+      {
         SUPER::respond_with(SUPER::ResponseStatus::unauthorized);
+        return false;
+      }
       return true;
     }
 

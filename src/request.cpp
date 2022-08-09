@@ -7,7 +7,7 @@ using namespace Crails;
 using namespace std;
 
 Request::Request(const Server& server, Connection& connection)
-  : server(server), connection(connection.shared_from_this()), out(connection)
+  : server(server), connection(connection.shared_from_this()), response(connection), out(response)
 {
 }
 

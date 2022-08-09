@@ -21,6 +21,7 @@ namespace Crails
     void         async_query(const HttpRequest& request, std::function<void(const HttpResponse&)> callback);
 
   private:
+    bool                     connected = false;
     const std::string        host;
     const unsigned short     port;
     Resolver                 resolver;

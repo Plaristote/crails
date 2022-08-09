@@ -20,9 +20,13 @@ Client::~Client()
 
 void Client::connect()
 {
-  const auto results = resolver.resolve(host, boost::lexical_cast<std::string>(port));
+  if (!connected)
+  {
+    const auto results = resolver.resolve(host, boost::lexical_cast<std::string>(port));
 
-  stream.connect(results);
+    stream.connect(results);
+    connected = true;
+  }
 }
 
 HttpResponse Client::query(const HttpRequest& request)

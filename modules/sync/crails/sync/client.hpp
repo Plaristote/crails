@@ -3,7 +3,7 @@
 
 # include <string>
 # include <crails/datatree.hpp>
-# include <boost/network/protocol/http/client.hpp>
+# include <crails/client.hpp>
 
 namespace Faye
 {
@@ -21,10 +21,8 @@ namespace Faye
 
     void publish(const std::string& channel, Data message);
   private:
-    std::string url_for_channel(const std::string& channel) const;
-
     Settings settings;
-    boost::network::http::client http;
+    Crails::Client http;
   };
 }
 

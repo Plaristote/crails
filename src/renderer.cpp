@@ -18,7 +18,7 @@ void Renderer::render(const std::string& view, Data params, RenderTarget& target
 
   if (renderer == NULL)
     throw MissingTemplate(view, params["headers"]["Accept"].defaults_to<string>(default_format));
-  renderer->render_template(view, params, target, vars);
+  renderer->render_template(view, target, vars);
 }
 
 Renderer* Renderer::pick_renderer(const std::string& view, Data params)
