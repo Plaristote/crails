@@ -1,16 +1,18 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(<%= options[:name] %>)
-option(DEVELOPER_MODE  "enable debugging tools" ON)
+option(DEVELOPER_MODE "enable debugging tools" ON)
 
 <% cxx_options  = ''
    cxx_options += " -DUSE_SEGVCATCH" unless options[:segvcatch] != true -%>
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -pedantic <%= cxx_options %>")
+set(CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -pedantic <%= cxx_options %>")
 
-find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system random REQUIRED)
 
-include_directories(include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} .)
+include_directories(include /usr/local/include ${Boost_INCLUDE_DIRS} .)
+
+// Do not change the following line unless you've compiled Crails without it
+add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW)
 
 if(DEVELOPER_MODE)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -50,7 +52,6 @@ set(dependencies crails-core${crails-suffix}
                  crails-app
                  ${Boost_LIBRARIES}
                  pthread dl crypto ssl
-                 ${CPPNETLIB_LIBRARIES}
                  ${dependencies}
                  <% if options[:segvcatch] == true %>segvcatch<% end %>)
 

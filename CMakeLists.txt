@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(crails_project)
 
@@ -6,10 +6,8 @@ option(USE_MEMCACHED     "Memcached"             OFF)
 option(USE_MONGODB       "MongoDB"               ON)
 option(USE_ODB           "ODB ORM"               ON)
 option(USE_COOKIE_CIPHER "Include cookie cipher" OFF)
-option(USE_SSL           "Include ssl support"   OFF)
 option(USE_CRAILS_SYNC   "crails-sync"           ON)
 option(DEVELOPER_MODE    "Developer mode"        ON)
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 ##
@@ -30,26 +28,21 @@ if (USE_COOKIE_CIPHER)
   include_directories(/usr/include/openssl-1.0)
 endif()
 
-if (USE_SSL)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCRAILS_WITH_SSL -DBOOST_NETWORK_ENABLE_HTTPS")
-endif()
-
 if(CMAKE_COMPILER_IS_GNUCC)
-  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ ${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual -Wno-return-type-c-linkage")
+  set(CMAKE_CXX_FLAGS "-stdlib=libc++ ${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual -Wno-return-type-c-linkage")
   set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -undefined dynamic_lookup")
 endif()
 
 ##
 ## Dependencies
 ##
-find_package(cppnetlib REQUIRED)
 find_package(Boost COMPONENTS thread filesystem program_options system random REQUIRED)
 find_package(ImageMagick COMPONENTS Magick++)
 find_package(webdriverxx)
 
-include_directories(. include Boots/include /usr/local/include ${CPPNETLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ImageMagick_INCLUDE_DIRS} ${WEBDRIVERXX_INCLUDE_DIRS})
+include_directories(. include Boots/include /usr/local/include ${Boost_INCLUDE_DIRS} ${ImageMagick_INCLUDE_DIRS} ${WEBDRIVERXX_INCLUDE_DIRS})
 add_definitions(-DBOOST_BEAST_USE_STD_STRING_VIEW)
 
 ##
@@ -100,6 +93,17 @@ install(FILES      ${guard_plugins}       DESTINATION share/crails/guard)
 install(DIRECTORY  crails                 DESTINATION include)
 install(TARGETS    crails-core${crails-suffix}    LIBRARY DESTINATION lib)
 install(TARGETS    crails-tests${crails-suffix}   LIBRARY DESTINATION lib)
+
+if (USE_ODB)
+  add_definitions(-DWITH_ODB)
+endif()
+
+if (USE_MONGODB)
+  add_definitions(-DWITH_MONGODB)
+  foreach(PREFIX IN ITEMS ${CMAKE_SYSTEM_PREFIX_PATH})
+    include_directories("${PREFIX}/include/mongocxx/v_noabi" "${PREFIX}/include/bsoncxx/v_noabi")
+  endforeach()
+endif()
 
 add_subdirectory(modules/docker)
 add_subdirectory(modules/html)
