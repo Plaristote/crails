@@ -10,9 +10,12 @@ using namespace Crails;
 
 std::string rand_str(std::string::size_type size); // Defined in rand_str.cpp
 
-Controller::Controller(Request& request) : params(request.params), response(request.out), session(params.get_session())
+Controller::Controller(Request& request) :
+  params(request.params),
+  session(params.get_session()),
+  response(request.out),
+  request(request.shared_from_this())
 {
-  this->request = request.shared_from_this();
   // Set the class attributes accessible to the views
   vars["controller"] = this;
   vars["params"]     = &params;
@@ -28,7 +31,7 @@ Controller::Controller(Request& request) : params(request.params), response(requ
 
 Controller::~Controller()
 {
-  params["response-time"]["controller"] = timer.GetElapsedSeconds();
+  close();
 }
 
 void Controller::initialize()
@@ -37,10 +40,21 @@ void Controller::initialize()
     protect_from_forgery();
 }
 
+void Controller::close()
+{
+  params["response-time"]["controller"] = timer.GetElapsedSeconds();
+  if (callback)
+  {
+    callback();
+    callback = std::function<void()>();
+  }
+}
+
 void Controller::redirect_to(const string& uri)
 {
   request->out.set_status_code(HttpStatus::temporary_redirect);
   request->out.set_headers("Location", uri);
+  close();
 }
 
 void Controller::respond_with(Crails::HttpStatus code)
@@ -69,7 +83,7 @@ bool Controller::check_csrf_token(void)// const
 void Controller::render(const std::string& view)
 {
   Renderer::render(view, params.as_data(), request->out, vars);
-  request->out.send();
+  close();
 }
 
 void Controller::render(const std::string& view, SharedVars vars)
@@ -80,14 +94,14 @@ void Controller::render(const std::string& view, SharedVars vars)
       vars.emplace(var.first, var.second);
   }
   Renderer::render(view, params.as_data(), request->out, vars);
-  request->out.send();
+  close();
 }
 
 void Controller::render(RenderType type, const string& value)
 {
   set_content_type(type);
   request->out.set_body(value.c_str(), value.length());
-  request->out.send();
+  close();
 }
 
 void Controller::render(RenderType type, Data value)
@@ -108,7 +122,7 @@ void Controller::render(RenderType type, Data value)
   }
   set_content_type(type);
   request->out.set_body(body.str().c_str(), body.str().length());
-  request->out.send();
+  close();
 }
 
 void Controller::set_content_type_from_extension(const std::string& extension)

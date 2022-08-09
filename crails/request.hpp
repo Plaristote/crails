@@ -25,6 +25,7 @@ namespace Crails
     Params                      params;
     Utils::Timer                timer;
     ExceptionCatcher::Context   exception_context;
+    bool                        handled = false;
 
     void run();
   private:

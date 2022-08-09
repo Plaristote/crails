@@ -4,14 +4,14 @@ using namespace std;
 
 namespace Crails
 {
-  string strip(const string& str)
+  string strip(const string& str, char character)
   {
     unsigned short w_begin, w_end;
     bool           got_begin = false;
 
     for (unsigned short i = 0 ; i < str.size() ; ++i)
     {
-      if (str[i] != ' ')
+      if (str[i] != character)
       {
         if (got_begin == false)
         {
@@ -22,6 +22,26 @@ namespace Crails
       }
     }
     return (str.substr(w_begin, (w_end + 1) - w_begin));
+  }
+
+  string remove_duplicate_characters(const string& source, char character)
+  {
+    int length = source.length();
+
+    if (length > 0)
+    {
+      string str;
+
+      str.reserve(length);
+      for (int i = 0 ; i < length - 1 ; ++i)
+      {
+        if (source[i] != character || source[i] != source[i+1])
+          str.push_back(source[i]);
+      }
+      str.push_back(source[length - 1]);
+      return str;
+    }
+    return source;
   }
 
   string humanize(const string& tmp)

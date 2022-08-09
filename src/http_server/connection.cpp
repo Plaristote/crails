@@ -6,6 +6,12 @@
 using namespace Crails;
 using namespace boost;
 
+Connection::Connection(const Server& server_, HttpRequest request) :
+  server(server_),
+  stream(std::move(asio::ip::tcp::socket(server.get_io_context()))),
+  request(request)
+{}
+
 Connection::Connection(const Server& server_, asio::ip::tcp::socket socket_) :
   server(server_),
   stream(std::move(socket_))

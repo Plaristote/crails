@@ -5,6 +5,7 @@
 # include <vector>
 # include <string>
 # include <regex>
+# include <crails/utils/string.hpp>
 # define ROUTER_PARAM_PATTERN "[a-zA-Z0-9_-]*"
 
 namespace Crails
@@ -52,17 +53,26 @@ namespace Crails
 
     void      match(const std::string& route, Action callback)
     {
-      match("", route, callback);
+      match("", full_route(route), callback);
     }
 
     void      match(const std::string& method, const std::string& route, Action callback)
     {
       Item item;
 
-      item_initialize_regex(item, '^' + route + '$');
+      item_initialize_regex(item, '^' + full_route(route) + '$');
       item.method = method;
       item.run    = callback;
       routes.push_back(item);
+    }
+
+    void      scope(const std::string& path, std::function<void()> callback)
+    {
+      const auto backup = current_scope;
+
+      current_scope = path;
+      callback();
+      current_scope = backup;
     }
 
   private:
@@ -84,9 +94,15 @@ namespace Crails
         last_position = match.position(0) + match.length(0);
       }
       regexified_route += route.substr(last_position);
-      item.regexp = regex(regexified_route, regex_constants::ECMAScript);
+      item.regexp = regex(regexified_route, regex_constants::ECMAScript | regex_constants::optimize);
     }
 
+    std::string full_route(const std::string& path) const
+    {
+      return remove_duplicate_characters(current_scope + '/' + path, '/');
+    }
+
+    std::string current_scope;
   public:
     Items routes;
   };

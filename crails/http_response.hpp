@@ -8,7 +8,6 @@
 
 namespace Crails
 {
-
   class BuildingResponse : public RenderTarget
   {
   public:

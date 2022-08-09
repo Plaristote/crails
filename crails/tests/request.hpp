@@ -26,13 +26,12 @@ namespace Crails
       };
 
     public:
-      Request(const std::string& method, const std::string& uri);
+      Request(boost::beast::http::verb method, const std::string& uri);
 
       void run();
 
-      Params   params;
-      DataTree response;
-    private:
+      HttpRequest  request;
+      HttpResponse response;
     };
   }
 }

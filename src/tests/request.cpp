@@ -1,12 +1,15 @@
 #include "crails/tests/request.hpp"
+#include "crails/tests/helper.hpp"
 
 using namespace std;
 using namespace Crails;
 
-Tests::Request::Request(const string& method, const std::string& uri)
+extern Server* test_server;
+
+Tests::Request::Request(boost::beast::http::verb method, const std::string& uri)
 {
-  params["method"] = method;
-  params["uri"]    = uri;
+  request.method(method);
+  request.target(uri);
 }
 
 void Tests::Request::run()
@@ -15,14 +18,12 @@ void Tests::Request::run()
 
   if (router)
   {
-    const Router::Action* action = router->get_action(params["method"].as<string>(), params["uri"].as<string>(), params);
+    auto stub_connection = make_shared<Crails::Connection>(*test_server, request);
+    auto stub_request    = make_shared<Crails::Request>(*test_server, *stub_connection);
 
-    if (action != 0)
-      (*action)(params, [this](DataTree data) { response = data; });
-    else
-      throw RouteNotFound(params["method"].as<string>() + '#' + params["uri"].as<string>());
-    if (!response["status"].exists())
-      response["status"] = 200;
+    stub_request->run();
+    if (!stub_request->handled)
+      throw RouteNotFound(std::string(boost::beast::http::to_string(request.method())) + '#' + std::string(request.target()));
   }
   else
     throw RouterNotInitialized();

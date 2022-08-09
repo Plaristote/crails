@@ -12,6 +12,7 @@ namespace Crails
   class Router;
   class Mailer;
   class Request;
+  template<typename CONTROLLER> class ControllerRoute;
 
   struct ExceptionCSRF : public std::exception
   {
@@ -20,10 +21,12 @@ namespace Crails
 
   class Controller : public std::enable_shared_from_this<Controller>
   {
+    template<typename CONTROLLER>
+    friend class ControllerRoute;
   protected:
     typedef Crails::HttpStatus ResponseStatus;
 
-    Controller(Request& params);
+    Controller(Request& request);
   public:
     virtual ~Controller();
 
@@ -64,8 +67,10 @@ namespace Crails
     bool            check_basic_authentication_header(const std::string& header, std::function<bool (const std::string&, const std::string&)>);
     void            set_content_type(RenderType);
     void            set_content_type_from_extension(const std::string&);
+    void            close();
 
     std::shared_ptr<Request> request;
+    std::function<void()>    callback;
     Utils::Timer             timer;
   };
 }

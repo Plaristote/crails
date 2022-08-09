@@ -10,72 +10,60 @@
 # include "server.hpp"
 # include "params.hpp"
 # include "router_base.hpp"
+# include "request.hpp"
 
 namespace Crails
 {
-  class Router : public RouterBase<Crails::Params, std::function<void (Crails::Params&,std::function<void(DataTree)>)> >
+  class Router : public RouterBase<Crails::Params, std::function<void (Crails::Request&, std::function<void()>)> >
   {
     Router() {}
     ~Router() {}
 
     SINGLETON(Router)
   public:
-    void          initialize(void);
+    void initialize(void);
+  };
+
+  template<typename CONTROLLER>
+  class ControllerRoute
+  {
+    typedef void (CONTROLLER::*Method)();
+  public:
+    static void trigger(Crails::Request& request, Method method, std::function<void()> callback)
+    {
+      auto controller = std::make_shared<CONTROLLER>(request);
+
+      if (!request.out.sent())
+      {
+        controller->callback = std::bind(&ControllerRoute<CONTROLLER>::finalize, controller.get(), callback);
+        controller->initialize();
+        if (!request.out.sent())
+          (controller.get()->*method)();
+      }
+      else
+        callback();
+    }
+
+  private:
+    static void finalize(CONTROLLER* controller, std::function<void()> callback)
+    {
+      controller->finalize();
+      callback();
+    }
   };
 }
 
 # define SYM2STRING(sym) std::string(#sym)
 
-# define SetAsyncRoute(method, route, klass, func) \
-  match(method, route, [](Params& params, std::function<void(DataTree)> callback) \
-  { \
-    params["controller-data"]["name"]   = #klass; \
-    params["controller-data"]["action"] = #func; \
-    std::shared_ptr<klass> controller = std::make_shared<klass>(params); \
-    auto                   callback_2 = [controller, callback]() \
-    { \
-      DataTree response = controller->response; \
-\
-      controller.reset(0); \
-      callback(response); \
-    }; \
-\
-    if (controller->response["status"].exists()) \
-      callback_2(); \
-    controller->initialize([controller, callback_2]() \
-    { \
-      auto callback_3 = [=](){ controller->finalize(callback_2);}; \
-\
-      if (!controller->response["status"].exists()) \
-        controller->func(callback_3); \
-      else \
-        callback_3(); \
-    }); \
-  });
-
 # define SetRoute(method, route, klass, func) \
-  match(method, route, [](Params& params, std::function<void(DataTree)> callback) \
+  match(method, route, [](Crails::Request& request, std::function<void()> callback) \
   { \
-    DataTree response; \
-\
-    params["controller-data"]["name"]   = #klass; \
-    params["controller-data"]["action"] = #func; \
-    { \
-      klass controller(params); \
-\
-      if (controller.response["status"].exists()) \
-        response = controller.response; \
-      else \
-      { \
-        controller.initialize(); \
-        if (!controller.response["status"].exists()) \
-          controller.func(); \
-        controller.finalize(); \
-        response = controller.response; \
-      } \
-    } \
-    callback(response); \
-  });
+    request.params["controller-data"]["name"]   = #klass; \
+    request.params["controller-data"]["action"] = #func; \
+    ControllerRoute<klass>::trigger(request, &klass::func, callback); \
+  })
+
+# define match_action(method, path, controller, action) SetRoute(method, path, controller, action)
 
 # define Crudify(resource_name, controller) \
   SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \

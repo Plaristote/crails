@@ -90,14 +90,9 @@ void Request::run_handler(Server::RequestHandlers::const_iterator it, std::funct
 
 void Request::on_handled(bool handled)
 {
+  this->handled = handled;
   if (!handled)
-  {
-    auto code = boost::beast::http::status::not_found;
-
-    if (params["response-data"]["code"].exists())
-      code = (HttpStatus)(params["response-data"]["code"].as<int>());
-    render_error_view(out, code, params);
-  }
+    render_error_view(out, boost::beast::http::status::not_found, params);
   on_finished();
 }
 
@@ -105,7 +100,7 @@ static void output_request_timers(Data timers)
 {
   int i = 0;
 
-  logger << '(';
+  logger << ' ';
   timers.each([&i](Data timer) -> bool
   {
     logger << (i++ == 0 ? "(" : ", ");
@@ -121,10 +116,11 @@ void Request::on_finished()
   unsigned short code   = static_cast<unsigned short>(connection->get_response().result());
 
   out.send();
-  logger << Logger::Info << "# Responded to " << params["method"].defaults_to<string>("GET") << " '" << params["uri"].defaults_to<string>("");
-  logger << "' with " << code;
-  logger << " in " << crails_time << 's';
+  logger << Logger::Info << "# Responded to "
+         << params["method"].defaults_to<string>("GET")
+         << " '" << params["uri"].defaults_to<string>("")
+         << "' with " << code << " in " << crails_time << 's';
   if (params["response-time"].exists())
     output_request_timers(params["response-time"]);
-  logger << Logger::endl << Logger::endl;
+  logger << Logger::endl;
 }

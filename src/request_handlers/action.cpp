@@ -24,22 +24,9 @@ void ActionRequestHandler::operator()(Request& request, function<void(bool)> cal
     {
       logger << Logger::Info << "# Responding to " << method << ' ' << params["uri"].as<string>() << Logger::endl;
       params.session->load(request.params["headers"]);
-      (*action)(params, [callback, &request](DataTree data)
+      (*action)(request, [callback, &request]()
       {
-        string     body = data["body"].defaults_to<string>("");
-        HttpStatus code;
-
-        if (data["headers"].exists())
-        {
-          data["headers"].each([&request](Data header) -> bool
-          {
-            request.out.set_headers(header.get_key(), header.as<string>());
-            return true;
-          });
-        }
         request.params.session->finalize(request.out);
-        code = static_cast<HttpStatus>(data["status"].defaults_to<int>(200));
-        request.out.set_response(code, body);
         callback(true);
       });
     }

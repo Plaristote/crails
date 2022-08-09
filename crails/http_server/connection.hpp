@@ -15,6 +15,7 @@ namespace Crails
     typedef std::function<void(Connection&)> RequestHandler;
 
     Connection(const Server&, boost::asio::ip::tcp::socket);
+    Connection(const Server&, HttpRequest); // Only needed for test purposes
     ~Connection();
 
     void start();
