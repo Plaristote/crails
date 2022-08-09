@@ -5,10 +5,9 @@
 using namespace std;
 using namespace XmlRpc;
 
-typedef boost::network::http::client_options<boost::network::http::client::tag_type>
-  client_options;
-
-Client::Client(const string& endpoint) : endpoint(endpoint), client(client_options())
+Client::Client(const string& url) :
+  endpoint(Crails::Url::from_string(url)),
+  client(endpoint.host, endpoint.port)
 {
 }
 

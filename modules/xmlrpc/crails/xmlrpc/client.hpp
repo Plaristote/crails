@@ -1,8 +1,9 @@
 #ifndef  XMLRPC_CLIENT_HPP
 # define XMLRPC_CLIENT_HPP
 
-# include <boost/network/protocol/http/client.hpp>
 # include <boost/lexical_cast.hpp>
+# include "crails/client.hpp"
+# include "crails/url.hpp"
 # include "variable.hpp"
 # include "xml_for_method_call.hpp"
 
@@ -11,40 +12,36 @@ namespace XmlRpc
   class Client
   {
   protected:
-    const std::string endpoint;
-    boost::network::http::client client;
+    const Crails::Url endpoint;
+    Crails::Client client;
 
   public:
     Client(const std::string& endpoint);
 
-    virtual void set_request_headers(boost::network::http::client::request& request)
-    {
-    }
-
     template<typename ...Args>
     Variable call(const std::string& method_name, Args... args)
     {
-      std::string body = xml_for_method_call(method_name, args...);
-      boost::network::http::client::request request(endpoint);
+      std::string          body = xml_for_method_call(method_name, args...);
+      Crails::HttpRequest  request{boost::beast::http::verb::post, endpoint.target, 11};
+      Crails::HttpResponse response;
       DataTree response_data;
 
-      request << boost::network::header("Connection",   "close");
-      request << boost::network::header("User-Agent",   "crails-xmlrpc/0.1");
-      request << boost::network::header("Content-Type", "text/xml");
-      request << boost::network::header("Content-Length", boost::lexical_cast<std::string>(body.length()));
-      request << boost::network::body(body);
-      auto response = client.post(request);
-      int  status   = boost::network::http::status(response);
-
-      if (status >= 400)
+      request.set(boost::beast::http::field::connection,   "close");
+      request.set(boost::beast::http::field::user_agent,   "crails-xmlrpc/0.2");
+      request.set(boost::beast::http::field::content_type, "text/xml");
+      request.content_length(body.length());
+      request.body() = body;
+      client.connect();
+      response = client.query(request);
+      if (static_cast<short>(response.result()) >= 400)
         throw std::runtime_error("XmlRpc::Client::call responded with status >= 400");
-      std::cout << "response body: " << boost::network::http::body(response) << std::endl;
-      response_data.from_xml(boost::network::http::body(response));
+      response_data.from_xml(std::string(response.body()));
       if (is_faulty_response(response_data))
         raise_xmlrpc_fault(response_data);
       return get_response_variable(response_data);
     }
 
+  private:
     bool is_faulty_response(const DataTree& data) const
     {
       return data["methodResponse"]["fault"].exists();
