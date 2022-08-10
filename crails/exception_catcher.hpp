@@ -8,21 +8,21 @@
 
 namespace Crails
 {
-  class Request;
+  class Context;
   class Server;
 
   class ExceptionCatcher
   {
-    friend class Request;
+    friend class Context;
     friend class Server;
 
     struct Context
     {
-      Context(Request& request) : request(&request) {}
-      Context() : request(0) {}
+      Context(Crails::Context& context) : context(&context) {}
+      Context() : context(0) {}
 
       unsigned short        iterator;
-      Request*              request;
+      Crails::Context*      context;
       std::thread::id       thread_id;
       std::function<void()> callback;
     };
@@ -32,45 +32,44 @@ namespace Crails
   public:
     ExceptionCatcher();
 
-    void run(Request&, std::function<void()> callback) const;
-    void run_protected(Request&, std::function<void()> callback) const;
+    void run(Crails::Context&, std::function<void()> callback) const;
+    void run_protected(Crails::Context&, std::function<void()> callback) const;
 
     template<typename EXCEPTION>
     void add_exception_catcher(const std::string& exception_name)
     {
-      add_exception_catcher<EXCEPTION>([this, exception_name](Request& request, const EXCEPTION e)
+      add_exception_catcher<EXCEPTION>([this, exception_name](Crails::Context& context, const EXCEPTION e)
       {
         std::stringstream stream;
 
         stream << boost_ext::trace(e);
-        default_exception_handler(request,
-          exception_name, e.what(), stream.str());
+        default_exception_handler(context, exception_name, e.what(), stream.str());
       });
     }
 
     template<typename EXCEPTION>
-    void add_exception_catcher(std::function<void (Request&, const EXCEPTION)> handler)
+    void add_exception_catcher(std::function<void (Crails::Context&, const EXCEPTION)> handler)
     {
-      functions.push_back([this, handler](Context context)
+      functions.push_back([this, handler](Context exception_context)
       {
         try
         {
-          context.iterator++;
-          if (context.iterator < functions.size())
-            functions[context.iterator](context);
+          exception_context.iterator++;
+          if (exception_context.iterator < functions.size())
+            functions[exception_context.iterator](exception_context);
           else
-            context.callback();
+            exception_context.callback();
         }
         catch (const EXCEPTION e)
         {
-          handler(*(context.request), e);
+          handler(*(exception_context.context), e);
         }
       });
     }
 
   private:
-    void response_exception(Request&, std::string exception_name, std::string message) const;
-    void default_exception_handler(Request&, const std::string& exception_name, const std::string& message, const std::string& trace);
+    void response_exception(Crails::Context&, std::string exception_name, std::string message) const;
+    void default_exception_handler(Crails::Context&, const std::string& exception_name, const std::string& message, const std::string& trace);
 
     Functions     functions;
   };

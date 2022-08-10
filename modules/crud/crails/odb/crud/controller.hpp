@@ -26,13 +26,13 @@ namespace Crud
     public:
       typedef odb::query<QUERY_OBJECT> Query;
 
-      Controller(Crails::Request& request) :
-        BASE(request),
-        paginator(request.params.as_data())
+      Controller(Crails::Context& context) :
+        BASE(context),
+        paginator(context.params.as_data())
       {
       }
 
-      void initialize()
+      void initialize() override
       {
         BASE::initialize();
         initialize_crud();
@@ -136,7 +136,7 @@ namespace Crud
           Crails::Controller::render(Crails::Controller::JSON,
             model->errors.as_data()
           );
-          BASE::response["status"] = BASE::ResponseStatus::bad_request;
+          BASE::response.set_status_code(Crails::HttpStatus::bad_request);
           return false;
         }
         return true;
@@ -152,7 +152,7 @@ namespace Crud
       void require_model()
       {
         if (!find_model())
-          BASE::response["status"] = BASE::ResponseStatus::not_found;
+          BASE::response.set_status_code(Crails::HttpStatus::not_found);
       }
 
       virtual bool find_model()

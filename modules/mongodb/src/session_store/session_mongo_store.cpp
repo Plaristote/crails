@@ -39,7 +39,7 @@ void MongoStore::finalize(BuildingResponse& response)
     while (cookie.Count())
       cookie[0].Remove();
     cookie["session_id"] = session->Id();
-    response.set_headers("Set-Cookie", cookie.serialize());
+    response.set_header(HttpHeader::set_cookie, cookie.serialize());
     MongoStore::SessionStore::Cleanup();
   }
 }

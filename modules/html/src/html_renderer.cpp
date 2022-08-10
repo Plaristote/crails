@@ -18,7 +18,7 @@ void HtmlRenderer::render_template(const std::string& view, RenderTarget& target
   string html_view = (*tpl).second(this, vars);
   string layout    = cast<std::string>(vars, "layout", "");
 
-  target.set_headers("Content-Type", "text/html");
+  target.set_header("Content-Type", "text/html");
   if (layout != "" && view != layout)
   {
     if (can_render("text/html", layout))

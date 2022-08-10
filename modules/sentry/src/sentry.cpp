@@ -31,10 +31,16 @@ string get_type_as_string(const T& t)
   return demangle(typeid(t).name());
 }
 
-typedef network::http::client_options<network::http::client::tag_type> http_options;
+string Sentry::get_server_url()
+{
+  return server_protocol + "://" + server_url + "/api/" + project_id + "/store/";
+}
 
-Sentry::Sentry() : http(http_options())
-{}
+Sentry::Sentry() :
+  url(Url::from_string(get_server_url())),
+  client(url.host, url.port)
+{
+}
 
 void Sentry::set_message_context(Data message)
 {
@@ -135,11 +141,6 @@ void Sentry::capture_exception(Data params, const std::exception& e)
   }
 }
 
-string Sentry::get_server_url()
-{
-  return server_protocol + "://" + server_url + "/api/" + project_id + "/store/";
-}
-
 void Sentry::send_message(Data message)
 {
   string body_str = message.to_json();
@@ -166,19 +167,18 @@ void Sentry::send_message(Data message)
     + "sentry_key=" + sentry_key + ','
     + "sentry_secret=" + sentry_secret;
 
-  network::http::client::request request(get_server_url());
+  HttpRequest request{HttpVerb::post, url.target, 11};
+  HttpResponse response;
 
-  request << network::header("Connection", "close")
-          << network::header("Content-Length", lexical_cast<string>(body_str.length()))
-          << network::header("Content-Type", "application/json")
-          << network::header("X-Sentry-Auth", sentry_auth)
-          << network::body(body_str);
-  auto response = http.post(request);
-  auto response_status = status(response);
-
+  request.set(HttpHeader::connection,   "close");
+  request.set(HttpHeader::content_type, "application/json");
+  request.set("X-Sentry-Auth",          sentry_auth);
+  request.content_length(body_str.length());
+  request.body() = body_str;
+  response = client.query(request);
   logger << Logger::Info << "[Sentry] ";
-  if (response_status == 200)
-    logger << "exception logged with id " << body(response) << Logger::endl;
+  if (response.result() == HttpStatus::ok)
+    logger << "exception logged with id " << response.body() << Logger::endl;
   else 
-    logger << "failed to log exception (status " << (int)response_status << "): " << body(response) << Logger::endl;
+    logger << "failed to log exception (status " << static_cast<int>(response.result()) << "): " << response.body() << Logger::endl;
 }

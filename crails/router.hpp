@@ -3,20 +3,13 @@
 
 # include <exception>
 # include <iostream>
-
 # include <crails/utils/singleton.hpp>
-
-# include "datatree.hpp"
-# include "server.hpp"
-# include "params.hpp"
 # include "router_base.hpp"
-# include "request.hpp"
-
-# include "logger.hpp"
+# include "context.hpp"
 
 namespace Crails
 {
-  class Router : public RouterBase<Crails::Params, std::function<void (Crails::Request&, std::function<void()>)> >
+  class Router : public RouterBase<Crails::Params, std::function<void (Crails::Context&, std::function<void()>)> >
   {
     Router() {}
     ~Router() {}
@@ -27,19 +20,19 @@ namespace Crails
   };
 
   template<typename CONTROLLER>
-  class ControllerRoute
+  class ActionRoute
   {
     typedef void (CONTROLLER::*Method)();
   public:
-    static void trigger(Crails::Request& request, Method method, std::function<void()> callback)
+    static void trigger(Crails::Context& context, Method method, std::function<void()> callback)
     {
-      auto controller = std::make_shared<CONTROLLER>(request);
+      auto controller = std::make_shared<CONTROLLER>(context);
 
-      if (!request.out.sent())
+      if (!context.response.sent())
       {
-        controller->callback = std::bind(&ControllerRoute<CONTROLLER>::finalize, controller.get(), callback);
-        controller->initialize();
-        if (!request.out.sent())
+        controller->callback = std::bind(&ActionRoute<CONTROLLER>::finalize, controller.get(), callback);
+        controller->ActionController::initialize();
+        if (!context.response.sent())
           (controller.get()->*method)();
       }
       else
@@ -50,7 +43,7 @@ namespace Crails
   private:
     static void finalize(CONTROLLER* controller, std::function<void()> callback)
     {
-      controller->finalize();
+      controller->ActionController::finalize();
       callback();
     }
   };
@@ -58,28 +51,23 @@ namespace Crails
 
 # define SYM2STRING(sym) std::string(#sym)
 
-# define SetRoute(method, route, klass, func) \
-  match(method, route, [](Crails::Request& request, std::function<void()> callback) \
+# define match_action(method, path, controller, action) \
+  match(method, path, [](Crails::Context& context, std::function<void()> callback) \
   { \
-    request.params["controller-data"]["name"]   = #klass; \
-    request.params["controller-data"]["action"] = #func; \
-    ControllerRoute<klass>::trigger(request, &klass::func, callback); \
+    context.params["controller-data"]["name"]   = #controller; \
+    context.params["controller-data"]["action"] = #action; \
+    ActionRoute<controller>::trigger(context, &controller::action, callback); \
   })
 
-# define Crudify(resource_name, controller) \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,show);   \
-  SetRoute("POST",   '/' + SYM2STRING(resource_name),               controller,create); \
-  SetRoute("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,update); \
-  SetRoute("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,destroy);
+# define crud_actions(resource_name, controller) \
+  match_action("GET",    '/' + SYM2STRING(resource_name),               controller,index);  \
+  match_action("GET",    '/' + SYM2STRING(resource_name) + "/:id" ,     controller,show);   \
+  match_action("POST",   '/' + SYM2STRING(resource_name),               controller,create); \
+  match_action("PUT",    '/' + SYM2STRING(resource_name) + "/:id",      controller,update); \
+  match_action("DELETE", '/' + SYM2STRING(resource_name) + "/:id",      controller,destroy);
 
-
-# define SetResource(resource_name, controller) \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,new_);    \
-  SetRoute("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,edit);   \
-  Crudify(resource_name, controller)
-
-# define match_action(method, path, controller, action) SetRoute(method, path, controller, action)
-# define crud_actions(resource_name, controller)     Crudify(resource_name, controller)
-# define resource_actions(resource_name, controller) SetResource(resource_name, controller)
+# define resource_actions(resource_name, controller) \
+  match_action("GET",    '/' + SYM2STRING(resource_name) + "/new",      controller,new_);    \
+  match_action("GET",    '/' + SYM2STRING(resource_name) + "/:id/edit", controller,edit);   \
+  crud_actions(resource_name, controller)
 #endif

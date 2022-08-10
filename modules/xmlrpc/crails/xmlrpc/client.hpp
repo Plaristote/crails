@@ -26,9 +26,9 @@ namespace XmlRpc
       Crails::HttpResponse response;
       DataTree response_data;
 
-      request.set(boost::beast::http::field::connection,   "close");
-      request.set(boost::beast::http::field::user_agent,   "crails-xmlrpc/0.2");
-      request.set(boost::beast::http::field::content_type, "text/xml");
+      request.set(Crails::HttpHeader::connection,   "close");
+      request.set(Crails::HttpHeader::user_agent,   "crails-xmlrpc/0.2");
+      request.set(Crails::HttpHeader::content_type, "text/xml");
       request.content_length(body.length());
       request.body() = body;
       client.connect();

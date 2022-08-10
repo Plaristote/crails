@@ -3,7 +3,8 @@
 
 # include <crails/datatree.hpp>
 # include <crails/utils/backtrace.hpp>
-# include <boost/network/protocol/http/client.hpp>
+# include <crails/client.hpp>
+# include <crails/url.hpp>
 
 class Sentry
 {
@@ -26,7 +27,8 @@ private:
   void send_message(Data);
   static std::string get_server_url();
 
-  boost::network::http::client http;
+  const Crails::Url url;
+  Crails::Client    client;
 };
 
 #endif

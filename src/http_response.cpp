@@ -12,31 +12,18 @@ void BuildingResponse::set_response(HttpStatus code, const string& body)
 
 void BuildingResponse::set_body(const char* str, size_t size)
 {
-  auto&   response = get_response();
+  auto&   response = get_raw_response();
   string& out      = response.body();
 
   response.content_length(size);
   out.resize(size);
   std::copy(str, str + size, out.begin());
-  //send();
-}
-
-void BuildingResponse::set_status_code(HttpStatus code)
-{
-  get_response().result(code);
-}
-
-void BuildingResponse::set_headers(const std::string& key, const std::string& value)
-{
-  headers.emplace(key, value);
 }
 
 void BuildingResponse::send()
 {
   if (!already_sent)
   {
-    for (auto it = headers.cbegin() ; it != headers.cend() ; ++it)
-      get_response().set(it->first, it->second);
     connection.write();
     already_sent = true;
   }

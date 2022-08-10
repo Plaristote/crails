@@ -8,7 +8,7 @@ namespace Crails
   class RequestArchiveParser : public BodyParser
   {
   public:
-    void operator()(Connection& request, BuildingResponse& out, Params& params, std::function<void(RequestParser::Status)> callback);
+    void operator()(Connection&, BuildingResponse&, Params& params, std::function<void(RequestParser::Status)> callback);
     void body_received(Connection&, BuildingResponse&, Params& params, const std::string& body);
   };
 }

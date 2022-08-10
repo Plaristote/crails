@@ -11,7 +11,7 @@ void RequestDataParser::operator()(Connection& connection, BuildingResponse&, Pa
     const auto&  request    = connection.get_request();
     const string destination(request.target());
     const char*  get_params = strrchr(destination.c_str(), '?');
-    std::string  uri        = destination;
+    string       uri = destination;
 
     // Setting Headers parameters
     {
@@ -29,7 +29,6 @@ void RequestDataParser::operator()(Connection& connection, BuildingResponse&, Pa
       cgi2params(params.as_data(), str_params);
     }
   
-    // Set URI and method for the posterity (is that even a word ?)
     params["uri"]    = uri;
     params["method"] = boost::beast::http::to_string(request.method());
   }

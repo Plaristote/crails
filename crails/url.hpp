@@ -7,8 +7,10 @@ namespace Crails
 {
   struct Url
   {
-    static Url  from_string(const std::string&);
-    std::string to_string() const;
+    static std::string encode(const std::string&);
+    static std::string decode(const std::string&);
+    static Url         from_string(const std::string&);
+    std::string        to_string() const;
 
     bool           ssl = false;
     std::string    host;

@@ -1,7 +1,7 @@
 #ifndef  SERVER_HPP
 # define SERVER_HPP
 
-# include "http_server/types.hpp"
+# include "http.hpp"
 # include "file_cache.hpp"
 # include "exception_catcher.hpp"
 # include "datatree.hpp"
@@ -9,14 +9,14 @@
 namespace Crails
 {
   class Params;
-  class Request;
+  class Context;
   class RequestParser;
   class RequestHandler;
   class Connection;
 
   class Server
   {
-    friend class Request;
+    friend class Context;
   public:
     static const std::string temporary_path;
     static const std::string public_path;

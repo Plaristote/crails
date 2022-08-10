@@ -1,7 +1,7 @@
 #ifndef  CRAILS_HTTP_CONNECTION_H
 # define CRAILS_HTTP_CONNECTION_H
 
-# include "crails/http_server/types.hpp"
+# include "crails/http.hpp"
 # include <boost/asio/ip/tcp.hpp>
 # include <boost/beast/core.hpp>
 

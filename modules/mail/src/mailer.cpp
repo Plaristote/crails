@@ -4,7 +4,7 @@
 using namespace std;
 using namespace Crails;
 
-Mailer::Mailer(Controller& controller, const std::string& configuration) : controller(&controller), configuration(configuration), is_connected(false)
+Mailer::Mailer(RenderController& controller, const std::string& configuration) : controller(&controller), configuration(configuration), is_connected(false)
 {
 }
 

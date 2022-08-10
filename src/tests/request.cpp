@@ -19,7 +19,7 @@ void Tests::Request::run()
   if (router)
   {
     auto stub_connection = make_shared<Crails::Connection>(*test_server, request);
-    auto stub_request    = make_shared<Crails::Request>(*test_server, *stub_connection);
+    auto stub_request    = make_shared<Crails::Context>(*test_server, *stub_connection);
 
     stub_request->run();
     if (!stub_request->handled)

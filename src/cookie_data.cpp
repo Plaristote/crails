@@ -1,5 +1,5 @@
 #include <crails/cookie_data.hpp>
-#include <crails/http.hpp>
+#include <crails/url.hpp>
 #include <crails/utils/parse_cookie_values.hpp>
 #include <crails/utils/regex.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -23,7 +23,7 @@ string CookieData::serialize(void)
     if (use_encryption)
       value        = cipher.encrypt(value, password, salt);
 #endif
-    cookie_string += Http::Url::Encode("crails") + '=' + Http::Url::Encode(value);
+    cookie_string += Url::encode("crails") + '=' + Url::encode(value);
     cookie_string += ";path=/";
     return (cookie_string);
   }

@@ -9,7 +9,7 @@ namespace Crails
   class NoSessionStore : public SessionStore
   {
   public:
-    void load(Data) {}
+    void load(const HttpRequest&) {}
     void finalize(BuildingResponse&) {}
     Data to_data(void) { return stub.to_data(); }
   private:

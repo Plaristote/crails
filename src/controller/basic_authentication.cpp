@@ -1,10 +1,16 @@
-#include "crails/controller.hpp"
-#include <crails/utils/string.hpp>
+#include "crails/controller/basic_authentication.hpp"
+#include "crails/utils/string.hpp"
+#include "crails/params.hpp"
+#include "crails/http_response.hpp"
 
 using namespace std;
 using namespace Crails;
 
-bool Controller::require_basic_authentication(const string& username, const string& password)
+BasicAuthenticationController::BasicAuthenticationController(Context& context) : ActionController(context)
+{
+}
+
+bool BasicAuthenticationController::require_basic_authentication(const string& username, const string& password)
 {
   return require_basic_authentication([username, password](const string& a, const string& b) -> bool
   {
@@ -12,7 +18,7 @@ bool Controller::require_basic_authentication(const string& username, const stri
   });
 }
 
-bool Controller::require_basic_authentication(std::function<bool (const std::string&, const std::string&)> acceptor)
+bool BasicAuthenticationController::require_basic_authentication(std::function<bool (const std::string&, const std::string&)> acceptor)
 {
   Data authorization_header = params["headers"]["Authorization"];
 
@@ -21,12 +27,12 @@ bool Controller::require_basic_authentication(std::function<bool (const std::str
   else
   {
     response.set_status_code(HttpStatus::unauthorized);
-    response.set_headers("WWW-Authenticate", "Basic realm=\"User Visible realm\"");
+    response.set_header(boost::beast::http::field::www_authenticate, "Basic realm=\"User Visible realm\"");
   }
   return false;
 }
 
-bool Controller::check_basic_authentication_header(const string& authorization_header, function<bool (const string&, const string&)> acceptor)
+bool BasicAuthenticationController::check_basic_authentication_header(const string& authorization_header, function<bool (const string&, const string&)> acceptor)
 {
   auto parts = split(authorization_header, ' ');
 

@@ -21,7 +21,9 @@ namespace Crails
       ProxyRequest(boost::beast::http::verb method, const std::string& host, unsigned short port, const std::string& target, unsigned int http_version = 11) : HttpRequest{method, target, http_version}, host(host), port(port) {}
       ProxyRequest(boost::beast::http::verb method, const std::string& host, std::string& target) : HttpRequest{method, target, 11}, host(host), port(80) {}
 
-      bool ssl;
+      ProxyRequest& with_ssl() { ssl = true; return *this; }
+
+      bool ssl = false;
       std::string host;
       unsigned short port;
     };
@@ -51,8 +53,8 @@ namespace Crails
 
   private:
     void body_received(Connection&, BuildingResponse&, Params&, const std::string&) const override {}
-    void execute_rule(const Rule&, Connection&, BuildingResponse&, std::function<void()> callback) const;
-    void proxy(const Rule&, Connection&, BuildingResponse&, std::function<void()> callback) const;
+    void execute_rule(const Rule&, const HttpRequest&, BuildingResponse&, std::function<void()> callback) const;
+    void proxy(const Rule&, const HttpRequest&, BuildingResponse&, std::function<void()> callback) const;
     static std::string get_proxyfied_url(const ProxyRequest&);
 
     static const Mode  default_mode;

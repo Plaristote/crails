@@ -14,7 +14,7 @@ namespace Crud
   {
     typedef Crud::Controller<BASE, RESOURCE> Super;
   public:
-    BelongsToController(Crails::Request& request) : Super(request)
+    BelongsToController(Crails::Context& context) : Super(context)
     {}
 
     void initialize()

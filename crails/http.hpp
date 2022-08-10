@@ -1,18 +1,15 @@
-#ifndef  HTTP_HPP
-# define HTTP_HPP
+#ifndef  CRAILS_HTTP_TYPES_HPP
+# define CRAILS_HTTP_TYPES_HPP
 
-# include <string>
+# include <boost/beast/http.hpp>
 
 namespace Crails
 {
-  namespace Http
-  {
-    namespace Url
-    {
-      std::string Encode(const std::string&);
-      std::string Decode(const std::string&);
-    }
-  }
+  typedef boost::beast::http::request<boost::beast::http::string_body>  HttpRequest;
+  typedef boost::beast::http::response<boost::beast::http::string_body> HttpResponse;
+  typedef boost::beast::http::status                                    HttpStatus;
+  typedef boost::beast::http::field                                     HttpHeader;
+  typedef boost::beast::http::verb                                      HttpVerb;
 }
 
 #endif

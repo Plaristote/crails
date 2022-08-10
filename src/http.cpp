@@ -1,4 +1,4 @@
-#include <crails/http.hpp>
+#include <crails/url.hpp>
 
 using namespace std;
 using namespace Crails;
@@ -29,7 +29,7 @@ static char hexToChar(char first, char second)
   return static_cast<char>(digit);
 }
 
-std::string Http::Url::Encode(const std::string& src)
+std::string Url::encode(const std::string& src)
 {
   std::string                 result;
   std::string::const_iterator iter;
@@ -67,7 +67,7 @@ std::string Http::Url::Encode(const std::string& src)
   return (result);
 }
 
-std::string Http::Url::Decode(const std::string& src)
+std::string Url::decode(const std::string& src)
 {
   std::string                 result;
   std::string::const_iterator iter;

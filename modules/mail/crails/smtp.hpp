@@ -48,7 +48,7 @@ namespace Smtp
     const_attr_accessor(std::string&, reply_to)
     const_attr_accessor(std::string&, content_type)
 
-    void set_headers(const std::string& key, const std::string& value) override { if (key == "Content-Type") { set_content_type(value); } }
+    void set_header(const std::string& key, const std::string& value) override { if (key == "Content-Type") { set_content_type(value); } }
     void set_body(const char* value, std::size_t length) override { body = std::string(value, length); }
 
   private:

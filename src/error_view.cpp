@@ -3,25 +3,26 @@
 #include "crails/request_handlers/file.hpp"
 #include "crails/shared_vars.hpp"
 #include "crails/renderer.hpp"
+#include "crails/logger.hpp"
 
 using namespace std;
 
 namespace Crails
 {
-  static void render_custom_error_view(string view_name, BuildingResponse& out, HttpStatus code, Params& params)
+  static void render_custom_error_view(string view_name, BuildingResponse& response, HttpStatus code, Params& params)
   {
-    out.set_status_code(code);
+    response.set_status_code(code);
     if (Renderer::can_render(view_name, params.as_data()))
     {
       SharedVars vars;
       string     content_type;
 
-      Renderer::render(view_name, params.as_data(), out, vars);
+      Renderer::render(view_name, params.as_data(), response, vars);
     }
-    out.send();
+    response.send();
   }
 
-  void render_error_view(BuildingResponse& out, HttpStatus code, Params& params)
+  void render_error_view(BuildingResponse& response, HttpStatus code, Params& params)
   {
     FileRequestHandler* file_handler = reinterpret_cast<FileRequestHandler*>(Server::get_request_handler("file"));
     stringstream file_name;
@@ -30,9 +31,38 @@ namespace Crails
     file_name << (unsigned int)(code);
     view_name << "errors/" << file_name.str();
     if (file_handler &&
-        file_handler->send_file("public/" + file_name.str() + ".html", out, code))
+        file_handler->send_file("public/" + file_name.str() + ".html", response, code))
       return ;
     else
-      render_custom_error_view(view_name.str(), out, code, params);
+      render_custom_error_view(view_name.str(), response, code, params);
   }
+
+#ifdef SERVER_DEBUG
+  void render_exception_view(Context& context, string& exception_name, string& exception_message)
+  {
+    SharedVars vars;
+
+    vars["exception_name"] = exception_name;
+    vars["exception_what"] = exception_message;
+    vars["params"]         = &(context.params);
+    {
+      try {
+        context.response.set_status_code(HttpStatus::internal_server_error);
+        Renderer::render("lib/exception", context.params.as_data(), context.response, vars);
+      }
+      catch (const MissingTemplate& exception) {
+        logger << Logger::Warning
+          << "# Template lib/exception not found for format "
+          << context.params["headers"]["Accept"].defaults_to<string>("")
+          << Logger::endl;
+      }
+      catch (const std::exception& e) {
+        logger << Logger::Error << "# Template lib/exception crashed (" << e.what() << ')' << Logger::endl;
+      }
+      catch (...) {
+        logger << Logger::Error << "# Template lib/exception crashed" << Logger::endl;
+      }
+    }
+  }
+#endif
 }

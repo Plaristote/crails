@@ -4,9 +4,8 @@
 # include <boost/fusion/functional/invocation/invoke.hpp>
 # include <boost/fusion/container.hpp>
 # include <crails/controller.hpp>
+# include <crails/params.hpp>
 # include "variable.hpp"
-
-# include <iostream>
 
 namespace XmlRpc
 {
@@ -91,7 +90,7 @@ namespace XmlRpc
     };
 
   public:
-    Controller(Crails::Request& request) : Crails::Controller(request)
+    Controller(Crails::Context& context) : Crails::Controller(context)
     {
     }
 

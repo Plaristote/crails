@@ -15,11 +15,12 @@ ProxyRequestHandler::ProxyRequestHandler::Rule::Rule(const char* regex, const ch
   Url url = Url::from_string(url_string);
   ProxyRequest base;
 
-  base.method(boost::beast::http::verb::get);
   base.ssl  = url.ssl;
   base.host = url.host;
   base.port = url.port;
+  base.method(HttpVerb::get);
   base.target(url.target);
+  base.set(HttpHeader::host, url.host);
   solver = std::bind(&Rule::defaultSolver, base, placeholders::_1, placeholders::_2);
 }
 
@@ -42,7 +43,10 @@ ProxyRequestHandler::ProxyRequest ProxyRequestHandler::Rule::defaultSolver(Proxy
   string suffix(matches.suffix());
 
   for (auto it = source.cbegin() ; it != source.cend() ; ++it)
-    result.insert(it->name_string(), it->value());
+  {
+    if (it->name() != HttpHeader::host)
+      result.insert(it->name_string(), it->value());
+  }
   if (suffix.length() > 0)
   {
     if (suffix[0] != '/' && suffix[0] != '?')

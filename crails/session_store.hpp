@@ -18,9 +18,9 @@ namespace Crails
     virtual ~SessionStore() {}
     static std::unique_ptr<SessionStore> Factory(void);
 
-    virtual void load(Data request_headers)           = 0;
-    virtual void finalize(BuildingResponse& response) = 0;
-    virtual Data to_data(void)                        = 0;
+    virtual void load(const HttpRequest&)    = 0;
+    virtual void finalize(BuildingResponse&) = 0;
+    virtual Data to_data(void)               = 0;
   };
 }
 

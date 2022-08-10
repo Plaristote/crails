@@ -10,7 +10,7 @@ namespace Crails
   class AuthController : public SUPER
   {
   public:
-    AuthController(Crails::Request& request) : SUPER(request), user_session(SUPER::session)
+    AuthController(Crails::Context& context) : SUPER(context), user_session(SUPER::session)
     {
     }
 
@@ -33,7 +33,7 @@ namespace Crails
     {
       if (user_session.get_current_user() == nullptr)
       {
-        SUPER::respond_with(SUPER::ResponseStatus::unauthorized);
+        SUPER::respond_with(HttpStatus::unauthorized);
         return false;
       }
       return true;

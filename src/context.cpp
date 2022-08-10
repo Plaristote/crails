@@ -1,4 +1,4 @@
-#include "crails/request.hpp"
+#include "crails/context.hpp"
 #include "crails/request_parser.hpp"
 #include "crails/request_handler.hpp"
 #include "crails/logger.hpp"
@@ -6,24 +6,31 @@
 using namespace Crails;
 using namespace std;
 
-Request::Request(const Server& server, Connection& connection)
-  : server(server), connection(connection.shared_from_this()), response(connection), out(response)
+namespace Crails { void render_error_view(BuildingResponse&, HttpStatus, Params&); }
+
+Context::Context(const Server& server, Connection& connection) :
+  server(server),
+  connection(connection.shared_from_this()),
+  response(connection)
 {
 }
 
-Request::~Request()
+Context::~Context()
 {
+  logger << Logger::Info << "Context DESTROYED" << Logger::endl;
 }
 
-void Request::run()
+void Context::run()
 {
+  logger << Logger::Info << "Context::run BEGIN" << Logger::endl;
   run_parser(
     server.request_parsers.begin(),
-    bind(&Request::on_parsed, this, placeholders::_1)
+    bind(&Context::on_parsed, this, placeholders::_1)
   );
+  logger << Logger::Info << "Context::run END" << Logger::endl;
 }
 
-void Request::run_parser(Server::RequestParsers::const_iterator it, function<void(bool)> callback)
+void Context::run_parser(Server::RequestParsers::const_iterator it, function<void(bool)> callback)
 {
   server.exception_catcher.run(*this, [=]()
   {
@@ -33,7 +40,7 @@ void Request::run_parser(Server::RequestParsers::const_iterator it, function<voi
     {
       auto self = shared_from_this();
 
-      (**it)(*connection, out, params, [self, it, callback](RequestParser::Status status)
+      (**it)(*connection, response, params, [self, it, callback](RequestParser::Status status)
       {
         if (status == RequestParser::Abort)
           callback(false);
@@ -46,9 +53,9 @@ void Request::run_parser(Server::RequestParsers::const_iterator it, function<voi
   });
 }
 
-void Request::on_parsed(bool parsed)
+void Context::on_parsed(bool parsed)
 {
-  if (out.sent())
+  if (response.sent())
     on_handled(true);
   else if (parsed)
   {
@@ -62,12 +69,12 @@ void Request::on_parsed(bool parsed)
   else
   {
     logger << Logger::Info << "# Request could not be parsed" << Logger::endl;
-    out.set_status_code(HttpStatus::bad_request);
+    response.set_status_code(HttpStatus::bad_request);
     on_handled(false);
   }
 }
 
-void Request::run_handler(Server::RequestHandlers::const_iterator it, std::function<void(bool)> callback)
+void Context::run_handler(Server::RequestHandlers::const_iterator it, std::function<void(bool)> callback)
 {
   server.exception_catcher.run(*this, [=]()
   {
@@ -88,11 +95,11 @@ void Request::run_handler(Server::RequestHandlers::const_iterator it, std::funct
   });
 }
 
-void Request::on_handled(bool handled)
+void Context::on_handled(bool handled)
 {
   this->handled = handled;
   if (!handled)
-    render_error_view(out, boost::beast::http::status::not_found, params);
+    render_error_view(response, boost::beast::http::status::not_found, params);
   on_finished();
 }
 
@@ -110,12 +117,12 @@ static void output_request_timers(Data timers)
   logger << ')';
 }
 
-void Request::on_finished()
+void Context::on_finished()
 {
-  float crails_time     = timer.GetElapsedSeconds();
-  unsigned short code   = static_cast<unsigned short>(connection->get_response().result());
+  float crails_time   = timer.GetElapsedSeconds();
+  unsigned short code = static_cast<unsigned short>(connection->get_response().result());
 
-  out.send();
+  response.send();
   logger << Logger::Info << "# Responded to "
          << params["method"].defaults_to<string>("GET")
          << " '" << params["uri"].defaults_to<string>("")

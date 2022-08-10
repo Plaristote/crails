@@ -1,6 +1,6 @@
 #include <vector>
 #include <regex>
-#include "crails/http.hpp"
+#include "crails/url.hpp"
 #include "crails/datatree.hpp"
 
 using namespace std;
@@ -9,10 +9,10 @@ using namespace Crails;
 static void recursively_set_value(Data param, std::vector<std::string> key_stack, const std::string& value)
 {
   if (key_stack.size() == 0)
-    param = Http::Url::Decode(value);
+    param = Url::decode(value);
   else
   {
-    string key = Http::Url::Decode(key_stack.front());
+    string key = Url::decode(key_stack.front());
 
     key_stack.erase(key_stack.begin());
     if (key.length() == 0)

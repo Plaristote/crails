@@ -12,9 +12,9 @@ namespace ODB
     ODB::Connection database;
 
   public:
-    Controller(Crails::Params& params);
+    Controller(Crails::Context& params);
 
-    void finalize();
+    void finalize() override;
   };
 }
 

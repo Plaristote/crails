@@ -31,13 +31,14 @@ namespace Sync
     {
       if (T::view != "")
       {
-        DataTree           params, response;
+        DataTree params;
+        Crails::RenderString result;
         Crails::SharedVars vars;
 
         params["headers"]["Accept"] = "application/json";
         vars["model"] = &object;
-        Crails::Renderer::render(T::view, params.as_data(), response.as_data(), vars);
-        data[uid()] = response["body"].as<std::string>();
+        Crails::Renderer::render(T::view, params.as_data(), result, vars);
+        data[uid()] = result.value();
       }
     }
   };

@@ -17,7 +17,7 @@ namespace Crails
   public:
     typedef std::shared_ptr<USER> UserPtr;
 
-    SessionController(Crails::Request& request) : SUPER(request), user_session(SUPER::session)
+    SessionController(Crails::Context& context) : SUPER(context), user_session(SUPER::session)
     {
     }
 
@@ -35,7 +35,7 @@ namespace Crails
         SUPER::render(SUPER::JSON, response_body.as_data());
       }
       else
-        SUPER::respond_with(SUPER::ResponseStatus::forbidden);
+        SUPER::respond_with(HttpStatus::forbidden);
     }
 
     void create()
@@ -48,7 +48,7 @@ namespace Crails
         show();
       }
       else
-        SUPER::respond_with(SUPER::ResponseStatus::bad_request);
+        SUPER::respond_with(HttpStatus::bad_request);
     }
 
     void destroy()
@@ -56,7 +56,7 @@ namespace Crails
       if (user_session.get_current_user())
         user_session.destroy();
       else
-        SUPER::respond_with(SUPER::ResponseStatus::forbidden);
+        SUPER::respond_with(HttpStatus::forbidden);
     }
 
   private:

@@ -1,43 +1,56 @@
 #include "crails/request_handlers/file.hpp"
 #include "crails/server.hpp"
 #include "crails/request.hpp"
-#include "crails/params.hpp"
 #include "crails/logger.hpp"
 #include "crails/helpers.hpp"
+#include "crails/http.hpp"
 #include "crails/utils/string.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <time.h>
+#include <string_view>
 
 using namespace std;
 using namespace Crails;
-using namespace boost::beast::http;
 
 const vector<pair<string, string> > compression_strategies = {{"br", "br"}, {"gzip", "gz"}};
 
-static bool accepts_encoding(Params& params, const std::string& name)
+static string filepath_from_uri(string uri)
 {
-  const string accepts = params["headers"]["Accept-Encoding"].as<string>();
+  boost::system::error_code ec;
+  size_t separator = uri.find('?');
 
-  return accepts.find(name) != std::string::npos;
+  if (separator != std::string::npos)
+    uri.erase(separator);
+  boost::filesystem::canonical(Server::public_path + uri, ec);
+  if (ec == boost::system::errc::success)
+    return boost::filesystem::absolute(Server::public_path + uri).string();
+  return "";
 }
 
-static void serve_compressed_file_if_possible(string& fullpath, BuildingResponse& response, Params& params)
+static bool accepts_encoding(const HttpRequest& request, const std::string& name)
+{
+  const auto accepted = request.find(HttpHeader::accept_encoding);
+
+  return accepted != request.end() && accepted->value().find(name) != string::npos;
+}
+
+static void serve_compressed_file_if_possible(string& fullpath, BuildingResponse& response, const HttpRequest& request)
 {
   for (const auto& strategy : compression_strategies)
   {
-    if (accepts_encoding(params, strategy.first) && boost::filesystem::exists(fullpath + '.' + strategy.second))
+    if (accepts_encoding(request, strategy.first) && boost::filesystem::exists(fullpath + '.' + strategy.second))
     {
-      response.set_headers("Content-Encoding", strategy.first);
+      response.set_header(HttpHeader::content_encoding, strategy.first);
       fullpath += '.' + strategy.second;
       break ;
     }
   }
 }
 
-static std::pair<unsigned int, unsigned int> range_from_header(const std::string& header)
+static std::pair<unsigned int, unsigned int> range_from_header(string_view header)
 {
-  auto parts = split(header, '=');
+  auto parts = split(string(header), '=');
   pair<unsigned int, unsigned int> range{0,0};
 
   if (parts.size() == 2)
@@ -49,63 +62,18 @@ static std::pair<unsigned int, unsigned int> range_from_header(const std::string
   return range;
 }
 
-void FileRequestHandler::operator()(Request& request, function<void(bool)> callback) const
-{
-  if (request.connection->get_request().method() == boost::beast::http::verb::get)
-  {
-    boost::system::error_code ec;
-    string                    fullpath;
-    BuildingResponse&         response   = request.out;
-    string                    dirty_path = request.params["uri"].as<string>();
-    size_t                    pos        = dirty_path.find('?');
-    Range                     range{0,0};
-
-    if (pos != std::string::npos)
-      dirty_path.erase(pos);
-    boost::filesystem::canonical(Server::public_path + dirty_path, ec);
-    if (ec == boost::system::errc::success)
-      fullpath = boost::filesystem::absolute(Server::public_path + dirty_path).string();
-    if (ec != boost::system::errc::success)
-      response.set_status_code(HttpStatus::not_found);
-    else if (fullpath.find(Server::public_path) == string::npos)
-      response.set_status_code(HttpStatus::bad_request);
-    else
-    {
-      if (boost::filesystem::is_directory(fullpath))
-        fullpath += "/index.html";
-      serve_compressed_file_if_possible(fullpath, response, request.params);
-      if (request.params["headers"]["Range"].exists())
-        range = range_from_header(request.params["headers"]["Range"].as<string>());
-      if (request.params["headers"]["If-Modified-Since"].exists() &&
-          if_not_modified(request.params, response, fullpath))
-      {
-        response.set_status_code(HttpStatus::not_modified);
-        callback(true);
-        return ;
-      }
-      else if (send_file(fullpath, response, HttpStatus::ok, range))
-      {
-        callback(true);
-        return ;
-      }
-    }
-  }
-  callback(false);
-}
-
-static std::time_t http_date_to_timestamp(const std::string& str)
+static std::time_t http_date_to_timestamp(string_view str)
 {
   static const char format[] = "%a, %d %b %Y %H:%M:%S %Z"; // rfc 1123
   struct tm tm;
   bzero(&tm, sizeof(tm));
-  if (strptime(str.c_str(), format, &tm))
+  if (strptime(str.data(), format, &tm))
     return mktime(&tm);
   return 0;
 }
 
-bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& response, const string& fullpath) const
+static bool if_not_modified(string_view str_time, BuildingResponse& response, const string& fullpath)
 {
-  const string str_time = params["headers"]["If-Modified-Since"].as<string>();
   time_t condition_time = http_date_to_timestamp(str_time);
   time_t modified_time  = boost::filesystem::last_write_time(fullpath);
 
@@ -117,12 +85,52 @@ bool FileRequestHandler::if_not_modified(Params& params, BuildingResponse& respo
   return false;
 }
 
+void FileRequestHandler::operator()(Context& context, function<void(bool)> callback) const
+{
+  bool result = context.connection->get_request().method() == HttpVerb::get
+             && process(context);
+
+  callback(result);
+}
+
+bool FileRequestHandler::process(Context& context) const
+{
+  const HttpRequest& request = context.connection->get_request();
+  const string       uri(request.target());
+  string             fullpath = filepath_from_uri(uri);
+
+  if (fullpath.length() == 0)
+    context.response.set_status_code(HttpStatus::not_found);
+  else if (fullpath.find(Server::public_path) == string::npos)
+    context.response.set_status_code(HttpStatus::bad_request);
+  else
+  {
+    Range      range{0,0};
+    const auto range_field  = request.find(HttpHeader::range);
+    const auto update_field = request.find(HttpHeader::if_modified_since);
+
+    if (boost::filesystem::is_directory(fullpath))
+      fullpath += "/index.html";
+    serve_compressed_file_if_possible(fullpath, context.response, request);
+    if (range_field != request.end())
+      range = range_from_header(range_field->value());
+    if (update_field != request.end() && if_not_modified(update_field->value(), context.response, fullpath))
+    {
+      context.response.set_status_code(HttpStatus::not_modified);
+      return true;
+    }
+    else if (send_file(fullpath, context.response, HttpStatus::ok, range))
+      return true;
+  }
+  return false;
+}
+
 bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse& response, HttpStatus code, std::pair<unsigned int, unsigned int> range) const
 {
   file_cache.lock();
   {
-    bool cached = cache_enabled && file_cache.contains(fullpath);
-    auto file   = file_cache.require(fullpath);
+    bool cached = file_cache.contains(fullpath);
+    auto file   = cache_enabled ? file_cache.require(fullpath) : file_cache.create_instance(fullpath);
 
     if (file)
     {
@@ -132,8 +140,7 @@ bool FileRequestHandler::send_file(const std::string& fullpath, BuildingResponse
       if (range.second == 0)
         range.second = str.size();
       str_length << (range.second - range.first);
-      response.set_headers("Content-Length", str_length.str());
-      response.set_headers("Content-Type",   get_mimetype(fullpath));
+      response.set_header(HttpHeader::content_type, get_mimetype(fullpath));
       set_headers_for_file(response, fullpath);
       response.set_status_code(code);
       response.set_body(str.c_str() + range.first, range.second - range.first);

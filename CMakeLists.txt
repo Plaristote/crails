@@ -53,6 +53,7 @@ file(GLOB crails_core
      src/http_server/*.cpp
      src/request_handlers/*.cpp
      src/request_parsers/*.cpp
+     src/controller/*.cpp
      src/utils/*.cpp)
 
 file(GLOB crails_sql

@@ -21,9 +21,8 @@ namespace Crails
       mutex.unlock();
     }
 
-  private:
     std::shared_ptr<std::string> create_instance(std::string key);
-
+  private:
     std::mutex mutex;
   };
 }

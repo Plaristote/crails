@@ -1,7 +1,7 @@
 #include <boost/asio/dispatch.hpp>
 #include "crails/http_server/connection.hpp"
 #include "crails/logger.hpp"
-#include "crails/request.hpp"
+#include "crails/context.hpp"
 
 using namespace Crails;
 using namespace boost;
@@ -45,14 +45,13 @@ void Connection::expect_read()
 void Connection::read(beast::error_code ec, std::size_t bytes_transferred)
 {
   if (!ec)
-    std::make_shared<Request>(server, *this)->run();
-  else
+    std::make_shared<Context>(server, *this)->run();
+  else if (ec != boost::asio::error::eof && ec != boost::asio::error::timed_out)
     logger << Logger::Error << "!! Crails failed to read on socket: " << ec.message() << Logger::endl;
 }
 
 void Connection::write()
 {
-  response.content_length(response.body().size());
   beast::http::async_write(
     stream, response,
     beast::bind_front_handler(&Connection::on_write, shared_from_this(), response.keep_alive())

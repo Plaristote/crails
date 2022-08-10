@@ -15,6 +15,6 @@ void JsonRenderer::render_template(const std::string& view, RenderTarget& target
   auto tpl = templates.find(view);
   std::string json_view = (*tpl).second(this, vars);
 
-  target.set_headers("Content-Type", "application/json");
+  target.set_header("Content-Type", "application/json");
   target.set_body(json_view.c_str(), json_view.length());
 }

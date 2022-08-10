@@ -11,25 +11,27 @@
 namespace Crails
 {
   class ExceptionCatcher;
+  namespace Tests { class Request; }
 
-  class Request : public std::enable_shared_from_this<Request>
+  class Context : public std::enable_shared_from_this<Context>
   {
     friend class ExceptionCatcher;
+    friend class Connection;
+    friend class Tests::Request;
+    const Server&             server;
+    bool                      handled = false;
+    ExceptionCatcher::Context exception_context;
   public:
-    Request(const Server& server, Connection& connection);
-    ~Request();
+    Context(const Server& server, Connection& connection);
+    ~Context();
 
-    const Server&               server;
     std::shared_ptr<Connection> connection;
     BuildingResponse            response;
-    BuildingResponse&           out;
     Params                      params;
     Utils::Timer                timer;
-    ExceptionCatcher::Context   exception_context;
-    bool                        handled = false;
 
-    void run();
   private:
+    void run();
     void run_parser(Server::RequestParsers::const_iterator, std::function<void(bool)>);
     void run_handler(Server::RequestHandlers::const_iterator, std::function<void(bool)>);
 

@@ -1,5 +1,5 @@
 #include <crails/utils/parse_cookie_values.hpp>
-#include <crails/http.hpp>
+#include <crails/url.hpp>
 #include <regex>
 
 using namespace std;
@@ -17,8 +17,8 @@ namespace Crails
       string val = str.substr(match.position(2), match.length(2));
       string key = str.substr(match.position(1), match.length(1));
 
-      val = Http::Url::Decode(val);
-      key = Http::Url::Decode(key);
+      val = Url::decode(val);
+      key = Url::decode(key);
       if (!(callback(key, val)))
         break ;
     }

@@ -18,7 +18,8 @@ namespace Crails
 #endif
     }
 
-    void operator()(Request& params, std::function<void(bool)> callback) const override;
+    void operator()(Context&, std::function<void(bool)> callback) const override;
+    bool process(Context&) const;
     bool send_file(const std::string& path, BuildingResponse& response, HttpStatus code, Range range = {0,0}) const;
 
     void set_cache_enabled(bool enable) { cache_enabled = enable; }
@@ -28,8 +29,6 @@ namespace Crails
     virtual void set_headers_for_file(BuildingResponse& response, const std::string& fullpath) const {}
 
   private:
-    bool if_not_modified(Params&, BuildingResponse&, const std::string& path) const;
-
     bool       cache_enabled;
     FileCache& file_cache;
   };
