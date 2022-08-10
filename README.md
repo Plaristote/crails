@@ -1,28 +1,40 @@
 Crails
 ======
 Crails Framework is an MVC web development framework aiming to bring a Rails-like experience to C++
-developers. Despite being inspired by Ruby on Rails, it is much lighter and simpler.
+developers. Despite being inspired by Ruby on Rails, it is much lighter, faster, and much more C++.
 
-It's a cpp-netlib based HTTP server using a routing system, MVC design, C++-compiled templates, asset
-precompilation and database abstraction.
+It's a Boost.Beast powered HTTP server using a routing system, MVC design, C++-compiled templates, asset
+precompilation, database abstraction and testing tools.
 
 Crails is modular, and comes by default with a bunch of modules:
-- With crails-html and crails-json, you have the ability to write templates that are then compiled into C++
-- With crails-mongodb and crails-odb, you get an object oriented database abstraction
-- With crails-cache, you get a simple API to handle your caching using memcached
-- With crails-mail, you get the ability to easily render and send mails
-- With crails-image, you can store image in your models, and use Magick++ to generate thumbnails
-- With crails-sentry, you can monitor server exceptions using [Sentry](http://sentry.io)
+- crails-html and crails-json: template engines
+- crails-mongodb and crails-odb: ORMs for SQL and MongoDB databases
+- crails-docker: building tools to ease deployment on the production platform 
+- crails-sidekic: task scheduler
+- crails-cache: memcached powered caching
+- crails-mail: sending emails
+- crails-attachment: storing files in your models
+- crails-image: use Magick++ to generate thumbnails
+- crails-xmlrpc: implements xmlrpc server and clients 
+- crails-proxy: redirects requests or acts as a proxy
+- crails-sentry: monitor server exceptions using [Sentry](http://sentry.io)
+- crails-selenium: automated browser tests for your test suite
+
+Used with [Comet.cpp](https://github.com/crails-framework/comet.cpp), you can also use Crails to write
+both backend and frontend code in C++.
+
+The [MetaRecord](https://github.com/crails-framework/meta-record) code generator may also help you
+generate code for your models. It provides backends for Crails, Comet.cpp, Qt and JavaScript.
 
 Install Crails Framework
 ========
 Compiling
 --------
-This project has been compiled using `gcc 4.9`. It should support `clang` as well, though this support is not actively maintained for now.
+This project has been compiled using `gcc 11`. It should support `clang` as well, though this support is not actively maintained for now.
 
 Here's a list of the dependecies:
 - ruby >= 1.9 (development only)
-- cpp-netlib
+- Boost
 - segvcatch (optional)
 - [ODB](http://www.codesynthesis.com/products/odb/) (optional, used by crails-odb)
 - [mongo-cxx-driver](https://github.com/mongodb/mongo-cxx-driver/tree/legacy) (optional, used by crail-mongodb)
