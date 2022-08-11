@@ -4,7 +4,7 @@ project(crails_project)
 
 option(USE_MEMCACHED     "Memcached"             OFF)
 option(USE_MONGODB       "MongoDB"               ON)
-option(USE_ODB           "ODB ORM"               ON)
+option(USE_ODB           "ODB ORM"               OFF)
 option(USE_COOKIE_CIPHER "Include cookie cipher" OFF)
 option(USE_CRAILS_SYNC   "crails-sync"           ON)
 option(DEVELOPER_MODE    "Developer mode"        ON)
@@ -13,7 +13,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 ##
 ## Compiler Options
 ##
-set(CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -pedantic")
+set(CMAKE_CXX_FLAGS "-std=c++17 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -pedantic")
 
 if (DEVELOPER_MODE)
   message("-- Building development server")
