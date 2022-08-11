@@ -1,9 +1,8 @@
 #include "crails/request_handlers/file.hpp"
 #include "crails/server.hpp"
-#include "crails/request.hpp"
+#include "crails/context.hpp"
 #include "crails/logger.hpp"
 #include "crails/helpers.hpp"
-#include "crails/http.hpp"
 #include "crails/utils/string.hpp"
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>

@@ -12,7 +12,7 @@ namespace Crails
 #ifdef SERVER_DEBUG
   void render_exception_view(Context& context, string& exception_name, string& exception_message);
 #else
-  render_error_view(BuildingResponse& out, HttpStatus code, Params& params);
+  void render_error_view(BuildingResponse& out, HttpStatus code, Params& params);
 #endif
 }
 

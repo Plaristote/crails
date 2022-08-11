@@ -4,6 +4,7 @@
 # include <exception>
 # include <iostream>
 # include <crails/utils/singleton.hpp>
+# include "controller/action.hpp"
 # include "router_base.hpp"
 # include "context.hpp"
 
