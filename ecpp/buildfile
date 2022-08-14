@@ -1,0 +1,10 @@
+libs =
+import libs += libboost-program-options%lib{boost_program_options}
+import libs += libboost-filesystem%lib{boost_filesystem}
+import libs += libboost-random%lib{boost_random}
+include ../libcrails/
+
+exe{ecpp}: {hxx ixx txx cxx}{**} $libs ../libcrails/lib{crails} testscript
+
+cxx.poptions =+ "-I$out_root" "-I$src_root" "-I$src_root/libcrails"
+cxx.loptions =+ "-Wl,--start-group"

@@ -1,0 +1,23 @@
+std::string @configuration_type;
+bool has_router = configuration_type == "webservice" || configuration_type == "full";
+
+// END LINKING
+#include <crails/tests/runner.hpp>
+<% if (has_router) do -%>
+#include <crails/router.hpp>
+<% end %>
+
+void Crails::Tests::Runner::setup()
+{
+<% if (has_router) do -%>
+  Router::singleton::Initialize();
+  Router::singleton::Get()->initialize();
+<% end %>
+}
+
+void Crails::Tests::Runner::shutdown()
+{
+<% if (has_router) do -%>
+  Router::singleton::Finalize();
+<% end %>
+}

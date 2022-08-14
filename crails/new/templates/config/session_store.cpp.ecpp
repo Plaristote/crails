@@ -1,0 +1,9 @@
+#include "utils/string.hpp"
+std::string @session_store = "NoSessionStore";
+// END LINKING
+#include <crails/session_store/<%= Crails::underscore(session_store) %>.hpp>
+#include <crails/session_store.hpp>
+
+using namespace Crails;
+
+USE_SESSION_STORE(<%= session_store %>)

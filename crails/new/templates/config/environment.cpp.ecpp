@@ -1,0 +1,8 @@
+std::string @environment = "Development";
+// END LINKING
+#include <crails/environment.hpp>
+
+namespace Crails
+{
+  Environment environment = <%= environment %>;
+}

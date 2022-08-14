@@ -1,0 +1,37 @@
+bool @with_action = true;
+bool @with_cookies = false;
+// END LINKING
+#include <crails/server.hpp>
+#include <crails/renderer.hpp>
+<% if (with_action) do -%>
+#include <crails/router.hpp>
+<% end -%>
+<% if (with_cookies) do -%>
+#include <crails/cipher.hpp>
+#include <crails/cookie_data.hpp>
+<% end %>
+
+using namespace std;
+using namespace Crails;
+
+int main(int argc, const char **argv)
+{
+<% if (with_action) do -%>
+  SingletonInstantiator<Router> router;
+
+  router->initialize();
+<% end %>
+  // Initializers
+  Renderer::initialize();
+<% if (with_cookies) do -%>
+  if (CookieData::use_encryption)
+    Cipher::initialize();
+<% end -%>
+
+  // Application loop
+  Server::launch(argc, argv);
+
+  // Finalizers
+  Renderer::finalize();
+  return (0);
+}

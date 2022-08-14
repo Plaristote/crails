@@ -1,0 +1,33 @@
+#include <algorithm>
+
+std::string @configuration_type = "full";
+std::vector<std::string>& @formats;
+
+// END LINKING
+libs =
+import libs += libboost-program-options%lib{boost_program_options}
+import libs += libboost-filesystem%lib{boost_filesystem}
+import libs += libboost-random%lib{boost_random}
+import libs += libcrails%lib{crails}
+<% if (configuration_type == "webservice" || configuration_type == "full") do -%>
+import libs += libcrails-action%lib{crails-action}
+<% end -%>
+<% if (configuration_type == "full") do -%>
+import libs += libcrails-controllers%lib{crails-controllers}
+import libs += libcrails-cookies%lib{crails-cookies}
+import libs += libcrails-databases%lib{crails-databases}
+import libs += libcrails-form-parser%lib{crails-form-parser}
+import libs += libcrails-url-parser%lib{crails-url-parser}
+import libs += libcrails-multipart-parser%lib{crails-multipart-parser}
+<% end -%>
+<% if (std::find(formats.begin(), formats.end(), "json") != formats.end()) do -%>
+import libs += libcrails-json-parser%lib{crails-json-parser}
+<% end -%>
+<% if (std::find(formats.begin(), formats.end(), "xml") != formats.end()) do -%>
+import libs += libcrails-xml-parser%lib{crails-xml-parser}
+<% end -%>
+include ../config/
+
+exe{application}: {hxx ixx txx cxx}{**} $libs
+
+cxx.poptions =+ "-I$out_root" "-I$src_root"

@@ -1,0 +1,13 @@
+: 1
+name: crails
+version: 2.0.0
+summary: c++ modular mvc web framework
+license: BSD-C3
+description-file: README.md
+url: https://github.com/Plaristote/crails
+email: michael@unetresgrossebite.com
+depends: * build2 >= 0.15.0
+depends: * bpkg >= 0.15.0
+depends: { libboost-beast libboost-program-options libboost-thread libboost-random libboost-filesystem libboost-system } >= 1.74.0
+depends: libssl ~1.1.1
+#depends: libodb ~2.5.0

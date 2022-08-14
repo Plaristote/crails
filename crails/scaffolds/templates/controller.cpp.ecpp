@@ -1,0 +1,61 @@
+#include "utils/string.hpp"
+
+using namespace std;
+
+string @classname;
+string @parent_class = "ApplicationController";
+string path = Crails::underscore(classname);
+bool   @resource_scaffold = false;
+bool   @crud_scaffold     = false;
+// END LINKING
+#include "<%= path %>.hpp"
+
+<%= classname + "::" + classname %>(Crails::Context& context) : <%= parent_class %>(context)
+{
+}
+
+void <%= classname %>::initialize()
+{
+}
+
+void <%= classname %>::finalize()
+{
+}
+
+<% if (resource_scaffold || crud_scaffold) do -%>
+void <%= classname %>::index()
+{
+  render("<%= path %>/index");
+}
+
+void <%= classname %>::show()
+{
+  render("<%= path %>/show");
+}
+
+void <%= classname %>::create()
+{
+  render("<%= path %>/show");
+}
+
+void <%= classname %>::update()
+{
+  render("<%= path %>/show");
+}
+
+void <%= classname %>::destroy()
+{
+  redirect_to("<%= path %>");
+}
+<% if (resource_scaffold) do -%>
+void <%= classname %>::new_()
+{
+  render("<%= path %>/new");
+}
+
+void <%= classname %>::edit()
+{
+  render("<%= path %>/edit");
+}
+<% end -%>
+<% end -%>

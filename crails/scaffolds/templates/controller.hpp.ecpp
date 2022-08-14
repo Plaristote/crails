@@ -1,0 +1,30 @@
+using namespace std;
+
+string @classname;
+string @parent_class      = "ApplicationController";
+string @parent_header     = "app/controllers/application.hpp";
+bool   @resource_scaffold = false;
+bool   @crud_scaffold     = false;
+// END LINKING
+#pragma once
+#include "<%= parent_header %>"
+
+class <%= classname %> : public <%= parent_class %>
+{
+public:
+  <%= classname %>(Crails::Context&);
+
+  void initialize();
+  void finalize();
+<% if (resource_scaffold || crud_scaffold) do -%>
+  void index();
+  void show();
+  void create();
+  void update();
+  void destroy();
+<% if (resource_scaffold) do -%>
+  void new_();
+  void edit();
+<% end -%>
+<% end -%>
+};

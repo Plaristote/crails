@@ -1,0 +1,6 @@
+#include <crails/router.hpp>
+
+void Crails::Router::initialize(void)
+{
+  // Append routes here
+}

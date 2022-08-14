@@ -1,0 +1,14 @@
+#include "utils/string.hpp"
+
+using namespace Crails;
+using namespace std;
+const std::string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
+// END LINKING
+#include <crails/cookie_data.hpp>
+
+using namespace Crails;
+using namespace std;
+
+const bool   CookieData::use_encryption = true;
+const string CookieData::password       = "<%= generate_random_string(charset, 50) %>";
+const string CookieData::salt           = "<%= generate_random_string(charset, 8) %>";

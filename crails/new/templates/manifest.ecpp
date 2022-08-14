@@ -1,0 +1,30 @@
+std::string @configuration_type = "full";
+std::vector<std::string>& @formats;
+std::string @project_name;
+std::string @crails_version;
+
+// END LINKING
+: 1
+name: <%= project_name %>
+version: 0.0.1
+summary: crails application
+license: other
+#description-file: README.md
+#url:
+#email: your@mail.org
+depends: * build2 >= 0.15.0
+depends: * bpkg >= 0.15.0
+depends: libcrails ~<%= crails_version -%>
+<% if (configuration_type == "webservice" || configuration_type == "full") do -%>
+depends: { libcrails-action } ~<%= crails_version -%>
+<% end -%>
+<% if (configuration_type == "full") do -%>
+depends: { libcrails-controllers libcrails-cookies libcrails-databases} ~<%= crails_version -%>
+depends: { libcrails-form-parser libcrails-url-parser libcrails-multipart-parser} ~<%= crails_version -%>
+<% end -%>
+<% if (std::find(formats.begin(), formats.end(), "json") != formats.end()) do -%>
+depends: { libcrails-json-parser } ~<%= crails_version -%>
+<% end -%>
+<% if (std::find(formats.begin(), formats.end(), "xml") != formats.end()) do -%>
+depends: libcrails-xml-parser ~<%= crails_version -%>
+<% end -%>

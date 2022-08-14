@@ -1,0 +1,21 @@
+using namespace std;
+
+string                        @default_format = "text/html";
+vector<pair<string, string>>& @renderers;
+// END LINKING
+#include <crails/renderer.hpp>
+<% for (auto renderer : renderers) do -%>
+<%= "#include <crails/renderers/" + renderer.first + ".hpp>\n" %>
+<% end %>
+
+using namespace Crails;
+
+const std::string Renderer::default_format = "<%= default_format %>";
+
+void Renderer::initialize()
+{
+  // Append renderers
+<% for (auto renderer : renderers) do -%>
+  <%= "renderers.push_back(new " + renderer.second + ");\n" %>
+<% end %>
+}

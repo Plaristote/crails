@@ -1,0 +1,29 @@
+using namespace std;
+
+vector<pair<string, string>>& @parsers;
+vector<pair<string, string>>& @handlers;
+// END LINKING
+<% for (auto parser : parsers) do -%>
+<%= "#include <crails/request_parsers/" + parser.first + ".hpp>\n" -%>
+<% end -%>
+<% for (auto handler : handlers) do -%>
+<%= "#include <crails/request_handlers/" + handler.first + ".hpp>\n" -%>
+<% end -%>
+#include <crails/request_handlers/file.hpp>
+#include <crails/request_handlers/action.hpp>
+#include <crails/request_parser.hpp>
+
+using namespace Crails;
+
+const std::string Server::temporary_path = "/tmp";
+
+void Server::initialize_request_pipe()
+{
+<% for (auto parser : parsers) do -%>
+  <%= "add_request_parser(new " + parser.second + ");" %>
+<% end -%>
+
+<% for (auto handler : handlers) do -%>
+  <%= "add_request_handler(new " + handler.second + ");" %>
+<% end %>
+}

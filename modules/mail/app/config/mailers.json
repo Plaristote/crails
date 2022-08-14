@@ -1,7 +1,0 @@
-{
-  "gmail": {
-    "hostname": "smtp.gmail.com",
-    "port":     465,
-    "tls":      "true"
-  }
-}
