@@ -1,3 +1,12 @@
+Crails has moved
+======
+/!\ This repository has been moved and split to [https://github.com/crails-framework](https://github.com/crails-framework).
+The v2 of the framework has moved from cpp-netlib to boost.beast and no longer relies on Ruby for file generation and build management.
+Many modules have been added, through the refactoring of all the projects I've developed using this framework: support for ssh, oauth,
+deployment tools, etc.
+
+This repository will no longer be maintained.
+
 Crails
 ======
 Crails Framework is an MVC web development framework aiming to bring a Rails-like experience to C++
